@@ -70,6 +70,10 @@ jobs:
     needs: test
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
+    # Nur ein ISO-Bau gleichzeitig; ein neuer Commit ersetzt den laufenden Bau
+    concurrency:
+      group: iso-nightly
+      cancel-in-progress: true
     timeout-minutes: 300
     permissions:
       contents: write
@@ -128,14 +132,16 @@ jobs:
           Prüfen:          sha256sum -c SHA256SUMS --ignore-missing
           Auf USB-Stick:   sudo dd if=$iso of=/dev/sdX bs=4M status=progress oflag=sync
           EOT
-          gh release delete nightly --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag 2>/dev/null || true
-          gh release create nightly --repo "$GITHUB_REPOSITORY" --prerelease --target "$GITHUB_SHA" \
+          # Erst vollständig in ein temporäres Release hochladen, dann austauschen:
+          # ein abgebrochener Upload lässt das bisherige Nightly unangetastet.
+          tmp="nightly-run-$GITHUB_RUN_ID"
+          gh release create "$tmp" --repo "$GITHUB_REPOSITORY" --prerelease --target "$GITHUB_SHA" \
             --title "symfonOS Nightly $(date +%Y-%m-%d)" --notes-file ANLEITUNG.txt \
-            "$iso".part* SHA256SUMS ANLEITUNG.txt smoke-serial.log 2>/dev/null || \
-          gh release create nightly --repo "$GITHUB_REPOSITORY" --prerelease --target "$GITHUB_SHA" \
-            --title "symfonOS Nightly $(date +%Y-%m-%d)" --notes-file ANLEITUNG.txt \
-            "$iso".part* SHA256SUMS ANLEITUNG.txt
-
+            "$iso".part* SHA256SUMS ANLEITUNG.txt smoke-serial.log
+          gh release delete nightly --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag || true
+          gh release edit "$tmp" --repo "$GITHUB_REPOSITORY" --tag nightly --target "$GITHUB_SHA"
+          gh api -X DELETE "repos/$GITHUB_REPOSITORY/git/refs/tags/$tmp" || true
+          echo "::notice title=ISO veröffentlicht::Release nightly, Commit ${GITHUB_SHA::8}"
   repo:
     needs: test
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
