@@ -1,5 +1,6 @@
 # Abhängigkeits-Mapping für syp-convert.
 # Eigene Ergänzungen: /etc/syp/convert-map.toml (gleiches Format, überschreibt Einträge).
+# Regeln sind POSIX Extended Regular Expressions (keine Lazy-Quantoren).
 # Leerer Zielwert ("") = Abhängigkeit ignorieren.
 
 [ignore]
@@ -195,8 +196,8 @@ deb = [
   ["^gir1\\.2-.*$", "!ignore"],
   ["^(.+)-common$", "\\1"],
   ["^(.+)-data$", "\\1"],
-  ["^(lib.+?)-?[0-9][0-9.]*(t64)?(a)?$", "\\1"],
-  ["^lib(.+?)-?[0-9][0-9.]*(t64)?$", "\\1"],
+  ["^(lib[a-z0-9+.-]*[a-z+])-?[0-9][0-9.]*(t64)?a?$", "\\1"],
+  ["^lib([a-z0-9+.-]*[a-z+])-?[0-9][0-9.]*(t64)?$", "\\1"],
 ]
 rpm = [
   ["^python3dist\\((.+)\\)$", "python-\\1"],

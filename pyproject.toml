@@ -5,18 +5,16 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "symfonos-tools"
 version = "0.1.0"
-description = "symfonOS: Paketmanager syp, Konverter, Software-Center, Design-Center, Assistent"
+description = "symfonOS: Software-Center, Design-Center, Assistent, Konverter-GUI (syp/syp-convert sind in C, siehe csrc/)"
 requires-python = ">=3.11"
 license = "GPL-3.0-or-later"
-dependencies = ["zstandard>=0.22", "cryptography>=42"]
+dependencies = []
 
 [project.optional-dependencies]
 gui = ["PySide6>=6.6"]
-test = ["pytest>=8"]
+test = ["pytest>=8", "zstandard>=0.22"]
 
 [project.scripts]
-syp = "syp.cli:main"
-syp-convert = "syp_convert.cli:main"
 symfonos-assist = "symfonos_assist.cli:main"
 
 [project.gui-scripts]
@@ -29,8 +27,6 @@ symfonos-assist-gui = "symfonos_assist.gui:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-syp = ["triggers/*.toml"]
-syp_convert = ["mapping.toml"]
 symfonos_design = ["layouts/*.js"]
 
 [tool.pytest.ini_options]

@@ -39,8 +39,7 @@ static int extract_archive(const char *file, const char *dest) {
     archive_read_support_filter_all(a);
     archive_read_support_format_all(a);
     archive_write_disk_set_options(w, ARCHIVE_EXTRACT_TIME | ARCHIVE_EXTRACT_PERM |
-                                          ARCHIVE_EXTRACT_SECURE_NODOTDOT | ARCHIVE_EXTRACT_SECURE_SYMLINKS |
-                                          ARCHIVE_EXTRACT_SECURE_NOABSOLUTEPATHS);
+                                          ARCHIVE_EXTRACT_SECURE_NODOTDOT | ARCHIVE_EXTRACT_SECURE_SYMLINKS);
     if (archive_read_open_filename(a, file, 1 << 16) != ARCHIVE_OK) {
         set_error("%s: %s", file, archive_error_string(a));
         archive_read_free(a);

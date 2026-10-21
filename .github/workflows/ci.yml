@@ -23,12 +23,25 @@ jobs:
       - name: Abhängigkeiten
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y -q libegl1 libgl1 libxkbcommon0 libfontconfig1 libdbus-1-3 nftables shellcheck dpkg
+          sudo apt-get install -y -q libegl1 libgl1 libxkbcommon0 libfontconfig1 libdbus-1-3 nftables shellcheck dpkg \
+            build-essential pkg-config libarchive-dev libzstd-dev libsodium-dev libsqlite3-dev libcurl4-openssl-dev
           pip install -e ".[gui,test]" ruff
       - name: Lint
         run: |
           ruff check src tests --select E,F,W --ignore E501,E731,E741
           shellcheck -S warning exam/symfonos-exam iso/build.sh tools/repo-sync.sh system/usr/bin/* system/usr/lib/symfonos/*.sh iso/airootfs/usr/local/bin/*
+      - name: C-Werkzeuge bauen (-Werror)
+        run: make -C csrc -j4 CFLAGS="-O2 -g -Werror"
+      - name: Tests mit AddressSanitizer/UBSan
+        env:
+          QT_QPA_PLATFORM: offscreen
+          SYP_SKIP_BUILD: "1"
+          ASAN_OPTIONS: detect_leaks=0
+        run: |
+          make -C csrc clean
+          make -C csrc -j4 CFLAGS="-O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer" LDFLAGS="-fsanitize=address,undefined"
+          pytest -q tests/test_syp.py tests/test_convert.py
+          make -C csrc clean
       - name: Tests
         env:
           QT_QPA_PLATFORM: offscreen

@@ -5,7 +5,7 @@ DATADIR ?= $(PREFIX)/share/syp
 CC      ?= cc
 PKGS    := libarchive libzstd libsodium sqlite3 libcurl
 CFLAGS  ?= -O2 -g
-CFLAGS  += -std=c11 -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -D_FORTIFY_SOURCE=2 \
+ALL_CFLAGS = $(CFLAGS) -std=c11 -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -D_FORTIFY_SOURCE=2 \
            -fstack-protector-strong -Ilib $(shell pkg-config --cflags $(PKGS)) -DSYP_DATADIR=\"$(DATADIR)\"
 LDLIBS  += $(shell pkg-config --libs $(PKGS)) -lm
 
@@ -28,7 +28,7 @@ bin/syp-convert: $(CONV_OBJ) libsyp.a
 	$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 %.o: %.c $(wildcard lib/*.h)
-	$(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) $(ALL_CFLAGS) -c -o $@ $<
 
 install: all
 	install -Dm755 bin/syp $(DESTDIR)$(PREFIX)/bin/syp

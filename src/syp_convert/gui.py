@@ -1,7 +1,10 @@
 """syp-convert GUI: Pakete per Drag & Drop umwandeln, Mapping-Bericht ansehen, installieren."""
 from __future__ import annotations
 
+import json
+import os
 import shlex
+import subprocess
 import sys
 from pathlib import Path
 
@@ -13,10 +16,15 @@ from PySide6.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel,
                                QVBoxLayout, QWidget)
 
 import symfonos_ui
-from syp.crypto import SecretKey
+CONVERT = os.environ.get("SYP_CONVERT_BIN", "syp-convert")
 
-from . import convert
-from .cli import make_mapper
+
+class Report:
+    """Bericht von `syp-convert --json` als Objekt."""
+
+    def __init__(self, d: dict):
+        self.__dict__.update(d)
+        self.ok = not d.get("unresolved")
 
 SUFFIXES = (".deb", ".rpm", ".pkg.tar.zst", ".pkg.tar.xz", ".pkg.tar.gz")
 
@@ -30,13 +38,14 @@ class Worker(QObject):
         self.files, self.out, self.key = files, out, key
 
     def run(self):
-        mapper = make_mapper("/", False, None)
-        signer = SecretKey.load(Path(self.key)) if self.key else None
         for f in self.files:
+            cmd = [CONVERT, str(f), "-o", str(self.out), "--json"] + (["-k", self.key] if self.key else [])
             try:
-                _, rep = convert(f, self.out, mapper, signer)
-                self.done.emit(str(f), rep, "")
-            except Exception as e:   # GUI soll weiterlaufen und den Fehler anzeigen
+                r = subprocess.run(cmd, capture_output=True, text=True)
+                if r.returncode == 1 or not r.stdout.strip():
+                    raise RuntimeError(r.stderr.strip() or f"Exit {r.returncode}")
+                self.done.emit(str(f), Report(json.loads(r.stdout)[0]), "")
+            except (OSError, RuntimeError, ValueError, IndexError) as e:
                 self.done.emit(str(f), None, str(e))
         self.finished.emit()
 
