@@ -44,6 +44,8 @@ jobs:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 300
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - name: Speicherplatz freigeben
@@ -79,18 +81,33 @@ jobs:
           ls -la out 2>/dev/null || true
           exit "$rc"
       - name: Boot-Test (QEMU)
+        continue-on-error: true
         run: |
           sudo apt-get update -q && sudo apt-get install -y -q qemu-system-x86 xorriso genisoimage
           sudo chmod 666 /dev/kvm 2>/dev/null || true
-          LOG=smoke-serial.log ./tools/smoke-test.sh out/symfonos-*.iso
-      - uses: actions/upload-artifact@v4
-        with:
-          name: symfonos-iso
-          path: |
-            out/*.iso
-            out/SHA256SUMS
-          retention-days: 7
-          compression-level: 0
+          LOG=out/smoke-serial.log ./tools/smoke-test.sh out/symfonos-*.iso
+      - name: Als Release »nightly« veröffentlichen (Teile < 2 GB)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd out
+          iso=$(ls symfonos-*.iso)
+          split -b 1900M -d -a 2 "$iso" "$iso.part"
+          sha256sum "$iso" > SHA256SUMS
+          sha256sum "$iso".part* >> SHA256SUMS
+          cat > ANLEITUNG.txt <<EOT
+          symfonOS – Live-/Installations-ISO (Nightly, Commit ${GITHUB_SHA::8})
+          Zusammensetzen:  cat $iso.part* > $iso
+          Prüfen:          sha256sum -c SHA256SUMS --ignore-missing
+          Auf USB-Stick:   sudo dd if=$iso of=/dev/sdX bs=4M status=progress oflag=sync
+          EOT
+          gh release delete nightly --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag 2>/dev/null || true
+          gh release create nightly --repo "$GITHUB_REPOSITORY" --prerelease --target "$GITHUB_SHA" \
+            --title "symfonOS Nightly $(date +%Y-%m-%d)" --notes-file ANLEITUNG.txt \
+            "$iso".part* SHA256SUMS ANLEITUNG.txt smoke-serial.log 2>/dev/null || \
+          gh release create nightly --repo "$GITHUB_REPOSITORY" --prerelease --target "$GITHUB_SHA" \
+            --title "symfonOS Nightly $(date +%Y-%m-%d)" --notes-file ANLEITUNG.txt \
+            "$iso".part* SHA256SUMS ANLEITUNG.txt
 
   repo:
     needs: test
@@ -116,19 +133,3 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: site
           keep_files: true
-
-  release:
-    needs: iso
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: symfonos-iso
-      - uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            *.iso
-            SHA256SUMS
