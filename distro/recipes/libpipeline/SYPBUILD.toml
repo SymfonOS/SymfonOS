@@ -6,10 +6,8 @@ summary = "Pipeline-Bibliothek"
 license = "GPL-3.0-or-later"
 url = "https://download.savannah.gnu.org/releases/libpipeline/"
 depends = ["glibc"]
-
 [[source]]
 url = "https://download.savannah.gnu.org/releases/libpipeline/libpipeline-1.5.8.tar.gz"
-sha256 = "TODO"
-
+sha256 = "1b1203ca152ccd63983c3f2112f7fe6fa5afd453218ede5153d1b31e11bb8405"
 [build]
 style = "autotools"

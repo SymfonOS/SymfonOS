@@ -6,10 +6,8 @@ summary = "lsusb"
 license = "GPL-2.0-or-later"
 url = "https://www.kernel.org/pub/linux/utils/usb/usbutils/"
 depends = ["glibc", "libusb", "systemd"]
-
 [[source]]
 url = "https://www.kernel.org/pub/linux/utils/usb/usbutils/usbutils-018.tar.xz"
-sha256 = "TODO"
-
+sha256 = "83f68b59b58547589c00266e82671864627593ab4362d8c807f50eea923cad93"
 [build]
 style = "meson"

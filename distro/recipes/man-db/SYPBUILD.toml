@@ -6,11 +6,9 @@ summary = "Handbuchseiten anzeigen"
 license = "GPL-2.0-or-later"
 url = "https://download.savannah.gnu.org/releases/man-db/"
 depends = ["glibc", "groff", "less", "libpipeline", "gdbm", "zlib"]
-
 [[source]]
 url = "https://download.savannah.gnu.org/releases/man-db/man-db-2.13.1.tar.xz"
-sha256 = "TODO"
-
+sha256 = "8afebb6f7eb6bb8542929458841f5c7e6f240e30c86358c1fbcefbea076c87d9"
 [build]
 style = "autotools"
 configure_flags = "--docdir=/usr/share/doc/man-db-2.13.1 --sysconfdir=/etc --disable-setuid --enable-cache-owner=bin --with-browser=/usr/bin/lynx --with-vgrind=/usr/bin/vgrind --with-grap=/usr/bin/grap"

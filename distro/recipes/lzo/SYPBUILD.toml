@@ -7,11 +7,9 @@ license = "GPL-2.0-or-later"
 url = "https://www.oberhumer.com/opensource/lzo/download/"
 depends = ["glibc"]
 provides = ["so:liblzo2.so.2"]
-
 [[source]]
 url = "https://www.oberhumer.com/opensource/lzo/download/lzo-2.10.tar.gz"
-sha256 = "TODO"
-
+sha256 = "c0f892943208266f9b6543b3ae308fab6284c5c90e627931446fb49b4221a072"
 [build]
 style = "autotools"
 configure_flags = "--enable-shared --docdir=/usr/share/doc/lzo-2.10"

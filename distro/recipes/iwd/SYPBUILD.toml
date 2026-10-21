@@ -7,11 +7,9 @@ license = "LGPL-2.1-or-later"
 url = "https://www.kernel.org/pub/linux/network/wireless/"
 depends = ["glibc", "dbus", "readline"]
 backup = ["etc/iwd/main.conf"]
-
 [[source]]
 url = "https://www.kernel.org/pub/linux/network/wireless/iwd-3.9.tar.xz"
-sha256 = "TODO"
-
+sha256 = "0cd7dc9b32b9d6809a4a5e5d063b5c5fd279f5ad3a0bf03d7799da66df5cad45"
 [build]
 style = "autotools"
 configure_flags = "--libexecdir=/usr/lib/iwd --localstatedir=/var --disable-manual-pages --enable-wired=no"

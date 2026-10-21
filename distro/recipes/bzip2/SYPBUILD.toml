@@ -7,16 +7,13 @@ license = "bzip2-1.0.6"
 url = "https://www.sourceware.org/pub/bzip2/"
 depends = ["glibc"]
 provides = ["so:libbz2.so.1.0"]
-
 [[source]]
 url = "https://www.sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz"
-sha256 = "TODO"
-
+sha256 = "ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269"
 [[source]]
 url = "https://www.linuxfromscratch.org/patches/lfs/12.4/bzip2-1.0.8-install_docs-1.patch"
-sha256 = "TODO"
+sha256 = "35e3bbd9642af51fef2a8a83afba040d272da42d7e3a251d8e43255a7b496702"
 extract = false
-
 [build]
 dir = "bzip2-1.0.8"
 prepare = '''

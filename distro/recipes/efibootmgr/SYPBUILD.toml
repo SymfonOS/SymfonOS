@@ -6,12 +6,10 @@ summary = "EFI-Bootmanager-Einträge"
 license = "GPL-2.0-or-later"
 url = "https://github.com/rhboot/efibootmgr/archive/18/"
 depends = ["glibc", "efivar", "popt"]
-
 [[source]]
 url = "https://github.com/rhboot/efibootmgr/archive/18/efibootmgr-18.tar.gz"
-sha256 = "TODO"
+sha256 = "442867d12f8525034a404fc8af3036dba8e1fc970998af2486c3b940dfad0874"
 filename = "efibootmgr-18.tar.gz"
-
 [build]
 build = '''
 cd "$S"

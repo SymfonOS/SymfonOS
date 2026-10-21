@@ -7,10 +7,8 @@ license = "BSD-3-Clause"
 url = "https://pypi.org/packages/source/M/MarkupSafe/"
 depends = ["python"]
 makedepends = ["python-setuptools"]
-
 [[source]]
 url = "https://pypi.org/packages/source/M/MarkupSafe/markupsafe-3.0.2.tar.gz"
-sha256 = "TODO"
-
+sha256 = "ee55d3edf80167e48ea11a923c7386f4669df67d7994554387f84e7d8b0a2bf0"
 [build]
 style = "python"

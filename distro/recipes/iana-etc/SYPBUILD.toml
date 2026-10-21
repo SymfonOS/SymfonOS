@@ -6,11 +6,9 @@ summary = "Netzwerkdienste und Protokolle (/etc/services, /etc/protocols)"
 license = "MIT"
 url = "https://github.com/Mic92/iana-etc/releases/download/20250807/"
 makedepends = ["filesystem"]
-
 [[source]]
 url = "https://github.com/Mic92/iana-etc/releases/download/20250807/iana-etc-20250807.tar.gz"
-sha256 = "TODO"
-
+sha256 = "4f88470a2cac2a2f9568285aaff9aeaee0ab66c6ba3c12bba51adca915fa92b1"
 [build]
 package = '''
 cd "$S"

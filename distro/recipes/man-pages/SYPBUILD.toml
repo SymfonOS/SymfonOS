@@ -6,17 +6,14 @@ summary = "Linux-Handbuchseiten"
 license = "GPL-2.0-or-later AND BSD-3-Clause"
 url = "https://www.kernel.org/pub/linux/docs/man-pages/"
 makedepends = ["filesystem"]
-
 [[source]]
 url = "https://www.kernel.org/pub/linux/docs/man-pages/man-pages-6.15.tar.xz"
-sha256 = "TODO"
-
+sha256 = "03d8ebf618bd5df57cb4bf355efa3f4cd3a00b771efd623d4fd042b5dceb4465"
 [build]
 package = '''
 cd "$S"
 rm -f man3/crypt*
 make -R GIT=false prefix=/usr DESTDIR="$DESTDIR" install
 '''
-
 [options]
 strip = false

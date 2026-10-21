@@ -7,11 +7,9 @@ license = "LGPL-2.1-or-later"
 url = "https://github.com/besser82/libxcrypt/releases/download/v4.4.38/"
 depends = ["glibc"]
 provides = ["so:libcrypt.so.2"]
-
 [[source]]
 url = "https://github.com/besser82/libxcrypt/releases/download/v4.4.38/libxcrypt-4.4.38.tar.xz"
-sha256 = "TODO"
-
+sha256 = "80304b9c306ea799327f01d9a7549bdb28317789182631f1b54f4511b4206dd6"
 [build]
 style = "autotools"
 configure_flags = "--enable-hashes=strong,glibc --enable-obsolete-api=no --disable-failure-tokens"

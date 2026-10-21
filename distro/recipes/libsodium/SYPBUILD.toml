@@ -7,10 +7,8 @@ license = "ISC"
 url = "https://download.libsodium.org/libsodium/releases/"
 depends = ["glibc"]
 provides = ["so:libsodium.so.26"]
-
 [[source]]
 url = "https://download.libsodium.org/libsodium/releases/libsodium-1.0.20.tar.gz"
-sha256 = "TODO"
-
+sha256 = "ebb65ef6ca439333c2bb41a0c1990587288da07f6c7fd07cb3a18cc18d30ce19"
 [build]
 style = "autotools"

@@ -8,11 +8,9 @@ url = "https://dbus.freedesktop.org/releases/dbus/"
 depends = ["glibc", "expat", "systemd"]
 makedepends = ["meson"]
 provides = ["so:libdbus-1.so.3", "dbus-libs"]
-
 [[source]]
 url = "https://dbus.freedesktop.org/releases/dbus/dbus-1.16.2.tar.xz"
-sha256 = "TODO"
-
+sha256 = "0ba2a1a4b16afe7bceb2c07e9ce99a8c2c3508e5dec290dbb643384bd6beb7e2"
 [build]
 style = "meson"
 configure_flags = "--wrap-mode=nofallback -D systemd=enabled -D systemd_system_unitdir=/usr/lib/systemd/system -D systemd_user_unitdir=/usr/lib/systemd/user"

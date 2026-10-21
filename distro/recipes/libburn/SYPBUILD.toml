@@ -6,10 +6,8 @@ summary = "Brennbibliothek"
 license = "GPL-2.0-or-later"
 url = "https://files.libburnia-project.org/releases/"
 depends = ["glibc"]
-
 [[source]]
 url = "https://files.libburnia-project.org/releases/libburn-1.5.6.tar.gz"
-sha256 = "TODO"
-
+sha256 = "7295491b4be5eeac5e7a3fb2067e236e2955ffdc6bbd45f546466edee321644b"
 [build]
 style = "autotools"

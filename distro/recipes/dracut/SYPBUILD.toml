@@ -7,12 +7,10 @@ license = "GPL-2.0-or-later"
 url = "https://github.com/dracut-ng/dracut-ng/archive/refs/tags/"
 depends = ["bash", "coreutils", "util-linux", "kmod", "systemd", "cpio", "findutils", "gzip", "zstd"]
 backup = ["etc/dracut.conf"]
-
 [[source]]
 url = "https://github.com/dracut-ng/dracut-ng/archive/refs/tags/107.tar.gz"
-sha256 = "TODO"
+sha256 = "fab19fb41d86de681c022d1a8798804595750be934d98a785ff0257dcdfc9a78"
 filename = "dracut-ng-107.tar.gz"
-
 [build]
 build = '''
 cd "$S"

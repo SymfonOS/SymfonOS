@@ -6,11 +6,9 @@ summary = "find, xargs"
 license = "GPL-3.0-or-later"
 url = "https://ftp.gnu.org/gnu/findutils/"
 depends = ["glibc"]
-
 [[source]]
 url = "https://ftp.gnu.org/gnu/findutils/findutils-4.10.0.tar.xz"
-sha256 = "TODO"
-
+sha256 = "1387e0b67ff247d2abde998f90dfbf70c1491391a59ddfecb8ae698789f0a4f5"
 [build]
 style = "autotools"
 configure_flags = "--localstatedir=/var/lib/locate"

@@ -6,11 +6,9 @@ summary = "ps, top, free, vmstat"
 license = "GPL-2.0-or-later AND LGPL-2.0-or-later"
 url = "https://sourceforge.net/projects/procps-ng/files/Production/"
 depends = ["glibc", "ncurses", "systemd"]
-
 [[source]]
 url = "https://sourceforge.net/projects/procps-ng/files/Production/procps-ng-4.0.5.tar.xz"
-sha256 = "TODO"
-
+sha256 = "c2e6d193cc78f84cd6ddb72aaf6d5c6a9162f0470e5992092057f5ff518562fa"
 [build]
 style = "autotools"
 configure_flags = "--disable-kill --enable-watch8bit --with-systemd"

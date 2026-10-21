@@ -6,11 +6,9 @@ summary = "Erweiterte Dateiattribute"
 license = "LGPL-2.1-or-later"
 url = "https://download.savannah.gnu.org/releases/attr/"
 depends = ["glibc"]
-
 [[source]]
 url = "https://download.savannah.gnu.org/releases/attr/attr-2.5.2.tar.gz"
-sha256 = "TODO"
-
+sha256 = "39bf67452fa41d0948c2197601053f48b3d78a029389734332a6309a680c6c87"
 [build]
 style = "autotools"
 configure_flags = "--docdir=/usr/share/doc/attr-2.5.2"

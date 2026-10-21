@@ -6,10 +6,8 @@ summary = "Flit-Build-Backend"
 license = "BSD-3-Clause"
 url = "https://pypi.org/packages/source/f/flit-core/"
 depends = ["python"]
-
 [[source]]
 url = "https://pypi.org/packages/source/f/flit-core/flit_core-3.12.0.tar.gz"
-sha256 = "TODO"
-
+sha256 = "18f63100d6f94385c6ed57a72073443e1a71a4acb4339491615d0f16d6ff01b2"
 [build]
 style = "python"

@@ -7,11 +7,9 @@ license = "GPL-2.0-or-later"
 url = "https://www.kernel.org/pub/linux/utils/cryptsetup/v2.8/"
 depends = ["glibc", "lvm2", "json-c", "popt", "openssl", "util-linux"]
 provides = ["so:libcryptsetup.so.12"]
-
 [[source]]
 url = "https://www.kernel.org/pub/linux/utils/cryptsetup/v2.8/cryptsetup-2.8.1.tar.xz"
-sha256 = "TODO"
-
+sha256 = "2c3379eb76597dcab50911449b013e2697c4bffcc716dbbf0d9b0e8fbbb46fb4"
 [build]
 style = "autotools"
 configure_flags = "--disable-ssh-token --disable-asciidoc"

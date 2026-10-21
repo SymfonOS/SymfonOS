@@ -7,11 +7,9 @@ license = "GPL-2.0-or-later AND LGPL-2.0-or-later"
 url = "https://downloads.sourceforge.net/project/e2fsprogs/e2fsprogs/v1.47.3/"
 depends = ["glibc", "util-linux"]
 backup = ["etc/mke2fs.conf"]
-
 [[source]]
 url = "https://downloads.sourceforge.net/project/e2fsprogs/e2fsprogs/v1.47.3/e2fsprogs-1.47.3.tar.gz"
-sha256 = "TODO"
-
+sha256 = "2f5164e64dd7d91eadd1e0e8a77d92c06dd7837bb19f1d9189ce1939b363d2b4"
 [build]
 build = '''
 cd "$S"; mkdir -p build; cd build

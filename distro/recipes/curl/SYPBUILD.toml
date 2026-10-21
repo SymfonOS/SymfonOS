@@ -7,11 +7,9 @@ license = "curl"
 url = "https://curl.se/download/"
 depends = ["glibc", "openssl", "zlib", "zstd", "ca-certificates"]
 provides = ["so:libcurl.so.4"]
-
 [[source]]
 url = "https://curl.se/download/curl-8.15.0.tar.xz"
-sha256 = "TODO"
-
+sha256 = "6cd0a8a5b126ddfda61c94dc2c3fc53481ba7a35461cf7c5ab66aa9d6775b609"
 [build]
 style = "autotools"
 configure_flags = "--with-openssl --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt --without-libpsl --enable-threaded-resolver"

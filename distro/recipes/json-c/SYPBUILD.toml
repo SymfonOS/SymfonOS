@@ -8,11 +8,9 @@ url = "https://s3.amazonaws.com/json-c_releases/releases/"
 depends = ["glibc"]
 makedepends = ["cmake"]
 provides = ["so:libjson-c.so.5"]
-
 [[source]]
 url = "https://s3.amazonaws.com/json-c_releases/releases/json-c-0.18.tar.gz"
-sha256 = "TODO"
-
+sha256 = "876ab046479166b869afc6896d288183bbc0e5843f141200c677b3e8dfb11724"
 [build]
 style = "cmake"
 configure_flags = "-DBUILD_STATIC_LIBS=OFF"

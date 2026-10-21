@@ -6,12 +6,10 @@ summary = "SquashFS-Werkzeuge (Live-System)"
 license = "GPL-2.0-or-later"
 url = "https://github.com/plougher/squashfs-tools/archive/refs/tags/"
 depends = ["glibc", "zlib", "xz", "lz4", "zstd", "lzo"]
-
 [[source]]
 url = "https://github.com/plougher/squashfs-tools/archive/refs/tags/4.7.2.tar.gz"
-sha256 = "TODO"
+sha256 = "4672b5c47d9418d3a5ae5b243defc6d9eae8275b9771022247c6a6082c815914"
 filename = "squashfs-tools-4.7.2.tar.gz"
-
 [build]
 build = '''
 cd "$S/squashfs-tools"

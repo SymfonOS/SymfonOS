@@ -5,11 +5,9 @@ version = "20250808-1"
 summary = "Firmware für Grafik, WLAN, Bluetooth, Audio"
 license = "LicenseRef-linux-firmware"
 url = "https://www.kernel.org/pub/linux/kernel/firmware/"
-
 [[source]]
 url = "https://www.kernel.org/pub/linux/kernel/firmware/linux-firmware-20250808.tar.xz"
-sha256 = "TODO"
-
+sha256 = "c029551b45a15926c9d7a5df1a0b540044064f19157c57fc11d91fd0aade837f"
 [build]
 build = '''
 true
@@ -18,6 +16,5 @@ package = '''
 cd "$S"
 make DESTDIR="$DESTDIR" FIRMWAREDIR=/usr/lib/firmware install-nodedup
 '''
-
 [options]
 strip = false

@@ -7,11 +7,9 @@ license = "LGPL-3.0-or-later OR GPL-2.0-or-later"
 url = "https://sourceware.org/ftp/elfutils/0.193/"
 depends = ["glibc", "zlib", "zstd", "xz", "bzip2"]
 provides = ["so:libelf.so.1"]
-
 [[source]]
 url = "https://sourceware.org/ftp/elfutils/0.193/elfutils-0.193.tar.bz2"
-sha256 = "TODO"
-
+sha256 = "7857f44b624f4d8d421df851aaae7b1402cfe6bcdd2d8049f15fc07d3dde7635"
 [build]
 build = '''
 cd "$S"

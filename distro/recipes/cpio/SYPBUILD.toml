@@ -6,11 +6,9 @@ summary = "cpio-Archive (Initramfs)"
 license = "GPL-3.0-or-later"
 url = "https://ftp.gnu.org/gnu/cpio/"
 depends = ["glibc"]
-
 [[source]]
 url = "https://ftp.gnu.org/gnu/cpio/cpio-2.15.tar.bz2"
-sha256 = "TODO"
-
+sha256 = "937610b97c329a1ec9268553fb780037bcfff0dcffe9725ebc4fd9c1aa9075db"
 [build]
 style = "autotools"
 configure_flags = "--enable-mt --with-rmt=/usr/libexec/rmt"
