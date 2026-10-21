@@ -1,0 +1,211 @@
+# Abhängigkeits-Mapping für syp-convert.
+# Eigene Ergänzungen: /etc/syp/convert-map.toml (gleiches Format, überschreibt Einträge).
+# Leerer Zielwert ("") = Abhängigkeit ignorieren.
+
+[ignore]
+deb = ["debconf", "debconf-2.0", "cdebconf", "dpkg", "init-system-helpers", "lsb-base",
+       "sysvinit-utils", "${*}", "ucf", "install-info", "*-dev", "dh-*", "adduser",
+       "ubuntu-advantage-tools", "apt", "apt-utils", "base-files", "libpam-systemd"]
+rpm = ["rpmlib(*)", "config(*)", "rtld(*)", "/sbin/ldconfig", "/usr/sbin/ldconfig",
+       "*-devel", "pkgconfig(*)", "systemd-units", "chkconfig", "/sbin/chkconfig",
+       "fedora-release*", "redhat-release*", "system-release*", "dnf*", "rpm", "rpm-libs",
+       "glibc-langpack-*", "glibc-minimal-langpack", "/sbin/install-info", "info", "crypto-policies"]
+arch = []
+
+[files]
+"/bin/sh" = "sh"
+"/usr/bin/sh" = "sh"
+"/bin/bash" = "bash"
+"/usr/bin/bash" = "bash"
+"/usr/bin/env" = "coreutils"
+"/usr/bin/python3" = "python"
+"/usr/bin/perl" = "perl"
+"/usr/bin/ruby" = "ruby"
+"/usr/bin/lua" = "lua"
+"/usr/bin/node" = "nodejs"
+"/usr/bin/pkexec" = "polkit"
+"/usr/bin/xdg-open" = "xdg-utils"
+
+[deb]
+"libc6" = "glibc"
+"libc-bin" = "glibc"
+"libgcc-s1" = "gcc-libs"
+"libgcc1" = "gcc-libs"
+"libstdc++6" = "gcc-libs"
+"libgomp1" = "gcc-libs"
+"zlib1g" = "zlib"
+"libbz2-1.0" = "bzip2"
+"liblzma5" = "xz"
+"libzstd1" = "zstd"
+"libssl3" = "openssl"
+"libssl3t64" = "openssl"
+"libcurl4" = "curl"
+"libcurl4t64" = "curl"
+"libglib2.0-0" = "glib2"
+"libglib2.0-0t64" = "glib2"
+"libgtk-3-0" = "gtk3"
+"libgtk-3-0t64" = "gtk3"
+"libgtk-4-1" = "gtk4"
+"libadwaita-1-0" = "libadwaita"
+"libqt5core5a" = "qt5-base"
+"libqt5core5t64" = "qt5-base"
+"libqt5gui5" = "qt5-base"
+"libqt5widgets5" = "qt5-base"
+"libqt6core6" = "qt6-base"
+"libqt6core6t64" = "qt6-base"
+"libqt6gui6" = "qt6-base"
+"libqt6widgets6" = "qt6-base"
+"libx11-6" = "libx11"
+"libxext6" = "libxext"
+"libxrandr2" = "libxrandr"
+"libxcb1" = "libxcb"
+"libxkbcommon0" = "libxkbcommon"
+"libwayland-client0" = "wayland"
+"libdrm2" = "libdrm"
+"libgbm1" = "mesa"
+"libegl1" = "libglvnd"
+"libgl1" = "libglvnd"
+"libvulkan1" = "vulkan-icd-loader"
+"libasound2" = "alsa-lib"
+"libasound2t64" = "alsa-lib"
+"libpulse0" = "libpulse"
+"libpipewire-0.3-0" = "libpipewire"
+"libpipewire-0.3-0t64" = "libpipewire"
+"libjack-jackd2-0" = "pipewire-jack"
+"libjack0" = "pipewire-jack"
+"libdbus-1-3" = "dbus"
+"libsystemd0" = "systemd-libs"
+"libudev1" = "systemd-libs"
+"libfontconfig1" = "fontconfig"
+"libfreetype6" = "freetype2"
+"libharfbuzz0b" = "harfbuzz"
+"libpango-1.0-0" = "pango"
+"libcairo2" = "cairo"
+"libpng16-16" = "libpng"
+"libpng16-16t64" = "libpng"
+"libjpeg8" = "libjpeg-turbo"
+"libjpeg62-turbo" = "libjpeg-turbo"
+"libtiff6" = "libtiff"
+"libwebp7" = "libwebp"
+"liblcms2-2" = "lcms2"
+"libexpat1" = "expat"
+"libxml2" = "libxml2"
+"libsqlite3-0" = "sqlite"
+"libnss3" = "nss"
+"libnspr4" = "nspr"
+"libsecret-1-0" = "libsecret"
+"libnotify4" = "libnotify"
+"libcups2" = "libcups"
+"libcups2t64" = "libcups"
+"libatk1.0-0" = "at-spi2-core"
+"libatk-bridge2.0-0" = "at-spi2-core"
+"libatspi2.0-0" = "at-spi2-core"
+"libgdk-pixbuf-2.0-0" = "gdk-pixbuf2"
+"libavcodec60" = "ffmpeg"
+"libavformat60" = "ffmpeg"
+"libavutil58" = "ffmpeg"
+"libsdl2-2.0-0" = "sdl2"
+"libopenexr-3-1-30" = "openexr"
+"libopenimageio2.4" = "openimageio"
+"python3" = "python"
+"python3-minimal" = "python"
+"perl" = "perl"
+"perl-base" = "perl"
+"bash" = "bash"
+"coreutils" = "coreutils"
+"procps" = "procps-ng"
+"xdg-utils" = "xdg-utils"
+"ca-certificates" = "ca-certificates"
+"fonts-liberation" = "ttf-liberation"
+"fonts-noto-color-emoji" = "noto-fonts-emoji"
+"default-jre" = "jre-openjdk"
+"policykit-1" = "polkit"
+"pkexec" = "polkit"
+"libpolkit-gobject-1-0" = "polkit"
+"libgcrypt20" = "libgcrypt"
+"libgnutls30" = "gnutls"
+"libgnutls30t64" = "gnutls"
+"libuuid1" = "util-linux-libs"
+"libblkid1" = "util-linux-libs"
+"libmount1" = "util-linux-libs"
+
+[rpm]
+"glibc" = "glibc"
+"libgcc" = "gcc-libs"
+"libstdc++" = "gcc-libs"
+"zlib" = "zlib"
+"zlib-ng-compat" = "zlib"
+"bzip2-libs" = "bzip2"
+"xz-libs" = "xz"
+"libzstd" = "zstd"
+"openssl-libs" = "openssl"
+"libcurl" = "curl"
+"glib2" = "glib2"
+"gtk3" = "gtk3"
+"gtk4" = "gtk4"
+"qt5-qtbase" = "qt5-base"
+"qt5-qtbase-gui" = "qt5-base"
+"qt6-qtbase" = "qt6-base"
+"qt6-qtbase-gui" = "qt6-base"
+"libX11" = "libx11"
+"libXext" = "libxext"
+"libxcb" = "libxcb"
+"mesa-libGL" = "libglvnd"
+"mesa-libEGL" = "libglvnd"
+"mesa-libgbm" = "mesa"
+"vulkan-loader" = "vulkan-icd-loader"
+"alsa-lib" = "alsa-lib"
+"pulseaudio-libs" = "libpulse"
+"pipewire-libs" = "libpipewire"
+"pipewire-jack-audio-connection-kit" = "pipewire-jack"
+"dbus-libs" = "dbus"
+"systemd-libs" = "systemd-libs"
+"fontconfig" = "fontconfig"
+"freetype" = "freetype2"
+"harfbuzz" = "harfbuzz"
+"libpng" = "libpng"
+"libjpeg-turbo" = "libjpeg-turbo"
+"lcms2" = "lcms2"
+"sqlite-libs" = "sqlite"
+"nss" = "nss"
+"python3" = "python"
+"python3-libs" = "python"
+"perl-interpreter" = "perl"
+"perl-libs" = "perl"
+"procps-ng" = "procps-ng"
+"shadow-utils" = "shadow"
+"util-linux-core" = "util-linux"
+"libuuid" = "util-linux-libs"
+"libblkid" = "util-linux-libs"
+"polkit-libs" = "polkit"
+"gnutls" = "gnutls"
+"libgcrypt" = "libgcrypt"
+"java-latest-openjdk" = "jre-openjdk"
+"liberation-fonts" = "ttf-liberation"
+"google-noto-emoji-color-fonts" = "noto-fonts-emoji"
+
+[arch]
+
+# Regeln: [Regex, Ersetzung]; "!ignore" = verwerfen. Werden nach der Tabelle geprüft.
+[rules]
+deb = [
+  ["^python3-(.+)$", "python-\\1"],
+  ["^lib(.+)-perl$", "perl-\\1"],
+  ["^fonts-(.+)$", "ttf-\\1"],
+  ["^gir1\\.2-.*$", "!ignore"],
+  ["^(.+)-common$", "\\1"],
+  ["^(.+)-data$", "\\1"],
+  ["^(lib.+?)-?[0-9][0-9.]*(t64)?(a)?$", "\\1"],
+  ["^lib(.+?)-?[0-9][0-9.]*(t64)?$", "\\1"],
+]
+rpm = [
+  ["^python3dist\\((.+)\\)$", "python-\\1"],
+  ["^python3-(.+)$", "python-\\1"],
+  ["^perl\\((.+)\\)$", "perl-\\1"],
+  ["^(lib.+\\.so\\.[0-9.]+)\\(.*$", "so:\\1"],
+  ["^(.+)\\((x86-64|aarch-64)\\)$", "\\1"],
+  ["^(.+)-libs$", "\\1"],
+  ["^font\\(.*\\)$", "!ignore"],
+  ["^lib(.+)$", "\\1"],
+]
+arch = []

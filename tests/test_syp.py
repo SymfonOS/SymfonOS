@@ -9,7 +9,7 @@ from syp import repo
 from syp.cli import main
 from syp.crypto import Keyring, SecretKey, SignatureError
 from syp.deps import Atom
-from syp.package import AtpPackage, PackageError, PackageInfo
+from syp.package import SypPackage, PackageError, PackageInfo
 from syp.repo import RepoPackage
 from syp.solver import Solver, SolverError
 from syp.version import vercmp
@@ -88,7 +88,7 @@ def test_solver_remove_and_orphans():
 def test_package_roundtrip_and_signature(tmp_path):
     key = SecretKey.generate("test")
     p = make_pkg(tmp_path, "hello", "1.0-1", signer=key)
-    pkg = AtpPackage(p)
+    pkg = SypPackage(p)
     kr = Keyring()
     with pytest.raises(SignatureError):
         pkg.verify(kr)
@@ -116,7 +116,7 @@ def test_tampered_package_rejected(tmp_path):
             ti.size = len(members[n])
             tf.addfile(ti, io.BytesIO(members[n]))
     with pytest.raises(SignatureError):
-        AtpPackage(bad).verify(Keyring.from_dir(tmp_path))
+        SypPackage(bad).verify(Keyring.from_dir(tmp_path))
 
 
 def test_invalid_name():
@@ -210,7 +210,7 @@ path = "hello.sh"
 package = 'install -Dm755 hello.sh "$DESTDIR/usr/bin/hello"'
 ''')
     assert main(["build", str(tmp_path / "SYPBUILD.toml"), "-o", str(tmp_path / "o")]) == 0
-    pkg = AtpPackage(tmp_path / "o/hello-1.0-1-any.syp")
+    pkg = SypPackage(tmp_path / "o/hello-1.0-1-any.syp")
     assert [f["path"] for f in pkg.files] == ["usr", "usr/bin", "usr/bin/hello"]
     assert pkg.files[-1]["mode"] == 0o755
 

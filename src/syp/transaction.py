@@ -14,7 +14,7 @@ from . import repo, snapshot, triggers
 from .config import Config
 from .crypto import Keyring
 from .db import Database
-from .package import AtpPackage
+from .package import SypPackage
 from .repo import RepoPackage, sha256
 from .solver import Plan
 
@@ -36,7 +36,7 @@ def locked(cfg: Config):
 
 
 def local_package(path: Path) -> RepoPackage:
-    p = AtpPackage(path)
+    p = SypPackage(path)
     return RepoPackage(p.info, "lokal", path.name, sha256(path), path.stat().st_size,
                        priority=0, local_path=path.resolve())
 
@@ -111,7 +111,7 @@ class Transaction:
         self.changed.add(e["path"])
 
     # --- Prüfungen ---------------------------------------------------------------
-    def _check_conflicts(self, pkgs: list[AtpPackage], removing: set[str]) -> None:
+    def _check_conflicts(self, pkgs: list[SypPackage], removing: set[str]) -> None:
         claimed: dict[str, str] = {}
         problems = []
         for pkg in pkgs:
@@ -167,7 +167,7 @@ class Transaction:
         self.db.delete(name)
         self._script(inst.info, "post_remove", SYP_OLD_VERSION=inst.version)
 
-    def _install(self, pkg: AtpPackage, reason: str) -> None:
+    def _install(self, pkg: SypPackage, reason: str) -> None:
         info = pkg.info
         old = self.db.get(info.name)
         hook = "upgrade" if old else "install"
@@ -213,7 +213,7 @@ class Transaction:
                 if rp.local_path and rp.local_path.parent != self.cfg.cache_dir.resolve():
                     self.cfg.cache_dir.mkdir(parents=True, exist_ok=True)
                     shutil.copy2(path, self.cfg.cache_dir / path.name)   # für Rollbacks
-                pkg = AtpPackage(path)
+                pkg = SypPackage(path)
                 if pkg.info.name != rp.name or pkg.info.version != rp.version:
                     raise TransactionError(f"{path.name}: Metadaten passen nicht zum Index")
                 if self.cfg.require_signatures and not self.allow_unsigned:
@@ -240,7 +240,7 @@ class Transaction:
             return tx
 
 
-def _order(pkgs: list[AtpPackage]) -> list[AtpPackage]:
+def _order(pkgs: list[SypPackage]) -> list[SypPackage]:
     """Topologische Reihenfolge: Abhängigkeiten zuerst (Zyklen werden toleriert)."""
     from .deps import Dep
     by_prov = {}

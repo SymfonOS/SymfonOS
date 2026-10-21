@@ -14,7 +14,7 @@ from .build import build
 from .config import Config
 from .crypto import Keyring, SecretKey, SignatureError
 from .db import Database
-from .package import AtpPackage, PackageError
+from .package import SypPackage, PackageError
 from .repo import RepoError
 from .solver import Plan, Solver, SolverError
 from .transaction import (Transaction, TransactionError, clean_cache, local_package,
@@ -173,7 +173,7 @@ def cmd_info(ctx: Ctx) -> int:
     rc = 0
     for name in ctx.args.targets:
         if name.endswith(".syp") and Path(name).exists():
-            info, where = AtpPackage(Path(name)).info, "Datei"
+            info, where = SypPackage(Path(name)).info, "Datei"
         elif name in inst:
             info, where = inst[name].info, "installiert"
         else:

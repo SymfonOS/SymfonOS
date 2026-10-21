@@ -18,7 +18,7 @@ import zstandard
 
 from .config import Config, RepoConf
 from .crypto import Keyring, SecretKey, sign_file, verify_file
-from .package import AtpPackage, PackageInfo
+from .package import SypPackage, PackageInfo
 
 
 class RepoError(Exception):
@@ -113,7 +113,7 @@ def build_index(repo_dir: Path, name: str, arch: str, signer: SecretKey | None) 
     """Erzeugt index.json.zst aus allen .syp im Pool (für `syp repo-index`)."""
     entries = []
     for p in sorted((repo_dir / "pool").rglob("*.syp")):
-        pkg = AtpPackage(p)
+        pkg = SypPackage(p)
         if pkg.info.arch not in (arch, "any"):
             continue
         entries.append({"info": pkg.info.to_dict(), "file": p.relative_to(repo_dir).as_posix(),
@@ -128,7 +128,7 @@ def build_index(repo_dir: Path, name: str, arch: str, signer: SecretKey | None) 
 
 
 def add_to_pool(repo_dir: Path, pkg_path: Path) -> Path:
-    name = AtpPackage(pkg_path).info.name
+    name = SypPackage(pkg_path).info.name
     dest = repo_dir / "pool" / name[0] / pkg_path.name
     dest.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(pkg_path, dest)

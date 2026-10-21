@@ -188,7 +188,7 @@ def build_package(tree: Path, info: PackageInfo, out_dir: Path,
     return out
 
 
-class AtpPackage:
+class SypPackage:
     def __init__(self, path: Path):
         self.path = Path(path)
         try:
