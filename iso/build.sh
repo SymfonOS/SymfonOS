@@ -9,8 +9,9 @@ LOCALREPO=/tmp/symfonos-localrepo
 BUILDER=builder
 
 pacman -Syu --noconfirm --needed archiso base-devel git python-build python-installer \
-  python-setuptools python-wheel python-pytest python-zstandard python-cryptography pyside6 \
+  python-setuptools python-wheel python-pytest pyside6 libarchive zstd libsodium sqlite curl \
   qt6-svg kpmcore boost yaml-cpp extra-cmake-modules qt6-tools
+make -C "$ROOT/csrc" -j"$(nproc)"   # syp und syp-convert (C) für Schlüssel und Tests
 
 id "$BUILDER" &>/dev/null || useradd -m "$BUILDER"
 echo "$BUILDER ALL=(ALL) NOPASSWD: /usr/bin/pacman" > /etc/sudoers.d/90-builder
@@ -19,7 +20,7 @@ chown -R "$BUILDER" "$ROOT"
 
 # Öffentlicher Release-Schlüssel (CI: aus Secret abgeleitet; lokal: Testschlüssel erzeugen)
 if [[ -z ${SYP_RELEASE_PUB:-} ]]; then
-  PYTHONPATH="$ROOT/src" python -m syp keygen /tmp/symfonos-dev --comment "symfonOS Entwicklung (unsicher)"
+  "$ROOT/csrc/bin/syp" keygen /tmp/symfonos-dev --comment "symfonOS Entwicklung (unsicher)"
   export SYP_RELEASE_PUB=/tmp/symfonos-dev.pub
   echo "WARNUNG: Entwicklungsschlüssel erzeugt – nicht für Releases verwenden" >&2
 fi

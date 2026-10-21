@@ -6,7 +6,9 @@ set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 OUT=${1:-$ROOT/out/repo}
 : "${SYP_KEY:?SYP_KEY (geheimer Signaturschlüssel) nicht gesetzt}"
-export PYTHONPATH="$ROOT/src" SYP_ZSTD_LEVEL=${SYP_ZSTD_LEVEL:-15}
+export SYP_ZSTD_LEVEL=${SYP_ZSTD_LEVEL:-15}
+[[ -x $ROOT/csrc/bin/syp ]] || make -C "$ROOT/csrc" -j"$(nproc)"
+SYP=$ROOT/csrc/bin/syp SYP_CONVERT=$ROOT/csrc/bin/syp-convert
 CACHE=${CACHE:-/var/cache/symfonos-sync}
 mkdir -p "$CACHE" "$OUT"
 pacman -Sy --noconfirm >/dev/null
@@ -28,12 +30,12 @@ while read -r url; do
   mkdir -p "$conv"
   name=$(basename "$f" | sed -E 's/-[^-]+-[^-]+-[^-]+\.pkg\.tar\.zst$//')
   ls "$conv"/*/"$name"-*.syp &>/dev/null && continue
-  python -m syp_convert "$f" -o "$conv/${name:0:1}" -k "$SYP_KEY" --offline --mark-scripts-reviewed \
+  "$SYP_CONVERT" "$f" -o "$conv/${name:0:1}" -k "$SYP_KEY" --offline --mark-scripts-reviewed \
     --json > "$CACHE/$name.report.json" || echo "!! $name fehlgeschlagen" >&2
 done < "$CACHE/urls.txt"
 
 for repo in core extra multilib; do
   [[ -d $OUT/$repo/x86_64 ]] || continue
-  python -m syp repo-add "$OUT/$repo/x86_64" --name "$repo" --arch x86_64 -k "$SYP_KEY"
+  "$SYP" repo-add "$OUT/$repo/x86_64" --name "$repo" --arch x86_64 -k "$SYP_KEY"
 done
 echo ":: Repos unter $OUT"

@@ -4,10 +4,10 @@ pkgname=symfonos-tools
 pkgver=0.1.0
 pkgrel=1
 pkgdesc="symfonOS: Paketmanager syp, Paket-Konverter, Software-Center, Design-Center, Assistent, Prüfungsmodus"
-arch=('any')
+arch=('x86_64')
 url="https://github.com/thomasrohm23-bit/symfonOS"
 license=('GPL-3.0-or-later')
-depends=('python' 'python-zstandard' 'python-cryptography' 'pyside6' 'qt6-wayland' 'polkit'
+depends=('python' 'libarchive' 'zstd' 'libsodium' 'sqlite' 'curl' 'pyside6' 'qt6-wayland' 'polkit'
          'snapper' 'btrfs-progs' 'grub-btrfs' 'ollama' 'cage' 'nftables' 'firefox' 'libnotify'
          'kdialog' 'pciutils' 'usbutils' 'curl')
 makedepends=('python-build' 'python-installer' 'python-setuptools' 'python-wheel')
@@ -18,16 +18,19 @@ _root="${startdir}/../.."
 
 build() {
   cd "$_root"
+  make -C csrc clean
+  make -C csrc CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS"
   python -m build --wheel --no-isolation --outdir "$srcdir/dist"
 }
 
 check() {
   cd "$_root"
-  QT_QPA_PLATFORM=offscreen python -m pytest -q
+  QT_QPA_PLATFORM=offscreen SYP_SKIP_BUILD=1 python -m pytest -q
 }
 
 package() {
   python -m installer --destdir="$pkgdir" "$srcdir"/dist/*.whl
+  make -C "$_root/csrc" DESTDIR="$pkgdir" PREFIX=/usr install
   cp -a --no-preserve=ownership "$_root/system/." "$pkgdir/"
   rm -f "$pkgdir/etc/syp/keys/README"
   install -Dm755 "$_root/exam/symfonos-exam" "$pkgdir/usr/bin/symfonos-exam"

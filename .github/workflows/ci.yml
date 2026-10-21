@@ -141,7 +141,7 @@ jobs:
           SYP_SIGNING_KEY: ${{ secrets.SYP_SIGNING_KEY }}
         run: |
           test -n "$SYP_SIGNING_KEY" || { echo "Secret SYP_SIGNING_KEY fehlt"; exit 1; }
-          pacman -Sy --noconfirm --needed python python-cryptography python-zstandard curl
+          pacman -Sy --noconfirm --needed base-devel libarchive zstd libsodium sqlite curl
           umask 077; printf '%s\n' "$SYP_SIGNING_KEY" > /tmp/release.key
           SYP_KEY=/tmp/release.key ./tools/repo-sync.sh "$PWD/site/repo"
       - name: Auf GitHub Pages veröffentlichen
