@@ -14,7 +14,7 @@ true
 '''
 package = '''
 cd "$S"
-make DESTDIR="$DESTDIR" FIRMWAREDIR=/usr/lib/firmware install-nodedup
+./copy-firmware.sh "$DESTDIR/usr/lib/firmware"
 '''
 [options]
 strip = false

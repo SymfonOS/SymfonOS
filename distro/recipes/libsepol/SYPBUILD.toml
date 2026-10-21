@@ -21,5 +21,4 @@ make PREFIX=/usr SBINDIR=/usr/sbin LIBDIR=/usr/lib SHLIBDIR=/usr/lib
 package = '''
 cd "$S"
 make PREFIX=/usr SBINDIR=/usr/sbin LIBDIR=/usr/lib SHLIBDIR=/usr/lib DESTDIR="$DESTDIR" install
-rm -f "$DESTDIR/usr/lib/libsepol.a"
 '''

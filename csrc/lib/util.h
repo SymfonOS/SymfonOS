@@ -20,6 +20,9 @@ void die(const char *fmt, ...) __attribute__((noreturn, format(printf, 1, 2)));
 /* Fehlerkanal: Funktionen geben -1 zurück und setzen eine Meldung */
 void set_error(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
 const char *last_error(void);
+/* Zeichensatz für Dateinamen auf UTF-8 stellen (libarchive wandelt Archivnamen in die aktuelle
+ * Locale; mit "C" scheitern Archive mit Nicht-ASCII-Namen, z. B. der gcc-Quelltext). */
+void init_utf8_locale(void);
 
 /* Dynamischer String */
 typedef struct {

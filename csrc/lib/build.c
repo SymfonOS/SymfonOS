@@ -135,6 +135,10 @@ static const char *MIRRORS[][4] = {
     {"https://ftp.gnu.org/gnu/", "https://ftpmirror.gnu.org/gnu/", "https://mirrors.kernel.org/gnu/",
      "https://ftp.fau.de/gnu/"},
     {"https://www.kernel.org/pub/", "https://mirrors.edge.kernel.org/pub/", "https://cdn.kernel.org/pub/", NULL},
+    {"https://download.savannah.gnu.org/releases/", "https://download-mirror.savannah.gnu.org/releases/",
+     "https://mirrors.kernel.org/nongnu/", "https://ftp.fau.de/nongnu/"},
+    {"https://download.savannah.nongnu.org/releases/", "https://download-mirror.savannah.gnu.org/releases/",
+     "https://mirrors.kernel.org/nongnu/", "https://ftp.fau.de/nongnu/"},
     {"https://www.cpan.org/", "https://cpan.metacpan.org/", NULL, NULL},
     {"https://data.iana.org/time-zones/", "https://ftp.iana.org/tz/", NULL, NULL},
 };

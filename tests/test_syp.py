@@ -497,3 +497,21 @@ def test_buildall_root_installs_without_syp_in_path(tmp_path):
     out = run(SYP, "buildall", recs, "--repo", tmp_path / "repo", "--root", r, "-k", key, "--name", "t",
               env={"PATH": "/usr/bin:/bin", "HOME": str(tmp_path)})
     assert "vorhanden 2" in out.stdout and (r / "etc/b.txt").exists()
+
+
+def test_build_extracts_non_ascii_names_in_c_locale(tmp_path):
+    """gcc-Quellen enthalten UTF-8-Dateinamen; der Bootstrap läuft mit LC_ALL=POSIX."""
+    import hashlib
+    import io
+    tar = tmp_path / "q-1.tar.gz"
+    with tarfile.open(tar, "w:gz", format=tarfile.PAX_FORMAT) as tf:
+        for name in ("q-1/doc/Grüße.txt", "q-1/a.txt"):
+            ti = tarfile.TarInfo(name)
+            ti.size = 2
+            tf.addfile(ti, io.BytesIO(b"x\n"))
+    digest = hashlib.sha256(tar.read_bytes()).hexdigest()
+    (tmp_path / "SYPBUILD.toml").write_text(
+        f'[package]\nname = "q"\nversion = "1-1"\narch = "any"\n[[source]]\nurl = "file://{tar}"\nsha256 = "{digest}"\n'
+        "[build]\npackage = 'test -f \"$S/doc/Grüße.txt\"; install -Dm644 \"$S/a.txt\" \"$DESTDIR/usr/share/q/a.txt\"'\n")
+    run(SYP, "build", tmp_path / "SYPBUILD.toml", "-o", tmp_path / "out",
+        env=dict(os.environ, LC_ALL="C", LANG="C", HOME=str(tmp_path)))

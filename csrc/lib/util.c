@@ -2,6 +2,8 @@
 #define _GNU_SOURCE
 #include "util.h"
 
+#include <locale.h>
+#include <langinfo.h>
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -535,3 +537,10 @@ const char *col(const char *code) {
     return buf[i];
 }
 const char *col_end(void) { return g_tty ? "\033[0m" : ""; }
+
+void init_utf8_locale(void) {
+    if (setlocale(LC_CTYPE, "") && !strcmp(nl_langinfo(CODESET), "UTF-8")) return;
+    const char *cand[] = {"C.UTF-8", "C.utf8", "en_US.UTF-8", NULL};
+    for (const char **c = cand; *c; c++)
+        if (setlocale(LC_CTYPE, *c)) return;
+}

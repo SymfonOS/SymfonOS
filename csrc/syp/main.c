@@ -778,6 +778,7 @@ static void usage(void) {
 }
 
 int main(int argc, char **argv) {
+    init_utf8_locale();
     g_tty = isatty(1);
     if (crypto_init()) die("%s", last_error());
     ctx c = {0};

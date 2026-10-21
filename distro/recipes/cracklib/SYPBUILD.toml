@@ -27,5 +27,6 @@ package = '''
 cd "$S"
 make DESTDIR="$DESTDIR" install
 install -Dm644 ../cracklib-words-2.10.3.xz "$DESTDIR/usr/share/dict/cracklib-words.xz"
+install -d "$DESTDIR/usr/lib/cracklib"
 xz -dc ../cracklib-words-2.10.3.xz | LD_LIBRARY_PATH="$DESTDIR/usr/lib" "$DESTDIR/usr/sbin/cracklib-packer" "$DESTDIR/usr/lib/cracklib/pw_dict"
 '''
