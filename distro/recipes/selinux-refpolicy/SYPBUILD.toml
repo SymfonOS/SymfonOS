@@ -11,7 +11,7 @@ backup = ["etc/selinux/config"]
 
 [[source]]
 url = "https://github.com/SELinuxProject/refpolicy/releases/download/RELEASE_2_20250213/refpolicy-2.20250213.tar.bz2"
-sha256 = "TODO"
+sha256 = "d2487c49420e8710e999b18bbe699fbff033fe5adc5127e3f0c7dafaa9b4d209"
 
 [build]
 dir = "refpolicy"

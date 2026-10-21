@@ -9,7 +9,7 @@ makedepends = ["glibc"]
 
 [[source]]
 url = "https://data.iana.org/time-zones/releases/tzdata2025b.tar.gz"
-sha256 = "TODO"
+sha256 = "11810413345fc7805017e27ea9fa4885fd74cd61b2911711ad038f5d28d71474"
 filename = "tzdata2025b.tar.gz"
 
 [build]

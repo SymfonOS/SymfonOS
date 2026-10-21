@@ -10,7 +10,7 @@ backup = ["etc/login.defs", "etc/default/useradd"]
 
 [[source]]
 url = "https://github.com/shadow-maint/shadow/releases/download/4.18.0/shadow-4.18.0.tar.xz"
-sha256 = "TODO"
+sha256 = "add4604d3bc410344433122a819ee4154b79dd8316a56298c60417e637c07608"
 
 [build]
 prepare = '''
