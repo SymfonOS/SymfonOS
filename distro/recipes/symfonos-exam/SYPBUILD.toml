@@ -1,0 +1,24 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "symfonos-exam"
+version = "1.0-1"
+arch = "any"
+summary = "Prüfungsmodus: Kiosk-Sitzung, Firewall-Allowlist, gesperrte USB-Datenträger; Wege zum Safe Exam Browser"
+license = "GPL-3.0-or-later"
+depends = ["bash", "coreutils", "gawk", "nftables", "systemd", "kmod", "procps-ng", "util-linux", "glibc"]
+# Grafischer Teil (Desktop-Stufe): Kiosk-Compositor, Browser, Windows-VM für den offiziellen SEB,
+# FUSE für das AppImage des Community-Clients seb-linux
+optdepends = ["cage", "firefox", "sddm", "qemu-desktop", "fuse2"]
+
+[[source]]
+path = "@/exam/symfonos-exam"
+
+[[source]]
+path = "@/system/usr/lib/sysusers.d/symfonos.conf"
+
+[build]
+package = '''
+install -Dm755 "$SRCDIR/symfonos-exam" "$DESTDIR/usr/bin/symfonos-exam"
+install -Dm644 "$SRCDIR/symfonos.conf" "$DESTDIR/usr/lib/sysusers.d/symfonos-exam.conf"
+install -d -m 700 "$DESTDIR/var/lib/symfonos-exam"
+'''

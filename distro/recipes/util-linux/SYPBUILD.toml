@@ -5,7 +5,7 @@ version = "2.41.1-1"
 summary = "Systemwerkzeuge (mount, fdisk, lsblk …)"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later AND BSD-3-Clause"
 url = "https://www.kernel.org/pub/linux/utils/util-linux/v2.41/"
-depends = ["glibc", "ncurses", "zlib", "readline", "libcap", "libxcrypt"]
+depends = ["glibc", "ncurses", "zlib", "readline", "libcap", "libxcrypt", "libselinux", "audit", "linux-pam"]
 provides = ["so:libblkid.so.1", "so:libmount.so.1", "so:libuuid.so.1", "so:libsmartcols.so.1", "so:libfdisk.so.1", "util-linux-libs"]
 
 [[source]]
@@ -18,7 +18,7 @@ cd "$S"
 ./configure --bindir=/usr/bin --libdir=/usr/lib --runstatedir=/run --sbindir=/usr/sbin --disable-chfn-chsh \
   --disable-login --disable-nologin --disable-su --disable-setpriv --disable-runuser --disable-pylibmount \
   --disable-liblastlog2 --disable-static --without-python ADJTIME_PATH=/var/lib/hwclock/adjtime \
-  --docdir=/usr/share/doc/util-linux-2.41.1
+  --docdir=/usr/share/doc/util-linux-2.41.1 --with-selinux --with-audit
 make
 '''
 package = '''

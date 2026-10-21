@@ -1,0 +1,15 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "libmnl"
+version = "1.0.5-1"
+summary = "Netfilter-Bibliothek libmnl"
+license = "LGPL-2.1-or-later"
+url = "https://netfilter.org/projects/libmnl/files/"
+depends = ["glibc"]
+
+[[source]]
+url = "https://netfilter.org/projects/libmnl/files/libmnl-1.0.5.tar.bz2"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

@@ -1,0 +1,21 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "symfonos-security"
+version = "1.0-1"
+arch = "any"
+summary = "symfonOS-Sicherheitskonfiguration: PAM, Passwortregeln, Firewall, sysctl-Härtung, Audit, SSH, Krypto-Richtlinie, Secure Boot"
+license = "GPL-3.0-or-later"
+depends = ["linux-pam", "libpwquality", "nftables", "audit", "policycoreutils", "selinux-refpolicy", "openssl", "systemd", "crypto-policies", "python", "bash"]
+backup = ["etc/nftables.conf", "etc/security/pwquality.conf.d/50-symfonos.conf", "etc/security/faillock.conf", "etc/sudoers.d/00-symfonos"]
+
+[[source]]
+path = "@/distro/security"
+
+[build]
+build = '''
+true
+'''
+package = '''
+cd "$SRCDIR/security"
+./install.sh "$DESTDIR"
+'''

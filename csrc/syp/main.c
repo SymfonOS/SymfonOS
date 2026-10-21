@@ -772,6 +772,7 @@ static void usage(void) {
          "  keygen AUSGABE            Signaturschlüssel erzeugen (--comment)\n"
          "  pubkey GEHEIM AUSGABE     Öffentlichen Schlüssel aus einem geheimen ableiten\n"
          "  repo-add REPO [PAKET...]  Pakete ins Repo aufnehmen, Index signieren (--name, --arch, -k)\n"
+         "  repo-show REPO            Index als JSON ausgeben (--pub: nur mit gültiger Signatur)\n"
          "  vercmp A B                Versionen vergleichen (-1, 0, 1)\n\n"
          "Transaktionsoptionen: --overwrite GLOB, --allow-unsigned, --trust-scripts, --no-scripts");
 }
@@ -814,6 +815,7 @@ int main(int argc, char **argv) {
     int as_dep = 0, cascade = 0, nosync = 0, explicit_only = 0, nocheck = 0, update_sums = 0, keep_work = 0, system = 0;
     int limit = 30, keep = -1;
     const char *out = NULL, *key = NULL, *comment = "", *rname = "symfonos", *arch = "x86_64", *chroot_dir = NULL;
+    const char *pubopt = NULL;
     for (; i < argc; i++) {
         const char *a = argv[i];
         int more = i + 1 < argc;
@@ -839,6 +841,7 @@ int main(int argc, char **argv) {
         else if ((!strcmp(a, "-k") || !strcmp(a, "--key")) && more) key = argv[++i];
         else if (!strcmp(a, "--comment") && more) comment = argv[++i];
         else if (!strcmp(a, "--name") && more) rname = argv[++i];
+        else if (!strcmp(a, "--pub") && more) pubopt = argv[++i];
         else if (!strcmp(a, "--arch") && more) arch = argv[++i];
         else if (!strcmp(a, "--chroot") && more) chroot_dir = argv[++i];
         else if (a[0] == '-' && a[1] && strcmp(a, "-")) die("Unbekannte Option für %s: %s", cmd, a);
@@ -868,6 +871,16 @@ int main(int argc, char **argv) {
         return c_keygen(pos.v[0], comment);
     }
     if (!strcmp(cmd, "repo-add")) return c_repo_add((int)pos.n, pos.v, rname, arch, key);
+    if (!strcmp(cmd, "repo-show")) {
+        if (pos.n != 1) die("Aufruf: syp repo-show REPO [--pub SCHLÜSSEL.pub]");
+        jval *idx = repo_show_index(pos.v[0], pubopt);
+        if (!idx) die("%s", last_error());
+        char *js = json_dump(idx, 0, 1);
+        puts(js);
+        free(js);
+        json_free(idx);
+        return 0;
+    }
     if (!strcmp(cmd, "sums")) {
         if (!pos.n) die("Aufruf: syp sums REZEPT... (fehlende sha256 ermitteln und eintragen)");
         const char *cache = getenv("SYP_SRCCACHE");

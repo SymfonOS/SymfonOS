@@ -1,0 +1,11 @@
+auth       requisite    pam_nologin.so
+auth       include      system-auth
+account    required     pam_access.so
+account    include      system-auth
+password   include      system-auth
+session    required     pam_selinux.so close
+session    required     pam_loginuid.so
+session    include      system-auth
+session    required     pam_selinux.so open
+session    optional     pam_lastlog2.so silent
+session    optional     pam_motd.so

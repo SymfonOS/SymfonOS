@@ -1,0 +1,34 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "crypto-policies"
+version = "1.0-1"
+arch = "any"
+summary = "Systemweite Krypto-Richtlinien DEFAULT/FUTURE/LEGACY für OpenSSL und OpenSSH (wie Fedora)"
+license = "GPL-3.0-or-later"
+depends = []
+backup = ["etc/crypto-policies/config"]
+
+[[source]]
+path = "@/distro/security/crypto"
+
+[[source]]
+path = "@/distro/security/bin/update-crypto-policies"
+
+[build]
+package = '''
+for p in DEFAULT FUTURE LEGACY; do
+  install -d "$DESTDIR/usr/share/crypto-policies/$p"
+  install -m644 "$SRCDIR/crypto/$p"/*.config "$DESTDIR/usr/share/crypto-policies/$p/"
+done
+install -Dm644 "$SRCDIR/crypto/openssl.cnf" "$DESTDIR/usr/share/crypto-policies/openssl.cnf"
+install -Dm755 "$SRCDIR/update-crypto-policies" "$DESTDIR/usr/bin/update-crypto-policies"
+install -d "$DESTDIR/etc/crypto-policies/back-ends"
+printf '# Systemweite Krypto-Richtlinie (DEFAULT | FUTURE | LEGACY), gesetzt mit update-crypto-policies\nDEFAULT\n' \
+  > "$DESTDIR/etc/crypto-policies/config"
+CRYPTO_POLICIES_ROOT="$DESTDIR" "$SRCDIR/update-crypto-policies"
+'''
+
+[scripts]
+# Nach einem Update die Back-ends gemäß der lokal gewählten Richtlinie neu verlinken
+post_install = "/usr/bin/update-crypto-policies"
+post_upgrade = "/usr/bin/update-crypto-policies"

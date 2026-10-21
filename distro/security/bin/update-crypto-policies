@@ -1,0 +1,68 @@
+#!/bin/sh
+# update-crypto-policies – systemweite Krypto-Richtlinie (wie Fedora): DEFAULT | FUTURE | LEGACY
+#
+#   update-crypto-policies --show          aktuelle Richtlinie
+#   update-crypto-policies --set FUTURE    umschalten (root), danach Dienste neu starten
+#   update-crypto-policies --check         prüft, ob die Back-ends zur Konfiguration passen
+#   update-crypto-policies                 Back-ends aus /etc/crypto-policies/config neu verlinken
+#
+# Back-ends: /etc/crypto-policies/back-ends/{opensslcnf,openssh,openssh-server}.config
+# (gelesen von /etc/ssl/openssl.cnf und den SSH-Drop-ins in /etc/ssh/ssh{,d}_config.d/).
+set -eu
+
+ROOT=${CRYPTO_POLICIES_ROOT:-}
+SHARE=$ROOT/usr/share/crypto-policies
+ETC=$ROOT/etc/crypto-policies
+BACKENDS="opensslcnf.config openssh.config openssh-server.config"
+
+die() { echo "update-crypto-policies: $*" >&2; exit 1; }
+
+current() {
+  p=$(sed -n 's/^[[:space:]]*\([A-Z][A-Z0-9_-]*\)[[:space:]]*$/\1/p' "$ETC/config" 2>/dev/null | tail -n1)
+  echo "${p:-DEFAULT}"
+}
+
+valid() { [ -d "$SHARE/$1" ] && [ -f "$SHARE/$1/opensslcnf.config" ]; }
+
+apply() {
+  pol=$1
+  valid "$pol" || die "unbekannte Richtlinie: $pol (verfügbar: $(ls "$SHARE" | tr '\n' ' '))"
+  mkdir -p "$ETC/back-ends"
+  for b in $BACKENDS; do
+    # Relative Verweise, damit das Ziel auch unter einem anderen Wurzelverzeichnis (Image-Bau) stimmt
+    ln -sfn "../../../usr/share/crypto-policies/$pol/$b" "$ETC/back-ends/$b.tmp"
+    mv -f "$ETC/back-ends/$b.tmp" "$ETC/back-ends/$b"
+  done
+}
+
+check() {
+  pol=$(current)
+  rc=0
+  for b in $BACKENDS; do
+    t=$(readlink "$ETC/back-ends/$b" 2>/dev/null || true)
+    case $t in
+      */crypto-policies/"$pol"/"$b") ;;
+      *) echo "Back-end $b passt nicht zu $pol (zeigt auf: ${t:-nichts})"; rc=1 ;;
+    esac
+  done
+  [ $rc -eq 0 ] && echo "Krypto-Richtlinie $pol ist konsistent angewendet."
+  return $rc
+}
+
+case "${1:-}" in
+  --show) current ;;
+  --check) check ;;
+  --set)
+    [ $# -eq 2 ] || die "--set braucht genau eine Richtlinie"
+    [ -z "$ROOT" ] && [ "$(id -u)" -ne 0 ] && die "bitte als root ausführen"
+    pol=$(echo "$2" | tr '[:lower:]' '[:upper:]')
+    valid "$pol" || die "unbekannte Richtlinie: $pol"
+    mkdir -p "$ETC"
+    printf '# Systemweite Krypto-Richtlinie (DEFAULT | FUTURE | LEGACY), gesetzt mit update-crypto-policies\n%s\n' "$pol" > "$ETC/config"
+    apply "$pol"
+    echo "Krypto-Richtlinie auf $pol gesetzt. Laufende Dienste (sshd, Browser) übernehmen sie nach einem Neustart."
+    ;;
+  "") apply "$(current)" ;;
+  -h|--help) sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//' ;;
+  *) die "unbekannte Option: $1 (siehe --help)" ;;
+esac

@@ -1,0 +1,25 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "libsepol"
+version = "3.8.1-1"
+summary = "SELinux-Binärrichtlinien-Bibliothek"
+license = "LGPL-2.1-or-later"
+url = "https://github.com/SELinuxProject/selinux/releases/download/3.8.1/"
+depends = ["glibc"]
+makedepends = ["flex", "bison"]
+provides = ["so:libsepol.so.2"]
+
+[[source]]
+url = "https://github.com/SELinuxProject/selinux/releases/download/3.8.1/libsepol-3.8.1.tar.gz"
+sha256 = "TODO"
+
+[build]
+build = '''
+cd "$S"
+make PREFIX=/usr SBINDIR=/usr/sbin LIBDIR=/usr/lib SHLIBDIR=/usr/lib
+'''
+package = '''
+cd "$S"
+make PREFIX=/usr SBINDIR=/usr/sbin LIBDIR=/usr/lib SHLIBDIR=/usr/lib DESTDIR="$DESTDIR" install
+rm -f "$DESTDIR/usr/lib/libsepol.a"
+'''

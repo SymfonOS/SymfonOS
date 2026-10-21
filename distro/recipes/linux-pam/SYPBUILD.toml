@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "linux-pam"
+version = "1.7.1-1"
+summary = "Pluggable Authentication Modules"
+license = "BSD-3-Clause OR GPL-2.0-or-later"
+url = "https://github.com/linux-pam/linux-pam/releases/download/v1.7.1/"
+depends = ["glibc", "libxcrypt", "libselinux", "audit"]
+makedepends = ["meson"]
+provides = ["so:libpam.so.0", "pam"]
+backup = ["etc/security/limits.conf", "etc/security/faillock.conf", "etc/security/access.conf", "etc/environment"]
+
+[[source]]
+url = "https://github.com/linux-pam/linux-pam/releases/download/v1.7.1/Linux-PAM-1.7.1.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-D docs=disabled -D examples=false -D xtests=false -D selinux=enabled -D audit=enabled -D logind=enabled"

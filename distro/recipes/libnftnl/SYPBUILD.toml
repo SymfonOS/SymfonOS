@@ -1,0 +1,15 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "libnftnl"
+version = "1.3.0-1"
+summary = "Netfilter-Bibliothek libnftnl"
+license = "GPL-2.0-or-later"
+url = "https://netfilter.org/projects/libnftnl/files/"
+depends = ["glibc", "libmnl"]
+
+[[source]]
+url = "https://netfilter.org/projects/libnftnl/files/libnftnl-1.3.0.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

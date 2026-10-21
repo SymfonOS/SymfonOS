@@ -371,6 +371,25 @@ package = 'install -Dm755 x "$DESTDIR/usr/bin/x"'
     syp("build", rec / "SYPBUILD.toml", "-o", tmp_path / "warn")
 
 
+def test_hardening_file_modes(tmp_path):
+    rec = tmp_path / "rec"
+    rec.mkdir()
+    def recipe(pkg):
+        (rec / "SYPBUILD.toml").write_text(
+            '[package]\nname = "m"\nversion = "1-1"\narch = "any"\n[build]\n'
+            "package = '''\n" + pkg + "\n'''\n")
+    recipe('install -d -m1777 "$DESTDIR/var/tmp"\ninstall -Dm4755 /dev/null "$DESTDIR/usr/bin/helper"')
+    out = syp("build", rec / "SYPBUILD.toml", "-o", tmp_path / "ok").stdout
+    assert "Privilegiert: /usr/bin/helper (setuid)" in out              # Übersicht, kein Fehler
+    with tarfile.open(tmp_path / "ok/m-1-1-any.syp") as tf:
+        h = json.loads(tf.extractfile(".SYPINFO.json").read())["origin"]["hardening"]
+    assert h["setuid"] == ["/usr/bin/helper (setuid)"] and h["world_writable"] == 0
+    recipe('install -Dm666 /dev/null "$DESTDIR/etc/offen.conf"\ninstall -d -m777 "$DESTDIR/var/spool/x"')
+    r = syp("build", rec / "SYPBUILD.toml", "-o", tmp_path / "bad", check=False)
+    assert r.returncode == 1 and "Härtungsprüfung fehlgeschlagen (2 kritische" in r.stderr
+    assert "/etc/offen.conf: für alle beschreibbar (Modus 0666)" in r.stdout
+
+
 def test_security_audit_and_upgrade(env):
     tmp, key, root, publish_, S, plan, pk = env
     publish_(pk("openssl", "3.5.1-1"), pk("curl", "8.14.0-1"), pk("libfoo", "1-1"))

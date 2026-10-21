@@ -1,0 +1,31 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "cracklib"
+version = "2.10.3-1"
+summary = "Prüfung auf schwache Passwörter"
+license = "LGPL-2.1-or-later"
+url = "https://github.com/cracklib/cracklib/releases/download/v2.10.3/"
+depends = ["glibc", "zlib"]
+provides = ["so:libcrack.so.2"]
+
+[[source]]
+url = "https://github.com/cracklib/cracklib/releases/download/v2.10.3/cracklib-2.10.3.tar.xz"
+sha256 = "TODO"
+
+[[source]]
+url = "https://github.com/cracklib/cracklib/releases/download/v2.10.3/cracklib-words-2.10.3.xz"
+sha256 = "TODO"
+
+[build]
+dir = "cracklib-2.10.3"
+build = '''
+cd "$S"
+./configure --prefix=/usr --disable-static --with-default-dict=/usr/lib/cracklib/pw_dict --without-python
+make
+'''
+package = '''
+cd "$S"
+make DESTDIR="$DESTDIR" install
+install -Dm644 ../cracklib-words-2.10.3.xz "$DESTDIR/usr/share/dict/cracklib-words.xz"
+xz -dc ../cracklib-words-2.10.3.xz | LD_LIBRARY_PATH="$DESTDIR/usr/lib" "$DESTDIR/usr/sbin/cracklib-packer" "$DESTDIR/usr/lib/cracklib/pw_dict"
+'''

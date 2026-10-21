@@ -5,7 +5,7 @@ version = "2025.10-1"
 arch = "any"
 summary = "symfonOS-Basissystem (bootfähig, Konsole)"
 license = "GPL-3.0-or-later"
-depends = ["filesystem", "glibc", "tzdata", "bash", "coreutils", "util-linux", "systemd", "dbus", "shadow", "sudo", "procps-ng", "psmisc", "iproute2", "inetutils", "kbd", "kmod", "less", "nano", "man-db", "man-pages", "file", "findutils", "gawk", "grep", "sed", "gzip", "bzip2", "xz", "zstd", "tar", "which", "diffutils", "e2fsprogs", "btrfs-progs", "dosfstools", "cryptsetup", "lvm2", "ca-certificates", "curl", "openssh", "iwd", "pciutils", "usbutils", "syp", "linux", "linux-firmware", "dracut", "grub", "efibootmgr"]
+depends = ["filesystem", "glibc", "tzdata", "bash", "coreutils", "util-linux", "systemd", "dbus", "shadow", "sudo", "procps-ng", "psmisc", "iproute2", "inetutils", "kbd", "kmod", "less", "nano", "man-db", "man-pages", "file", "findutils", "gawk", "grep", "sed", "gzip", "bzip2", "xz", "zstd", "tar", "which", "diffutils", "e2fsprogs", "btrfs-progs", "dosfstools", "cryptsetup", "lvm2", "ca-certificates", "curl", "openssh", "iwd", "pciutils", "usbutils", "syp", "linux", "linux-firmware", "dracut", "grub", "efibootmgr", "linux-pam", "libpwquality", "nftables", "audit", "libselinux", "policycoreutils", "selinux-refpolicy", "tpm2-tss", "crypto-policies", "symfonos-security", "symfonos-exam"]
 
 [build]
 style = "meta"

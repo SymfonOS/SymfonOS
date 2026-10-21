@@ -1,0 +1,25 @@
+# symfonOS – OpenSSL-Hauptkonfiguration. Die TLS-Vorgaben stammen aus der systemweiten
+# Krypto-Richtlinie (/etc/crypto-policies/config, umschalten mit update-crypto-policies --set).
+openssl_conf = openssl_init
+
+[openssl_init]
+providers = provider_sect
+ssl_conf = ssl_module
+
+[provider_sect]
+default = default_sect
+
+[default_sect]
+activate = 1
+
+[ssl_module]
+system_default = crypto_policy
+
+[crypto_policy]
+.include = /etc/crypto-policies/back-ends/opensslcnf.config
+
+# --- Vorgaben für "openssl req" (CA-/Zertifikatsanfragen)
+[req]
+distinguished_name = req_distinguished_name
+default_md = sha256
+[req_distinguished_name]

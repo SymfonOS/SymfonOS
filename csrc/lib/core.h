@@ -33,6 +33,8 @@ long long index_expiry(void);
 void repo_load_synced(const config *c, ptrvec *out); /* pkg* */
 char *repo_fetch_package(const config *c, const pkg *p); /* Pfad im Cache */
 int repo_build_index(const char *repo_dir, const char *name, const char *arch, const seckey *signer);
+/* Index eines lokalen Repos laden; mit pubkey_path nur bei gültiger Signatur dieses Schlüssels */
+jval *repo_show_index(const char *repo_dir, const char *pubkey_path);
 char *repo_add_to_pool(const char *repo_dir, const char *pkg_path);
 int repo_index_add(const char *repo_dir, const char *name, const char *arch, const seckey *signer,
                    const char *pkgfile);

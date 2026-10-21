@@ -1,0 +1,24 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "libselinux"
+version = "3.8.1-1"
+summary = "SELinux-Bibliothek"
+license = "LicenseRef-Public-Domain"
+url = "https://github.com/SELinuxProject/selinux/releases/download/3.8.1/"
+depends = ["glibc", "libsepol", "pcre2"]
+provides = ["so:libselinux.so.1"]
+
+[[source]]
+url = "https://github.com/SELinuxProject/selinux/releases/download/3.8.1/libselinux-3.8.1.tar.gz"
+sha256 = "TODO"
+
+[build]
+build = '''
+cd "$S"
+make PREFIX=/usr SBINDIR=/usr/sbin LIBDIR=/usr/lib SHLIBDIR=/usr/lib USE_PCRE2=y
+'''
+package = '''
+cd "$S"
+make PREFIX=/usr SBINDIR=/usr/sbin LIBDIR=/usr/lib SHLIBDIR=/usr/lib USE_PCRE2=y DESTDIR="$DESTDIR" install
+rm -f "$DESTDIR/usr/lib/libselinux.a"
+'''

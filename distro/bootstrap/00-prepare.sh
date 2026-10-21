@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Stufe 0: Host prüfen, syp bauen, Verzeichnisstruktur von $SYM anlegen
-# shellcheck source=config.sh
+# shellcheck source-path=SCRIPTDIR source=config.sh
 . "$(dirname "$0")/config.sh"
 log "Host prüfen"
 need=(bash gcc g++ make bison gawk m4 patch perl python3 tar xz gzip bzip2 makeinfo sed grep diff find pkg-config)

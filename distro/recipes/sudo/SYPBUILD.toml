@@ -5,14 +5,14 @@ version = "1.9.17p2-1"
 summary = "Befehle als anderer Benutzer ausführen"
 license = "ISC"
 url = "https://www.sudo.ws/dist/"
-depends = ["glibc", "openssl", "zlib"]
+depends = ["glibc", "openssl", "zlib", "linux-pam", "libselinux", "audit"]
 backup = ["etc/sudoers"]
 [[source]]
 url = "https://www.sudo.ws/dist/sudo-1.9.17p2.tar.gz"
 sha256 = "4a38a1ab3adb1199257edc2a7c4a2bd714665eb605b04368843b06dada2cfcfb"
 [build]
 style = "autotools"
-configure_flags = "--libexecdir=/usr/lib --with-secure-path --with-env-editor --without-pam --with-passprompt='[sudo] Passwort für %p: '"
+configure_flags = "--libexecdir=/usr/lib --with-secure-path --with-env-editor --with-pam --with-selinux --with-passprompt='[sudo] Passwort für %p: ' --with-logpath=/var/log/sudo.log --with-insults=disabled"
 post_install = '''
 install -d -m750 "$DESTDIR/etc/sudoers.d"
 echo '%wheel ALL=(ALL:ALL) ALL' > "$DESTDIR/etc/sudoers.d/10-wheel"

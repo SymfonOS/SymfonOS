@@ -1,0 +1,330 @@
+#!/usr/bin/python3 -I
+"""symfonos-secureboot – eigene Secure-Boot-Schlüssel, Signatur von systemd-boot und Unified Kernel Images
+
+  symfonos-secureboot status                 Firmware-Zustand, Schlüssel, unsignierte EFI-Dateien
+  symfonos-secureboot init [--no-microsoft]  Schlüssel PK/KEK/db erzeugen, .auth-Dateien für die Firmware
+  symfonos-secureboot enroll                 Schlüssel in die Firmware schreiben (nur im Setup-Modus)
+  symfonos-secureboot sign [DATEI...]        EFI-Dateien signieren (ohne Angabe: alle auf der ESP)
+  symfonos-secureboot verify DATEI...        Signatur gegen den eigenen db-Schlüssel prüfen
+
+Ablauf: Secure Boot im Firmware-Menü in den Setup-Modus versetzen (Schlüssel löschen),
+dann  sudo symfonos-secureboot init && sudo symfonos-secureboot enroll && sudo symfonos-secureboot sign,
+neu starten und Secure Boot einschalten. Neue Kernel signiert der Kernel-Hook automatisch.
+
+Die Microsoft-Zertifikate bleiben standardmäßig in der db: Viele Grafikkarten und NVMe-Controller
+laden Option-ROMs, die mit Microsofts UEFI-CA signiert sind, und ein Windows für Dual-Boot
+(z. B. für den offiziellen Safe Exam Browser) startet nur damit. --no-microsoft nur bei Geräten
+ohne solche Komponenten verwenden; sonst kann der Rechner keine Anzeige mehr starten.
+"""
+from __future__ import annotations
+
+import datetime
+import os
+import shutil
+import struct
+import subprocess
+import sys
+import tempfile
+import urllib.request
+import uuid
+from pathlib import Path
+
+ROOT = Path(os.environ.get("SYMFONOS_ROOT", "/"))
+KEYDIR = ROOT / "var/lib/symfonos/secureboot"
+EFIVARS = Path("/sys/firmware/efi/efivars")
+GLOBAL = uuid.UUID("8be4df61-93ca-11d2-aa0d-00e098032b8c")
+IMAGE_SECURITY = uuid.UUID("d719b2cb-3d3a-4596-a3bc-dad00e67656f")
+CERT_X509 = uuid.UUID("a5c059a1-94e4-4aa7-87b5-ab155c2bf072")
+CERT_PKCS7 = uuid.UUID("4aafd29d-68df-49ee-8aa9-347d375665a7")
+MS_OWNER = uuid.UUID("77fa9abd-0359-4d32-bd60-28f4e78f784b")
+# NV | BOOTSERVICE | RUNTIME | TIME_BASED_AUTHENTICATED_WRITE
+ATTRS = 0x01 | 0x02 | 0x04 | 0x20
+
+# Öffentliche Microsoft-Zertifikate (Download nur bei init, Prüfung des Ausstellernamens)
+MS_CERTS = {
+    "KEK": [("https://go.microsoft.com/fwlink/?LinkId=321185", "Microsoft Corporation KEK CA 2011"),
+            ("https://go.microsoft.com/fwlink/?linkid=2239775", "Microsoft Corporation KEK 2K CA 2023")],
+    "db": [("https://go.microsoft.com/fwlink/?LinkId=321192", "Microsoft Windows Production PCA 2011"),
+           ("https://go.microsoft.com/fwlink/?LinkId=321194", "Microsoft Corporation UEFI CA 2011"),
+           ("https://go.microsoft.com/fwlink/?linkid=2239776", "Windows UEFI CA 2023"),
+           ("https://go.microsoft.com/fwlink/?linkid=2239872", "Microsoft UEFI CA 2023"),
+           ("https://go.microsoft.com/fwlink/?linkid=2284009", "Microsoft Option ROM UEFI CA 2023")],
+}
+VARS = {"PK": (GLOBAL, "PK"), "KEK": (GLOBAL, "PK"), "db": (IMAGE_SECURITY, "KEK")}  # Variable -> (GUID, Signierer)
+
+
+def die(msg: str) -> None:
+    print(f"symfonos-secureboot: {msg}", file=sys.stderr)
+    sys.exit(1)
+
+
+def need_root() -> None:
+    if os.geteuid() != 0 and str(ROOT) == "/":
+        die("bitte mit sudo ausführen")
+
+
+def openssl(*args: str, data: bytes | None = None) -> bytes:
+    r = subprocess.run(["openssl", *args], input=data, capture_output=True)
+    if r.returncode:
+        die("openssl " + " ".join(args[:2]) + ": " + r.stderr.decode(errors="replace").strip())
+    return r.stdout
+
+
+# ------------------------------------------------------------------ UEFI-Datenstrukturen
+def esl(owner: uuid.UUID, ders: list[bytes]) -> bytes:
+    """EFI_SIGNATURE_LIST je Zertifikat (X.509 verlangt genau ein Zertifikat pro Liste)."""
+    out = b""
+    for der in ders:
+        size = 16 + len(der)
+        out += CERT_X509.bytes_le + struct.pack("<III", 28 + size, 0, size) + owner.bytes_le + der
+    return out
+
+
+def der_unwrap_contentinfo(der: bytes) -> bytes:
+    """PKCS#7 ContentInfo -> SignedData (UEFI erwartet SignedData)."""
+    def tlv(buf: bytes, i: int) -> tuple[int, int, int]:  # Tag, Start des Inhalts, Länge
+        tag = buf[i]
+        n = buf[i + 1]
+        i += 2
+        if n & 0x80:
+            k = n & 0x7F
+            n = int.from_bytes(buf[i:i + k], "big")
+            i += k
+        return tag, i, n
+    tag, body, _ = tlv(der, 0)
+    if tag != 0x30:
+        return der
+    tag, oid_body, oid_len = tlv(der, body)
+    if tag != 0x06:
+        return der
+    tag, inner, inner_len = tlv(der, oid_body + oid_len)
+    if tag != 0xA0:
+        return der
+    return der[inner:inner + inner_len]
+
+
+def efi_time(now: datetime.datetime) -> bytes:
+    return struct.pack("<HBBBBBBIhBB", now.year, now.month, now.day, now.hour, now.minute, now.second, 0, 0, 0, 0, 0)
+
+
+def auth(var: str, guid: uuid.UUID, data: bytes, key: Path, crt: Path) -> bytes:
+    """EFI_VARIABLE_AUTHENTICATION_2 + Daten für eine zeitbasiert authentifizierte Variable."""
+    ts = efi_time(datetime.datetime.now(datetime.timezone.utc))
+    signed = var.encode("utf-16-le") + guid.bytes_le + struct.pack("<I", ATTRS) + ts + data
+    with tempfile.NamedTemporaryFile() as f:
+        f.write(signed)
+        f.flush()
+        p7 = openssl("smime", "-sign", "-binary", "-noattr", "-md", "sha256", "-outform", "DER",
+                     "-in", f.name, "-signer", str(crt), "-inkey", str(key))
+    p7 = der_unwrap_contentinfo(p7)
+    wincert = struct.pack("<IHH", 24 + len(p7), 0x0200, 0x0EF1) + CERT_PKCS7.bytes_le + p7
+    return ts + wincert + data
+
+
+# ------------------------------------------------------------------ Firmware-Zustand
+def efivar(name: str, guid: uuid.UUID = GLOBAL) -> bytes | None:
+    try:
+        return (EFIVARS / f"{name}-{guid}").read_bytes()[4:]
+    except OSError:
+        return None
+
+
+def flag(name: str) -> str:
+    v = efivar(name)
+    return "?" if v is None else ("ja" if v[:1] == b"\x01" else "nein")
+
+
+def esp() -> Path:
+    for cand in ("efi", "boot/efi", "boot"):
+        p = ROOT / cand
+        if (p / "EFI").is_dir():
+            return p
+    die("EFI-Systempartition nicht gefunden (/efi, /boot/efi oder /boot)")
+    raise SystemExit
+
+
+def is_signed(pe: Path) -> bool:
+    """PE-Datei mit Eintrag im Zertifikatsverzeichnis (Authenticode)?"""
+    try:
+        b = pe.read_bytes()
+        off = struct.unpack_from("<I", b, 0x3C)[0]
+        if b[off:off + 4] != b"PE\0\0":
+            return False
+        opt = off + 24
+        magic = struct.unpack_from("<H", b, opt)[0]
+        dd = opt + (112 if magic == 0x20B else 96)
+        _, size = struct.unpack_from("<II", b, dd + 4 * 8)
+        return size > 0
+    except (OSError, struct.error):
+        return False
+
+
+def efi_files(base: Path) -> list[Path]:
+    out = []
+    for sub in ("EFI/systemd", "EFI/BOOT", "EFI/Linux", "EFI/symfonos"):
+        d = base / sub
+        if d.is_dir():
+            out += sorted(p for p in d.rglob("*") if p.suffix.lower() == ".efi" and p.is_file())
+    return out
+
+
+# ------------------------------------------------------------------ Befehle
+def cmd_status(_: list[str]) -> int:
+    print(f"Firmware:          {'UEFI' if EFIVARS.is_dir() else 'BIOS (kein Secure Boot)'}")
+    if EFIVARS.is_dir():
+        print(f"Secure Boot aktiv: {flag('SecureBoot')}")
+        print(f"Setup-Modus:       {flag('SetupMode')}  (ja = Schlüssel können eingetragen werden)")
+    have = (KEYDIR / "db.key").exists()
+    print(f"Eigene Schlüssel:  {'ja, ' + str(KEYDIR) if have else 'nein (symfonos-secureboot init)'}")
+    try:
+        base = esp()
+    except SystemExit:
+        return 1
+    unsigned = [p for p in efi_files(base) if not is_signed(p)]
+    print(f"EFI-Dateien:       {len(efi_files(base))} auf {base}, davon unsigniert: {len(unsigned)}")
+    for p in unsigned:
+        print(f"  ! {p}")
+    return 1 if unsigned else 0
+
+
+def fetch_ms(kind: str) -> list[bytes]:
+    ders = []
+    for url, cn in MS_CERTS[kind]:
+        try:
+            with urllib.request.urlopen(url, timeout=30) as r:
+                raw = r.read()
+        except OSError as e:
+            die(f"Microsoft-Zertifikat nicht ladbar ({url}): {e}. Ohne Netz: --no-microsoft (siehe Warnung in --help)")
+        subj = openssl("x509", "-inform", "DER", "-noout", "-subject", data=raw).decode()
+        if cn not in subj:
+            die(f"unerwartetes Zertifikat von {url}: {subj.strip()}")
+        ders.append(raw)
+    return ders
+
+
+def cmd_init(args: list[str]) -> int:
+    need_root()
+    microsoft = "--no-microsoft" not in args
+    if (KEYDIR / "PK.key").exists() and "--force" not in args:
+        die(f"Schlüssel existieren bereits in {KEYDIR} (--force erzeugt neue; alte Signaturen werden ungültig)")
+    KEYDIR.mkdir(parents=True, exist_ok=True)
+    os.chmod(KEYDIR, 0o700)
+    owner = uuid.uuid4()
+    (KEYDIR / "GUID").write_text(f"{owner}\n")
+    host = os.uname().nodename
+    for k in ("PK", "KEK", "db"):
+        openssl("req", "-new", "-x509", "-newkey", "rsa:2048", "-sha256", "-days", "7300", "-nodes",
+                "-subj", f"/CN=symfonOS {k} ({host})/", "-keyout", str(KEYDIR / f"{k}.key"), "-out", str(KEYDIR / f"{k}.crt"))
+        os.chmod(KEYDIR / f"{k}.key", 0o600)
+        der = openssl("x509", "-in", str(KEYDIR / f"{k}.crt"), "-outform", "DER")
+        (KEYDIR / f"{k}.cer").write_bytes(der)
+    lists = {k: esl(owner, [(KEYDIR / f"{k}.cer").read_bytes()]) for k in VARS}
+    if microsoft:
+        lists["KEK"] += esl(MS_OWNER, fetch_ms("KEK"))
+        lists["db"] += esl(MS_OWNER, fetch_ms("db"))
+    for var, (guid, signer) in VARS.items():
+        (KEYDIR / f"{var}.esl").write_bytes(lists[var])
+        (KEYDIR / f"{var}.auth").write_bytes(
+            auth(var, guid, lists[var], KEYDIR / f"{signer}.key", KEYDIR / f"{signer}.crt"))
+    # Kopie für die automatische Eintragung durch systemd-boot (loader.conf: secure-boot-enroll)
+    try:
+        dst = esp() / "loader/keys/symfonos"
+        dst.mkdir(parents=True, exist_ok=True)
+        for var in VARS:
+            shutil.copyfile(KEYDIR / f"{var}.auth", dst / f"{var}.auth")
+    except SystemExit:
+        pass
+    print(f"Schlüssel erzeugt in {KEYDIR}{' (mit Microsoft-Zertifikaten)' if microsoft else ' (OHNE Microsoft-Zertifikate)'}.")
+    print("Weiter: sudo symfonos-secureboot enroll  (Firmware muss im Setup-Modus sein)")
+    return 0
+
+
+def write_var(var: str, guid: uuid.UUID, data: bytes) -> None:
+    p = EFIVARS / f"{var}-{guid}"
+    if p.exists():
+        subprocess.run(["chattr", "-i", str(p)], check=False, capture_output=True)
+    fd = os.open(p, os.O_WRONLY | os.O_CREAT, 0o644)
+    try:
+        os.write(fd, struct.pack("<I", ATTRS) + data)
+    except OSError as e:
+        die(f"Firmware hat {var} abgelehnt: {e}")
+    finally:
+        os.close(fd)
+
+
+def cmd_enroll(_: list[str]) -> int:
+    need_root()
+    if not (KEYDIR / "PK.auth").exists():
+        die("keine Schlüssel – zuerst symfonos-secureboot init")
+    if flag("SetupMode") != "ja":
+        die("Firmware ist nicht im Setup-Modus. Im Firmware-Menü die Secure-Boot-Schlüssel löschen "
+            "(\"Clear Secure Boot Keys\" / \"Reset to Setup Mode\") und erneut versuchen.")
+    for var in ("db", "KEK", "PK"):  # PK zuletzt: damit endet der Setup-Modus
+        guid, _ = VARS[var]
+        write_var(var, guid, (KEYDIR / f"{var}.auth").read_bytes())
+        print(f"  {var} eingetragen")
+    print("Fertig. Jetzt signieren (symfonos-secureboot sign), neu starten und Secure Boot einschalten.")
+    return 0
+
+
+def sign_one(p: Path) -> None:
+    key, crt = KEYDIR / "db.key", KEYDIR / "db.crt"
+    tmp = p.with_name(p.name + ".signed")
+    if shutil.which("systemd-sbsign"):
+        cmd = ["systemd-sbsign", "sign", f"--private-key={key}", f"--certificate={crt}", f"--output={tmp}", str(p)]
+    elif shutil.which("sbsign"):
+        cmd = ["sbsign", "--key", str(key), "--cert", str(crt), "--output", str(tmp), str(p)]
+    else:
+        die("weder systemd-sbsign noch sbsign gefunden")
+    r = subprocess.run(cmd, capture_output=True, text=True)
+    if r.returncode:
+        tmp.unlink(missing_ok=True)
+        die(f"Signieren von {p} fehlgeschlagen: {r.stderr.strip()}")
+    os.replace(tmp, p)
+    print(f"  signiert: {p}")
+
+
+def cmd_sign(args: list[str]) -> int:
+    need_root()
+    if not (KEYDIR / "db.key").exists():
+        if "--if-keys" in args:
+            return 0
+        die("keine Schlüssel – zuerst symfonos-secureboot init")
+    files = [Path(a) for a in args if not a.startswith("--")] or efi_files(esp())
+    for p in files:
+        if "--if-keys" in args and is_signed(p):
+            continue
+        if is_signed(p) and shutil.which("systemd-sbsign") is None and shutil.which("sbverify"):
+            # sbsign hängt Signaturen an; doppelte vermeiden
+            if subprocess.run(["sbverify", "--cert", str(KEYDIR / "db.crt"), str(p)], capture_output=True).returncode == 0:
+                continue
+        sign_one(p)
+    return 0
+
+
+def cmd_verify(args: list[str]) -> int:
+    rc = 0
+    for a in args:
+        p = Path(a)
+        if not is_signed(p):
+            print(f"{p}: unsigniert")
+            rc = 1
+        elif shutil.which("sbverify"):
+            ok = subprocess.run(["sbverify", "--cert", str(KEYDIR / "db.crt"), str(p)], capture_output=True).returncode == 0
+            print(f"{p}: {'gültig (eigener db-Schlüssel)' if ok else 'signiert, aber nicht mit dem eigenen Schlüssel'}")
+            rc |= 0 if ok else 1
+        else:
+            print(f"{p}: signiert (Prüfung gegen den Schlüssel braucht sbverify)")
+    return rc
+
+
+def main() -> int:
+    cmds = {"status": cmd_status, "init": cmd_init, "enroll": cmd_enroll, "sign": cmd_sign, "verify": cmd_verify}
+    if len(sys.argv) < 2 or sys.argv[1] not in cmds:
+        print(__doc__.strip())
+        return 0 if len(sys.argv) > 1 and sys.argv[1] in ("-h", "--help") else 2
+    return cmds[sys.argv[1]](sys.argv[2:])
+
+
+if __name__ == "__main__":
+    sys.exit(main())

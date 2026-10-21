@@ -1,0 +1,36 @@
+## symfonOS-Audit-Regeln (angelehnt an die OSPP-/STIG-Grundregeln von Fedora/RHEL)
+-D
+-b 8192
+-f 1
+--backlog_wait_time 60000
+## Identität und Rechte
+-w /etc/passwd -p wa -k identity
+-w /etc/group -p wa -k identity
+-w /etc/shadow -p wa -k identity
+-w /etc/gshadow -p wa -k identity
+-w /etc/sudoers -p wa -k privilege
+-w /etc/sudoers.d/ -p wa -k privilege
+-w /etc/security/ -p wa -k pam
+-w /etc/pam.d/ -p wa -k pam
+## Anmeldung und Netzwerkkonfiguration
+-w /var/log/faillock -p wa -k logins
+-w /etc/ssh/sshd_config -p wa -k sshd
+-w /etc/ssh/sshd_config.d/ -p wa -k sshd
+-w /etc/nftables.conf -p wa -k firewall
+-w /etc/nftables.d/ -p wa -k firewall
+-w /etc/hosts -p wa -k network
+## Systemzeit
+-a always,exit -F arch=b64 -S adjtimex,settimeofday,clock_settime -k time-change
+-w /etc/localtime -p wa -k time-change
+## Kernelmodule
+-a always,exit -F arch=b64 -S init_module,finit_module,delete_module -k modules
+-w /usr/bin/kmod -p x -k modules
+## SELinux
+-w /etc/selinux/ -p wa -k mac-policy
+## Paketverwaltung
+-w /usr/bin/syp -p x -k software
+-w /etc/syp/ -p wa -k software
+## Rechteausweitung durch Programme mit setuid
+-a always,exit -F arch=b64 -S execve -C uid!=euid -F euid=0 -k setuid
+## Regeln nach dem Laden sperren (Änderung nur per Neustart)
+-e 2

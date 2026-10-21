@@ -5,13 +5,18 @@ version = "3.5.2-1"
 summary = "TLS/SSL und Kryptographie"
 license = "Apache-2.0"
 url = "https://github.com/openssl/openssl/releases/download/openssl-3.5.2/"
-depends = ["glibc", "zlib"]
+depends = ["glibc", "zlib", "crypto-policies"]
 makedepends = ["perl"]
 provides = ["so:libssl.so.3", "so:libcrypto.so.3"]
 backup = ["etc/ssl/openssl.cnf"]
+
 [[source]]
 url = "https://github.com/openssl/openssl/releases/download/openssl-3.5.2/openssl-3.5.2.tar.gz"
 sha256 = "c53a47e5e441c930c3928cf7bf6fb00e5d129b630e0aa873b08258656e7345ec"
+
+[[source]]
+path = "@/distro/security/crypto/openssl.cnf"
+
 [build]
 build = '''
 cd "$S"
@@ -22,4 +27,6 @@ package = '''
 cd "$S"
 sed -i '/INSTALL_LIBS/s/libcrypto.a libssl.a//' Makefile
 make DESTDIR="$DESTDIR" MANSUFFIX=ssl install
+# TLS-Vorgaben aus der systemweiten Krypto-Richtlinie (Paket crypto-policies)
+install -m644 "$SRCDIR/openssl.cnf" "$DESTDIR/etc/ssl/openssl.cnf"
 '''

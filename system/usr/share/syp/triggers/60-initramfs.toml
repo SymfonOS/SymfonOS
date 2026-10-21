@@ -1,3 +1,3 @@
-description = "Kernel nach /boot kopieren und Initramfs erzeugen (dracut)"
-paths = ["usr/lib/modules/*/vmlinuz", "usr/lib/firmware/*", "usr/lib/dracut/*"]
+description = "Kernel-Start aktualisieren: Initramfs bzw. Unified Kernel Image erzeugen und signieren"
+paths = ["usr/lib/modules/*/vmlinuz", "usr/lib/firmware/*", "usr/lib/dracut/*", "usr/lib/systemd/boot/efi/*", "etc/kernel/cmdline"]
 exec = ["/usr/lib/syp/kernel-hook"]

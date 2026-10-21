@@ -29,7 +29,10 @@ jobs:
       - name: Lint
         run: |
           ruff check src tests --select E,F,W --ignore E501,E731,E741
-          shellcheck -S warning exam/symfonos-exam iso/build.sh tools/repo-sync.sh system/usr/bin/* system/usr/lib/symfonos/*.sh iso/airootfs/usr/local/bin/*
+          shellcheck -S warning exam/symfonos-exam iso/build.sh tools/repo-sync.sh system/usr/bin/* system/usr/lib/symfonos/*.sh iso/airootfs/usr/local/bin/* \
+            system/usr/lib/syp/kernel-hook distro/bootstrap/*.sh distro/installer/symfonos-install distro/security/install.sh \
+            distro/security/bin/symfonos-security distro/security/bin/update-crypto-policies
+          ruff check --select E,F,W --ignore E501 distro/security/bin/symfonos-secureboot
       - name: C-Werkzeuge bauen (-Werror)
         run: make -C csrc -j4 CFLAGS="-O2 -g -Werror"
       - name: Tests mit AddressSanitizer/UBSan
@@ -45,6 +48,7 @@ jobs:
       - name: Tests
         env:
           QT_QPA_PLATFORM: offscreen
+          SYMFONOS_NET_TESTS: "1"   # u. a. Microsoft-UEFI-Zertifikate für symfonos-secureboot laden und prüfen
         run: |
           pytest -q 2>&1 | tee pytest.log; rc=${PIPESTATUS[0]}
           if [ "$rc" -ne 0 ]; then

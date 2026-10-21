@@ -5,14 +5,16 @@ version = "9.7-1"
 summary = "GNU-Grundwerkzeuge"
 license = "GPL-3.0-or-later"
 url = "https://ftp.gnu.org/gnu/coreutils/"
-depends = ["glibc", "acl", "attr", "libcap", "openssl", "gmp"]
+depends = ["glibc", "acl", "attr", "libcap", "openssl", "gmp", "libselinux"]
+
 [[source]]
 url = "https://ftp.gnu.org/gnu/coreutils/coreutils-9.7.tar.xz"
 sha256 = "e8bb26ad0293f9b5a1fc43fb42ba970e312c66ce92c1b0b16713d7500db251bf"
+
 [build]
 build = '''
 cd "$S"
-FORCE_UNSAFE_CONFIGURE=1 ./configure --prefix=/usr --enable-no-install-program=kill,uptime
+FORCE_UNSAFE_CONFIGURE=1 ./configure --prefix=/usr --enable-no-install-program=kill,uptime --with-selinux
 make
 '''
 package = '''

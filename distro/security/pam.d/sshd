@@ -1,0 +1,8 @@
+auth       include      system-auth
+account    required     pam_nologin.so
+account    include      system-auth
+password   include      system-auth
+session    required     pam_selinux.so close
+session    required     pam_loginuid.so
+session    include      system-auth
+session    required     pam_selinux.so open

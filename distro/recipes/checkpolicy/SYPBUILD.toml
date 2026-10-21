@@ -1,0 +1,23 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "checkpolicy"
+version = "3.8.1-1"
+summary = "SELinux-Richtlinien-Compiler"
+license = "GPL-2.0-only"
+url = "https://github.com/SELinuxProject/selinux/releases/download/3.8.1/"
+depends = ["glibc", "libsepol"]
+makedepends = ["flex", "bison"]
+
+[[source]]
+url = "https://github.com/SELinuxProject/selinux/releases/download/3.8.1/checkpolicy-3.8.1.tar.gz"
+sha256 = "TODO"
+
+[build]
+build = '''
+cd "$S"
+make PREFIX=/usr SBINDIR=/usr/sbin LIBDIR=/usr/lib SHLIBDIR=/usr/lib
+'''
+package = '''
+cd "$S"
+make PREFIX=/usr SBINDIR=/usr/sbin LIBDIR=/usr/lib SHLIBDIR=/usr/lib DESTDIR="$DESTDIR" install
+'''

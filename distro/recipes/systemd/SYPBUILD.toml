@@ -5,8 +5,8 @@ version = "257.8-1"
 summary = "System- und Dienstverwaltung"
 license = "LGPL-2.1-or-later"
 url = "https://github.com/systemd/systemd/archive/v257.8/"
-depends = ["glibc", "acl", "libcap", "libxcrypt", "kmod", "util-linux", "openssl", "zstd", "xz", "lz4", "libelf"]
-makedepends = ["meson", "python-jinja", "gperf", "pkgconf", "coreutils"]
+depends = ["glibc", "acl", "libcap", "libxcrypt", "kmod", "util-linux", "openssl", "zstd", "xz", "lz4", "libelf", "linux-pam", "libselinux", "audit", "tpm2-tss", "cryptsetup", "libpwquality"]
+makedepends = ["meson", "python-jinja", "python-pyelftools", "gperf", "pkgconf", "coreutils"]
 provides = ["udev", "systemd-libs", "so:libsystemd.so.0", "so:libudev.so.1"]
 backup = ["etc/systemd/journald.conf", "etc/systemd/logind.conf", "etc/systemd/system.conf", "etc/systemd/resolved.conf", "etc/systemd/timesyncd.conf"]
 
@@ -23,7 +23,9 @@ sed -e 's/GROUP="render"/GROUP="video"/' -e 's/GROUP="sgx", //' -i rules.d/50-ud
 build = '''
 meson setup "$S/_build" "$S" --prefix=/usr --buildtype=release -D default-dnssec=no -D firstboot=true \
   -D install-tests=false -D ldconfig=false -D sysusers=true -D rpmmacrosdir=no -D homed=disabled -D userdb=false \
-  -D man=disabled -D mode=release -D pamconf=false -D pam=disabled -D dev-kvm-mode=0660 -D nobody-group=nogroup \
+  -D man=disabled -D mode=release -D pamconf=false -D pam=enabled -D selinux=enabled -D audit=enabled \
+  -D tpm2=enabled -D libcryptsetup=enabled -D pwquality=enabled -D bootloader=enabled -D efi=true \
+  -D dev-kvm-mode=0660 -D nobody-group=nogroup \
   -D sysupdate=disabled -D ukify=disabled -D docdir=/usr/share/doc/systemd-257.8 -D default-locale=C.UTF-8
 ninja -C "$S/_build"
 '''

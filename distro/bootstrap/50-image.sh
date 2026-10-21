@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Stufe 5: bootfähiges Live-/Installations-ISO ausschließlich aus dem eigenen syp-Repository.
 #   SYP_PUB=release.pub ./50-image.sh [ausgabe.iso]
-# shellcheck source=config.sh
+# shellcheck source-path=SCRIPTDIR source=config.sh
 . "$(dirname "$0")/config.sh"
 : "${SYP_PUB:?SYP_PUB (öffentlicher Release-Schlüssel) setzen}"
 OUTISO=${1:-$REPO_ROOT/out/symfonos-base-$(date +%Y.%m.%d)-x86_64.iso}

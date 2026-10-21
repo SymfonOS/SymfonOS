@@ -5,11 +5,16 @@ version = "10.0p1-1"
 summary = "Secure Shell"
 license = "BSD-2-Clause"
 url = "https://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/"
-depends = ["glibc", "openssl", "zlib", "libxcrypt"]
+depends = ["glibc", "openssl", "zlib", "libxcrypt", "linux-pam", "libselinux", "audit", "crypto-policies"]
 backup = ["etc/ssh/sshd_config", "etc/ssh/ssh_config"]
 [[source]]
 url = "https://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-10.0p1.tar.gz"
 sha256 = "021a2e709a0edf4250b1256bd5a9e500411a90dddabea830ed59cef90eb9d85c"
 [build]
 style = "autotools"
-configure_flags = "--sysconfdir=/etc/ssh --with-privsep-path=/var/lib/sshd --with-default-path=/usr/bin --with-superuser-path=/usr/sbin:/usr/bin --with-pid-dir=/run"
+configure_flags = "--sysconfdir=/etc/ssh --with-privsep-path=/var/lib/sshd --with-default-path=/usr/bin --with-superuser-path=/usr/sbin:/usr/bin --with-pid-dir=/run --with-pam --with-selinux --with-audit=linux"
+post_install = '''
+sed -i '1i Include /etc/ssh/sshd_config.d/*.conf' "$DESTDIR/etc/ssh/sshd_config"
+sed -i '1i Include /etc/ssh/ssh_config.d/*.conf' "$DESTDIR/etc/ssh/ssh_config"
+install -d "$DESTDIR/etc/ssh/sshd_config.d" "$DESTDIR/etc/ssh/ssh_config.d"
+'''

@@ -1,0 +1,16 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "python-pyelftools"
+version = "0.32-1"
+summary = "ELF-Analyse in Python (für systemd-boot)"
+license = "LicenseRef-Public-Domain"
+url = "https://pypi.org/packages/source/p/pyelftools/"
+depends = ["python"]
+makedepends = ["python-setuptools"]
+
+[[source]]
+url = "https://pypi.org/packages/source/p/pyelftools/pyelftools-0.32.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "python"

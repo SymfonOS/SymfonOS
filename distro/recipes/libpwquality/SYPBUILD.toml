@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "libpwquality"
+version = "1.4.5-1"
+summary = "Passwortqualität (pam_pwquality)"
+license = "BSD-3-Clause OR GPL-2.0-or-later"
+url = "https://github.com/libpwquality/libpwquality/releases/download/libpwquality-1.4.5/"
+depends = ["glibc", "cracklib", "linux-pam"]
+provides = ["so:libpwquality.so.1"]
+backup = ["etc/security/pwquality.conf"]
+
+[[source]]
+url = "https://github.com/libpwquality/libpwquality/releases/download/libpwquality-1.4.5/libpwquality-1.4.5.tar.bz2"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--with-securedir=/usr/lib/security --disable-python-bindings"

@@ -1,0 +1,261 @@
+#!/bin/bash
+# symfonos-security – Sicherheitszustand anzeigen und verwalten
+#
+#   symfonos-security status                      Übersicht (SELinux, Firewall, Audit, Secure Boot, TPM, ...)
+#   symfonos-security check [--quiet]             Soll/Ist-Prüfung, Exit 1 bei Abweichungen (täglicher Timer)
+#   symfonos-security selinux enforcing|permissive [--force]
+#   symfonos-security selinux relabel             Dateikontexte beim nächsten Start neu setzen
+#   symfonos-security selinux denials             AVC-Meldungen seit dem Start
+#   symfonos-security crypto DEFAULT|FUTURE|LEGACY
+#   symfonos-security firewall list | allow PORT/PROTO [KOMMENTAR] | deny PORT/PROTO
+#   symfonos-security autoupdate on|off|status    Sicherheitsupdates automatisch einspielen (täglich)
+set -euo pipefail
+
+ROOT=${SYMFONOS_ROOT:-}
+SELCONF=$ROOT/etc/selinux/config
+NFTD=$ROOT/etc/nftables.d
+SYSCTL_DEFAULTS=$ROOT/usr/lib/sysctl.d/50-symfonos-hardening.conf
+SYP=${SYP_BIN:-syp}
+QUIET=0
+
+if [[ -t 1 ]]; then G=$'\e[32m' Y=$'\e[33m' R=$'\e[31m' B=$'\e[1m' N=$'\e[0m'; else G="" Y="" R="" B="" N=""; fi
+die() { echo "symfonos-security: $*" >&2; exit 1; }
+need_root() { [[ -n $ROOT || $EUID -eq 0 ]] || die "bitte mit sudo ausführen"; }
+ok()   { ((QUIET)) || printf '  %s✓%s %-26s %s\n' "$G" "$N" "$1" "$2"; }
+warn() { ((QUIET)) || printf '  %s!%s %-26s %s\n' "$Y" "$N" "$1" "$2"; HINTS=$((HINTS + 1)); }
+bad()  { printf '  %s✗%s %-26s %s\n' "$R" "$N" "$1" "$2"; PROBLEMS=$((PROBLEMS + 1)); }
+PROBLEMS=0 HINTS=0   # PROBLEMS: Soll verletzt (Exit 1), HINTS: Empfehlungen
+
+selinux_mode() {
+  if [[ -r /sys/fs/selinux/enforce ]]; then
+    [[ $(cat /sys/fs/selinux/enforce) == 1 ]] && echo enforcing || echo permissive
+  else
+    echo disabled
+  fi
+}
+selinux_config() { { sed -n "s/^SELINUX=//p" "$SELCONF" 2>/dev/null || true; } | tail -n1; }
+
+efivar() {  # Wert (letztes Byte) einer EFI-Variable der globalen GUID
+  local f=/sys/firmware/efi/efivars/$1-8be4df61-93ca-11d2-aa0d-00e098032b8c
+  [[ -r $f ]] && od -An -tu1 -j4 -N1 "$f" | tr -d ' '
+}
+
+# ------------------------------------------------------------------ Prüfungen
+check_all() {
+  local m c
+  ((QUIET)) || echo "${B}Zugriffskontrolle${N}"
+  m=$(selinux_mode); c=$(selinux_config)
+  case $m in
+    enforcing) ok "SELinux" "enforcing (Richtlinie: $(sed -n 's/^SELINUXTYPE=//p' "$SELCONF" 2>/dev/null))" ;;
+    permissive) warn "SELinux" "permissive – Verstöße werden nur protokolliert (symfonos-security selinux enforcing)" ;;
+    *) bad "SELinux" "deaktiviert" ;;
+  esac
+  [[ $m != disabled && -n $c && $c != "$m" ]] && warn "SELinux-Konfiguration" "$c (gilt ab dem nächsten Start)"
+  if [[ -r /sys/kernel/security/lsm ]]; then
+    ok "LSM-Stapel" "$(cat /sys/kernel/security/lsm)"
+  fi
+  if [[ -r /proc/sys/kernel/yama/ptrace_scope ]] && (($(cat /proc/sys/kernel/yama/ptrace_scope) >= 1)); then
+    ok "ptrace-Schutz (Yama)" "Stufe $(cat /proc/sys/kernel/yama/ptrace_scope)"
+  else
+    warn "ptrace-Schutz (Yama)" "aus"
+  fi
+
+  ((QUIET)) || echo "${B}Kernel${N}"
+  if [[ -r /sys/module/module/parameters/sig_enforce ]] && [[ $(cat /sys/module/module/parameters/sig_enforce) == Y ]]; then
+    ok "Modulsignaturen" "erzwungen"
+  else
+    warn "Modulsignaturen" "nicht erzwungen"
+  fi
+  if [[ -r /sys/kernel/security/lockdown ]]; then
+    local l; l=$(sed -n 's/.*\[\(.*\)\].*/\1/p' /sys/kernel/security/lockdown)
+    [[ $l == none ]] && warn "Kernel-Lockdown" "none (mit Secure Boot: integrity)" || ok "Kernel-Lockdown" "$l"
+  fi
+  local key want have bad_sysctl=0
+  if [[ -r $SYSCTL_DEFAULTS ]]; then
+    while IFS='=' read -r key want; do
+      key=${key//[[:space:]]/}; want=$(echo "$want" | xargs)
+      [[ -z $key || $key == \#* || $key == \;* ]] && continue
+      have=$(sysctl -n "$key" 2>/dev/null | xargs) || continue
+      [[ -z $have ]] && continue
+      # Der Prüfungsmodus setzt SysRq bewusst auf 0
+      [[ $key == kernel.sysrq && -e /run/symfonos-exam/active ]] && continue
+      if [[ $have != "$want" ]]; then
+        bad "sysctl $key" "ist $have, erwartet $want"; bad_sysctl=1
+      fi
+    done < "$SYSCTL_DEFAULTS"
+    ((bad_sysctl)) || ok "sysctl-Härtung" "alle Werte gesetzt"
+  fi
+
+  ((QUIET)) || echo "${B}Netz und Protokoll${N}"
+  if nft list table inet symfonos >/dev/null 2>&1; then
+    ok "Firewall" "aktiv, $(find "$NFTD" -name '*.nft' 2>/dev/null | wc -l) eigene Freigaben"
+  else
+    bad "Firewall" "Tabelle inet symfonos fehlt (systemctl enable --now nftables)"
+  fi
+  if systemctl is-active --quiet auditd 2>/dev/null; then
+    ok "Audit" "auditd läuft$(auditctl -s 2>/dev/null | grep -q 'enabled 2' && echo ', Regeln gesperrt')"
+  else
+    warn "Audit" "auditd läuft nicht"
+  fi
+  if systemctl is-enabled --quiet sshd.service 2>/dev/null || systemctl is-enabled --quiet sshd.socket 2>/dev/null; then
+    if sshd -T 2>/dev/null | grep -q '^permitrootlogin no'; then ok "SSH-Server" "aktiv, Root-Anmeldung gesperrt"
+    else warn "SSH-Server" "aktiv, Root-Anmeldung NICHT gesperrt"; fi
+  else
+    ok "SSH-Server" "nicht aktiviert"
+  fi
+  local pol
+  if pol=$(update-crypto-policies --show 2>/dev/null); then
+    if update-crypto-policies --check >/dev/null 2>&1; then ok "Krypto-Richtlinie" "$pol"
+    else bad "Krypto-Richtlinie" "$pol, Back-ends abweichend (sudo update-crypto-policies)"; fi
+    [[ $pol == LEGACY ]] && warn "Krypto-Richtlinie" "LEGACY erlaubt SHA-1 und alte Verfahren"
+  else
+    bad "Krypto-Richtlinie" "nicht installiert (Paket crypto-policies)"
+  fi
+
+  ((QUIET)) || echo "${B}Start und Datenträger${N}"
+  if [[ -d /sys/firmware/efi ]]; then
+    case $(efivar SecureBoot) in
+      1) ok "Secure Boot" "aktiv" ;;
+      0) warn "Secure Boot" "aus (symfonos-secureboot status)" ;;
+      *) warn "Secure Boot" "Zustand nicht lesbar" ;;
+    esac
+  else
+    warn "Secure Boot" "BIOS-Start, nicht verfügbar"
+  fi
+  if [[ -e /sys/class/tpm/tpm0 ]]; then
+    ok "TPM" "$(cat /sys/class/tpm/tpm0/tpm_version_major 2>/dev/null || echo ?).x vorhanden"
+  else
+    ((QUIET)) || printf '  - %-26s %s\n' "TPM" "nicht vorhanden"
+  fi
+  local rootsrc; rootsrc=$(findmnt -no SOURCE / 2>/dev/null | sed 's/\[.*//')
+  if [[ -n $rootsrc ]] && lsblk -sno TYPE "$rootsrc" 2>/dev/null | grep -q crypt; then
+    ok "Festplattenverschlüsselung" "Wurzeldateisystem auf LUKS"
+  else
+    warn "Festplattenverschlüsselung" "Wurzeldateisystem unverschlüsselt"
+  fi
+
+  ((QUIET)) || echo "${B}Pakete${N}"
+  local out rc=0
+  out=$("$SYP" audit 2>&1) || rc=$?
+  if ((rc == 0)); then ok "Sicherheitsupdates" "keine offenen Lücken"
+  elif ((rc == 1)); then bad "Sicherheitsupdates" "$(echo "$out" | sed -n '1p') (sudo syp upgrade --security)"
+  else warn "Sicherheitsupdates" "syp audit fehlgeschlagen"; fi
+  if systemctl is-enabled --quiet syp-security-update.timer 2>/dev/null; then ok "Automatische Updates" "Sicherheitsupdates täglich"; fi
+}
+
+cmd_status() {
+  check_all
+  echo
+  if ((PROBLEMS + HINTS)); then echo "$PROBLEMS Problem(e), $HINTS Hinweis(e)."; else echo "${G}Alles in Ordnung.${N}"; fi
+  ((PROBLEMS == 0))
+}
+
+cmd_check() {
+  [[ ${1:-} == --quiet ]] && QUIET=1
+  local tmp; tmp=$(mktemp)
+  check_all > "$tmp" 2>&1 || true
+  cat "$tmp"
+  if ((PROBLEMS)); then
+    logger -t symfonos-security -p auth.warning -- \
+      "$PROBLEMS Abweichung(en): $(sed 's/\x1b\[[0-9;]*m//g' "$tmp" | grep '✗' | tr -s ' ' | paste -sd';')" 2>/dev/null || true
+  fi
+  rm -f "$tmp"
+  ((PROBLEMS == 0))
+}
+
+# ------------------------------------------------------------------ SELinux
+denials() { ausearch -m AVC,USER_AVC,SELINUX_ERR -ts boot 2>/dev/null | grep -c 'type=AVC' || true; }
+
+cmd_selinux() {
+  local mode=${1:-} force=${2:-}
+  case $mode in
+    enforcing|permissive)
+      need_root
+      if [[ $mode == enforcing && $force != --force ]]; then
+        local n; n=$(denials)
+        if ((n > 0)); then
+          echo "Seit dem Start gab es $n SELinux-Verweigerungen (symfonos-security selinux denials)."
+          echo "Im Modus enforcing würden diese Zugriffe blockiert. Erst prüfen oder mit --force umschalten."
+          exit 1
+        fi
+      fi
+      # Anmeldungen wie bei Fedora unconfined_u zuordnen: Desktop-Programme, QEMU/KVM (Prüfungsmodus-VM)
+      # und Browser-Sandboxen funktionieren, Systemdienste bleiben eingeschränkt.
+      if command -v semanage >/dev/null && ! semanage login -l 2>/dev/null | grep -q '^__default__ *unconfined_u'; then
+        semanage login -m -s unconfined_u -r s0-s0:c0.c1023 __default__ 2>/dev/null || true
+      fi
+      sed -i "s/^SELINUX=.*/SELINUX=$mode/" "$SELCONF"
+      if [[ $(selinux_mode) != disabled ]]; then setenforce "$mode" && echo "SELinux ist jetzt $mode."
+      else echo "SELinux ist im Kernel aus; $mode gilt nach dem Neustart (vorher: symfonos-security selinux relabel)."; fi
+      ;;
+    relabel) need_root; touch "$ROOT/.autorelabel"; echo "Dateikontexte werden beim nächsten Start neu gesetzt." ;;
+    denials) ausearch -m AVC,USER_AVC,SELINUX_ERR -ts boot -i 2>/dev/null || echo "Keine Verweigerungen seit dem Start." ;;
+    *) die "selinux enforcing|permissive|relabel|denials" ;;
+  esac
+}
+
+# ------------------------------------------------------------------ Firewall
+port_rule() {  # PORT/PROTO -> Dateiname und Regel
+  [[ $1 =~ ^([0-9]{1,5})(-([0-9]{1,5}))?/(tcp|udp)$ ]] || die "Format: PORT/tcp oder PORT/udp (z. B. 22/tcp, 6000-6010/udp)"
+  local lo=${BASH_REMATCH[1]} hi=${BASH_REMATCH[3]} proto=${BASH_REMATCH[4]}
+  ((lo >= 1 && lo <= 65535)) || die "ungültiger Port: $lo"
+  [[ -z $hi ]] || { ((hi > lo && hi <= 65535)) || die "ungültiger Bereich: $lo-$hi"; }
+  RULE_FILE="$NFTD/$proto-$lo${hi:+-$hi}.nft"
+  RULE="$proto dport $lo${hi:+-$hi} accept"
+}
+
+cmd_firewall() {
+  case ${1:-list} in
+    list)
+      echo "Eingehend erlaubt (zusätzlich zu Antworten, Loopback und ICMP):"
+      local f any=0
+      for f in "$NFTD"/*.nft; do [[ -e $f ]] || continue; any=1; printf '  %s\n' "$(grep -v '^#' "$f")"; done
+      ((any)) || echo "  (nichts)"
+      ;;
+    allow)
+      need_root; [[ $# -ge 2 ]] || die "firewall allow PORT/PROTO [KOMMENTAR]"
+      port_rule "$2"
+      local comment=${3:-"freigegeben mit symfonos-security"}
+      comment=${comment//\"/}
+      install -d -m 755 "$NFTD"
+      printf '# %s\n%s comment "%s"\n' "$(date -Iseconds)" "$RULE" "$comment" > "$RULE_FILE"
+      reload_fw && echo "Freigegeben: $2"
+      ;;
+    deny)
+      need_root; [[ $# -ge 2 ]] || die "firewall deny PORT/PROTO"
+      port_rule "$2"
+      [[ -e $RULE_FILE ]] || die "keine Freigabe für $2"
+      rm -f "$RULE_FILE"; reload_fw && echo "Gesperrt: $2"
+      ;;
+    *) die "firewall list|allow|deny" ;;
+  esac
+}
+
+reload_fw() {
+  [[ -n $ROOT ]] && return 0
+  if ! nft -c -f /etc/nftables.conf; then
+    rm -f "$RULE_FILE"; die "Regelsatz ungültig – Änderung verworfen"
+  fi
+  systemctl reload nftables.service
+}
+
+# ------------------------------------------------------------------ Updates
+cmd_autoupdate() {
+  case ${1:-status} in
+    on) need_root; systemctl enable --now syp-security-update.timer; echo "Sicherheitsupdates werden täglich eingespielt (vorher Btrfs-Snapshot)." ;;
+    off) need_root; systemctl disable --now syp-security-update.timer; echo "Automatische Sicherheitsupdates aus." ;;
+    status) systemctl is-enabled --quiet syp-security-update.timer 2>/dev/null && echo an || echo aus ;;
+    *) die "autoupdate on|off|status" ;;
+  esac
+}
+
+case ${1:-status} in
+  status) cmd_status ;;
+  check) shift; cmd_check "$@" ;;
+  selinux) shift; cmd_selinux "$@" ;;
+  crypto) shift; need_root; [[ $# -eq 1 ]] || die "crypto DEFAULT|FUTURE|LEGACY"; update-crypto-policies --set "$1" ;;
+  firewall) shift; cmd_firewall "$@" ;;
+  autoupdate) shift; cmd_autoupdate "$@" ;;
+  -h|--help|help) sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//' ;;
+  *) die "unbekannter Befehl: $1 (siehe --help)" ;;
+esac

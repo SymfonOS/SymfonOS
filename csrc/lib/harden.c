@@ -130,6 +130,18 @@ static void walk(const char *root, const char *rel, harden_report *r) {
             char *r2 = rel ? xasprintf("%s/%s", rel, d) : xstrdup(d), *full = path_join(root, r2);
             struct stat st;
             if (lstat(full, &st) == 0) {
+                /* Für alle beschreibbar: bei Verzeichnissen nur mit Sticky-Bit zulässig (wie /tmp) */
+                if ((S_ISDIR(st.st_mode) || S_ISREG(st.st_mode)) && (st.st_mode & S_IWOTH) &&
+                    !(S_ISDIR(st.st_mode) && (st.st_mode & S_ISVTX))) {
+                    r->worldwrite++;
+                    sv_push_own(&r->problems, xasprintf("/%s: für alle beschreibbar (Modus %04o)", r2,
+                                                        (unsigned)(st.st_mode & 07777)));
+                }
+                if (S_ISREG(st.st_mode) && (st.st_mode & (S_ISUID | S_ISGID))) {
+                    r->suid++;
+                    sv_push_own(&r->suids, xasprintf("/%s (%s%s)", r2, (st.st_mode & S_ISUID) ? "setuid" : "",
+                                                     (st.st_mode & S_ISGID) ? ((st.st_mode & S_ISUID) ? "+setgid" : "setgid") : ""));
+                }
                 if (S_ISDIR(st.st_mode)) walk(root, r2, r);
                 else if (S_ISREG(st.st_mode) && !exempt(r2)) {
                     elfinfo e;
@@ -179,12 +191,14 @@ int harden_check(const char *destdir, const char *mode, harden_report *r) {
     if (mode && !strcmp(mode, "off")) return 0;
     walk(destdir, NULL, r);
     int strict = !mode || !strcmp(mode, "strict");
-    int critical = r->nopie + r->execstack + r->textrel + r->badrpath + r->norelro;
+    int critical = r->nopie + r->execstack + r->textrel + r->badrpath + r->norelro + r->worldwrite;
     if (r->elf)
         printf("==> Härtung: %d ELF-Dateien · ohne PIE %d · ohne RELRO %d · ohne BIND_NOW %d · ausf. Stack %d · "
                "TEXTREL %d · unsicherer RPATH %d\n",
                r->elf, r->nopie, r->norelro, r->nonow, r->execstack, r->textrel, r->badrpath);
     for (size_t i = 0; i < r->problems.n && i < 20; i++) printf("    ! %s\n", r->problems.v[i]);
+    if (r->worldwrite) printf("==> Dateirechte: %d Einträge für alle beschreibbar\n", r->worldwrite);
+    for (size_t i = 0; i < r->suids.n; i++) printf("==> Privilegiert: %s\n", r->suids.v[i]);
     if (strict && critical) {
         set_error("Härtungsprüfung fehlgeschlagen (%d kritische Befunde; Ausnahme nur per [options] hardening = "
                   "\"warn\" mit Begründung)",
@@ -205,7 +219,14 @@ jval *harden_json(const harden_report *r) {
     jset(o, "bad_rpath", jint(r->badrpath));
     jset(o, "no_stack_protector", jint(r->nossp));
     jset(o, "no_fortify", jint(r->nofortify));
+    jset(o, "world_writable", jint(r->worldwrite));
+    jval *su = jarr();
+    for (size_t i = 0; i < r->suids.n; i++) jpush(su, jstr(r->suids.v[i]));
+    jset(o, "setuid", su);
     return o;
 }
 
-void harden_free(harden_report *r) { sv_free(&r->problems); }
+void harden_free(harden_report *r) {
+    sv_free(&r->problems);
+    sv_free(&r->suids);
+}

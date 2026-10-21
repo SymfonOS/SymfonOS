@@ -5,7 +5,7 @@ version = "4.18.0-1"
 summary = "Benutzer- und Gruppenverwaltung"
 license = "BSD-3-Clause"
 url = "https://github.com/shadow-maint/shadow/releases/download/4.18.0/"
-depends = ["glibc", "acl", "attr", "libxcrypt"]
+depends = ["glibc", "acl", "attr", "libxcrypt", "linux-pam", "libselinux", "audit"]
 backup = ["etc/login.defs", "etc/default/useradd"]
 
 [[source]]
@@ -20,11 +20,12 @@ find man -name Makefile.in -exec sed -i 's/groups\.1 / /' {} \;
 find man -name Makefile.in -exec sed -i 's/getspnam\.3 / /' {} \;
 find man -name Makefile.in -exec sed -i 's/passwd\.5 / /' {} \;
 sed -e 's:#ENCRYPT_METHOD DES:ENCRYPT_METHOD YESCRYPT:' -e 's:/var/spool/mail:/var/mail:' \
+    -e 's:^#\?HOME_MODE.*:HOME_MODE\t0700:' -e 's:^UMASK.*:UMASK\t\t022:' \
     -e '/PATH=/{s@/sbin:@@;s@/bin:@@}' -i etc/login.defs
 '''
 build = '''
 cd "$S"
-./configure --sysconfdir=/etc --disable-static --with-{b,yes}crypt --without-libbsd --with-group-name-max-length=32
+./configure --sysconfdir=/etc --disable-static --with-{b,yes}crypt --without-libbsd --with-group-name-max-length=32 --with-libpam --with-selinux --with-audit
 make
 '''
 package = '''

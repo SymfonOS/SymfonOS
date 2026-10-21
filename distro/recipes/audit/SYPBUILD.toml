@@ -1,0 +1,30 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "audit"
+version = "4.1.1-1"
+summary = "Linux-Audit-Daemon und -Bibliothek"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
+url = "https://github.com/linux-audit/audit-userspace/archive/v4.1.1/"
+depends = ["glibc", "libcap"]
+makedepends = ["autoconf", "automake", "libtool"]
+provides = ["so:libaudit.so.1", "auditd"]
+backup = ["etc/audit/auditd.conf"]
+
+[[source]]
+url = "https://github.com/linux-audit/audit-userspace/archive/v4.1.1/audit-userspace-4.1.1.tar.gz"
+sha256 = "TODO"
+filename = "audit-userspace-4.1.1.tar.gz"
+
+[build]
+build = '''
+cd "$S"
+./autogen.sh
+./configure --prefix=/usr --sysconfdir=/etc --enable-shared --disable-static --without-python3 --disable-zos-remote --without-libcap-ng --with-arm=no --with-aarch64=no
+make
+'''
+package = '''
+cd "$S"
+make DESTDIR="$DESTDIR" install
+install -d "$DESTDIR/var/log/audit"
+chmod 700 "$DESTDIR/var/log/audit"
+'''

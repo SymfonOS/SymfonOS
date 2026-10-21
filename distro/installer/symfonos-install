@@ -1,17 +1,22 @@
 #!/usr/bin/env bash
 # symfonos-install – installiert symfonOS vom Live-Medium (offline aus dem Repo auf dem ISO).
-#   sudo symfonos-install [--disk /dev/nvme0n1] [--encrypt] [--user NAME] [--hostname NAME] [--yes]
-# Layout: GPT mit BIOS-Boot (1 MiB), EFI (512 MiB, FAT32), Btrfs (Rest; optional LUKS2)
+#   sudo symfonos-install [--disk /dev/nvme0n1] [--no-encrypt] [--tpm] [--boot systemd-boot|grub]
+#                         [--user NAME] [--hostname NAME] [--yes]
+# Layout: GPT mit BIOS-Boot (1 MiB), EFI (1 GiB, FAT32), Btrfs (Rest, standardmäßig in LUKS2)
 # Btrfs-Subvolumes: @ @home @snapshots @var_log @cache – Pakete und Snapshots verwaltet syp.
+# UEFI: systemd-boot mit signierbaren Unified Kernel Images (Secure Boot: symfonos-secureboot),
+#       LUKS2 mit Argon2id. BIOS bzw. --boot grub: GRUB, LUKS2 mit PBKDF2 (GRUB kennt kein Argon2).
+# --tpm: Entsperren über TPM 2.0 (an PCR 7 = Secure-Boot-Zustand gebunden) plus Wiederherstellungsschlüssel.
 set -euo pipefail
-DISK="" ENCRYPT=0 USERNAME="" HOST=symfonos YES=0
+DISK="" ENCRYPT=1 TPM=0 BOOT="" USERNAME="" HOST=symfonos YES=0
 REPO=${SYMFONOS_REPO:-/run/initramfs/live/repo}
 MNT=/mnt/symfonos-target
 while (($#)); do
   case $1 in
-    --disk) DISK=$2; shift 2 ;; --encrypt) ENCRYPT=1; shift ;; --user) USERNAME=$2; shift 2 ;;
+    --disk) DISK=$2; shift 2 ;; --encrypt) ENCRYPT=1; shift ;; --no-encrypt) ENCRYPT=0; shift ;;
+    --tpm) TPM=1; shift ;; --boot) BOOT=$2; shift 2 ;; --user) USERNAME=$2; shift 2 ;;
     --hostname) HOST=$2; shift 2 ;; --yes|-y) YES=1; shift ;; --repo) REPO=$2; shift 2 ;;
-    -h|--help) sed -n '2,6p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "Unbekannte Option: $1" >&2; exit 2 ;;
   esac
 done
@@ -33,21 +38,35 @@ if ((!YES)); then
 fi
 part() { [[ $DISK =~ [0-9]$ ]] && echo "${DISK}p$1" || echo "${DISK}$1"; }
 UEFI=0; [[ -d /sys/firmware/efi ]] && UEFI=1
+[[ -z $BOOT ]] && { ((UEFI)) && BOOT=systemd-boot || BOOT=grub; }
+[[ $BOOT == systemd-boot || $BOOT == grub ]] || { echo "--boot: systemd-boot oder grub" >&2; exit 2; }
+[[ $BOOT == systemd-boot && $UEFI == 0 ]] && { echo "systemd-boot braucht UEFI" >&2; exit 1; }
+if ((TPM)); then
+  ((ENCRYPT)) || { echo "--tpm setzt Verschlüsselung voraus" >&2; exit 1; }
+  [[ -e /sys/class/tpm/tpm0 ]] || { echo "Kein TPM 2.0 gefunden" >&2; exit 1; }
+  if [[ $(od -An -tu1 -j4 -N1 /sys/firmware/efi/efivars/SecureBoot-8be4df61-93ca-11d2-aa0d-00e098032b8c 2>/dev/null | tr -d ' ') != 1 ]]; then
+    echo "Hinweis: Secure Boot ist aus. Die TPM-Bindung an PCR 7 schützt dann kaum; nach der Einrichtung von"
+    echo "Secure Boot (symfonos-secureboot) neu binden: systemd-cryptenroll --wipe-slot=tpm2 --tpm2-device=auto --tpm2-pcrs=7"
+  fi
+fi
 
 say "Partitionieren ($( ((UEFI)) && echo UEFI || echo BIOS ))"
 wipefs -af "$DISK" >/dev/null
 sfdisk --quiet "$DISK" <<PARTS
 label: gpt
 size=1MiB, type=21686148-6248-6449-6E6F-744E656564EF, name="bios"
-size=512MiB, type=U, name="EFI"
+size=1GiB, type=U, name="EFI"
 type=L, name="symfonOS"
 PARTS
 udevadm settle
 EFI=$(part 2) ROOT=$(part 3) ROOTDEV=$(part 3)
 mkfs.fat -F32 -n EFI "$EFI" >/dev/null
 if ((ENCRYPT)); then
-  say "Verschlüsselung (LUKS2, PBKDF2 für GRUB)"
-  cryptsetup luksFormat --type luks2 --pbkdf pbkdf2 --batch-mode --verify-passphrase "$ROOT"
+  # GRUB entsperrt LUKS2 nur mit PBKDF2; mit systemd-boot entsperrt das Initramfs (Argon2id, speicherhart)
+  PBKDF=argon2id; [[ $BOOT == grub ]] && PBKDF=pbkdf2
+  say "Verschlüsselung (LUKS2, AES-256-XTS, $PBKDF)"
+  cryptsetup luksFormat --type luks2 --cipher aes-xts-plain64 --key-size 512 --hash sha512 --pbkdf "$PBKDF" \
+    --use-random --batch-mode --verify-passphrase "$ROOT"
   cryptsetup open "$ROOT" cryptroot
   ROOTDEV=/dev/mapper/cryptroot
 fi
@@ -57,12 +76,13 @@ for sv in @ @home @snapshots @var_log @cache; do btrfs subvolume create "$MNT/$s
 umount "$MNT"
 OPT=noatime,compress=zstd:1
 mount -o "$OPT,subvol=@" "$ROOTDEV" "$MNT"
-mkdir -p "$MNT"/{home,.snapshots,var/log,var/cache,boot/efi}
+ESPDIR=/boot/efi; [[ $BOOT == systemd-boot ]] && ESPDIR=/efi
+mkdir -p "$MNT"/{home,.snapshots,var/log,var/cache} "$MNT$ESPDIR"
 mount -o "$OPT,subvol=@home" "$ROOTDEV" "$MNT/home"
 mount -o "$OPT,subvol=@snapshots" "$ROOTDEV" "$MNT/.snapshots"
 mount -o "$OPT,subvol=@var_log" "$ROOTDEV" "$MNT/var/log"
 mount -o "$OPT,subvol=@cache" "$ROOTDEV" "$MNT/var/cache"
-mount "$EFI" "$MNT/boot/efi"
+mount -o umask=0077 "$EFI" "$MNT$ESPDIR"
 cleanup() { for m in run sys proc dev; do mountpoint -q "$MNT/$m" && umount -l "$MNT/$m"; done; true; }
 trap cleanup EXIT
 
@@ -84,36 +104,73 @@ RU=$(uuid "$ROOTDEV")
   echo "UUID=$RU /.snapshots btrfs $OPT,subvol=@snapshots 0 0"
   echo "UUID=$RU /var/log btrfs $OPT,subvol=@var_log 0 0"
   echo "UUID=$RU /var/cache btrfs $OPT,subvol=@cache 0 0"
-  echo "UUID=$(uuid "$EFI") /boot/efi vfat umask=0077 0 2"
+  echo "UUID=$(uuid "$EFI") $ESPDIR vfat umask=0077,shortname=winnt 0 2"
 } > "$MNT/etc/fstab"
 echo "$HOST" > "$MNT/etc/hostname"
 cp /etc/locale.conf /etc/vconsole.conf "$MNT/etc/" 2>/dev/null || true
 ln -sf "../usr/share/zoneinfo/${TZ_NAME:-Europe/Berlin}" "$MNT/etc/localtime"
-CMDLINE="rootflags=subvol=@ quiet"
+CMDLINE="rootflags=subvol=@"
 if ((ENCRYPT)); then
   LU=$(uuid "$ROOT")
-  echo "cryptroot UUID=$LU none luks" > "$MNT/etc/crypttab"
-  CMDLINE="rd.luks.uuid=$LU $CMDLINE"
-  sed -i 's/^#\?GRUB_ENABLE_CRYPTODISK=.*//' "$MNT/etc/default/grub"
-  echo 'GRUB_ENABLE_CRYPTODISK=y' >> "$MNT/etc/default/grub"
+  CRYPTOPT=luks; ((TPM)) && CRYPTOPT=luks,tpm2-device=auto
+  echo "cryptroot UUID=$LU none $CRYPTOPT" > "$MNT/etc/crypttab"
+  chmod 600 "$MNT/etc/crypttab"
+  CMDLINE="rd.luks.uuid=$LU rd.luks.name=$LU=cryptroot $CMDLINE"
+  ((TPM)) && CMDLINE="$CMDLINE rd.luks.options=$LU=tpm2-device=auto"
+  if [[ $BOOT == grub ]]; then
+    sed -i 's/^#\?GRUB_ENABLE_CRYPTODISK=.*//' "$MNT/etc/default/grub"
+    echo 'GRUB_ENABLE_CRYPTODISK=y' >> "$MNT/etc/default/grub"
+  fi
 fi
 sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"$CMDLINE\"|" "$MNT/etc/default/grub"
+# Gemeinsame Härtungsparameter (Paket symfonos-security), für UKI fest eingebettet
+HARDEN=$(cat "$MNT/usr/lib/symfonos/kernel-cmdline" 2>/dev/null || true)
+install -d "$MNT/etc/kernel"
+echo "root=UUID=$RU rw $CMDLINE $HARDEN" > "$MNT/etc/kernel/cmdline"
+((TPM)) && echo 'add_dracutmodules+=" tpm2-tss "' > "$MNT/etc/dracut.conf.d/50-tpm2.conf"
 in_target() { chroot "$MNT" /usr/bin/env -i PATH=/usr/bin:/usr/sbin HOME=/root /bin/bash -euo pipefail -c "$1"; }
 in_target "systemd-machine-id-setup >/dev/null; systemd-sysusers; systemd-tmpfiles --create >/dev/null 2>&1 || true
   useradd -m -G wheel,audio,video,input -s /bin/bash '$USERNAME'
-  systemctl enable systemd-networkd systemd-resolved systemd-timesyncd iwd fstrim.timer >/dev/null"
+  passwd -l root >/dev/null
+  systemctl preset-all >/dev/null 2>&1 || true
+  systemctl enable systemd-networkd systemd-resolved systemd-timesyncd iwd fstrim.timer nftables auditd \
+    symfonos-security-check.timer >/dev/null
+  # SELinux: Anmeldungen wie bei Fedora unconfined_u zuordnen (Desktop, QEMU/KVM, Browser-Sandboxen)
+  if command -v semanage >/dev/null; then semanage login -m -s unconfined_u -r s0-s0:c0.c1023 __default__ 2>/dev/null || true; fi"
 echo "Passwort für $USERNAME:"; chroot "$MNT" passwd "$USERNAME"
 echo "Root-Konto bleibt gesperrt; Verwaltung über sudo (Gruppe wheel)."
-say "Initramfs und Bootloader"
-KVER=$(ls "$MNT/usr/lib/modules" | head -1)
-in_target "dracut --force --kver '$KVER' /boot/initramfs-$KVER.img
-  cp /usr/lib/modules/$KVER/vmlinuz /boot/vmlinuz-$KVER"
-if ((UEFI)); then
-  in_target "grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=symfonOS
-    grub-install --target=x86_64-efi --efi-directory=/boot/efi --removable"
+say "Bootloader ($BOOT) und Kernel"
+if [[ $BOOT == systemd-boot ]]; then
+  in_target "bootctl --esp-path=/efi install >/dev/null
+    printf 'timeout 3\\neditor no\\nconsole-mode auto\\n' > /efi/loader/loader.conf
+    /usr/lib/syp/kernel-hook"
+else
+  in_target "/usr/lib/syp/kernel-hook"
+  if ((UEFI)); then
+    in_target "grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=symfonOS
+      grub-install --target=x86_64-efi --efi-directory=/boot/efi --removable"
+  fi
+  in_target "grub-install --target=i386-pc '$DISK'"
+  in_target "grub-mkconfig -o /boot/grub/grub.cfg"
 fi
-in_target "grub-install --target=i386-pc '$DISK'"
-in_target "grub-mkconfig -o /boot/grub/grub.cfg"
+
+if ((TPM)); then
+  say "TPM 2.0 einbinden und Wiederherstellungsschlüssel erzeugen"
+  echo "Bitte die eben gewählte Passphrase eingeben:"
+  systemd-cryptenroll --tpm2-device=auto --tpm2-pcrs=7 "$ROOT"
+  echo; echo "WIEDERHERSTELLUNGSSCHLÜSSEL – aufschreiben und getrennt vom Gerät aufbewahren:"
+  systemd-cryptenroll --recovery-key "$ROOT"
+  echo
+fi
+
+say "SELinux-Dateikontexte setzen"
+FC=$MNT/etc/selinux/refpolicy/contexts/files/file_contexts
+if [[ -r $FC ]] && command -v setfiles >/dev/null; then
+  setfiles -r "$MNT" -e "$MNT/proc" -e "$MNT/sys" -e "$MNT/dev" -e "$MNT/run" -e "$MNT$ESPDIR" -F "$FC" "$MNT" \
+    || { echo "setfiles fehlgeschlagen – Kontexte werden beim ersten Start gesetzt"; touch "$MNT/.autorelabel"; }
+else
+  touch "$MNT/.autorelabel"
+fi
 cleanup
 umount -R "$MNT"
 ((ENCRYPT)) && cryptsetup close cryptroot

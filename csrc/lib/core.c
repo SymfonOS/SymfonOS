@@ -184,6 +184,24 @@ static jval *load_index_file(const char *path) {
     return idx;
 }
 
+jval *repo_show_index(const char *repo_dir, const char *pubkey_path) {
+    char *idx = path_join(repo_dir, "index.json.zst");
+    jval *r = NULL;
+    if (pubkey_path) {
+        pubkey k;
+        if (pubkey_load(pubkey_path, &k)) goto out;
+        keyring kr = {&k, 1};
+        const pubkey *ok = verify_file(&kr, idx);
+        free(k.comment);
+        if (!ok) goto out;
+    }
+    r = load_index_file(idx);
+    if (!r && !last_error()[0]) set_error("%s: Index nicht lesbar", idx);
+out:
+    free(idx);
+    return r;
+}
+
 /* Prüft einen frisch geladenen (signaturgeprüften) Index gegen Name, Architektur, Ablauf und
  * den zuletzt akzeptierten Stand (kein Zurückspielen älterer Indizes). */
 static int check_index(const config *c, const repoconf *r, const char *fresh, const char *current) {

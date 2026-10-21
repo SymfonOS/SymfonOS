@@ -1,6 +1,41 @@
 #!/bin/sh
-# Wird von syp nach Kernel-, Firmware- oder dracut-Änderungen ausgeführt.
+# Wird von syp nach Kernel-, Firmware-, dracut- oder systemd-boot-Änderungen ausgeführt.
+#
+# Zwei Startwege:
+#   systemd-boot (UEFI, Standard): Unified Kernel Image pro Kernel unter $ESP/EFI/Linux/, die
+#       Kernel-Kommandozeile aus /etc/kernel/cmdline ist eingebettet und damit mitsigniert.
+#       Mit eigenen Secure-Boot-Schlüsseln werden UKI und Bootloader automatisch signiert.
+#   GRUB (BIOS oder ausdrücklich gewählt): vmlinuz und Initramfs in /boot, Menü über grub-mkconfig.
 set -eu
+
+ESP=""
+for d in /efi /boot/efi /boot; do
+  if [ -f "$d/loader/loader.conf" ]; then ESP=$d; break; fi
+done
+
+if [ -n "$ESP" ]; then
+  [ -r /etc/kernel/cmdline ] || { echo "kernel-hook: /etc/kernel/cmdline fehlt" >&2; exit 1; }
+  bootctl --esp-path="$ESP" update --graceful >/dev/null 2>&1 || true
+  mkdir -p "$ESP/EFI/Linux"
+  for d in /usr/lib/modules/*/; do
+    k=$(basename "$d")
+    [ -f "$d/vmlinuz" ] || continue
+    out="$ESP/EFI/Linux/symfonos-$k.efi"
+    tmp="$out.new"
+    dracut --force --quiet --uefi --kver "$k" --kernel-cmdline "$(tr -s '\n' ' ' < /etc/kernel/cmdline)" "$tmp"
+    if command -v symfonos-secureboot >/dev/null; then symfonos-secureboot sign --if-keys "$tmp"; fi
+    mv -f "$tmp" "$out"
+  done
+  for f in "$ESP"/EFI/Linux/symfonos-*.efi; do
+    [ -e "$f" ] || continue
+    k=${f##*/symfonos-}; k=${k%.efi}
+    [ -d "/usr/lib/modules/$k" ] || rm -f "$f"
+  done
+  # Bootloader nach einem systemd-Update neu signieren (nur, wenn eigene Schlüssel existieren)
+  if command -v symfonos-secureboot >/dev/null; then symfonos-secureboot sign --if-keys; fi
+  exit 0
+fi
+
 for d in /usr/lib/modules/*/; do
   k=$(basename "$d")
   [ -f "$d/vmlinuz" ] || continue
