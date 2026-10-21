@@ -83,12 +83,12 @@ static int sh(const char *fmt, ...) {
 }
 
 /* Bauumgebung vorbereiten: syp-Konfiguration mit lokalem Repo, Schlüssel, Mounts */
-static int prepare_root(const char *broot, const char *repo, const char *pubkey_path) {
+static int prepare_root(const char *broot, const char *repo, const char *pubkey_path, const char *rname) {
     char *etc = path_join(broot, "etc/syp"), *keys = path_join(broot, "etc/syp/keys");
     mkdir_p(keys, 0755);
-    char *conf = xasprintf("arch = \"x86_64\"\n[[repo]]\nname = \"build\"\nurl = \"file://%s\"\npriority = 1\n"
+    char *conf = xasprintf("arch = \"x86_64\"\n[[repo]]\nname = \"%s\"\nurl = \"file://%s\"\npriority = 1\n"
                            "[snapshots]\nenabled = false\n[security]\nrequire_signatures = %s\n",
-                           repo, pubkey_path ? "true" : "false");
+                           rname, repo, pubkey_path ? "true" : "false");
     char *cp = path_join(etc, "syp.toml");
     int rc = write_file(cp, conf, strlen(conf), 0644);
     if (!rc && pubkey_path) {
@@ -262,7 +262,7 @@ int cmd_buildall(int argc, char **argv, const char *root) {
         if (!path_exists(ip)) repo_build_index(repo_abs, rname, arch, k);
         free(ip);
         char *br = realpath(broot, NULL);
-        if (!br || prepare_root(br, repo_abs, pubpath)) die("Bauumgebung %s nicht nutzbar", broot);
+        if (!br || prepare_root(br, repo_abs, pubpath, rname)) die("Bauumgebung %s nicht nutzbar", broot);
         broot = br;
     }
     build_opts bo = {nocheck, update_sums, 0, getenv("SYP_SRCCACHE"), NULL};

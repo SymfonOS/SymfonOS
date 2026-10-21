@@ -191,7 +191,72 @@ static int c_remove(ctx *c, int argc, char **argv, int cascade) {
     return rc;
 }
 
-static int c_upgrade(ctx *c, int nosync) {
+/* Sicherheitsupdates: neuere Versionen installierter Pakete mit "security"-Einträgen (CVE-IDs) */
+static void security_updates(ptrvec *av, hmap *inst, strvec *reqs, jval *report) {
+    HM_FOREACH(inst, i) {
+        pkg *ip = inst->vals[i], *best = NULL;
+        for (size_t k = 0; k < av->n; k++) {
+            pkg *a = av->v[k];
+            jval *sec = jgeta(a->info, "security");
+            if (strcmp(a->name, ip->name) || !sec || !sec->n || vercmp(a->version, ip->version) <= 0) continue;
+            if (!best || vercmp(a->version, best->version) > 0) best = a;
+        }
+        if (!best) continue;
+        /* alle behobenen CVEs zwischen installierter und neuester Version sammeln */
+        jval *cves = jarr();
+        for (size_t k = 0; k < av->n; k++) {
+            pkg *a = av->v[k];
+            jval *sec = jgeta(a->info, "security");
+            if (strcmp(a->name, ip->name) || !sec || vercmp(a->version, ip->version) <= 0 ||
+                vercmp(a->version, best->version) > 0)
+                continue;
+            for (size_t j = 0; j < sec->n; j++) jpush(cves, jcopy(sec->items[j]));
+        }
+        if (reqs) sv_push_own(reqs, xasprintf("%s>=%s", best->name, best->version));
+        if (report) {
+            jval *e = jobj();
+            jset(e, "name", jstr(ip->name));
+            jset(e, "installed", jstr(ip->version));
+            jset(e, "fixed_in", jstr(best->version));
+            jset(e, "advisories", cves);
+            jpush(report, e);
+        } else {
+            json_free(cves);
+        }
+    }
+}
+
+static int c_audit(ctx *c) {
+    ptrvec av = {0};
+    repo_load_synced(&c->cfg, &av);
+    hmap inst;
+    db_installed(DB(c), &inst);
+    jval *rep = jarr();
+    security_updates(&av, &inst, NULL, rep);
+    if (c->json) {
+        char *s = json_dump(rep, 0, 0);
+        puts(s);
+        free(s);
+    } else if (!rep->n) {
+        printf(":: Keine bekannten Sicherheitslücken in installierten Paketen\n");
+    } else {
+        printf("%s%zu Pakete mit verfügbaren Sicherheitsupdates:%s\n", col("31;1"), rep->n, col_end());
+        for (size_t i = 0; i < rep->n; i++) {
+            jval *e = rep->items[i], *a = jgeta(e, "advisories");
+            printf("  %s %s -> %s:", jgets(e, "name", ""), jgets(e, "installed", ""), jgets(e, "fixed_in", ""));
+            for (size_t k = 0; a && k < a->n; k++) printf(" %s", a->items[k]->s);
+            printf("\n");
+        }
+        printf("Einspielen: sudo syp upgrade --security\n");
+    }
+    int rc = rep->n ? 1 : 0;
+    json_free(rep);
+    free_installed(&inst);
+    free_pkgs(&av);
+    return rc;
+}
+
+static int c_upgrade(ctx *c, int nosync, int security_only) {
     if (!nosync) c_sync(c);
     ptrvec av = {0};
     repo_load_synced(&c->cfg, &av);
@@ -201,7 +266,21 @@ static int c_upgrade(ctx *c, int nosync) {
     solver_init(&s, &av, &inst);
     plan p;
     plan_init(&p);
-    int rc = solve_upgrade(&s, &p) ? solver_fail(&s) : run_plan(c, &p, &inst);
+    int rc;
+    if (security_only) {
+        strvec reqs = {0};
+        security_updates(&av, &inst, &reqs, NULL);
+        rc = solve_install(&s, reqs.v, reqs.n, NULL, &p) ? solver_fail(&s) : 0;
+        /* Begründung beibehalten: als Abhängigkeit installierte Pakete bleiben "dep" */
+        for (size_t i = 0; !rc && i < p.install.n; i++) {
+            pkg *k = p.install.v[i], *old = hm_get(&inst, k->name);
+            if (old && old->reason) hm_set(&p.reasons, k->name, !strcmp(old->reason, "dep") ? "dep" : "explicit");
+        }
+        if (!rc) rc = run_plan(c, &p, &inst);
+        sv_free(&reqs);
+    } else {
+        rc = solve_upgrade(&s, &p) ? solver_fail(&s) : run_plan(c, &p, &inst);
+    }
     plan_free(&p);
     solver_free(&s);
     free_installed(&inst);
@@ -672,7 +751,8 @@ static void usage(void) {
          "  sync                      Repository-Indizes aktualisieren\n"
          "  install|in PAKET...       Pakete oder .syp-Dateien installieren (--as-dep)\n"
          "  remove|rm PAKET...        Pakete entfernen (--cascade)\n"
-         "  upgrade|up                System aktualisieren (--no-sync)\n"
+         "  upgrade|up                System aktualisieren (--no-sync, --security: nur Sicherheitsupdates)\n"
+         "  audit                     Installierte Pakete mit bekannten, behobenen Sicherheitslücken (--json)\n"
          "  autoremove                Verwaiste Abhängigkeiten entfernen\n"
          "  search|s [BEGRIFF...]     Pakete suchen (--json)\n"
          "  info PAKET...             Paketdetails (--json)\n"
@@ -730,6 +810,7 @@ int main(int argc, char **argv) {
     }
     /* Befehlsoptionen einsammeln */
     strvec pos = {0};
+    int security_only = 0;
     int as_dep = 0, cascade = 0, nosync = 0, explicit_only = 0, nocheck = 0, update_sums = 0, keep_work = 0, system = 0;
     int limit = 30, keep = -1;
     const char *out = NULL, *key = NULL, *comment = "", *rname = "symfonos", *arch = "x86_64", *chroot_dir = NULL;
@@ -740,6 +821,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--as-dep")) as_dep = 1;
         else if (!strcmp(a, "--cascade")) cascade = 1;
         else if (!strcmp(a, "--no-sync")) nosync = 1;
+        else if (!strcmp(a, "--security")) security_only = 1;
         else if (!strcmp(a, "--explicit")) explicit_only = 1;
         else if (!strcmp(a, "--nocheck")) nocheck = 1;
         else if (!strcmp(a, "--update-sums")) update_sums = 1;
@@ -830,7 +912,8 @@ int main(int argc, char **argv) {
     } else if (!strcmp(cmd, "remove") || !strcmp(cmd, "rm")) {
         if (!pos.n) die("Keine Pakete angegeben");
         rc = c_remove(&c, (int)pos.n, pos.v, cascade);
-    } else if (!strcmp(cmd, "upgrade") || !strcmp(cmd, "up")) rc = c_upgrade(&c, nosync);
+    } else if (!strcmp(cmd, "upgrade") || !strcmp(cmd, "up")) rc = c_upgrade(&c, nosync, security_only);
+    else if (!strcmp(cmd, "audit")) rc = c_audit(&c);
     else if (!strcmp(cmd, "autoremove")) rc = c_autoremove(&c);
     else if (!strcmp(cmd, "search") || !strcmp(cmd, "s")) rc = c_search(&c, (int)pos.n, pos.v);
     else if (!strcmp(cmd, "info")) rc = c_info(&c, (int)pos.n, pos.v);

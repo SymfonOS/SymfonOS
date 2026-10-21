@@ -163,6 +163,62 @@ int fetch_url(const char *url, const char *dest) {
 }
 
 /* --- Repositories ------------------------------------------------------------------ */
+/* Signierte Indizes laufen ab (Standard 14 Tage): schützt vor Freeze-Angriffen, bei denen ein
+ * Spiegel dauerhaft einen alten, korrekt signierten Stand ausliefert. */
+long long index_expiry(void) {
+    const char *d = getenv("SYP_INDEX_VALID_DAYS");
+    long long days = d && *d ? atoll(d) : 14;
+    return (long long)time(NULL) + days * 86400;
+}
+
+static jval *load_index_file(const char *path) {
+    char *raw, *js;
+    size_t rn, jn;
+    jval *idx = NULL;
+    if (read_file(path, &raw, &rn)) return NULL;
+    if (zstd_decompress_buf(raw, rn, &js, &jn) == 0) {
+        idx = json_parse(js, jn);
+        free(js);
+    }
+    free(raw);
+    return idx;
+}
+
+/* Prüft einen frisch geladenen (signaturgeprüften) Index gegen Name, Architektur, Ablauf und
+ * den zuletzt akzeptierten Stand (kein Zurückspielen älterer Indizes). */
+static int check_index(const config *c, const repoconf *r, const char *fresh, const char *current) {
+    jval *n = load_index_file(fresh);
+    if (!n) {
+        set_error("Repo %s: Index unlesbar", r->name);
+        return -1;
+    }
+    int rc = 0;
+    const char *name = jgets(n, "name", NULL), *arch = jgets(n, "arch", NULL);
+    long long gen = jgeti(n, "generated", 0), exp = jgeti(n, "expires", 0), now = (long long)time(NULL);
+    if (name && strcmp(name, r->name)) {
+        set_error("Repo %s: Index gehört zu Repo »%s« (Verwechslungsangriff?)", r->name, name);
+        rc = -1;
+    } else if (arch && strcmp(arch, c->arch) && strcmp(arch, "any")) {
+        set_error("Repo %s: Index für Architektur %s, System ist %s", r->name, arch, c->arch);
+        rc = -1;
+    } else if (exp && exp < now && !getenv("SYP_ALLOW_EXPIRED")) {
+        set_error("Repo %s: signierter Index ist seit %lld Tagen abgelaufen (Freeze-Angriff oder veralteter "
+                  "Spiegel?)",
+                  r->name, (now - exp) / 86400 + 1);
+        rc = -1;
+    } else {
+        jval *old = load_index_file(current);
+        long long oldgen = old ? jgeti(old, "generated", 0) : 0;
+        if (old && gen < oldgen) {
+            set_error("Repo %s: Index ist älter als der bereits bekannte Stand (Rollback-Angriff?)", r->name);
+            rc = -1;
+        }
+        json_free(old);
+    }
+    json_free(n);
+    return rc;
+}
+
 int repo_sync(const config *c, const keyring *kr, int quiet) {
     char *syncdir = cfg_path(c, "var/lib/syp/sync");
     mkdir_p(syncdir, 0755);
@@ -182,10 +238,14 @@ int repo_sync(const config *c, const keyring *kr, int quiet) {
                 free(m);
                 rc = -1;
             } else {
-                if (k && !quiet) printf(":: %s: Index signiert von %s (%s)\n", r->name, k->id, k->comment);
                 char *dest = xasprintf("%s/%s.index.json.zst", syncdir, r->name), *ds = xasprintf("%s.sig", dest);
-                rename(tmp, dest);
-                rename(tmpsig, ds);
+                if (check_index(c, r, tmp, dest)) {
+                    rc = -1;
+                } else {
+                    if (k && !quiet) printf(":: %s: Index signiert von %s (%s)\n", r->name, k->id, k->comment);
+                    rename(tmp, dest);
+                    rename(tmpsig, ds);
+                }
                 free(dest);
                 free(ds);
             }
@@ -333,6 +393,7 @@ int repo_build_index(const char *repo_dir, const char *name, const char *arch, c
     jset(idx, "name", jstr(name));
     jset(idx, "arch", jstr(arch));
     jset(idx, "generated", jint((long long)time(NULL)));
+    jset(idx, "expires", jint(index_expiry()));
     jset(idx, "packages", pk);
     char *js = json_dump(idx, 0, 0), *z;
     size_t zn;
@@ -364,6 +425,7 @@ int repo_index_add(const char *repo_dir, const char *name, const char *arch, con
     jset(idx, "name", jstr(name));
     jset(idx, "arch", jstr(arch));
     jset(idx, "generated", jint((long long)time(NULL)));
+    jset(idx, "expires", jint(index_expiry()));
     jval *pk = jgeta(idx, "packages");
     sypfile f;
     if (syp_open_meta(pkgfile, &f)) {

@@ -29,6 +29,7 @@ int cfg_is_root(const config *c);                 /* root == "/" */
 /* --- Repositories -------------------------------------------------------------- */
 int fetch_url(const char *url, const char *dest);   /* http(s)://, file://, Pfad */
 int repo_sync(const config *c, const keyring *kr, int quiet);
+long long index_expiry(void);
 void repo_load_synced(const config *c, ptrvec *out); /* pkg* */
 char *repo_fetch_package(const config *c, const pkg *p); /* Pfad im Cache */
 int repo_build_index(const char *repo_dir, const char *name, const char *arch, const seckey *signer);

@@ -221,10 +221,10 @@ def test_buildall_order_and_resume(tmp_path):
             f'[package]\nname = "{name}"\nversion = "1-1"\nmakedepends = {json.dumps(deps)}\n{extra}'
             f'[build]\npackage = \'mkdir -p "$DESTDIR/usr/share/{name}" && date +%s%N > "$DESTDIR/usr/share/{name}/b"\'\n')
     repo = tmp_path / "repo"
-    out = syp("buildall", rec, "--repo", repo, "-k", key).stdout
+    out = syp("buildall", rec, "--repo", repo, "-k", key, "--name", "core").stdout
     order = [line.split()[2] for line in out.splitlines() if line.startswith("==> [")]
     assert order.index("zlib") < order.index("libpng") < order.index("app") and order.index("bash") < order.index("app")
-    out2 = syp("buildall", rec, "--repo", repo, "-k", key).stdout
+    out2 = syp("buildall", rec, "--repo", repo, "-k", key, "--name", "core").stdout
     assert "gebaut 0, vorhanden 4" in out2
     root = setup_root(tmp_path, repo, pub)
     syp("-r", root, "sync")
@@ -307,3 +307,82 @@ post_install = 'install -Dm644 /dev/null "$DESTDIR/usr/share/doc/tool/OK"'
     with tarfile.open(tmp_path / "o/tool-2.0-1-x86_64.syp") as tf:
         files = [f["path"] for f in json.loads(tf.extractfile(".FILES.json").read())]
     assert "usr/bin/tool" in files and "usr/share/doc/tool/OK" in files
+
+
+def test_index_freeze_rollback_and_mixup_protection(tmp_path):
+    import shutil
+    import time
+    key, pub = keygen(tmp_path)
+    repo = tmp_path / "repo"
+    root = setup_root(tmp_path, repo, pub)
+    publish(repo, key, make_pkg(tmp_path, "a", "1-1", key=key))
+    syp("-r", root, "sync")
+    old = tmp_path / "old"
+    shutil.copytree(repo, old)
+    time.sleep(1.1)
+    publish(repo, key, make_pkg(tmp_path, "a", "2-1", key=key))
+    syp("-r", root, "sync")
+    # Spiegel liefert wieder den alten (gültig signierten) Index aus -> Rollback-Angriff
+    for f in ("index.json.zst", "index.json.zst.sig"):
+        shutil.copy(old / f, repo / f)
+    r = syp("-r", root, "sync", check=False)
+    assert r.returncode == 1 and "Rollback-Angriff" in r.stderr
+    # abgelaufener Index -> Freeze-Angriff
+    env = dict(os.environ, SYP_INDEX_VALID_DAYS="-1")
+    time.sleep(1.1)
+    syp("repo-add", repo, "--name", "core", "-k", key, env=env)
+    r = syp("-r", root, "sync", check=False)
+    assert r.returncode == 1 and "abgelaufen" in r.stderr
+    # Index eines anderen Repos
+    syp("repo-add", repo, "--name", "extra", "-k", key)
+    r = syp("-r", root, "sync", check=False)
+    assert r.returncode == 1 and "Verwechslungsangriff" in r.stderr
+    syp("repo-add", repo, "--name", "core", "-k", key)
+    syp("-r", root, "sync")
+
+
+def test_hardening_check(tmp_path):
+    rec = tmp_path / "rec"
+    rec.mkdir()
+    (rec / "x.c").write_text("int main(void){char b[64]; return b[0];}\n")
+    def recipe(flags, extra=""):
+        (rec / "SYPBUILD.toml").write_text(f'''
+[package]
+name = "x"
+version = "1-1"
+[[source]]
+path = "x.c"
+[build]
+build = 'cc {flags} -o x x.c'
+package = 'install -Dm755 x "$DESTDIR/usr/bin/x"'
+{extra}
+''')
+    recipe("$CFLAGS $LDFLAGS -fPIE -pie")
+    out = syp("build", rec / "SYPBUILD.toml", "-o", tmp_path / "ok").stdout
+    assert "ohne PIE 0" in out and "ausf. Stack 0" in out
+    with tarfile.open(tmp_path / "ok/x-1-1-x86_64.syp") as tf:
+        h = json.loads(tf.extractfile(".SYPINFO.json").read())["origin"]["hardening"]
+    assert h["elf"] == 1 and h["no_pie"] == 0 and h["no_bind_now"] == 0
+    recipe("-no-pie -Wl,-z,execstack -Wl,-z,norelro")
+    r = syp("build", rec / "SYPBUILD.toml", "-o", tmp_path / "bad", check=False)
+    assert r.returncode == 1 and "Härtungsprüfung fehlgeschlagen" in r.stderr
+    assert "kein PIE" in r.stdout and "ausführbarer Stack" in r.stdout
+    recipe("-no-pie", '[options]\nhardening = "warn"\nhardening_reason = "Test"')
+    syp("build", rec / "SYPBUILD.toml", "-o", tmp_path / "warn")
+
+
+def test_security_audit_and_upgrade(env):
+    tmp, key, root, publish_, S, plan, pk = env
+    publish_(pk("openssl", "3.5.1-1"), pk("curl", "8.14.0-1"), pk("libfoo", "1-1"))
+    S("install", "openssl", "curl", "libfoo")
+    publish_(pk("openssl", "3.5.2-1", security=["CVE-2025-9230", "CVE-2025-9231"]),
+             pk("curl", "8.15.0-1"), pk("libfoo", "2-1", security=["CVE-2025-0001"]))
+    S("sync")
+    r = syp("-r", root, "audit", check=False)
+    assert r.returncode == 1 and "openssl 3.5.1-1 -> 3.5.2-1: CVE-2025-9230 CVE-2025-9231" in r.stdout
+    audit = json.loads(syp("-r", root, "audit", "--json", check=False).stdout)
+    assert {a["name"] for a in audit} == {"openssl", "libfoo"}
+    assert names(plan("upgrade", "--security", "--no-sync")) == {"openssl": "3.5.2-1", "libfoo": "2-1"}
+    S("upgrade", "--security", "--no-sync")
+    assert "Keine bekannten Sicherheitslücken" in syp("-r", root, "audit").stdout
+    assert json.loads(syp("-r", root, "info", "curl", "--json").stdout)["version"] == "8.14.0-1"

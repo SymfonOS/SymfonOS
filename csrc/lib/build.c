@@ -13,6 +13,7 @@
 #include <unistd.h>
 
 #include "core.h"
+#include "harden.h"
 #include "pkg.h"
 #include "toml.h"
 
@@ -571,8 +572,23 @@ char *build_recipe(const char *recipe, const char *outdir, const seckey *signer,
         free(sdir);
     }
     if (!fail) {
-        post_process(dest, jgetb(jget(r, "options"), "strip", 1));
-        out = syp_build(dest, info, outdir, signer);
+        jval *opts = jget(r, "options");
+        post_process(dest, jgetb(opts, "strip", 1));
+        harden_report hr;
+        const char *mode = jgets(opts, "hardening", "strict");
+        if (strcmp(mode, "strict") && !jgets(opts, "hardening_reason", NULL))
+            printf("    Hinweis: hardening = \"%s\" ohne hardening_reason\n", mode);
+        if (harden_check(dest, mode, &hr)) {
+            fail = 1;
+        } else {
+            jval *origin = jget(info, "origin");
+            jval *hj = harden_json(&hr);
+            jset(hj, "mode", jstr(mode));
+            if (jgets(opts, "hardening_reason", NULL)) jset(hj, "reason", jstr(jgets(opts, "hardening_reason", "")));
+            jset(origin, "hardening", hj);
+            out = syp_build(dest, info, outdir, signer);
+        }
+        harden_free(&hr);
     }
     if (!o->keep_work) rm_rf(work);
     else printf("   Arbeitsverzeichnis: %s\n", work);
