@@ -50,7 +50,8 @@ jobs:
           QT_QPA_PLATFORM: offscreen
           SYMFONOS_NET_TESTS: "1"   # u. a. Microsoft-UEFI-Zertifikate für symfonos-secureboot laden und prüfen
         run: |
-          pytest -q 2>&1 | tee pytest.log; rc=${PIPESTATUS[0]}
+          pytest -q -rs 2>&1 | tee pytest.log; rc=${PIPESTATUS[0]}
+          echo "::notice title=pytest::$(grep -E '^SKIPPED|passed|failed' pytest.log | tail -8 | sed ':a;N;$!ba;s/\n/%0A/g')"
           if [ "$rc" -ne 0 ]; then
             echo "::error title=pytest::$(tail -c 3500 pytest.log | sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g')"
           fi
