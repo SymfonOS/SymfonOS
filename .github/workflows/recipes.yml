@@ -26,9 +26,12 @@ jobs:
           for r in distro/recipes/*/SYPBUILD.toml; do
             grep -q 'sha256 = "TODO"' "$r" || continue
             name=$(basename "$(dirname "$r")")
-            if ! out=$(csrc/bin/syp sums "$r" 2>&1); then
+            out=$(csrc/bin/syp sums "$r" 2>&1); rc=$?
+            if ((rc)); then
               failed+=("$name")
-              errs+="$name: $(echo "$out" | grep -E 'Fehler|Download|!!' | tail -1)%0A"   # eine Annotation (GitHub begrenzt die Anzahl)
+              why=$(echo "$out" | grep -E '!!|Fehler' | tail -1)
+              ((rc > 128)) && why="abgebrochen durch Signal $((rc - 128)) nach: $(echo "$out" | tail -1)"
+              errs+="$name (rc=$rc): ${why:-$(echo "$out" | tail -1)}%0A"   # eine Annotation (GitHub begrenzt die Anzahl)
             fi
           done
           if ((${#failed[@]})); then
@@ -41,6 +44,11 @@ jobs:
           git config user.name "symfonOS CI"
           git config user.email "ci@users.noreply.github.com"
           git commit -am "Rezepte: sha256 der Quellen eingetragen [skip ci]"
-          git push
+          # main kann sich während des Laufs bewegt haben: neu aufsetzen statt Prüfsummen zu verlieren
+          for i in 1 2 3 4; do
+            git pull --rebase -q origin main && git push -q origin HEAD:main && exit 0
+            sleep $((i * 5))
+          done
+          exit 1
       - name: Abhängigkeitsgraph prüfen
         run: csrc/bin/syp buildall distro/recipes --repo /tmp/dry -n | tail -3

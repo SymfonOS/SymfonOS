@@ -4,12 +4,12 @@ name = "expat"
 version = "2.7.1-1"
 summary = "XML-Parser"
 license = "MIT"
-url = "https://prdownloads.sourceforge.net/expat/"
+url = "https://github.com/libexpat/libexpat/releases/download/R_2_7_1/"
 depends = ["glibc"]
 provides = ["so:libexpat.so.1"]
 
 [[source]]
-url = "https://prdownloads.sourceforge.net/expat/expat-2.7.1.tar.xz"
+url = "https://github.com/libexpat/libexpat/releases/download/R_2_7_1/expat-2.7.1.tar.xz"
 sha256 = "TODO"
 
 [build]
