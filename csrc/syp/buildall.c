@@ -7,8 +7,10 @@
  * - Rezepte: REZEPTE/<name>/SYPBUILD.toml
  * - Reihenfolge: topologisch über depends + makedepends; Zyklen werden gemeldet und alphabetisch gebrochen.
  * - Bereits im Pool vorhandene Paketversionen werden übersprungen -> fortsetzbar (CI in Etappen).
- * - Mit --root wird in einer Chroot-Bauumgebung gebaut: Abhängigkeiten werden dort per syp aus dem
- *   lokalen Repo installiert, Quellen vorab auf dem Host geladen; signiert wird auf dem Host.
+ * - Mit --root wird in einer Chroot-Bauumgebung gebaut: der Host lädt Quellen, entpackt sie in die
+ *   Wurzel und führt prepare/build/check/package per chroot aus (syp muss dort nicht vorhanden sein).
+ *   Jedes gebaute Paket wird sofort in die Wurzel installiert (LFS-Prinzip; --no-install schaltet ab),
+ *   unverwaltete Dateien der temporären Werkzeuge werden dabei überschrieben. Signiert wird auf dem Host.
  * - --max-minutes: sauber beenden, wenn das Zeitbudget erschöpft ist (Exit-Code 3 = es gibt noch Arbeit).
  */
 #define _GNU_SOURCE
@@ -115,40 +117,15 @@ static void release_root(const char *broot) {
     sh("for m in run sys proc dev; do mountpoint -q '%s/'$m && umount -l '%s/'$m; done; true", broot, broot);
 }
 
-static int prefetch_sources(recipe *r, const char *cache) {
-    jval *src = jgeta(r->r, "source");
-    mkdir_p(cache, 0755);
-    for (size_t i = 0; src && i < src->n; i++) {
-        const char *url = jgets(src->items[i], "url", NULL), *sum = jgets(src->items[i], "sha256", "");
-        if (!url) continue;
-        const char *fname = jgets(src->items[i], "filename", path_basename(url));
-        char *dest = path_join(cache, fname), h[65];
-        if (!path_exists(dest)) {
-            printf("  Lade %s\n", url);
-            fflush(stdout);
-            if (fetch_url(url, dest)) {
-                free(dest);
-                return -1;
-            }
-        }
-        if (*sum && strcmp(sum, "TODO") && (sha256_file(dest, h) || strcmp(h, sum))) {
-            set_error("sha256 falsch: %s", url);
-            unlink(dest);
-            free(dest);
-            return -1;
-        }
-        free(dest);
-    }
-    return 0;
-}
-
-static char *build_in_root(recipe *r, const char *broot, const char *repo, const build_opts *o) {
-    /* Abhängigkeiten in der Bauumgebung installieren */
+static char *build_in_root(recipe *r, const char *broot, const build_opts *o) {
+    /* Abhängigkeiten aus dem lokalen Repo in die Bauumgebung (meist schon vorhanden) */
     if (r->atoms.n) {
         sbuf cmd = {0};
         sb_init(&cmd);
-        sb_addf(&cmd, "syp -q -r '%s' sync >/dev/null && syp -r '%s' -y install --as-dep", broot, broot);
+        sb_addf(&cmd, "syp -q -r '%s' sync >/dev/null && syp -r '%s' -y install --as-dep --overwrite '/*'", broot,
+                broot);
         for (size_t i = 0; i < r->atoms.n; i++) sb_addf(&cmd, " '%s'", r->atoms.v[i]);
+        sb_add(&cmd, " >/dev/null");
         int rc = sh("%s", cmd.s);
         free(cmd.s);
         if (rc) {
@@ -156,40 +133,11 @@ static char *build_in_root(recipe *r, const char *broot, const char *repo, const
             return NULL;
         }
     }
-    char *cache = path_join(broot, "var/cache/syp/sources");
-    if (prefetch_sources(r, cache)) {
-        free(cache);
-        return NULL;
-    }
-    free(cache);
-    char *work = path_join(broot, "var/tmp/syp-build");
-    char *rdir = path_join(work, r->name);
-    rm_rf(rdir);
-    static const char *ign[] = {".git", NULL};
-    if (copy_tree(r->dir, rdir, ign)) {
-        free(work);
-        free(rdir);
-        return NULL;
-    }
-    char *outdir = path_join(work, "out");
-    rm_rf(outdir);
+    build_opts bo = *o;
+    bo.chroot = broot;
+    char *outdir = path_join(broot, "var/tmp/syp-out");
     mkdir_p(outdir, 0755);
-    int rc = sh("chroot '%s' /usr/bin/env -i HOME=/root TERM=xterm PATH=/usr/bin:/usr/sbin "
-                "SYP_SRCCACHE=/var/cache/syp/sources SOURCE_DATE_EPOCH=%s "
-                "/usr/bin/syp build /var/tmp/syp-build/%s/SYPBUILD.toml -o /var/tmp/syp-build/out %s",
-                broot, getenv("SOURCE_DATE_EPOCH") ? getenv("SOURCE_DATE_EPOCH") : "1700000000", r->name,
-                o->nocheck ? "--nocheck" : "");
-    char *res = NULL;
-    if (rc == 0) res = path_join(outdir, r->pkgfile);
-    else set_error("Bau von %s fehlgeschlagen (%d)", r->name, rc);
-    if (res && !path_exists(res)) {
-        set_error("Bau von %s lieferte kein Paket %s", r->name, r->pkgfile);
-        free(res);
-        res = NULL;
-    }
-    rm_rf(rdir);
-    free(work);
-    free(rdir);
+    char *res = build_recipe(r->file, outdir, NULL, &bo);
     free(outdir);
     return res;
 }
@@ -198,7 +146,7 @@ int cmd_buildall(int argc, char **argv, const char *root) {
     (void)root;
     const char *rdir = NULL, *repo = NULL, *key = NULL, *broot = NULL, *only = NULL, *rname = "symfonos";
     const char *arch = "x86_64";
-    int maxmin = 0, nocheck = 0, update_sums = 0, keep_going = 0, dry = 0;
+    int maxmin = 0, nocheck = 0, update_sums = 0, keep_going = 0, dry = 0, install_built = 1;
     for (int i = 0; i < argc; i++) {
         const char *a = argv[i];
         int more = i + 1 < argc;
@@ -212,6 +160,7 @@ int cmd_buildall(int argc, char **argv, const char *root) {
         else if (!strcmp(a, "--nocheck")) nocheck = 1;
         else if (!strcmp(a, "--update-sums")) update_sums = 1;
         else if (!strcmp(a, "--keep-going")) keep_going = 1;
+        else if (!strcmp(a, "--no-install")) install_built = 0;
         else if (!strcmp(a, "-n") || !strcmp(a, "--dry-run")) dry = 1;
         else if (a[0] == '-') die("Unbekannte Option für buildall: %s", a);
         else rdir = a;
@@ -316,7 +265,7 @@ int cmd_buildall(int argc, char **argv, const char *root) {
         if (!br || prepare_root(br, repo_abs, pubpath)) die("Bauumgebung %s nicht nutzbar", broot);
         broot = br;
     }
-    build_opts bo = {nocheck, update_sums, 0, getenv("SYP_SRCCACHE")};
+    build_opts bo = {nocheck, update_sums, 0, getenv("SYP_SRCCACHE"), NULL};
     char *pool = path_join(repo_abs, "pool");
     for (size_t i = 0; i < order.n; i++) {
         recipe *r = order.v[i];
@@ -340,7 +289,7 @@ int cmd_buildall(int argc, char **argv, const char *root) {
         } else {
             printf("%s==> [%zu/%zu] %s %s%s\n", col("1;34"), i + 1, order.n, r->name, r->version, col_end());
             fflush(stdout);
-            char *res = broot ? build_in_root(r, broot, repo_abs, &bo) : build_recipe(r->file, pd, NULL, &bo);
+            char *res = broot ? build_in_root(r, broot, &bo) : build_recipe(r->file, pd, NULL, &bo);
             if (res && k && syp_resign(res, k)) {
                 free(res);
                 res = NULL;
@@ -353,6 +302,13 @@ int cmd_buildall(int argc, char **argv, const char *root) {
                 }
             }
             if (res && repo_index_add(repo_abs, rname, arch, k, target)) {
+                free(res);
+                res = NULL;
+            }
+            if (res && broot && install_built &&
+                sh("syp -q -r '%s' sync >/dev/null && syp -r '%s' -y install --overwrite '/*' '%s' >/dev/null", broot,
+                   broot, r->name)) {
+                set_error("Installation von %s in die Bauumgebung fehlgeschlagen", r->name);
                 free(res);
                 res = NULL;
             }

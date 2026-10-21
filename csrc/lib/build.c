@@ -133,6 +133,37 @@ static char *fetch_source(const char *url, const char *fname, const char *srccac
     return dest;
 }
 
+int recipe_fetch(const char *recipe, const char *dir, int quiet) {
+    jval *r = recipe_load(recipe);
+    if (!r) return -1;
+    mkdir_p(dir, 0755);
+    jval *src = jgeta(r, "source");
+    int rc = 0;
+    for (size_t i = 0; src && i < src->n && !rc; i++) {
+        const char *url = jgets(src->items[i], "url", NULL), *sum = jgets(src->items[i], "sha256", "");
+        if (!url) continue;
+        const char *fname = jgets(src->items[i], "filename", path_basename(url));
+        char *f = fetch_source(url, fname, dir), h[65];
+        if (!f) {
+            rc = -1;
+            break;
+        }
+        if (!*sum || !strcmp(sum, "TODO")) {
+            set_error("%s: keine sha256 im Rezept (syp build --update-sums)", url);
+            rc = -1;
+        } else if (sha256_file(f, h) || strcmp(h, sum)) {
+            set_error("sha256 falsch: %s (erwartet %s, erhalten %s)", url, sum, h);
+            unlink(f);
+            rc = -1;
+        } else if (!quiet) {
+            puts(f);
+        }
+        free(f);
+    }
+    json_free(r);
+    return rc;
+}
+
 int recipe_fill_sums(const char *recipe, const char *srccache) {
     jval *r = recipe_load(recipe);
     if (!r) return -1;
@@ -194,13 +225,112 @@ static void post_process(const char *dir, int strip) {
     if (n >= 0) free(list);
 }
 
-static char **build_env(const char *src, const char *dest, const char *rdir, const jval *pk, const jval *opts) {
+/* Standard-Schritte je Build-Style; Rezepte überschreiben einzelne Schritte oder ergänzen
+ * configure_flags/make_flags/install_flags sowie pre_configure/post_install. */
+static char *style_step(const jval *b, const char *step) {
+    const char *style = jgets(b, "style", NULL);
+    if (!style) return NULL;
+    const char *cf = jgets(b, "configure_flags", ""), *mf = jgets(b, "make_flags", ""),
+               *inf = jgets(b, "install_flags", ""), *pre = jgets(b, "pre_configure", ""),
+               *post = jgets(b, "post_install", "");
+    int run_check = jgetb(b, "run_check", 0);
+    if (!strcmp(step, "prepare")) return *pre ? xasprintf("cd \"$S\"\n%s", pre) : NULL;
+    if (!strcmp(style, "autotools")) {
+        if (!strcmp(step, "build"))
+            return xasprintf("cd \"$S\"\n./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var "
+                             "--disable-static %s\nmake %s",
+                             cf, mf);
+        if (!strcmp(step, "check")) return run_check ? xstrdup("cd \"$S\"\nmake check") : NULL;
+        if (!strcmp(step, "package"))
+            return xasprintf("cd \"$S\"\nmake DESTDIR=\"$DESTDIR\" install %s\n%s", inf, post);
+    } else if (!strcmp(style, "make")) {
+        if (!strcmp(step, "build")) return xasprintf("cd \"$S\"\nmake %s", mf);
+        if (!strcmp(step, "check")) return run_check ? xstrdup("cd \"$S\"\nmake check") : NULL;
+        if (!strcmp(step, "package"))
+            return xasprintf("cd \"$S\"\nmake DESTDIR=\"$DESTDIR\" PREFIX=/usr install %s\n%s", inf, post);
+    } else if (!strcmp(style, "meson")) {
+        if (!strcmp(step, "build"))
+            return xasprintf("meson setup \"$S/_build\" \"$S\" --prefix=/usr --libexecdir=lib --sbindir=bin "
+                             "--buildtype=release -Dwrap_mode=nodownload -Db_pie=true %s\nninja -C \"$S/_build\" %s",
+                             cf, mf);
+        if (!strcmp(step, "check")) return run_check ? xstrdup("meson test -C \"$S/_build\" --print-errorlogs") : NULL;
+        if (!strcmp(step, "package"))
+            return xasprintf("DESTDIR=\"$DESTDIR\" ninja -C \"$S/_build\" install %s\n%s", inf, post);
+    } else if (!strcmp(style, "cmake")) {
+        if (!strcmp(step, "build"))
+            return xasprintf("cmake -S \"$S\" -B \"$S/_build\" -G Ninja -DCMAKE_INSTALL_PREFIX=/usr "
+                             "-DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF %s\n"
+                             "cmake --build \"$S/_build\" %s",
+                             cf, mf);
+        if (!strcmp(step, "check")) return run_check ? xstrdup("ctest --test-dir \"$S/_build\" --output-on-failure") : NULL;
+        if (!strcmp(step, "package"))
+            return xasprintf("DESTDIR=\"$DESTDIR\" cmake --install \"$S/_build\" %s\n%s", inf, post);
+    } else if (!strcmp(style, "python")) {
+        if (!strcmp(step, "build"))
+            return xasprintf("cd \"$S\"\npip3 wheel -w dist --no-cache-dir --no-build-isolation --no-deps %s .", cf);
+        if (!strcmp(step, "package"))
+            return xasprintf("cd \"$S\"\npip3 install --root=\"$DESTDIR\" --no-index --no-deps --no-user "
+                             "--no-compile dist/*.whl %s\n%s",
+                             inf, post);
+    } else if (!strcmp(style, "perl")) {
+        if (!strcmp(step, "build")) return xasprintf("cd \"$S\"\nperl Makefile.PL INSTALLDIRS=vendor %s\nmake %s", cf, mf);
+        if (!strcmp(step, "package"))
+            return xasprintf("cd \"$S\"\nmake DESTDIR=\"$DESTDIR\" install %s\n%s", inf, post);
+    } else if (!strcmp(style, "meta")) {
+        if (!strcmp(step, "package")) return xstrdup("mkdir -p \"$DESTDIR/usr/share/symfonos/meta\"\n"
+                                                     "echo \"$PKGNAME\" > \"$DESTDIR/usr/share/symfonos/meta/$PKGNAME\"");
+    }
+    return NULL;
+}
+
+/* Quellbaum: [build] dir = "..." oder das einzige Verzeichnis in SRCDIR */
+static char *source_dir(const char *src, const jval *b) {
+    const char *d = jgets(b, "dir", NULL);
+    if (d) return path_join(src, d);
+    struct dirent **list;
+    int n = scandir(src, &list, NULL, alphasort);
+    char *only = NULL;
+    int dirs = 0, other = 0;
+    for (int i = 0; i < n; i++) {
+        const char *x = list[i]->d_name;
+        if (strcmp(x, ".") && strcmp(x, "..")) {
+            char *p = path_join(src, x);
+            if (is_dir(p)) {
+                dirs++;
+                free(only);
+                only = p;
+                p = NULL;
+            } else {
+                other++;
+            }
+            free(p);
+        }
+        free(list[i]);
+    }
+    if (n >= 0) free(list);
+    if (dirs == 1 && !other) return only;
+    free(only);
+    return xstrdup(src);
+}
+
+static char **build_env(const char *src, const char *sdir, const char *dest, const char *rdir, const jval *pk,
+                        const jval *opts, int isolated) {
     strvec env = {0};
     extern char **environ;
-    for (char **e = environ; *e; e++)
-        if (!str_starts(*e, "SRCDIR=") && !str_starts(*e, "DESTDIR=") && !str_starts(*e, "CFLAGS=") &&
-            !str_starts(*e, "CXXFLAGS=") && !str_starts(*e, "LDFLAGS=") && !str_starts(*e, "MAKEFLAGS="))
-            sv_push(&env, *e);
+    if (isolated) {
+        /* Chroot: keine Host-Umgebung durchreichen */
+        sv_push(&env, "HOME=/root");
+        sv_push(&env, "TERM=xterm");
+        sv_push(&env, "LC_ALL=C.UTF-8");
+        sv_push(&env, "PATH=/usr/bin:/usr/sbin");
+        const char *sde = getenv("SOURCE_DATE_EPOCH");
+        if (sde) sv_push_own(&env, xasprintf("SOURCE_DATE_EPOCH=%s", sde));
+    } else {
+        for (char **e = environ; *e; e++)
+            if (!str_starts(*e, "SRCDIR=") && !str_starts(*e, "DESTDIR=") && !str_starts(*e, "CFLAGS=") &&
+                !str_starts(*e, "CXXFLAGS=") && !str_starts(*e, "LDFLAGS=") && !str_starts(*e, "MAKEFLAGS="))
+                sv_push(&env, *e);
+    }
     const char *ver = jgets(pk, "version", "0");
     char *v = xstrdup(ver), *dash = strrchr(v, '-'), *colon = strchr(v, ':');
     char *rel = dash ? xstrdup(dash + 1) : xstrdup("1");
@@ -208,6 +338,7 @@ static char **build_env(const char *src, const char *dest, const char *rdir, con
     long nproc = sysconf(_SC_NPROCESSORS_ONLN);
     const char *cf = jgets(opts, "cflags", DEF_CFLAGS), *lf = jgets(opts, "ldflags", DEF_LDFLAGS);
     sv_push_own(&env, xasprintf("SRCDIR=%s", src));
+    sv_push_own(&env, xasprintf("S=%s", sdir));
     sv_push_own(&env, xasprintf("DESTDIR=%s", dest));
     sv_push_own(&env, xasprintf("pkgdir=%s", dest));
     sv_push_own(&env, xasprintf("RECIPEDIR=%s", rdir));
@@ -226,19 +357,30 @@ static char **build_env(const char *src, const char *dest, const char *rdir, con
     return env.v;
 }
 
+static char *default_srccache(const build_opts *o) {
+    if (o->srccache && *o->srccache) return xstrdup(o->srccache);
+    if (geteuid() == 0) return xstrdup("/var/cache/syp/sources");
+    const char *x = getenv("XDG_CACHE_HOME"), *h = getenv("HOME");
+    if (x && *x) return xasprintf("%s/syp/sources", x);
+    return xasprintf("%s/.cache/syp/sources", h && *h ? h : "/tmp");
+}
+
 char *build_recipe(const char *recipe, const char *outdir, const seckey *signer, const build_opts *o) {
     char *rpath = realpath(recipe, NULL);
     if (!rpath) {
         set_error("%s: %s", recipe, strerror(errno));
         return NULL;
     }
-    if (o->update_sums && recipe_fill_sums(rpath, o->srccache)) {
+    char *cache = default_srccache(o);
+    if (o->update_sums && recipe_fill_sums(rpath, cache)) {
         free(rpath);
+        free(cache);
         return NULL;
     }
     jval *r = recipe_load(rpath);
     if (!r) {
         free(rpath);
+        free(cache);
         return NULL;
     }
     char *rdir = path_dirname(rpath);
@@ -248,6 +390,7 @@ char *build_recipe(const char *recipe, const char *outdir, const seckey *signer,
         json_free(r);
         free(rdir);
         free(rpath);
+        free(cache);
         return NULL;
     }
     jval *info = jcopy(pk);
@@ -272,11 +415,19 @@ char *build_recipe(const char *recipe, const char *outdir, const seckey *signer,
     jset(info, "origin", origin);
     char *out = NULL;
     if (info_validate(info)) goto done;
-    char *work = make_tempdir("syp-build-");
+    char *work;
+    if (o->chroot) {
+        char *base = path_join(o->chroot, "var/tmp/syp-build");
+        mkdir_p(base, 0755);
+        work = xasprintf("%s/%s-XXXXXX", base, jgets(pk, "name", "x"));
+        free(base);
+        if (!mkdtemp(work)) die("mkdtemp %s", work);
+    } else {
+        work = make_tempdir("syp-build-");
+    }
     char *src = path_join(work, "src"), *dest = path_join(work, "pkg");
     mkdir_p(src, 0755);
     mkdir_p(dest, 0755);
-    const char *cache = o->srccache ? o->srccache : "/var/cache/syp/sources";
     mkdir_p(cache, 0755);
     jval *sources = jgeta(r, "source");
     int fail = 0;
@@ -329,17 +480,57 @@ char *build_recipe(const char *recipe, const char *outdir, const seckey *signer,
         }
     }
     if (!fail) {
-        char **env = build_env(src, dest, rdir, pk, jget(r, "options"));
+        size_t rl = o->chroot ? strlen(o->chroot) : 0;
+        while (rl > 1 && o->chroot[rl - 1] == '/') rl--;
+        const char *csrc = o->chroot ? src + rl : src, *cdest = o->chroot ? dest + rl : dest;
+        char *crdir = NULL;
+        if (o->chroot) {
+            /* Rezeptverzeichnis in die Wurzel spiegeln, damit $RECIPEDIR (Patches) erreichbar ist */
+            char *rd = path_join(work, "recipe");
+            static const char *ig[] = {".git", NULL};
+            copy_tree(rdir, rd, ig);
+            crdir = xstrdup(rd + rl);
+            free(rd);
+        }
+        char *sdir = source_dir(src, jget(r, "build"));
+        const char *csdir = o->chroot ? sdir + rl : sdir;
+        char **env = build_env(csrc, csdir, cdest, crdir ? crdir : rdir, pk, jget(r, "options"), o->chroot != NULL);
         const char *steps[] = {"prepare", "build", "check", "package", NULL};
         jval *b = jget(r, "build");
         for (const char **st = steps; *st && !fail; st++) {
             if (!strcmp(*st, "check") && o->nocheck) continue;
+            char *gen = NULL;
             const char *script = jgets(b, *st, NULL);
+            if (!script) script = gen = style_step(b, *st);
             if (!script) continue;
             printf("==> %s()\n", *st);
             fflush(stdout);
-            char *argv[] = {"bash", "-euo", "pipefail", "-c", (char *)script, NULL};
-            int rc = run_cmd(argv, src, env);
+            int rc;
+            if (o->chroot) {
+                size_t ne = 0;
+                while (env[ne]) ne++;
+                char **argv = xcalloc(ne + 10, sizeof(char *));
+                size_t k = 0;
+                argv[k++] = "chroot";
+                argv[k++] = (char *)o->chroot;
+                argv[k++] = "/usr/bin/env";
+                argv[k++] = "-i";
+                for (size_t e = 0; e < ne; e++) argv[k++] = env[e];
+                char *wrapped = xasprintf("cd \"$SRCDIR\"\n%s", script);
+                argv[k++] = "/bin/bash";
+                argv[k++] = "-euo";
+                argv[k++] = "pipefail";
+                argv[k++] = "-c";
+                argv[k++] = wrapped;
+                argv[k] = NULL;
+                rc = run_cmd(argv, NULL, NULL);
+                free(wrapped);
+                free(argv);
+            } else {
+                char *argv[] = {"bash", "-euo", "pipefail", "-c", (char *)script, NULL};
+                rc = run_cmd(argv, src, env);
+            }
+            free(gen);
             if (rc) {
                 set_error("%s() fehlgeschlagen (%d)", *st, rc);
                 fail = 1;
@@ -347,6 +538,8 @@ char *build_recipe(const char *recipe, const char *outdir, const seckey *signer,
         }
         for (char **e = env; *e; e++) free(*e);
         free(env);
+        free(crdir);
+        free(sdir);
     }
     if (!fail) {
         post_process(dest, jgetb(jget(r, "options"), "strip", 1));
@@ -362,5 +555,6 @@ done:
     json_free(r);
     free(rdir);
     free(rpath);
+    free(cache);
     return out;
 }

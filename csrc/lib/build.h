@@ -10,6 +10,7 @@ typedef struct {
     int update_sums; /* fehlende sha256 ermitteln und ins Rezept schreiben */
     int keep_work;
     const char *srccache; /* Download-Cache für Quellen */
+    const char *chroot;   /* bauen in dieser Wurzel (Host steuert, Schritte laufen per chroot) */
 } build_opts;
 
 /* Baut ein Rezept; gibt Pfad des .syp zurück (NULL + set_error) */
@@ -17,5 +18,6 @@ char *build_recipe(const char *recipe, const char *outdir, const seckey *signer,
 jval *recipe_load(const char *recipe); /* geparstes TOML */
 char *recipe_pkgfile(const jval *recipe); /* erwarteter Dateiname des Pakets */
 int recipe_fill_sums(const char *recipe, const char *srccache);
+int recipe_fetch(const char *recipe, const char *dir, int quiet); /* Quellen laden + prüfen */
 
 #endif

@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import io
+import os
+import subprocess
 import json
 import tarfile
 
@@ -235,3 +237,73 @@ def test_buildall_dry_run(tmp_path):
     (rec / "x/SYPBUILD.toml").write_text('[package]\nname = "x"\nversion = "1"\n')
     r = syp("buildall", rec, "--repo", tmp_path / "repo", "-n")
     assert "würde bauen: x 1" in r.stdout
+
+
+@pytest.mark.skipif(os.geteuid() != 0, reason="chroot/mount brauchen Root")
+def test_chroot_build(tmp_path):
+    """Bau per chroot: Host steuert, Schritte laufen isoliert in der Wurzel."""
+    r = tmp_path / "chr"
+    for d in ("usr", "etc/alternatives", "tmp", "var/tmp"):
+        (r / d).mkdir(parents=True)
+    for link in ("bin", "sbin", "lib", "lib64"):
+        (r / link).symlink_to(f"usr/{link}")
+    mounts = [("/usr", r / "usr"), ("/etc/alternatives", r / "etc/alternatives")]
+    try:
+        for src, dst in mounts:
+            if subprocess.run(["mount", "--bind", "-o", "ro", src, str(dst)]).returncode:
+                pytest.skip("bind-mount nicht möglich")
+        rec = tmp_path / "rec"
+        rec.mkdir()
+        (rec / "hello.c").write_text('#include <stdio.h>\nint main(void){puts("chroot");return 0;}\n')
+        (rec / "SYPBUILD.toml").write_text('''
+[package]
+name = "hello"
+version = "1.0-1"
+[[source]]
+path = "hello.c"
+[build]
+build = 'cc -o hello hello.c; test ! -e "$RECIPEDIR/../../../../../home/user/symfonos"; test -f "$RECIPEDIR/hello.c"'
+check = './hello | grep -q chroot'
+package = 'install -Dm755 hello "$DESTDIR/usr/bin/hello"'
+''')
+        syp("build", rec / "SYPBUILD.toml", "--chroot", r, "-o", tmp_path / "out")
+    finally:
+        for _, dst in reversed(mounts):
+            subprocess.run(["umount", str(dst)])
+    assert not list((r / "var/tmp/syp-build").iterdir())
+    key, pub = keygen(tmp_path)
+    root = setup_root(tmp_path, tmp_path / "repo", pub)
+    syp("-r", root, "-y", "install", "--allow-unsigned", tmp_path / "out/hello-1.0-1-x86_64.syp")
+    assert subprocess.run([root / "usr/bin/hello"], capture_output=True, text=True).stdout == "chroot\n"
+
+
+def test_build_style_make_and_source_dir(tmp_path):
+    proj = tmp_path / "src/tool-2.0"
+    proj.mkdir(parents=True)
+    (proj / "tool.c").write_text('int main(void){return 0;}\n')
+    (proj / "Makefile").write_text(
+        "all:\n\tcc $(CFLAGS) -o tool tool.c\ninstall:\n\tinstall -Dm755 tool $(DESTDIR)$(PREFIX)/bin/tool\n")
+    rec = tmp_path / "rec"
+    rec.mkdir()
+    with tarfile.open(rec / "tool-2.0.tar.gz", "w:gz") as tf:
+        tf.add(proj, arcname="tool-2.0")
+    (rec / "SYPBUILD.toml").write_text('''
+[package]
+name = "tool"
+version = "2.0-1"
+[[source]]
+path = "tool-2.0.tar.gz"
+[build]
+style = "make"
+pre_configure = 'echo "S=$S" > /dev/null; test -f tool.c'
+post_install = 'install -Dm644 /dev/null "$DESTDIR/usr/share/doc/tool/OK"'
+''')
+    # lokale Archive werden kopiert, nicht entpackt -> Quelle per URL simulieren
+    syp("build", rec / "SYPBUILD.toml", "-o", tmp_path / "o", check=False)
+    (rec / "SYPBUILD.toml").write_text((rec / "SYPBUILD.toml").read_text().replace(
+        'path = "tool-2.0.tar.gz"', f'url = "file://{rec}/tool-2.0.tar.gz"\nsha256 = "TODO"'))
+    syp("build", rec / "SYPBUILD.toml", "-o", tmp_path / "o", "--update-sums")
+    assert 'sha256 = "' in (rec / "SYPBUILD.toml").read_text() and "TODO" not in (rec / "SYPBUILD.toml").read_text()
+    with tarfile.open(tmp_path / "o/tool-2.0-1-x86_64.syp") as tf:
+        files = [f["path"] for f in json.loads(tf.extractfile(".FILES.json").read())]
+    assert "usr/bin/tool" in files and "usr/share/doc/tool/OK" in files

@@ -684,7 +684,8 @@ static void usage(void) {
          "  rollback [TX]             Transaktion zurücknehmen (--system: Btrfs-Snapshot)\n"
          "  clean                     Paket-Cache aufräumen (--keep N)\n"
          "  doctor                    Systemzustand prüfen\n"
-         "  build [REZEPT]            Paket aus SYPBUILD.toml bauen (-o, -k, --nocheck, --update-sums)\n"
+         "  build [REZEPT]            Paket aus SYPBUILD.toml bauen (-o, -k, --nocheck, --update-sums, --chroot W)\n"
+         "  fetch REZEPT...           Quellen eines Rezepts laden und prüfen (-o VERZEICHNIS)\n"
          "  buildall REZEPTE --repo R Alle Rezepte abhängigkeitsgerecht bauen (siehe --help)\n"
          "  pack DIR INFO.json        Verzeichnis als .syp packen (-o, -k)\n"
          "  keygen AUSGABE            Signaturschlüssel erzeugen (--comment)\n"
@@ -729,7 +730,7 @@ int main(int argc, char **argv) {
     strvec pos = {0};
     int as_dep = 0, cascade = 0, nosync = 0, explicit_only = 0, nocheck = 0, update_sums = 0, keep_work = 0, system = 0;
     int limit = 30, keep = -1;
-    const char *out = NULL, *key = NULL, *comment = "", *rname = "symfonos", *arch = "x86_64";
+    const char *out = NULL, *key = NULL, *comment = "", *rname = "symfonos", *arch = "x86_64", *chroot_dir = NULL;
     for (; i < argc; i++) {
         const char *a = argv[i];
         int more = i + 1 < argc;
@@ -755,6 +756,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--comment") && more) comment = argv[++i];
         else if (!strcmp(a, "--name") && more) rname = argv[++i];
         else if (!strcmp(a, "--arch") && more) arch = argv[++i];
+        else if (!strcmp(a, "--chroot") && more) chroot_dir = argv[++i];
         else if (a[0] == '-' && a[1] && strcmp(a, "-")) die("Unbekannte Option für %s: %s", cmd, a);
         else sv_push(&pos, a);
     }
@@ -770,9 +772,16 @@ int main(int argc, char **argv) {
         return c_keygen(pos.v[0], comment);
     }
     if (!strcmp(cmd, "repo-add")) return c_repo_add((int)pos.n, pos.v, rname, arch, key);
+    if (!strcmp(cmd, "fetch")) {
+        if (!pos.n) die("Aufruf: syp fetch REZEPT... [-o VERZEICHNIS]");
+        for (size_t k = 0; k < pos.n; k++)
+            if (recipe_fetch(pos.v[k], out ? out : ".", c.quiet)) die("%s", last_error());
+        return 0;
+    }
     if (!strcmp(cmd, "pack")) return c_pack((int)pos.n, pos.v, out, key);
     if (!strcmp(cmd, "build")) {
-        build_opts o = {nocheck, update_sums, keep_work, getenv("SYP_SRCCACHE")};
+        build_opts o = {nocheck, update_sums, keep_work, getenv("SYP_SRCCACHE"), chroot_dir};
+        if (chroot_dir && geteuid() != 0) die("--chroot benötigt Root-Rechte");
         seckey *k = load_key(key);
         char *p = build_recipe(pos.n ? pos.v[0] : "SYPBUILD.toml", out ? out : ".", k, &o);
         if (!p) die("%s", last_error());
