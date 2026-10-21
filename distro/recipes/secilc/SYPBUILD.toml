@@ -14,9 +14,9 @@ sha256 = "3db2974dd9a3c8403ada0392deff267b0398a74b4e7a0b051af76457270848d1"
 [build]
 build = '''
 cd "$S"
-make PREFIX=/usr SBINDIR=/usr/sbin LIBDIR=/usr/lib SHLIBDIR=/usr/lib
+make PREFIX=/usr SBINDIR=/usr/sbin LIBDIR=/usr/lib SHLIBDIR=/usr/lib secilc secil2conf secil2tree
 '''
 package = '''
 cd "$S"
-make PREFIX=/usr SBINDIR=/usr/sbin LIBDIR=/usr/lib SHLIBDIR=/usr/lib DESTDIR="$DESTDIR" install
+for b in secilc secil2conf secil2tree; do install -Dm755 "$b" "$DESTDIR/usr/bin/$b"; done
 '''
