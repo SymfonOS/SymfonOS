@@ -101,13 +101,13 @@ static int write_sum(const char *recipe, const char *url, const char *sum) {
         } else {
             next = line + strlen(line);
         }
-        char *t = str_trim(xstrdup(line)), *tt = t;
+        char *own = xstrdup(line), *tt = str_trim(own); /* str_trim verschiebt den Anfang: own freigeben */
         if (pending) {
             if (str_starts(tt, "sha256")) {
                 sb_addf(&out, "sha256 = \"%s\"\n", sum);
                 pending = 0;
                 done = 1;
-                free(tt);
+                free(own);
                 continue;
             }
             if (!*tt || tt[0] == '[' || strchr(tt, '=')) {
@@ -119,7 +119,7 @@ static int write_sum(const char *recipe, const char *url, const char *sum) {
         sb_add(&out, line);
         sb_addc(&out, '\n');
         if (!done && str_starts(tt, "url") && strstr(tt, url)) pending = 1;
-        free(tt);
+        free(own);
     }
     if (pending) sb_addf(&out, "sha256 = \"%s\"\n", sum);
     free(copy);

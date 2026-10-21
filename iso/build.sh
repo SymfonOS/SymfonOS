@@ -13,6 +13,8 @@ pacman -Syu --noconfirm --needed archiso base-devel git python-build python-inst
   qt6-svg kpmcore boost yaml-cpp extra-cmake-modules qt6-tools
 make -C "$ROOT/csrc" -j"$(nproc)"   # syp und syp-convert (C) für Schlüssel und Tests
 
+# Downloads von makepkg robuster: HTTP/1.1 (einzelne Server brechen HTTP/2-Übertragungen ab), mehr Versuche
+sed -i "s|^\(\s*'https::/usr/bin/curl\) |\1 --http1.1 --retry 5 --retry-all-errors |" /etc/makepkg.conf
 id "$BUILDER" &>/dev/null || useradd -m "$BUILDER"
 echo "$BUILDER ALL=(ALL) NOPASSWD: /usr/bin/pacman" > /etc/sudoers.d/90-builder
 install -d -o "$BUILDER" "$LOCALREPO"
@@ -37,8 +39,13 @@ done
 while read -r aur; do
   [[ -z $aur || $aur == \#* ]] && continue
   d=/tmp/aur-$aur
-  rm -rf "$d" && sudo -u "$BUILDER" git clone --depth 1 "https://aur.archlinux.org/$aur.git" "$d"
-  build_pkg "$d"
+  ok=0
+  for try in 1 2 3; do   # Netzfehler bei AUR oder Upstream-Servern nicht gleich als Abbruch werten
+    rm -rf "$d"
+    if sudo -u "$BUILDER" git clone --depth 1 "https://aur.archlinux.org/$aur.git" "$d" && build_pkg "$d"; then ok=1; break; fi
+    echo "!! $aur: Versuch $try fehlgeschlagen" >&2; sleep $((try * 15))
+  done
+  ((ok)) || { echo "$aur konnte nicht gebaut werden" >&2; exit 1; }
   pacman -U --noconfirm "$LOCALREPO/$aur"-*.pkg.tar.zst   # Build-Abhängigkeit für Folgepakete
 done < "$ROOT/packaging/aur.txt"
 

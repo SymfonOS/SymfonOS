@@ -430,7 +430,8 @@ def test_fetch_retry_and_sums_keep_layout(tmp_path):
     base = f"http://127.0.0.1:{srv.server_address[1]}"
     rec = tmp_path / "SYPBUILD.toml"
     text = ('[package]\nname = "f"\nversion = "1-1"\n\n[[source]]\nurl = "%s/flaky.txt"\nsha256 = "TODO"\n'
-            'extract = false\n\n[build]\npackage = "true"\n' % base)
+            'extract = false\n\n[build]\n'
+            "package = '''\n  true \\\n    --eingerueckt\n'''\n" % base)   # eingerückte Zeilen (früher: free() auf verschobenen Zeiger)
     rec.write_text(text)
     env = dict(os.environ, SYP_SRCCACHE=str(tmp_path / "cache"), SYP_FETCH_RETRIES="3",
                NO_PROXY="127.0.0.1", no_proxy="127.0.0.1")
