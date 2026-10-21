@@ -1,0 +1,20 @@
+// symfonOS "Studio": maximale vertikale Arbeitsfläche – Dock links, Leiste oben, Auto-Hide
+panels().forEach(function (p) { p.remove(); });
+var top = new Panel;
+top.location = "top";
+top.height = Math.round(gridUnit * 1.4);
+top.hiding = "autohide";
+top.addWidget("org.kde.plasma.kickoff");
+top.addWidget("org.kde.plasma.appmenu");
+top.addWidget("org.kde.plasma.panelspacer");
+top.addWidget("org.kde.plasma.systemmonitor.cpucore");
+top.addWidget("org.kde.plasma.systemtray");
+top.addWidget("org.kde.plasma.digitalclock");
+var side = new Panel;
+side.location = "left";
+side.height = Math.round(gridUnit * 3);
+side.alignment = "center";
+side.lengthMode = "fit";
+side.floating = true;
+side.hiding = "dodgewindows";
+side.addWidget("org.kde.plasma.icontasks");

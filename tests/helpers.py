@@ -14,7 +14,8 @@ def make_pkg(tmp: Path, name: str, version: str, files: dict[str, str] | None = 
         p = tree / rel
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(content)
-    info = PackageInfo(name=name, version=version, arch="x86_64", summary=f"{name} test", **kw)
+    kw.setdefault("summary", f"{name} test")
+    info = PackageInfo(name=name, version=version, arch="x86_64", **kw)
     return build_package(tree, info, out or tmp / "out", signer)
 
 

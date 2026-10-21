@@ -1,0 +1,1 @@
+"""symfonOS Design-Center."""
