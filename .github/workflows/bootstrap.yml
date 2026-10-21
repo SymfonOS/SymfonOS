@@ -69,9 +69,14 @@ jobs:
         id: build
         run: |
           set +e
-          sudo -E env "PATH=$PATH" SYP_KEY="$PWD/keys/release.key" MAX_MINUTES=280 PKGREPO="$PWD/out/repo/symfonos" \
+          # Harte Obergrenze, damit danach genug Zeit zum Sichern bleibt (Job-Timeout 350 min).
+          # buildall hört mit MAX_MINUTES von selbst sauber auf; ein Abbruch in Stufe 1–3 ist unkritisch,
+          # weil jeder Schritt erst nach Erfolg als erledigt gilt und beim nächsten Lauf neu beginnt.
+          sudo -E timeout -k 2m 270m env "PATH=$PATH" SYP_KEY="$PWD/keys/release.key" MAX_MINUTES=250 PKGREPO="$PWD/out/repo/symfonos" \
             bash -c 'cd distro/bootstrap && ./00-prepare.sh && ./10-cross-toolchain.sh && ./20-temp-tools.sh && ./30-chroot-tools.sh && ./40-system.sh' 2>&1 | tee build.log
           rc=${PIPESTATUS[0]}
+          if [ "$rc" -eq 124 ] || [ "$rc" -eq 137 ]; then rc=3; echo "::notice title=Bootstrap::Zeitbudget erreicht, nächster Lauf setzt fort"; fi
+          echo "::notice title=Stand::Stufen: $(sudo ls "$SYM/.stamps" 2>/dev/null | tr '\n' ' ') · Pakete: $(find out/repo -name '*.syp' 2>/dev/null | wc -l)"
           echo "rc=$rc" >> "$GITHUB_OUTPUT"
           if [ "$rc" -ne 0 ] && [ "$rc" -ne 3 ]; then
             echo "::error title=Bootstrap (Exit $rc)::$(grep -v '^ *[0-9.]*%' build.log | tail -c 3500 | sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g')"
@@ -84,9 +89,14 @@ jobs:
           sudo tar --zstd -cpf - -C / "${SYM#/}" "${GITHUB_WORKSPACE#/}/out" 2>/dev/null | split -b 1900M -d -a 2 - state.tar.zst.part
           # Nur ein selbst erzeugter Entwicklungsschlüssel wird gesichert – niemals das Release-Secret
           if [ -f keys/.dev ]; then tar -cf keys.tar keys; else tar -cf keys.tar keys/release.pub; fi
-          gh release delete "$STATE_TAG" --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag 2>/dev/null || true
-          gh release create "$STATE_TAG" --repo "$GITHUB_REPOSITORY" --prerelease --title "Bootstrap-Zwischenstand" \
+          # Erst vollständig hochladen, dann den alten Stand ersetzen: ein fehlgeschlagener Upload
+          # darf den letzten guten Zwischenstand (Stunden Rechenzeit) nicht löschen.
+          tmp="$STATE_TAG-run-$GITHUB_RUN_ID"
+          gh release create "$tmp" --repo "$GITHUB_REPOSITORY" --prerelease --title "Bootstrap-Zwischenstand" \
             --notes "Interner Zustand des Quellcode-Bootstraps (nicht zur Installation gedacht)." state.tar.zst.part* keys.tar
+          gh release delete "$STATE_TAG" --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag || true
+          gh release edit "$tmp" --repo "$GITHUB_REPOSITORY" --tag "$STATE_TAG"
+          gh api -X DELETE "repos/$GITHUB_REPOSITORY/git/refs/tags/$tmp" || true
       - name: ISO erzeugen
         if: steps.build.outputs.rc == '0'
         run: |
@@ -106,7 +116,10 @@ jobs:
           cd out
           iso=$(ls symfonos-base-*.iso)
           split -b 1900M -d -a 2 "$iso" "$iso.part"
-          gh release delete source-nightly --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag 2>/dev/null || true
-          gh release create source-nightly --repo "$GITHUB_REPOSITORY" --prerelease \
+          tmp="source-nightly-run-$GITHUB_RUN_ID"
+          gh release create "$tmp" --repo "$GITHUB_REPOSITORY" --prerelease \
             --title "symfonOS Basissystem aus Quellcode $(date +%Y-%m-%d)" \
-            --notes "Zusammensetzen: cat $iso.part* > $iso" "$iso".part* "$iso.sha256"
+            --notes "Zusammensetzen: cat $iso.part* > $iso" "$iso".part* "$iso.sha256" $(ls smoke-serial.log 2>/dev/null)
+          gh release delete source-nightly --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag || true
+          gh release edit "$tmp" --repo "$GITHUB_REPOSITORY" --tag source-nightly
+          gh api -X DELETE "repos/$GITHUB_REPOSITORY/git/refs/tags/$tmp" || true
