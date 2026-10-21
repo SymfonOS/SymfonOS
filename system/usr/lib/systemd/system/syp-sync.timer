@@ -1,0 +1,11 @@
+[Unit]
+Description=Täglich nach Updates suchen
+
+[Timer]
+OnBootSec=10min
+OnUnitActiveSec=1d
+RandomizedDelaySec=2h
+Persistent=true
+
+[Install]
+WantedBy=timers.target

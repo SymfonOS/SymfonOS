@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Design-Center
+Comment=Erscheinungsbild, Akzentfarbe, Layout und Widgets
+Exec=symfonos-design
+Icon=preferences-desktop-theme
+Categories=Settings;DesktopSettings;
+Terminal=false
+StartupNotify=true

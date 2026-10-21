@@ -1,0 +1,6 @@
+[Unit]
+Description=Auf verfügbare Updates hinweisen
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'n=$(syp -n upgrade --no-sync 2>/dev/null | grep -c "^  "); [ "$n" -gt 0 ] && notify-send -a Software -i system-software-update "Updates verfügbar" "$n Pakete können aktualisiert werden." || true'

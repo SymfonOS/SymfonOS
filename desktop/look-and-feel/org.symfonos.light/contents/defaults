@@ -1,0 +1,24 @@
+[kdeglobals][General]
+ColorScheme=SymfonosLight
+AccentColor=124,92,255
+font=Inter,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+fixed=JetBrains Mono,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+
+[kdeglobals][Icons]
+Theme=Papirus
+
+[kdeglobals][KDE]
+widgetStyle=Breeze
+
+[plasmarc][Theme]
+name=default
+
+[kcminputrc][Mouse]
+cursorTheme=breeze_cursors
+
+[kwinrc][org.kde.kdecoration2]
+library=org.kde.breeze
+theme=Breeze
+
+[kwinrc][Windows]
+BorderlessMaximizedWindows=true

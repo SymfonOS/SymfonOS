@@ -1,0 +1,29 @@
+# Natives syp-Rezept für symfonos-tools (Selbst-Hosting ohne pacman). Bauen: syp build -k release.key
+[package]
+name = "symfonos-tools"
+version = "0.1.0-1"
+arch = "any"
+summary = "symfonOS: syp, Konverter, Software-Center, Design-Center, Assistent, Prüfungsmodus"
+license = "GPL-3.0-or-later"
+url = "https://github.com/thomasrohm23-bit/symfonOS"
+depends = ["python", "python-zstandard", "python-cryptography", "pyside6", "polkit", "snapper",
+           "btrfs-progs", "grub-btrfs", "ollama", "cage", "nftables", "firefox", "libnotify"]
+optdepends = ["qemu-desktop"]
+backup = ["etc/syp/syp.toml", "etc/symfonos/assist.toml"]
+categories = ["System", "PackageManager"]
+
+[[source]]
+path = "."
+dest = "symfonos"
+
+[build]
+build = "cd symfonos && python -m build --wheel --no-isolation --outdir ../dist"
+check = "cd symfonos && QT_QPA_PLATFORM=offscreen python -m pytest -q"
+package = '''
+python -m installer --destdir="$DESTDIR" --prefix=/usr dist/*.whl
+cp -a symfonos/system/. "$DESTDIR/"
+rm -f "$DESTDIR/etc/syp/keys/README"
+install -Dm755 symfonos/exam/symfonos-exam "$DESTDIR/usr/bin/symfonos-exam"
+install -Dm644 symfonos/desktop/snapper/snapper-root.conf "$DESTDIR/usr/share/symfonos/snapper-root.conf"
+install -d "$DESTDIR/usr/share/doc/symfonos" && cp -a symfonos/docs/handbuch/. "$DESTDIR/usr/share/doc/symfonos/"
+'''

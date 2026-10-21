@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Lokales Modell für den Assistenten einrichten: default | small | <pfad.gguf>
+set -euo pipefail
+DIR=/var/lib/symfonos-assist/models
+declare -A URL=(
+  [default]="https://huggingface.co/unsloth/Qwen3-4B-Instruct-2507-GGUF/resolve/main/Qwen3-4B-Instruct-2507-Q4_K_M.gguf"
+  [small]="https://huggingface.co/unsloth/Qwen3-1.7B-GGUF/resolve/main/Qwen3-1.7B-Q4_K_M.gguf"
+)
+choice="${1:-auto}"
+if [[ "$choice" == auto ]]; then
+  mem_gb=$(awk '/MemTotal/ {print int($2/1024/1024)}' /proc/meminfo)
+  choice=$([[ $mem_gb -lt 7 ]] && echo small || echo default)
+  echo "RAM: ${mem_gb} GB -> Modell: $choice"
+fi
+install -d "$DIR"
+if [[ -f "$choice" ]]; then
+  ln -sf "$(realpath "$choice")" "$DIR/model.gguf"
+elif [[ ! -e "$DIR/$choice.gguf" ]]; then
+  echo "Lade ${URL[$choice]} …"
+  curl -fL --retry 3 -o "$DIR/$choice.gguf.part" "${URL[$choice]}"
+  mv "$DIR/$choice.gguf.part" "$DIR/$choice.gguf"
+fi
+[[ -f "$choice" ]] || ln -sf "$DIR/$choice.gguf" "$DIR/model.gguf"
+systemctl is-active --quiet ollama || systemctl start ollama
+for _ in $(seq 30); do curl -sf http://127.0.0.1:11434/api/tags >/dev/null && break; sleep 1; done
+ollama create symfonos-assist -f /usr/share/symfonos-assist/Modelfile
+echo "Assistent bereit (Modell: $choice)."

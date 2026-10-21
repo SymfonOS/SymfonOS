@@ -1,0 +1,29 @@
+# symfonOS – syp-Konfiguration
+arch = "x86_64"
+
+# Signierte Repositories. Kleinere priority = bevorzugt.
+[[repo]]
+name = "symfonos"          # eigene Pakete (Tools, Branding, Rebuilds)
+url = "https://thomasrohm23-bit.github.io/symfonOS/repo/symfonos/x86_64"
+priority = 10
+
+[[repo]]
+name = "core"              # aus Arch [core] konvertiert und neu signiert
+url = "https://thomasrohm23-bit.github.io/symfonOS/repo/core/x86_64"
+priority = 20
+
+[[repo]]
+name = "extra"             # aus Arch [extra] konvertiert und neu signiert
+url = "https://thomasrohm23-bit.github.io/symfonOS/repo/extra/x86_64"
+priority = 30
+
+[snapshots]
+enabled = true
+backend = "snapper"
+
+[cache]
+keep = 3                   # Versionen je Paket für `syp rollback`
+
+[security]
+require_signatures = true
+run_scripts = true          # Skripte konvertierter Fremdpakete laufen trotzdem nur mit --trust-scripts

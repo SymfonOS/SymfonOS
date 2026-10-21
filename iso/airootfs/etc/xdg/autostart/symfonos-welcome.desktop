@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=symfonOS Willkommen
+Exec=sh -c 'test "$USER" = liveuser && kdialog --title "Willkommen bei symfonOS" --yesno "Möchtest du symfonOS jetzt installieren?\nDu kannst das System auch zuerst ausprobieren." && sudo -E calamares'
+OnlyShowIn=KDE;
+X-KDE-autostart-phase=2

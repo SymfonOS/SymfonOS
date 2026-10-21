@@ -30,7 +30,7 @@ def os_release() -> str:
 def summary() -> str:
     """Kurzer Systemsteckbrief für den Prompt (keine persönlichen Daten)."""
     lines = [f"System: {os_release() or 'unbekannt'}", f"Kernel: {platform.release()}",
-             f"Desktop: KDE Plasma (Wayland)"]
+             "Desktop: KDE Plasma (Wayland)"]
     pk = _run(["syp", "list"])
     if pk:
         lines.append(f"Installierte Pakete: {len(pk.splitlines())}")

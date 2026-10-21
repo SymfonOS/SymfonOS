@@ -1,0 +1,14 @@
+# Maintainer: symfonOS <https://github.com/thomasrohm23-bit/symfonOS>
+# Erwartet den öffentlichen Release-Schlüssel in $SYP_RELEASE_PUB (von der CI erzeugt).
+pkgname=symfonos-keyring
+pkgver=1
+pkgrel=1
+pkgdesc="symfonOS: vertrauenswürdige Signaturschlüssel für syp-Repositories"
+arch=('any')
+url="https://github.com/thomasrohm23-bit/symfonOS"
+license=('CC0-1.0')
+
+package() {
+  : "${SYP_RELEASE_PUB:?SYP_RELEASE_PUB nicht gesetzt}"
+  install -Dm644 "$SYP_RELEASE_PUB" "$pkgdir/etc/syp/keys/symfonos-release.pub"
+}

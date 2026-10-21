@@ -1,0 +1,12 @@
+[Unit]
+Description=symfonOS Ersteinrichtung (Treiber, Assistent-Modell)
+Wants=network-online.target
+After=network-online.target ollama.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/lib/symfonos/firstboot.sh
+TimeoutStartSec=45min
+
+[Install]
+WantedBy=multi-user.target

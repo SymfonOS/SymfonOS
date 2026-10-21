@@ -12,7 +12,7 @@
     url = "https://example.org/hello-1.0.tar.gz"
     sha256 = "..."           # Pflicht bei URLs
     [[source]]
-    path = "files/"          # relativ zum Rezept
+    path = "files/"          # relativ zum Rezept (optional: dest = "name")
 
     [build]
     prepare = "..."          # bash, cwd=$SRCDIR
@@ -67,10 +67,13 @@ def build(recipe: Path, out_dir: Path, signer: SecretKey | None, log=print,
                 p = (rdir / s["path"]).resolve()
                 if not p.is_relative_to(rdir):
                     raise PackageError(f"Quellpfad außerhalb des Rezepts: {s['path']}")
+                dest_name = s.get("dest", p.name)
                 if p.is_dir():
-                    shutil.copytree(p, src / p.name, symlinks=True, dirs_exist_ok=True)
+                    shutil.copytree(p, src / dest_name, symlinks=True, dirs_exist_ok=True,
+                                    ignore=shutil.ignore_patterns(".git", "out", "work", "__pycache__",
+                                                                  "*.syp", ".pytest_cache"))
                 else:
-                    shutil.copy2(p, src / p.name)
+                    shutil.copy2(p, src / dest_name)
         env = dict(os.environ, SRCDIR=str(src), DESTDIR=str(dest), RECIPEDIR=str(rdir),
                    PKGNAME=info.name, PKGVER=info.version.split("-")[0],
                    SOURCE_DATE_EPOCH=os.environ.get("SOURCE_DATE_EPOCH", "1700000000"))

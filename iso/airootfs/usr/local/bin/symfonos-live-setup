@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Legt den Live-Benutzer an (nur auf dem Live-Medium; vom Installer entfernt).
+set -euo pipefail
+if ! id liveuser &>/dev/null; then
+  useradd -m -u 1000 -G wheel,audio,video,realtime,lp -s /bin/bash -c "symfonOS Live" liveuser
+  passwd -d liveuser
+fi
+install -d -o liveuser -g liveuser /home/liveuser/Desktop /home/liveuser/.config/autostart
+install -m 644 -o liveuser -g liveuser /usr/share/applications/symfonos-install.desktop /home/liveuser/Desktop/
+if grep -qw 'symfonos.a11y=1' /proc/cmdline; then
+  install -m 644 -o liveuser -g liveuser /usr/share/applications/org.gnome.Orca.desktop \
+    /home/liveuser/.config/autostart/orca.desktop 2>/dev/null || true
+  sudo -u liveuser kwriteconfig6 --file kaccessrc --group ScreenReader --key Enabled true || true
+fi

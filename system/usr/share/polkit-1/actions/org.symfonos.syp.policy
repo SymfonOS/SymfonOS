@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+ "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
+<policyconfig>
+  <vendor>symfonOS</vendor>
+  <action id="org.symfonos.syp.run">
+    <description>Software installieren, aktualisieren oder entfernen</description>
+    <description xml:lang="en">Install, update or remove software</description>
+    <message>Zum Ändern der Software ist eine Authentifizierung erforderlich.</message>
+    <message xml:lang="en">Authentication is required to change installed software.</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/syp</annotate>
+  </action>
+  <action id="org.symfonos.exam">
+    <description>Prüfungsmodus starten oder beenden</description>
+    <message>Zum Umschalten des Prüfungsmodus ist eine Authentifizierung erforderlich.</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/symfonos-exam</annotate>
+  </action>
+</policyconfig>

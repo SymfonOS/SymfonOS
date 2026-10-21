@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Assistent
+Comment=Lokaler KI-Helfer für Fragen und Fehlersuche
+Exec=symfonos-assist-gui
+Icon=help-browser
+Categories=System;Utility;
+Terminal=false
+StartupNotify=true

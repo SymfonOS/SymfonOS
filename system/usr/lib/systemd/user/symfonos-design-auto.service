@@ -1,0 +1,7 @@
+[Unit]
+Description=Hell/Dunkel nach Uhrzeit (Design-Center: Automatisch)
+After=plasma-workspace.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/symfonos-design --apply-auto

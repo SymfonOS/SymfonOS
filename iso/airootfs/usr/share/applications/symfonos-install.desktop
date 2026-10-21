@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=symfonOS installieren
+Name[en]=Install symfonOS
+Comment=symfonOS dauerhaft auf diesem Rechner installieren
+Exec=sudo -E calamares
+Icon=symfonos
+Terminal=false
+Categories=System;

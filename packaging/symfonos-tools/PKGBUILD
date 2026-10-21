@@ -1,0 +1,38 @@
+# Maintainer: symfonOS <https://github.com/thomasrohm23-bit/symfonOS>
+# Baut aus dem Arbeitsverzeichnis des Repos (iso/build.sh bzw. CI).
+pkgname=symfonos-tools
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="symfonOS: Paketmanager syp, Paket-Konverter, Software-Center, Design-Center, Assistent, Prüfungsmodus"
+arch=('any')
+url="https://github.com/thomasrohm23-bit/symfonOS"
+license=('GPL-3.0-or-later')
+depends=('python' 'python-zstandard' 'python-cryptography' 'pyside6' 'qt6-wayland' 'polkit'
+         'snapper' 'btrfs-progs' 'grub-btrfs' 'ollama' 'cage' 'nftables' 'firefox' 'libnotify'
+         'kdialog' 'pciutils' 'usbutils' 'curl')
+makedepends=('python-build' 'python-installer' 'python-setuptools' 'python-wheel')
+checkdepends=('python-pytest')
+optdepends=('qemu-desktop: Prüfungsmodus mit Windows-VM (SEB)')
+backup=('etc/syp/syp.toml' 'etc/symfonos/assist.toml')
+_root="${startdir}/../.."
+
+build() {
+  cd "$_root"
+  python -m build --wheel --no-isolation --outdir "$srcdir/dist"
+}
+
+check() {
+  cd "$_root"
+  QT_QPA_PLATFORM=offscreen python -m pytest -q
+}
+
+package() {
+  python -m installer --destdir="$pkgdir" "$srcdir"/dist/*.whl
+  cp -a --no-preserve=ownership "$_root/system/." "$pkgdir/"
+  rm -f "$pkgdir/etc/syp/keys/README"
+  install -Dm755 "$_root/exam/symfonos-exam" "$pkgdir/usr/bin/symfonos-exam"
+  install -Dm644 "$_root/desktop/snapper/snapper-root.conf" "$pkgdir/usr/share/symfonos/snapper-root.conf"
+  install -d "$pkgdir/usr/share/doc/symfonos"
+  cp -a "$_root/docs/handbuch/." "$pkgdir/usr/share/doc/symfonos/"
+  chmod 755 "$pkgdir"/usr/bin/symfonos-* "$pkgdir"/usr/lib/symfonos/*.sh
+}

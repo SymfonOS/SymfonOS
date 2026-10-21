@@ -1,0 +1,12 @@
+[Unit]
+Description=syp Repository-Indizes aktualisieren
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/syp sync
+Nice=19
+IOSchedulingClass=idle
+ProtectHome=yes
+PrivateTmp=yes

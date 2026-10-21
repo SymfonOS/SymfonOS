@@ -1,0 +1,10 @@
+NAME="symfonOS"
+PRETTY_NAME="symfonOS (Rolling)"
+ID=symfonos
+ID_LIKE=arch
+BUILD_ID=rolling
+ANSI_COLOR="38;2;124;92;255"
+HOME_URL="https://github.com/thomasrohm23-bit/symfonOS"
+DOCUMENTATION_URL="https://github.com/thomasrohm23-bit/symfonOS/tree/main/docs"
+BUG_REPORT_URL="https://github.com/thomasrohm23-bit/symfonOS/issues"
+LOGO=symfonos

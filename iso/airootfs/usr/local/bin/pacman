@@ -1,0 +1,5 @@
+#!/bin/sh
+# symfonOS verwaltet Pakete mit syp. pacman wird nur beim Bau des Live-Mediums verwendet.
+if [ -e /run/archiso ]; then exec /usr/bin/pacman "$@"; fi
+echo "symfonOS nutzt den Paketmanager »syp« (z. B. »sudo syp install <paket>«, »syp --help«)." >&2
+exit 1

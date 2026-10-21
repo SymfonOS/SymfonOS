@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Hardware-Erkennung: GPU-Treiber, KI-Beschleunigung, Tablet, Laptop-Extras.
+set -euo pipefail
+log() { echo ":: $*"; }
+want=()
+gpu=$(lspci -nn | grep -Ei 'VGA|3D|Display' || true)
+if grep -qi nvidia <<<"$gpu"; then
+  # Turing (RTX 20/GTX 16) und neuer: offene Kernelmodule; ältere Karten: nouveau (Mesa)
+  if lspci -nn | grep -Ei 'nvidia' | grep -Eiq 'TU1|GA1|AD1|GB2|RTX|GTX 16'; then
+    want+=(nvidia-open-dkms nvidia-utils lib32-nvidia-utils ollama-cuda)
+    log "NVIDIA (Turing+) erkannt -> nvidia-open-dkms"
+  else
+    log "Ältere NVIDIA-Karte -> nouveau/Mesa (bereits installiert)"
+  fi
+fi
+if grep -Eqi 'AMD|ATI' <<<"$gpu" && grep -Eqi 'Navi|RDNA|Radeon RX (6|7|9)' <<<"$gpu"; then
+  want+=(ollama-rocm)
+  log "AMD RDNA erkannt -> ROCm-Beschleunigung für den Assistenten"
+fi
+if lsusb 2>/dev/null | grep -Eqi 'Huion|XP-Pen|UGEE|Gaomon'; then
+  want+=(digimend-kernel-drivers-dkms)
+  log "Grafiktablett (Huion/XP-Pen/Gaomon) erkannt"
+fi
+if [[ -d /sys/class/power_supply/BAT0 || -d /sys/class/power_supply/BAT1 ]]; then
+  want+=(fprintd)
+fi
+if ((${#want[@]})); then
+  syp -y install "${want[@]}" || log "Einige Pakete konnten nicht installiert werden – siehe syp doctor"
+else
+  log "Keine zusätzlichen Treiber nötig"
+fi

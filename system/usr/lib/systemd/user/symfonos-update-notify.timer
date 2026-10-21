@@ -1,0 +1,9 @@
+[Unit]
+Description=Update-Hinweis prüfen
+
+[Timer]
+OnStartupSec=15min
+OnUnitActiveSec=6h
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,3 @@
+Vertrauenswürdige Repository-Schlüssel (*.pub). Der Release-Schlüssel symfonos-release.pub
+wird von der CI mit `syp keygen` erzeugt und als Paket symfonos-keyring ausgeliefert.
+Der geheime Schlüssel liegt ausschließlich als GitHub-Secret SYP_SIGNING_KEY vor.

@@ -1,0 +1,29 @@
+# Maintainer: symfonOS <https://github.com/thomasrohm23-bit/symfonOS>
+pkgname=symfonos-branding
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="symfonOS: Farbschemata, globale Designs, Hintergrundbilder, Logo, Installer-Branding"
+arch=('any')
+url="https://github.com/thomasrohm23-bit/symfonOS"
+license=('CC-BY-SA-4.0')
+depends=('plasma-workspace' 'breeze' 'papirus-icon-theme' 'inter-font' 'ttf-jetbrains-mono')
+makedepends=('pyside6')
+_root="${startdir}/../.."
+
+build() {
+  QT_QPA_PLATFORM=offscreen python "$_root/tools/make-wallpaper.py" "$srcdir/wallpapers"
+}
+
+package() {
+  local d="$_root/desktop"
+  install -Dm644 -t "$pkgdir/usr/share/color-schemes" "$d"/color-schemes/*.colors
+  install -d "$pkgdir/usr/share/plasma/look-and-feel" "$pkgdir/usr/share/wallpapers"
+  cp -a --no-preserve=ownership "$d"/look-and-feel/. "$pkgdir/usr/share/plasma/look-and-feel/"
+  cp -a --no-preserve=ownership "$srcdir"/wallpapers/. "$pkgdir/usr/share/wallpapers/"
+  install -Dm644 "$d/xdg/kdeglobals" "$pkgdir/etc/xdg/kdeglobals"
+  install -Dm644 "$d/xdg/kwinrc" "$pkgdir/etc/xdg/kwinrc"
+  install -Dm644 "$d/xdg/plasma-workspace-env-symfonos.sh" "$pkgdir/etc/xdg/plasma-workspace/env/symfonos.sh"
+  install -Dm644 "$d/branding/symfonos.svg" "$pkgdir/usr/share/icons/hicolor/scalable/apps/symfonos.svg"
+  install -Dm644 "$d/branding/symfonos.svg" "$pkgdir/usr/share/pixmaps/symfonos.svg"
+  install -Dm644 -t "$pkgdir/usr/share/calamares/branding/symfonos" "$d"/calamares/*
+}

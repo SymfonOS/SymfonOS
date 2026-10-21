@@ -1,0 +1,10 @@
+[Plugins]
+blurEnabled=true
+wobblywindowsEnabled=false
+shakecursorEnabled=true
+
+[Effect-overview]
+BorderActivate=9
+
+[Xwayland]
+Scale=1

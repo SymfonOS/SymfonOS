@@ -1,0 +1,6 @@
+# Lokaler Assistent – nur lokale Endpunkte erlaubt
+backend = "ollama"
+url = "http://127.0.0.1:11434"
+model = "symfonos-assist"
+temperature = 0.2
+context = 8192

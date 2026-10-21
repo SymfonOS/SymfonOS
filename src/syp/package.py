@@ -158,7 +158,8 @@ def _make_data(tree: Path, entries: list[dict], mtime: int) -> bytes:
                 ti.size = e["size"]
                 with open(p, "rb") as f:
                     tf.addfile(ti, f)
-    return zstandard.ZstdCompressor(level=19, threads=-1).compress(raw.getvalue())
+    level = int(os.environ.get("SYP_ZSTD_LEVEL", "19"))
+    return zstandard.ZstdCompressor(level=level, threads=-1).compress(raw.getvalue())
 
 
 def build_package(tree: Path, info: PackageInfo, out_dir: Path,

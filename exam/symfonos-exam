@@ -1,0 +1,258 @@
+#!/usr/bin/env bash
+# symfonos-exam – abgeschotteter Prüfungsmodus für symfonOS
+#
+#   symfonos-exam start --url URL [--allow DOMAIN]... [--seb DATEI.seb] [--minutes N] [--yes]
+#   symfonos-exam vm --image WINDOWS.qcow2 [--allow DOMAIN]...
+#   symfonos-exam stop | status | refresh
+#   symfonos-exam render --url URL --allow DOMAIN...     (Trockenlauf: zeigt Firewall + Policies)
+#
+# Wirkung: eigener Benutzer »exam«, Kiosk-Compositor cage (ein Vollbildfenster, kein VT-Wechsel),
+# nftables-Allowlist, gestoppte Hintergrunddienste, gesperrte USB-Datenträger, SysRq aus.
+set -euo pipefail
+
+STATE=/run/symfonos-exam
+SDDM_CONF=/etc/sddm.conf.d/90-symfonos-exam.conf
+FF_POLICY=/etc/firefox/policies/policies.json
+MODPROBE=/run/modprobe.d/symfonos-exam.conf
+EXAM_HOME=/var/lib/symfonos-exam
+STOP_UNITS=(bluetooth.service sshd.service ollama.service avahi-daemon.service cups.service
+            kdeconnectd.service teamviewerd.service anydesk.service rustdesk.service)
+SEB_APPIMAGE=${SEB_LINUX_APPIMAGE:-/opt/seb-linux/SafeExamBrowser.AppImage}
+
+log() { echo ":: $*"; logger -t symfonos-exam -- "$*" 2>/dev/null || true; }
+die() { echo "Fehler: $*" >&2; exit 1; }
+need_root() { [[ $EUID -eq 0 ]] || die "Bitte mit sudo bzw. pkexec ausführen"; }
+
+URL="" SEB="" IMAGE="" MINUTES=0 YES=0 MODE=browser
+ALLOW=()
+parse() {
+  while (($#)); do
+    case "$1" in
+      --url) URL=$2; shift 2 ;;
+      --allow) ALLOW+=("$2"); shift 2 ;;
+      --seb) SEB=$(realpath "$2"); MODE=seb; shift 2 ;;
+      --image) IMAGE=$(realpath "$2"); MODE=vm; shift 2 ;;
+      --minutes) MINUTES=$2; shift 2 ;;
+      --yes|-y) YES=1; shift ;;
+      *) die "Unbekannte Option: $1" ;;
+    esac
+  done
+  if [[ -n $URL ]]; then
+    local host=${URL#*://}; host=${host%%/*}; host=${host%%:*}
+    ALLOW+=("$host")
+  fi
+  # Duplikate entfernen
+  mapfile -t ALLOW < <(printf '%s\n' "${ALLOW[@]}" | awk 'NF && !seen[$0]++')
+}
+
+resolve() {  # Domain -> IPv4/IPv6-Adressen
+  local d
+  for d in "$@"; do
+    getent ahostsv4 "$d" 2>/dev/null | awk '{print "4 " $1}'
+    getent ahostsv6 "$d" 2>/dev/null | awk '{print "6 " $1}'
+  done | sort -u
+}
+
+dns_servers() {
+  awk '/^nameserver/ {print $2}' /etc/resolv.conf 2>/dev/null
+  [[ -r /run/systemd/resolve/resolv.conf ]] && awk '/^nameserver/ {print $2}' /run/systemd/resolve/resolv.conf
+}
+
+render_nft() {
+  local v4=() v6=() fam ip dns4=() dns6=()
+  while read -r fam ip; do
+    [[ $fam == 4 ]] && v4+=("$ip") || v6+=("$ip")
+  done < <(resolve "${ALLOW[@]}")
+  while read -r ip; do
+    [[ $ip == *:* ]] && dns6+=("$ip") || dns4+=("$ip")
+  done < <(dns_servers | sort -u)
+  elems() { local IFS=,; (($#)) && echo "elements = { $* }" || true; }
+  cat <<EOF
+table inet symfonos_exam {
+  set allow4 { type ipv4_addr; flags interval; $(elems "${v4[@]}") }
+  set allow6 { type ipv6_addr; flags interval; $(elems "${v6[@]}") }
+  set dns4 { type ipv4_addr; $(elems "${dns4[@]}") }
+  set dns6 { type ipv6_addr; $(elems "${dns6[@]}") }
+  chain output {
+    type filter hook output priority filter - 10; policy drop;
+    oifname "lo" accept
+    ct state established,related accept
+    udp dport { 67, 68 } accept
+    meta l4proto { udp, tcp } th dport 53 ip daddr @dns4 accept
+    meta l4proto { udp, tcp } th dport 53 ip6 daddr @dns6 accept
+    tcp dport { 80, 443 } ip daddr @allow4 accept
+    tcp dport { 80, 443 } ip6 daddr @allow6 accept
+    udp dport 443 ip daddr @allow4 accept
+    icmpv6 type { nd-neighbor-solicit, nd-router-solicit, nd-neighbor-advert } accept
+    log prefix "symfonos-exam blockiert: " limit rate 5/minute drop
+  }
+  chain input {
+    type filter hook input priority filter - 10; policy drop;
+    iifname "lo" accept
+    ct state established,related accept
+    udp sport 67 udp dport 68 accept
+    icmpv6 type { nd-neighbor-solicit, nd-neighbor-advert, nd-router-advert } accept
+  }
+}
+EOF
+}
+
+render_policy() {
+  local exceptions=() d
+  for d in "${ALLOW[@]}"; do exceptions+=("\"*://$d/*\"" "\"*://*.$d/*\""); done
+  local IFS=,
+  cat <<EOF
+{
+  "policies": {
+    "DisableDeveloperTools": true,
+    "BlockAboutConfig": true,
+    "BlockAboutAddons": true,
+    "BlockAboutProfiles": true,
+    "BlockAboutSupport": true,
+    "DisableFirefoxAccounts": true,
+    "DisableFirefoxScreenshots": true,
+    "DisablePocket": true,
+    "DisableTelemetry": true,
+    "DisableFormHistory": true,
+    "OfferToSaveLogins": false,
+    "PasswordManagerEnabled": false,
+    "PrintingEnabled": false,
+    "DisableSetDesktopBackground": true,
+    "PromptForDownloadLocation": false,
+    "DownloadDirectory": "/var/lib/symfonos-exam/blocked",
+    "ExtensionSettings": { "*": { "installation_mode": "blocked" } },
+    "WebsiteFilter": { "Block": ["<all_urls>"], "Exceptions": [${exceptions[*]}] }
+  }
+}
+EOF
+}
+
+write_session() {
+  install -d -o exam -g exam -m 700 "$EXAM_HOME"
+  cat > "$STATE/session.sh" <<EOF
+#!/bin/sh
+# Wird als Benutzer exam in cage ausgeführt; startet die Anwendung bei Absturz/Schließen neu.
+export MOZ_ENABLE_WAYLAND=1 HOME=$EXAM_HOME
+while [ -e $STATE/active ]; do
+  case "$MODE" in
+    seb) "$SEB_APPIMAGE" "$SEB" ;;
+    vm)  qemu-system-x86_64 -enable-kvm -machine q35 -cpu host -smp 2 -m 4G \\
+           -drive file="$IMAGE",if=virtio -nic user,model=virtio-net-pci \\
+           -display gtk,full-screen=on,show-menubar=off -usb -device usb-tablet ;;
+    *)   firefox --kiosk --no-remote --profile "$EXAM_HOME/ff" "$URL" ;;
+  esac
+  sleep 1
+done
+EOF
+  chmod 755 "$STATE/session.sh"
+  install -d -o exam -g exam "$EXAM_HOME/ff"
+  cat > /usr/share/wayland-sessions/symfonos-exam.desktop <<EOF
+[Desktop Entry]
+Name=symfonOS Prüfungsmodus
+Exec=cage -d -- $STATE/session.sh
+Type=Application
+EOF
+  cat > "$SDDM_CONF" <<EOF
+[Autologin]
+User=exam
+Session=symfonos-exam
+Relogin=true
+EOF
+}
+
+cmd_start() {
+  need_root
+  parse "$@"
+  [[ -e $STATE/active ]] && die "Prüfungsmodus läuft bereits (symfonos-exam status)"
+  case $MODE in
+    browser) [[ -n $URL ]] || die "--url fehlt" ;;
+    seb) [[ -x $SEB_APPIMAGE ]] || die "seb-linux nicht gefunden ($SEB_APPIMAGE). Siehe Handbuch: Prüfungsmodus." ;;
+    vm) command -v qemu-system-x86_64 >/dev/null || die "QEMU fehlt: sudo syp install qemu-desktop"
+        [[ -r /dev/kvm ]] || die "KVM nicht verfügbar (Virtualisierung im BIOS aktivieren)" ;;
+  esac
+  ((${#ALLOW[@]})) || die "Mindestens eine erlaubte Domain nötig (--allow oder --url)"
+  if ((!YES)); then
+    echo "Der Prüfungsmodus beendet die aktuelle Sitzung. Ungespeicherte Arbeit geht verloren."
+    echo "Erlaubte Ziele: ${ALLOW[*]}"
+    read -rp "Fortfahren? [j/N] " a; [[ $a =~ ^[jJyY] ]] || exit 0
+  fi
+  install -d -m 700 "$STATE"
+  printf '%s\n' "${ALLOW[@]}" > "$STATE/allow"
+  printf 'MODE=%q\nURL=%q\nSTARTED=%q\n' "$MODE" "$URL" "$(date -Iseconds)" > "$STATE/info"
+
+  log "Firewall-Allowlist aktivieren (${#ALLOW[@]} Domains)"
+  render_nft | nft -f -
+
+  log "Hintergrunddienste anhalten"
+  : > "$STATE/stopped-units"
+  for u in "${STOP_UNITS[@]}"; do
+    if systemctl is-active --quiet "$u"; then systemctl stop "$u" && echo "$u" >> "$STATE/stopped-units"; fi
+  done
+  log "USB-Datenträger sperren, SysRq aus"
+  install -d /run/modprobe.d
+  printf 'install usb_storage /bin/false\ninstall uas /bin/false\n' > "$MODPROBE"
+  modprobe -r uas usb_storage 2>/dev/null || true
+  sysctl -n kernel.sysrq > "$STATE/sysrq"; sysctl -q kernel.sysrq=0
+
+  if [[ $MODE == browser ]]; then
+    install -d /etc/firefox/policies
+    [[ -e $FF_POLICY ]] && cp -a "$FF_POLICY" "$STATE/policies.json.bak"
+    render_policy > "$FF_POLICY"
+  fi
+  touch "$STATE/active"
+  write_session
+  if ((MINUTES > 0)); then
+    systemd-run --unit=symfonos-exam-timeout --on-active="${MINUTES}min" /usr/bin/symfonos-exam stop --yes
+  fi
+  systemd-run --unit=symfonos-exam-refresh --on-active=5min --on-unit-active=5min \
+    /usr/bin/symfonos-exam refresh >/dev/null
+  log "Prüfungssitzung startet"
+  systemctl restart display-manager
+}
+
+cmd_refresh() {  # CDN-Adressen ändern sich: Allowlist regelmäßig neu auflösen
+  need_root
+  [[ -e $STATE/active ]] || exit 0
+  mapfile -t ALLOW < "$STATE/allow"
+  nft delete table inet symfonos_exam 2>/dev/null || true
+  render_nft | nft -f -
+}
+
+cmd_stop() {
+  need_root
+  parse "$@"
+  [[ -e $STATE/active ]] || { echo "Prüfungsmodus ist nicht aktiv."; return 0; }
+  rm -f "$STATE/active"
+  log "Prüfungsmodus wird beendet"
+  systemctl stop symfonos-exam-refresh.timer symfonos-exam-timeout.timer 2>/dev/null || true
+  rm -f "$SDDM_CONF" /usr/share/wayland-sessions/symfonos-exam.desktop "$MODPROBE"
+  if [[ -e $STATE/policies.json.bak ]]; then mv "$STATE/policies.json.bak" "$FF_POLICY"; else rm -f "$FF_POLICY"; fi
+  nft delete table inet symfonos_exam 2>/dev/null || true
+  [[ -e $STATE/sysrq ]] && sysctl -q kernel.sysrq="$(cat "$STATE/sysrq")"
+  while read -r u; do [[ -n $u ]] && systemctl start "$u" || true; done < "$STATE/stopped-units"
+  loginctl terminate-user exam 2>/dev/null || true
+  rm -rf "${EXAM_HOME:?}"/* "$STATE"
+  systemctl restart display-manager
+  log "Normalbetrieb wiederhergestellt"
+}
+
+cmd_status() {
+  if [[ -e $STATE/active ]]; then
+    # shellcheck disable=SC1091
+    . "$STATE/info"
+    echo "Prüfungsmodus AKTIV seit $STARTED (Modus: $MODE${URL:+, $URL})"
+    echo "Erlaubt: $(paste -sd' ' "$STATE/allow")"
+  else
+    echo "Prüfungsmodus nicht aktiv."
+  fi
+}
+
+case "${1:-}" in
+  start) shift; cmd_start "$@" ;;
+  vm) shift; cmd_start "$@" ;;
+  stop) shift; cmd_stop "$@" ;;
+  refresh) cmd_refresh ;;
+  status) cmd_status ;;
+  render) shift; parse "$@"; echo "# nftables"; render_nft; echo "# Firefox-Policies"; render_policy ;;
+  *) sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
+esac

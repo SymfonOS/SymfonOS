@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Software
+Comment=Programme installieren, aktualisieren, zurücknehmen
+Exec=symfonos-store
+Icon=system-software-install
+Categories=System;PackageManager;
+Terminal=false
+StartupNotify=true

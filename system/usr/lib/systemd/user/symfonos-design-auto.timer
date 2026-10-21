@@ -1,0 +1,9 @@
+[Unit]
+Description=Hell/Dunkel-Wechsel prüfen
+
+[Timer]
+OnStartupSec=30s
+OnCalendar=*:0/15
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,13 @@
+[General]
+ColorScheme=SymfonosDark
+AccentColor=124,92,255
+font=Inter,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+fixed=JetBrains Mono,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+
+[Icons]
+Theme=Papirus-Dark
+
+[KDE]
+LookAndFeelPackage=org.symfonos.dark
+SingleClick=false
+AnimationDurationFactor=0.8

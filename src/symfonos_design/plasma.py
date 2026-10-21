@@ -32,7 +32,7 @@ class Profile:
     scale: float = 1.0                   # Fensterskalierung (Wayland)
     animation: float = 1.0               # 0 = aus, 0.5 = schnell, 1 = normal, 2 = langsam
     icons: str = "Papirus"
-    cursor: str = "Bibata-Modern-Classic"
+    cursor: str = "breeze_cursors"
     wallpaper: str = "/usr/share/wallpapers/symfonOS/contents/images/3840x2160.png"
     widgets: list[str] = field(default_factory=list)
     neutral_ui: bool = False             # farbneutrale Oberfläche für farbkritische Arbeit

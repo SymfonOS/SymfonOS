@@ -1,0 +1,36 @@
+---
+componentName: symfonos
+welcomeStyleCalamares: true
+welcomeExpandingLogo: true
+windowExpanding: normal
+windowSize: 960px,640px
+windowPlacement: center
+sidebar: widget
+navigation: widget
+
+strings:
+  productName:         symfonOS
+  shortProductName:    symfonOS
+  version:             Rolling
+  shortVersion:        Rolling
+  versionedName:       symfonOS (Rolling)
+  shortVersionedName:  symfonOS
+  bootloaderEntryName: symfonOS
+  productUrl:          https://github.com/thomasrohm23-bit/symfonOS
+  supportUrl:          https://github.com/thomasrohm23-bit/symfonOS/issues
+  knownIssuesUrl:      https://github.com/thomasrohm23-bit/symfonOS/issues
+  donateUrl:           ""
+
+images:
+  productLogo:    "symfonos.svg"
+  productIcon:    "symfonos.svg"
+  productWelcome: "symfonos.svg"
+
+slideshow:    "show.qml"
+slideshowAPI: 2
+
+style:
+  SidebarBackground:        "#16161D"
+  SidebarText:              "#ECECF4"
+  SidebarTextCurrent:       "#FFFFFF"
+  SidebarBackgroundCurrent: "#7C5CFF"

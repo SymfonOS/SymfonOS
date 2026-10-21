@@ -16,7 +16,7 @@ from pathlib import Path
 
 import zstandard
 
-from .config import Config, RepoConf
+from .config import Config
 from .crypto import Keyring, SecretKey, sign_file, verify_file
 from .package import SypPackage, PackageInfo
 

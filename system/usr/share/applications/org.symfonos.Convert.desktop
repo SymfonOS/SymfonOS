@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Paket-Konverter
+Comment=.deb, .rpm und Arch-Pakete umwandeln
+Exec=syp-convert-gui %F
+Icon=package-x-generic
+Categories=System;PackageManager;
+Terminal=false
+StartupNotify=true
+MimeType=application/vnd.debian.binary-package;application/x-rpm;application/x-zstd-compressed-tar;

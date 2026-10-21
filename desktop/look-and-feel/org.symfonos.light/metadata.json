@@ -1,0 +1,13 @@
+{
+  "KPlugin": {
+    "Id": "org.symfonos.light",
+    "Name": "symfonOS Hell",
+    "Description": "Globales Design von symfonOS",
+    "Authors": [ { "Name": "symfonOS" } ],
+    "License": "CC-BY-SA-4.0",
+    "Version": "1.0",
+    "Website": "https://github.com/thomasrohm23-bit/symfonOS"
+  },
+  "KPackageStructure": "Plasma/LookAndFeel",
+  "X-Plasma-MainScript": "defaults"
+}

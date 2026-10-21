@@ -1,0 +1,5 @@
+# Live-Medium: archiso-Initramfs (wird vom Installer durch den Standard-Preset ersetzt)
+PRESETS=('archiso')
+ALL_kver='/boot/vmlinuz-linux-zen'
+archiso_config='/etc/mkinitcpio.conf.d/archiso.conf'
+archiso_image="/boot/initramfs-linux-zen.img"
