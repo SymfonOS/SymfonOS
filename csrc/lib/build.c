@@ -169,6 +169,27 @@ static char *fetch_source(const char *url, const char *fname, const char *srccac
     return NULL;
 }
 
+/* Quelle laden und gegen die sha256 des Rezepts prüfen. Eine Datei im Cache mit falscher Summe
+ * (abgebrochener Download, gleichnamige andere Version) wird verworfen und einmal neu geladen. */
+static char *fetch_verified(const char *url, const char *fname, const char *srccache, const char *sum) {
+    char *cached = path_join(srccache, fname);
+    int was_cached = path_exists(cached);
+    free(cached);
+    for (int attempt = 0; attempt < 2; attempt++) {
+        char *f = fetch_source(url, fname, srccache), h[65] = "";
+        if (!f) return NULL;
+        if (sha256_file(f, h) == 0 && !strcmp(h, sum)) return f;
+        unlink(f);
+        free(f);
+        if (!was_cached || attempt) {
+            set_error("sha256 falsch: %s (erwartet %s, erhalten %s)", url, sum, h);
+            return NULL;
+        }
+        fprintf(stderr, "  Prüfsumme der Datei im Cache passt nicht – lade %s neu\n", fname);
+    }
+    return NULL;
+}
+
 int recipe_fetch(const char *recipe, const char *dir, int quiet) {
     jval *r = recipe_load(recipe);
     if (!r) return -1;
@@ -179,21 +200,17 @@ int recipe_fetch(const char *recipe, const char *dir, int quiet) {
         const char *url = jgets(src->items[i], "url", NULL), *sum = jgets(src->items[i], "sha256", "");
         if (!url) continue;
         const char *fname = jgets(src->items[i], "filename", path_basename(url));
-        char *f = fetch_source(url, fname, dir), h[65];
+        if (!*sum || !strcmp(sum, "TODO")) {
+            set_error("%s: keine sha256 im Rezept (syp build --update-sums)", url);
+            rc = -1;
+            break;
+        }
+        char *f = fetch_verified(url, fname, dir, sum);
         if (!f) {
             rc = -1;
             break;
         }
-        if (!*sum || !strcmp(sum, "TODO")) {
-            set_error("%s: keine sha256 im Rezept (syp build --update-sums)", url);
-            rc = -1;
-        } else if (sha256_file(f, h) || strcmp(h, sum)) {
-            set_error("sha256 falsch: %s (erwartet %s, erhalten %s)", url, sum, h);
-            unlink(f);
-            rc = -1;
-        } else if (!quiet) {
-            puts(f);
-        }
+        if (!quiet) puts(f);
         free(f);
     }
     json_free(r);
@@ -486,15 +503,8 @@ char *build_recipe(const char *recipe, const char *outdir, const seckey *signer,
                 break;
             }
             const char *fname = jgets(s, "filename", path_basename(url));
-            char *f = fetch_source(url, fname, cache), h[65];
+            char *f = fetch_verified(url, fname, cache, sum);
             if (!f) {
-                fail = 1;
-                break;
-            }
-            if (sha256_file(f, h) || strcmp(h, sum)) {
-                set_error("sha256 falsch: %s (erwartet %s, erhalten %s)", url, sum, h);
-                unlink(f);
-                free(f);
                 fail = 1;
                 break;
             }

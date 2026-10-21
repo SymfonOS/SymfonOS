@@ -515,3 +515,18 @@ def test_build_extracts_non_ascii_names_in_c_locale(tmp_path):
         "[build]\npackage = 'test -f \"$S/doc/Grüße.txt\"; install -Dm644 \"$S/a.txt\" \"$DESTDIR/usr/share/q/a.txt\"'\n")
     run(SYP, "build", tmp_path / "SYPBUILD.toml", "-o", tmp_path / "out",
         env=dict(os.environ, LC_ALL="C", LANG="C", HOME=str(tmp_path)))
+
+
+def test_stale_cache_file_is_refetched(tmp_path):
+    """Gleichnamige Datei mit falscher Summe im Quell-Cache wird verworfen und neu geladen."""
+    import hashlib
+    src = tmp_path / "quelle.txt"
+    src.write_text("richtig\n")
+    cache = tmp_path / "cache"
+    cache.mkdir()
+    (cache / "quelle.txt").write_text("veraltet\n")
+    rec = tmp_path / "SYPBUILD.toml"
+    rec.write_text('[package]\nname = "f"\nversion = "1-1"\n\n[[source]]\n'
+                   f'url = "file://{src}"\nsha256 = "{hashlib.sha256(src.read_bytes()).hexdigest()}"\n')
+    r = run(SYP, "fetch", rec, "-o", cache)
+    assert "lade quelle.txt neu" in r.stderr and (cache / "quelle.txt").read_text() == "richtig\n"
