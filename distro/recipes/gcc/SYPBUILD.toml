@@ -6,7 +6,7 @@ summary = "GNU Compiler Collection (C, C++)"
 license = "GPL-3.0-or-later WITH GCC-exception-3.1"
 url = "https://ftp.gnu.org/gnu/gcc/gcc-15.2.0/"
 depends = ["glibc", "binutils", "gmp", "mpfr", "mpc", "zlib", "zstd"]
-makedepends = ["libxcrypt", "shadow"]
+makedepends = ["libxcrypt"]
 provides = ["cc", "c++", "gcc-libs", "so:libstdc++.so.6", "so:libgcc_s.so.1", "so:libgomp.so.1", "so:libatomic.so.1"]
 
 [[source]]

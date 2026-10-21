@@ -50,7 +50,7 @@ jobs:
           make -C csrc -j4
           sudo -E env "PATH=$PATH" SYP_SKIP_BUILD=1 "$(command -v python)" -m pytest -q -rs -p no:cacheprovider \
             tests/test_security.py::test_base_firewall_coexists_with_exam_mode tests/test_exam.py \
-            tests/test_syp.py::test_chroot_build 2>&1 | tee root.log; rc=${PIPESTATUS[0]}
+            tests/test_syp.py::test_chroot_build tests/test_syp.py::test_buildall_root_installs_without_syp_in_path 2>&1 | tee root.log; rc=${PIPESTATUS[0]}
           echo "::notice title=Root-Tests::$(tail -4 root.log | sed ':a;N;$!ba;s/\n/%0A/g')"
           sudo chown -R "$USER" csrc tests
           exit "$rc"

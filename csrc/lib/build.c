@@ -220,6 +220,14 @@ int recipe_fill_sums(const char *recipe, const char *srccache) {
     return rc;
 }
 
+/* chroot liegt in sbin, das nicht in jedem PATH steht (Dienste, normale Benutzer mit sudo -E) */
+static const char *chroot_bin(void) {
+    static const char *cand[] = {"/usr/sbin/chroot", "/usr/bin/chroot", "/sbin/chroot", "/bin/chroot", NULL};
+    for (const char **c = cand; *c; c++)
+        if (access(*c, X_OK) == 0) return *c;
+    return "chroot";
+}
+
 static int is_elf(const char *p) {
     FILE *f = fopen(p, "rb");
     if (!f) return 0;
@@ -353,7 +361,7 @@ static char **build_env(const char *src, const char *sdir, const char *dest, con
         /* Chroot: keine Host-Umgebung durchreichen */
         sv_push(&env, "HOME=/root");
         sv_push(&env, "TERM=xterm");
-        sv_push(&env, "LC_ALL=C.UTF-8");
+        sv_push(&env, "LC_ALL=C"); /* immer vorhanden, auch vor glibc-Locales; reproduzierbar */
         sv_push(&env, "PATH=/usr/bin:/usr/sbin");
         const char *sde = getenv("SOURCE_DATE_EPOCH");
         if (sde) sv_push_own(&env, xasprintf("SOURCE_DATE_EPOCH=%s", sde));
@@ -572,7 +580,7 @@ char *build_recipe(const char *recipe, const char *outdir, const seckey *signer,
                 while (env[ne]) ne++;
                 char **argv = xcalloc(ne + 10, sizeof(char *));
                 size_t k = 0;
-                argv[k++] = "chroot";
+                argv[k++] = (char *)chroot_bin();
                 argv[k++] = (char *)o->chroot;
                 argv[k++] = "/usr/bin/env";
                 argv[k++] = "-i";

@@ -82,6 +82,18 @@ static int sh(const char *fmt, ...) {
     return rc;
 }
 
+/* Pfad dieses Programms: buildall ruft sich selbst für sync/install auf, unabhängig vom PATH
+ * (in der CI und im Bootstrap liegt syp nicht in einem Standardverzeichnis). */
+static const char *self_exe(void) {
+    static char p[4096];
+    if (!p[0]) {
+        ssize_t n = readlink("/proc/self/exe", p, sizeof p - 1);
+        if (n <= 0) snprintf(p, sizeof p, "syp");
+        else p[n] = 0;
+    }
+    return p;
+}
+
 /* Bauumgebung vorbereiten: syp-Konfiguration mit lokalem Repo, Schlüssel, Mounts */
 static int prepare_root(const char *broot, const char *repo, const char *pubkey_path, const char *rname) {
     char *etc = path_join(broot, "etc/syp"), *keys = path_join(broot, "etc/syp/keys");
@@ -122,8 +134,8 @@ static char *build_in_root(recipe *r, const char *broot, const build_opts *o) {
     if (r->atoms.n) {
         sbuf cmd = {0};
         sb_init(&cmd);
-        sb_addf(&cmd, "syp -q -r '%s' sync >/dev/null && syp -r '%s' -y install --as-dep --overwrite '/*'", broot,
-                broot);
+        sb_addf(&cmd, "'%s' -q -r '%s' sync >/dev/null && '%s' -r '%s' -y install --as-dep --overwrite '/*'", self_exe(),
+                broot, self_exe(), broot);
         for (size_t i = 0; i < r->atoms.n; i++) sb_addf(&cmd, " '%s'", r->atoms.v[i]);
         sb_add(&cmd, " >/dev/null");
         int rc = sh("%s", cmd.s);
@@ -277,6 +289,17 @@ int cmd_buildall(int argc, char **argv, const char *root) {
             if (hm_get(&failed_names, r->deps.v[j])) blocked = 1;
         if (path_exists(target)) {
             skipped++;
+            /* Gebaut, aber (z. B. nach einem Abbruch) nicht in der Bauumgebung installiert: nachholen */
+            if (broot && install_built &&
+                sh("'%s' -q -r '%s' list 2>/dev/null | awk -v n='%s' '$1==n{f=1} END{exit !f}'", self_exe(), broot,
+                   r->name) &&
+                sh("'%s' -q -r '%s' sync >/dev/null && '%s' -r '%s' -y install --overwrite '/*' '%s' >/dev/null",
+                   self_exe(), broot, self_exe(), broot, r->name)) {
+                printf("!! %s: vorhanden, aber nicht in die Bauumgebung installierbar\n", r->name);
+                hm_set(&failed_names, r->name, (void *)1);
+                failed++;
+                skipped--;
+            }
         } else if (blocked) {
             printf("-- %s %s übersprungen (Abhängigkeit fehlgeschlagen)\n", r->name, r->version);
             hm_set(&failed_names, r->name, (void *)1);
@@ -306,8 +329,8 @@ int cmd_buildall(int argc, char **argv, const char *root) {
                 res = NULL;
             }
             if (res && broot && install_built &&
-                sh("syp -q -r '%s' sync >/dev/null && syp -r '%s' -y install --overwrite '/*' '%s' >/dev/null", broot,
-                   broot, r->name)) {
+                sh("'%s' -q -r '%s' sync >/dev/null && '%s' -r '%s' -y install --overwrite '/*' '%s' >/dev/null", self_exe(),
+                   broot, self_exe(), broot, r->name)) {
                 set_error("Installation von %s in die Bauumgebung fehlgeschlagen", r->name);
                 free(res);
                 res = NULL;

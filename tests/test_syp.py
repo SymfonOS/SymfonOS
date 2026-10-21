@@ -9,7 +9,7 @@ import tarfile
 
 import pytest
 
-from helpers import keygen, make_pkg, publish, setup_root, syp
+from helpers import ROOT, SYP, keygen, make_pkg, publish, run, setup_root, syp
 
 
 @pytest.mark.parametrize("a,b,r", [
@@ -457,3 +457,43 @@ def test_fetch_stdout_is_only_paths(tmp_path):
     r = syp("fetch", rec, "-o", tmp_path / "out")
     assert r.stdout.splitlines() == [str(tmp_path / "out/quelle.txt")]
     assert "Lade" in r.stderr
+
+
+def test_distro_recipe_graph_has_no_cycles(tmp_path):
+    r = syp("buildall", ROOT / "distro/recipes", "--repo", tmp_path / "repo", "-n")
+    assert "Abhängigkeitszyklen" not in r.stdout + r.stderr
+
+
+@pytest.mark.skipif(os.geteuid() != 0, reason="chroot/mount brauchen Root")
+def test_buildall_root_installs_without_syp_in_path(tmp_path):
+    """buildall --root spielt Gebautes in die Bauumgebung ein und ruft dafür sich selbst auf (kein PATH nötig)."""
+    r = tmp_path / "chr"
+    for d in ("usr", "etc/alternatives", "tmp", "var/tmp"):
+        (r / d).mkdir(parents=True)
+    for link in ("bin", "sbin", "lib", "lib64"):
+        (r / link).symlink_to(f"usr/{link}")
+    recs = tmp_path / "recipes"
+    for name, dep in (("a", None), ("b", "a")):
+        (recs / name).mkdir(parents=True)
+        (recs / name / "SYPBUILD.toml").write_text(
+            f'[package]\nname = "{name}"\nversion = "1-1"\narch = "any"\n'
+            + (f'depends = ["{dep}"]\n' if dep else "")
+            + f"[build]\npackage = 'install -Dm644 /dev/null \"$DESTDIR/etc/{name}.txt\"'\n")
+    key, _ = keygen(tmp_path)
+    mounts = [("/usr", r / "usr"), ("/etc/alternatives", r / "etc/alternatives")]
+    try:
+        for src, dst in mounts:
+            if subprocess.run(["mount", "--bind", "-o", "ro", src, str(dst)]).returncode:
+                pytest.skip("bind-mount nicht möglich")
+        out = run(SYP, "buildall", recs, "--repo", tmp_path / "repo", "--root", r, "-k", key, "--name", "t",
+                  env={"PATH": "/usr/bin:/bin", "HOME": str(tmp_path)})
+    finally:
+        for _, dst in reversed(mounts):
+            subprocess.run(["umount", "-l", str(dst)])
+    assert "gebaut 2" in out.stdout
+    assert (r / "etc/a.txt").exists() and (r / "etc/b.txt").exists()
+    # Fortsetzen: gebaut, aber nicht (mehr) installiert -> wird nachinstalliert statt nur übersprungen
+    run(SYP, "-r", r, "-y", "remove", "b")
+    out = run(SYP, "buildall", recs, "--repo", tmp_path / "repo", "--root", r, "-k", key, "--name", "t",
+              env={"PATH": "/usr/bin:/bin", "HOME": str(tmp_path)})
+    assert "vorhanden 2" in out.stdout and (r / "etc/b.txt").exists()
