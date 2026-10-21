@@ -9,7 +9,7 @@ depends = ["glibc"]
 provides = ["so:libaio.so.1"]
 
 [[source]]
-url = "https://pagure.io/libaio/archive/libaio-0.3.113/libaio-0.3.113.tar.gz"
+url = "https://deb.debian.org/debian/pool/main/liba/libaio/libaio_0.3.113.orig.tar.gz"
 sha256 = "TODO"
 filename = "libaio-0.3.113.tar.gz"
 
