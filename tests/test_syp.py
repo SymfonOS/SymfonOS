@@ -530,3 +530,21 @@ def test_stale_cache_file_is_refetched(tmp_path):
                    f'url = "file://{src}"\nsha256 = "{hashlib.sha256(src.read_bytes()).hexdigest()}"\n')
     r = run(SYP, "fetch", rec, "-o", cache)
     assert "lade quelle.txt neu" in r.stderr and (cache / "quelle.txt").read_text() == "richtig\n"
+
+
+def test_buildall_rebuilds_packages_signed_with_old_key(tmp_path):
+    recs = tmp_path / "recipes"
+    (recs / "a").mkdir(parents=True)
+    (recs / "a/SYPBUILD.toml").write_text(
+        '[package]\nname = "a"\nversion = "1-1"\narch = "any"\n'
+        "[build]\npackage = 'install -Dm644 /dev/null \"$DESTDIR/usr/share/a/x\"'\n")
+    old_key, _ = keygen(tmp_path, "alt")
+    new_key, new_pub = keygen(tmp_path, "neu")
+    repo = tmp_path / "repo"
+    assert "gebaut 1" in syp("buildall", recs, "--repo", repo, "-k", old_key, "--name", "t").stdout
+    out = syp("buildall", recs, "--repo", repo, "-k", new_key, "--name", "t").stdout
+    assert "mit fremdem Schlüssel" in out and "gebaut 1" in out
+    idx = json.loads(syp("repo-show", repo, "--pub", new_pub).stdout)
+    assert [e["info"]["name"] for e in idx["packages"]] == ["a"]
+    # Dritter Lauf mit demselben Schlüssel: nichts zu tun
+    assert "vorhanden 1" in syp("buildall", recs, "--repo", repo, "-k", new_key, "--name", "t").stdout

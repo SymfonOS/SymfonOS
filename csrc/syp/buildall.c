@@ -287,6 +287,19 @@ int cmd_buildall(int argc, char **argv, const char *root) {
         int blocked = 0;
         for (size_t j = 0; j < r->deps.n; j++)
             if (hm_get(&failed_names, r->deps.v[j])) blocked = 1;
+        /* Vorhandenes Paket mit fremdem Schlüssel signiert (Schlüsselwechsel, kompromittierter
+         * Schlüssel): verwerfen und neu bauen, statt es weiterzuverwenden */
+        if (path_exists(target) && k) {
+            sypfile sf;
+            if (syp_open_meta(target, &sf) == 0) {
+                const char *kid = sf.sig ? jgets(sf.sig, "key_id", "") : "";
+                if (strcmp(kid, k->id)) {
+                    printf("   %s: mit fremdem Schlüssel %s signiert – wird neu gebaut\n", r->pkgfile, *kid ? kid : "?");
+                    unlink(target);
+                }
+                syp_close(&sf);
+            }
+        }
         if (path_exists(target)) {
             skipped++;
             /* Gebaut, aber (z. B. nach einem Abbruch) nicht in der Bauumgebung installiert: nachholen */
