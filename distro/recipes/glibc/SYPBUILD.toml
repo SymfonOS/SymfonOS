@@ -27,9 +27,12 @@ patch -Np1 -i ../glibc-2.42-fhs-1.patch
 '''
 build = '''
 cd "$S"; mkdir -p build; cd build
+# glibc härtet sich über eigene Optionen (wie bei Fedora); die allgemeinen Härtungs-Flags
+# (-fcf-protection, -D_FORTIFY_SOURCE) brechen den Bau von ld.so (_dl_cet_* fehlen)
+export CFLAGS="-O2 -pipe -g" CXXFLAGS="-O2 -pipe -g"; unset LDFLAGS CPPFLAGS
 echo "rootsbindir=/usr/sbin" > configparms
 ../configure --prefix=/usr --disable-werror --disable-nscd libc_cv_slibdir=/usr/lib \
-  --enable-stack-protector=strong --enable-kernel=5.4 --enable-bind-now
+  --enable-stack-protector=strong --enable-kernel=5.4 --enable-bind-now --enable-fortify-source
 make
 '''
 package = '''
