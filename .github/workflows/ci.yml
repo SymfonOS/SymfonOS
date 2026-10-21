@@ -75,6 +75,11 @@ jobs:
           sudo chown -R "$USER" out 2>/dev/null || true
           ls -la out 2>/dev/null || true
           exit "$rc"
+      - name: Boot-Test (QEMU)
+        run: |
+          sudo apt-get update -q && sudo apt-get install -y -q qemu-system-x86 xorriso genisoimage
+          sudo chmod 666 /dev/kvm 2>/dev/null || true
+          LOG=smoke-serial.log ./tools/smoke-test.sh out/symfonos-*.iso
       - uses: actions/upload-artifact@v4
         with:
           name: symfonos-iso
