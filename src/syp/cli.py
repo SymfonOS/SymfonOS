@@ -40,8 +40,14 @@ class Ctx:
     def __init__(self, a):
         self.args = a
         self.cfg = Config.load(a.root)
-        self.db = Database(self.cfg.db_path)
+        self._db = None
         self.keyring = Keyring.from_dir(self.cfg.keyring_dir)
+
+    @property
+    def db(self) -> Database:
+        if self._db is None:
+            self._db = Database(self.cfg.db_path)
+        return self._db
 
     def available(self):
         return repo.load_synced(self.cfg)

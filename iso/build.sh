@@ -42,9 +42,24 @@ while read -r aur; do
 done < "$ROOT/packaging/aur.txt"
 
 repo-add "$LOCALREPO/symfonos-local.db.tar.gz" "$LOCALREPO"/*.pkg.tar.zst
-grep -qx symfonos-keyring "$ROOT/iso/packages.x86_64" || echo symfonos-keyring >> "$ROOT/iso/packages.x86_64"
+
+# Arbeitskopie des Profils; Pakete, die es (nicht mehr) gibt, werden gemeldet statt den Bau abzubrechen
+PROFILE=/tmp/symfonos-profile
+rm -rf "$PROFILE" && cp -a "$ROOT/iso" "$PROFILE"
+DBP=/tmp/symfonos-pacdb && rm -rf "$DBP" && mkdir -p "$DBP"
+pacman --config "$PROFILE/pacman.conf" --dbpath "$DBP" -Sy >/dev/null
+grep -Ev '^\s*(#|$)' "$ROOT/iso/packages.x86_64" > /tmp/wanted.txt
+echo symfonos-keyring >> /tmp/wanted.txt
+: > "$PROFILE/packages.x86_64"
+while read -r p; do
+  if pacman --config "$PROFILE/pacman.conf" --dbpath "$DBP" -Si "$p" &>/dev/null; then
+    echo "$p" >> "$PROFILE/packages.x86_64"
+  else
+    echo "::warning title=Paket fehlt::$p ist in keinem Repo vorhanden und wird ausgelassen"
+  fi
+done < /tmp/wanted.txt
 
 rm -rf "$WORK"
-mkarchiso -v -w "$WORK" -o "$OUT" "$ROOT/iso"
+mkarchiso -v -w "$WORK" -o "$OUT" "$PROFILE"
 ( cd "$OUT" && sha256sum symfonos-*.iso > SHA256SUMS )
 echo ":: ISO fertig: $(ls "$OUT"/symfonos-*.iso)"

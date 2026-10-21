@@ -2,7 +2,8 @@
 # Läuft im Ziel-System (Calamares shellprocess, chroot) nach dem Entpacken.
 set -euo pipefail
 
-# 1) Live-Reste entfernen
+# 1) Branding und Live-Reste
+ln -sf ../usr/share/symfonos/os-release /etc/os-release
 rm -f /etc/sudoers.d/10-live /etc/sddm.conf.d/10-live-autologin.conf \
       /usr/share/applications/symfonos-install.desktop /etc/xdg/autostart/symfonos-welcome.desktop \
       /etc/systemd/system/multi-user.target.wants/symfonos-live-setup.service \

@@ -1,0 +1,8 @@
+zstandard>=0.22
+cryptography>=42
+
+[gui]
+PySide6>=6.6
+
+[test]
+pytest>=8

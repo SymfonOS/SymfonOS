@@ -52,11 +52,20 @@ class InstalledPackage:
 
 class Database:
     def __init__(self, path: Path):
-        path.parent.mkdir(parents=True, exist_ok=True)
-        self.conn = sqlite3.connect(path, isolation_level=None)
-        self.conn.execute("PRAGMA foreign_keys=ON")
-        self.conn.execute("PRAGMA journal_mode=WAL")
-        self.conn.executescript(SCHEMA)
+        self.readonly = False
+        try:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            self.conn = sqlite3.connect(path, isolation_level=None)
+            self.conn.execute("PRAGMA foreign_keys=ON")
+            self.conn.execute("PRAGMA journal_mode=WAL")
+            self.conn.executescript(SCHEMA)
+        except (OSError, sqlite3.OperationalError):
+            # Ohne Schreibrechte (normaler Benutzer): lesend öffnen bzw. leere In-Memory-DB
+            self.readonly = True
+            uri = f"file:{path}?mode=ro&immutable=1" if path.exists() else "file::memory:"
+            self.conn = sqlite3.connect(uri, uri=True, isolation_level=None)
+            if not path.exists():
+                self.conn.executescript(SCHEMA)
 
     # --- Pakete -------------------------------------------------------------
     def installed(self) -> dict[str, InstalledPackage]:

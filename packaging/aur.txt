@@ -1,4 +1,3 @@
 # AUR-Pakete, die für das ISO aus dem Quelltext gebaut und ins lokale Repo gelegt werden
 ckbcomp
 calamares
-digimend-kernel-drivers-dkms

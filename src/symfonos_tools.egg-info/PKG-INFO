@@ -1,0 +1,12 @@
+Metadata-Version: 2.4
+Name: symfonos-tools
+Version: 0.1.0
+Summary: symfonOS: Paketmanager syp, Konverter, Software-Center, Design-Center, Assistent
+License-Expression: GPL-3.0-or-later
+Requires-Python: >=3.11
+Requires-Dist: zstandard>=0.22
+Requires-Dist: cryptography>=42
+Provides-Extra: gui
+Requires-Dist: PySide6>=6.6; extra == "gui"
+Provides-Extra: test
+Requires-Dist: pytest>=8; extra == "test"

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Legt den Live-Benutzer an (nur auf dem Live-Medium; vom Installer entfernt).
 set -euo pipefail
+ln -sf ../usr/share/symfonos/os-release /etc/os-release
 if ! id liveuser &>/dev/null; then
   useradd -m -u 1000 -G wheel,audio,video,realtime,lp -s /bin/bash -c "symfonOS Live" liveuser
   passwd -d liveuser

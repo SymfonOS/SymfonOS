@@ -32,29 +32,49 @@ jobs:
       - name: Tests
         env:
           QT_QPA_PLATFORM: offscreen
-        run: pytest -q
+        run: |
+          pytest -q 2>&1 | tee pytest.log; rc=${PIPESTATUS[0]}
+          if [ "$rc" -ne 0 ]; then
+            echo "::error title=pytest::$(tail -c 3500 pytest.log | sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g')"
+          fi
+          exit "$rc"
 
   iso:
     needs: test
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
-    container:
-      image: archlinux:latest
-      options: --privileged
+    timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4
+      - name: Speicherplatz freigeben
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+          sudo docker image prune -af >/dev/null
+          df -h /
       - name: Release-Schlüssel bereitstellen
         env:
           SYP_SIGNING_KEY: ${{ secrets.SYP_SIGNING_KEY }}
         run: |
-          pacman -Sy --noconfirm --needed python python-cryptography python-zstandard
+          mkdir -p keys
           if [ -n "$SYP_SIGNING_KEY" ]; then
-            umask 077; printf '%s\n' "$SYP_SIGNING_KEY" > /tmp/release.key
-            PYTHONPATH=src python -c "from syp.crypto import SecretKey; import pathlib; k=SecretKey.load(pathlib.Path('/tmp/release.key')); k.save(pathlib.Path('/tmp/r.key'), pathlib.Path('/tmp/release.pub'))"
-            echo "SYP_RELEASE_PUB=/tmp/release.pub" >> "$GITHUB_ENV"
+            umask 077; printf '%s\n' "$SYP_SIGNING_KEY" > keys/release.key
+            pip install -q cryptography zstandard
+            PYTHONPATH=src python3 -c "from syp.crypto import SecretKey; import pathlib; k=SecretKey.load(pathlib.Path('keys/release.key')); k.save(pathlib.Path('keys/tmp.key'), pathlib.Path('keys/release.pub'))"
+            rm -f keys/release.key keys/tmp.key
           fi
-      - name: ISO bauen
-        run: ./iso/build.sh "$PWD/out"
+      - name: ISO bauen (archlinux-Container)
+        run: |
+          pub=""; [ -f keys/release.pub ] && pub="-e SYP_RELEASE_PUB=/src/keys/release.pub"
+          set +e
+          sudo docker run --rm --privileged $pub -v "$PWD:/src" archlinux:latest \
+            bash -c 'pacman-key --init >/dev/null && pacman -Sy --noconfirm archlinux-keyring >/dev/null && /src/iso/build.sh /src/out' 2>&1 | tee build.log
+          rc=${PIPESTATUS[0]}
+          if [ "$rc" -ne 0 ]; then
+            echo "::error title=ISO-Build (Exit $rc)::$(grep -v '^ *[0-9.]*%' build.log | tail -c 3500 | sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g')"
+          fi
+          sudo chown -R "$USER" out 2>/dev/null || true
+          ls -la out 2>/dev/null || true
+          exit "$rc"
       - uses: actions/upload-artifact@v4
         with:
           name: symfonos-iso
@@ -62,6 +82,7 @@ jobs:
             out/*.iso
             out/SHA256SUMS
           retention-days: 7
+          compression-level: 0
 
   repo:
     needs: test

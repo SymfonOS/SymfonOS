@@ -1,0 +1,10 @@
+[console_scripts]
+symfonos-assist = symfonos_assist.cli:main
+syp = syp.cli:main
+syp-convert = syp_convert.cli:main
+
+[gui_scripts]
+symfonos-assist-gui = symfonos_assist.gui:main
+symfonos-design = symfonos_design.center:main
+symfonos-store = syp_store.gui:main
+syp-convert-gui = syp_convert.gui:main
