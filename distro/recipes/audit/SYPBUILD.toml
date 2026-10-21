@@ -18,7 +18,7 @@ filename = "audit-userspace-4.1.1.tar.gz"
 [build]
 build = '''
 cd "$S"
-./autogen.sh
+if [ -x ./autogen.sh ]; then ./autogen.sh; else autoreconf -fiv; fi
 ./configure --prefix=/usr --sysconfdir=/etc --enable-shared --disable-static --without-python3 --disable-zos-remote --without-libcap-ng --with-arm=no --with-aarch64=no
 make
 '''

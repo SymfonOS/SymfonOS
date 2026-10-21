@@ -12,7 +12,7 @@ sha256 = "b29f6f19733aa224b7763507a108a427ed48c688e1faf22b29c44e1c30549282"
 [build]
 build = '''
 cd "$S"
-./bootstrap --prefix=/usr --system-libs --no-system-jsoncpp --no-system-cppdap --no-system-librhash --no-system-libuv --mandir=/share/man --docdir=/share/doc/cmake-4.1.1 --parallel=$NPROC
+./bootstrap --prefix=/usr --system-libs --no-system-jsoncpp --no-system-cppdap --no-system-librhash --no-system-libuv --mandir=/share/man --docdir=/share/doc/cmake-4.1.1 --parallel=$NPROC -- -DBUILD_CursesDialog=OFF
 make
 '''
 package = '''
