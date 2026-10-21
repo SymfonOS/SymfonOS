@@ -78,9 +78,16 @@ jobs:
           if [ "$rc" -eq 124 ] || [ "$rc" -eq 137 ]; then rc=3; echo "::notice title=Bootstrap::Zeitbudget erreicht, nächster Lauf setzt fort"; fi
           echo "::notice title=Stand::Stufen: $(sudo ls "$SYM/.stamps" 2>/dev/null | tr '\n' ' ') · Pakete: $(find out/repo -name '*.syp' 2>/dev/null | wc -l)"
           echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          enc() { sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g'; }
           if [ "$rc" -ne 0 ] && [ "$rc" -ne 3 ]; then
-            echo "::error title=Bootstrap (Exit $rc)::$(grep -v '^ *[0-9.]*%' build.log | tail -c 3500 | sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g')"
+            echo "::error title=Bootstrap (Exit $rc)::$(grep -v '^ *[0-9.]*%' build.log | tail -c 3500 | enc)"
           fi
+          # Je fehlgeschlagenem Paket das Ende seines Bauabschnitts (mit --keep-going gibt es mehrere)
+          for name in $(sed -n 's/^ *✗ \([^:]*\):.*/\1/p' build.log | sort -u | head -12); do
+            sect=$(awk -v n="$name" '/^==> \[[0-9]+\/[0-9]+\] /{on=($3==n)} on' build.log | grep -v '^ *[0-9.]*%' | tail -n 25)
+            echo "::error title=Rezept $name::$(echo "$sect" | tail -c 2500 | enc)"
+          done
+          grep -E '^:: gebaut' build.log | tail -1 | sed 's/^/::notice title=buildall::/' || true
           exit 0
       - name: Zustand sichern
         if: always()
