@@ -21,7 +21,7 @@ Legende Quelle: **Arch** = aus Arch konvertiert · **eigen** = symfonOS-Eigenent
 | Panorama | Hugin | `hugin` | Arch | GPL-2.0-or-later |
 | Farbkalibrierung | ArgyllCMS, colord | `argyllcms`, `colord` | Arch | AGPL-3.0-only, GPL-2.0-or-later |
 | 3D/Animation | Blender | `blender` | Arch | GPL-2.0-or-later |
-| CAD/3D-Druck | FreeCAD | `freecad` | Arch | LGPL-2.0-or-later |
+| CAD/3D-Druck | FreeCAD (nachinstallierbar: `syp install freecad`) | `freecad` | Arch | LGPL-2.0-or-later |
 | Videoschnitt | Kdenlive | `kdenlive` | Arch | GPL-3.0-or-later |
 | Streaming/Aufnahme | OBS Studio | `obs-studio` | Arch | GPL-2.0-or-later |
 | Transkodierung | HandBrake | `handbrake` | Arch | GPL-2.0-only |
