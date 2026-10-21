@@ -369,7 +369,10 @@ static char *source_dir(const char *src, const jval *b) {
         free(list[i]);
     }
     if (n >= 0) free(list);
-    if (dirs == 1 && !other) return only;
+    /* Genau ein Verzeichnis = entpackte Hauptquelle; daneben liegende Dateien (Patches,
+     * Konfiguration, pax_global_header aus GitHub-Archiven) ändern daran nichts */
+    (void)other;
+    if (dirs == 1) return only;
     free(only);
     return xstrdup(src);
 }

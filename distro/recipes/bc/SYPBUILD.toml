@@ -12,7 +12,7 @@ sha256 = "91eb74caed0ee6655b669711a4f350c25579778694df248e28363318e03c7fc4"
 [build]
 build = '''
 cd "$S"
-CC=gcc ./configure --prefix=/usr -G -O3 -r
+CC="gcc -std=gnu17" ./configure --prefix=/usr -G -O3 -r   # bc 7 setzt false/true als Makros voraus (vor C23)
 make
 '''
 package = '''

@@ -548,3 +548,21 @@ def test_buildall_rebuilds_packages_signed_with_old_key(tmp_path):
     assert [e["info"]["name"] for e in idx["packages"]] == ["a"]
     # Dritter Lauf mit demselben Schlüssel: nichts zu tun
     assert "vorhanden 1" in syp("buildall", recs, "--repo", repo, "-k", new_key, "--name", "t").stdout
+
+
+def test_source_dir_with_extra_files(tmp_path):
+    """$S ist das entpackte Verzeichnis, auch wenn daneben weitere Quelldateien liegen."""
+    import hashlib
+    import io
+    tar = tmp_path / "p-1.tar.gz"
+    with tarfile.open(tar, "w:gz") as tf:
+        ti = tarfile.TarInfo("p-1/config")
+        ti.size = 3
+        ti.mode = 0o755
+        tf.addfile(ti, io.BytesIO(b"ok\n"))
+    (tmp_path / "extra.cnf").write_text("x\n")
+    (tmp_path / "SYPBUILD.toml").write_text(
+        f'[package]\nname = "p"\nversion = "1-1"\narch = "any"\n[[source]]\nurl = "file://{tar}"\n'
+        f'sha256 = "{hashlib.sha256(tar.read_bytes()).hexdigest()}"\n[[source]]\npath = "extra.cnf"\n'
+        "[build]\npackage = 'test -f \"$S/config\"; install -Dm644 \"$SRCDIR/extra.cnf\" \"$DESTDIR/etc/p.cnf\"'\n")
+    syp("build", tmp_path / "SYPBUILD.toml", "-o", tmp_path / "out", env=dict(os.environ, HOME=str(tmp_path)))
