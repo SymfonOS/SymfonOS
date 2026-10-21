@@ -5,3 +5,6 @@ __pycache__/
 /work/
 *.syp.part
 *.key
+csrc/bin/
+csrc/**/*.o
+csrc/*.a

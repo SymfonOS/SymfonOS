@@ -1,199 +1,181 @@
+"""Tests für den Paketmanager syp (C)."""
 from __future__ import annotations
 
+import io
 import json
 import tarfile
 
 import pytest
 
-from syp import repo
-from syp.cli import main
-from syp.crypto import Keyring, SecretKey, SignatureError
-from syp.deps import Atom
-from syp.package import SypPackage, PackageError, PackageInfo
-from syp.repo import RepoPackage
-from syp.solver import Solver, SolverError
-from syp.version import vercmp
-
-from helpers import make_pkg, setup_root
+from helpers import keygen, make_pkg, publish, setup_root, syp
 
 
 @pytest.mark.parametrize("a,b,r", [
     ("1.0", "1.0", 0), ("1.0", "1.1", -1), ("1.10", "1.9", 1), ("1.0a", "1.0", -1),
     ("1.0", "1.0.1", -1), ("1:1.0", "2.0", 1), ("1.0-2", "1.0-10", -1), ("1.0-1", "1.0", 0),
-    ("2.0rc1", "2.0", -1), ("1.0.0", "1.0", 1), ("1.a", "1.1", -1),
+    ("2.0rc1", "2.0", -1), ("1.0.0", "1.0", 1), ("1.a", "1.1", -1), ("1.01", "1.1", 0),
 ])
 def test_vercmp(a, b, r):
-    assert vercmp(a, b) == r
+    assert int(syp("vercmp", a, b).stdout) == r
 
 
-def test_atom_versions():
-    assert Atom.parse("foo>=1.2").matches_version("1.3-1")
-    assert not Atom.parse("foo<1.2").matches_version("1.2")
-    assert not Atom.parse("foo>=1").matches_version(None)
+@pytest.fixture
+def env(tmp_path):
+    key, pub = keygen(tmp_path)
+    repo_dir = tmp_path / "repo"
+    root = setup_root(tmp_path, repo_dir, pub)
+
+    def pub_and_sync(*pkgs):
+        publish(repo_dir, key, *pkgs)
+        syp("-r", root, "sync")
+
+    def S(*args, **kw):
+        return syp("-r", root, "-y", *args, **kw)
+
+    def plan(*args):
+        return json.loads(syp("-r", root, "-n", *args, "--json").stdout)
+
+    def pk(name, ver, files=None, **info):
+        return make_pkg(tmp_path, name, ver, files, key, **info)
+
+    return tmp_path, key, root, pub_and_sync, S, plan, pk
 
 
-def rp(name, ver, **kw):
-    return RepoPackage(PackageInfo(name=name, version=ver, **kw), "core", "", "", 0)
+def names(plan):
+    return {p["name"]: p["version"] for p in plan["install"]}
 
 
-class Inst:
-    def __init__(self, name, ver, reason="explicit", **kw):
-        self.info = PackageInfo(name=name, version=ver, **kw)
-        self.reason = reason
-
-    name = property(lambda s: s.info.name)
-    version = property(lambda s: s.info.version)
-
-
-def test_solver_basic_and_provides():
-    avail = [rp("app", "1-1", depends=["libx>=2", "sh"]), rp("libx", "1-1"), rp("libx", "2-1"),
-             rp("bash", "5-1", provides=["sh"])]
-    plan = Solver(avail, {}).install(["app"])
-    got = {p.name: p.version for p in plan.install}
-    assert got == {"app": "1-1", "libx": "2-1", "bash": "5-1"}
-    assert plan.reasons["app"] == "explicit" and plan.reasons["libx"] == "dep"
+def test_solver_basic_and_provides(env):
+    tmp, key, root, publish_, S, plan, pk = env
+    publish_(pk("app", "1-1", depends=["libx>=2", "sh"]), pk("libx", "1-1"), pk("libx", "2-1"),
+             pk("bash", "5-1", provides=["sh"]))
+    assert names(plan("install", "app")) == {"app": "1-1", "libx": "2-1", "bash": "5-1"}
+    S("install", "app")
+    info = {p["name"]: p["reason"] for p in json.loads(syp("-r", root, "list", "--json").stdout)}
+    assert info == {"app": "explicit", "libx": "dep", "bash": "dep"}
 
 
-def test_solver_backtracks_over_conflict():
-    avail = [rp("app", "1-1", depends=["tool"]), rp("tool-a", "2-1", provides=["tool"],
-             conflicts=["base"]), rp("tool-b", "1-1", provides=["tool"])]
-    plan = Solver(avail, {"base": Inst("base", "1-1")}).install(["app"])
-    assert {p.name for p in plan.install} == {"app", "tool-b"}
+def test_solver_backtracks_over_conflict(env):
+    tmp, key, root, publish_, S, plan, pk = env
+    base = pk("base", "1-1")
+    S("install", base)
+    publish_(pk("app", "1-1", depends=["tool"]), pk("tool-a", "2-1", provides=["tool"], conflicts=["base"]),
+             pk("tool-b", "1-1", provides=["tool"]))
+    assert names(plan("install", "app")) == {"app": "1-1", "tool-b": "1-1"}
 
 
-def test_solver_alternatives_and_missing():
-    avail = [rp("app", "1-1", depends=["x | y"]), rp("y", "1-1")]
-    assert {p.name for p in Solver(avail, {}).install(["app"]).install} == {"app", "y"}
-    with pytest.raises(SolverError, match="Nichts stellt »nope«"):
-        Solver([rp("app", "1-1", depends=["nope"])], {}).install(["app"])
+def test_solver_alternatives_and_missing(env):
+    tmp, key, root, publish_, S, plan, pk = env
+    publish_(pk("app", "1-1", depends=["x | y"]), pk("y", "1-1"), pk("bad", "1-1", depends=["nope"]))
+    assert names(plan("install", "app")) == {"app": "1-1", "y": "1-1"}
+    r = syp("-r", root, "-n", "install", "bad", check=False)
+    assert r.returncode == 1 and "Nichts stellt »nope« bereit (benötigt von bad)" in r.stderr
 
 
-def test_solver_upgrade_and_broken_revdeps():
-    inst = {"lib": Inst("lib", "1-1", "dep"), "app": Inst("app", "1-1", depends=["lib<2"])}
-    avail = [rp("lib", "2-1"), rp("lib", "1-1"), rp("app", "1-1", depends=["lib<2"]),
-             rp("app", "2-1", depends=["lib>=2"])]
-    plan = Solver(avail, inst).upgrade()
-    assert {p.name: p.version for p in plan.install} == {"lib": "2-1", "app": "2-1"}
+def test_solver_upgrade_and_broken_revdeps(env):
+    tmp, key, root, publish_, S, plan, pk = env
+    publish_(pk("lib", "1-1"), pk("app", "1-1", depends=["lib<2"]))
+    S("install", "app")
+    publish_(pk("lib", "2-1"), pk("app", "2-1", depends=["lib>=2"]))
+    S("sync")
+    assert names(plan("upgrade", "--no-sync")) == {"lib": "2-1", "app": "2-1"}
 
 
-def test_solver_remove_and_orphans():
-    inst = {"lib": Inst("lib", "1", "dep"), "app": Inst("app", "1", depends=["lib"]),
-            "old": Inst("old", "1", "dep")}
-    with pytest.raises(SolverError, match="app benötigt"):
-        Solver([], inst).remove(["lib"])
-    assert Solver([], inst).remove(["lib"], cascade=True).remove == ["app", "lib"]
-    assert Solver([], inst).orphans() == ["old"]
+def test_remove_cascade_and_orphans(env):
+    tmp, key, root, publish_, S, plan, pk = env
+    publish_(pk("lib", "1"), pk("app", "1", depends=["lib"]), pk("old", "1"), pk("tool", "1", depends=["old"]))
+    S("install", "app", "tool")
+    r = syp("-r", root, "-y", "remove", "lib", check=False)
+    assert r.returncode == 1 and "app benötigt »lib«" in r.stderr
+    assert plan("remove", "lib", "--cascade")["remove"] == ["app", "lib"]
+    S("remove", "tool")
+    assert plan("autoremove")["remove"] == ["old"]
 
 
-def test_package_roundtrip_and_signature(tmp_path):
-    key = SecretKey.generate("test")
-    p = make_pkg(tmp_path, "hello", "1.0-1", signer=key)
-    pkg = SypPackage(p)
-    kr = Keyring()
-    with pytest.raises(SignatureError):
-        pkg.verify(kr)
-    key.save(tmp_path / "k.key", tmp_path / "k.pub")
-    kr = Keyring.from_dir(tmp_path)
-    assert pkg.verify(kr).id == key.id
-    pkg.extract(tmp_path / "x")
-    assert (tmp_path / "x/usr/share/hello/VERSION").read_text() == "1.0-1"
-
-
-def test_tampered_package_rejected(tmp_path):
-    key = SecretKey.generate()
-    key.save(tmp_path / "k.key", tmp_path / "k.pub")
-    p = make_pkg(tmp_path, "hello", "1.0-1", signer=key)
+def test_package_signature_and_tamper(tmp_path):
+    key, pub = keygen(tmp_path)
+    p = make_pkg(tmp_path, "hello", "1.0-1", key=key)
     with tarfile.open(p) as tf:
+        assert tf.getnames() == [".SYPINFO.json", ".FILES.json", "data.tar.zst", ".SIGNATURE.json"]
         members = {m.name: tf.extractfile(m).read() for m in tf.getmembers()}
     info = json.loads(members[".SYPINFO.json"])
-    info["depends"] = ["evil"]
+    info["summary"] = "manipuliert"
     members[".SYPINFO.json"] = json.dumps(info).encode()
     bad = tmp_path / "bad.syp"
-    import io
     with tarfile.open(bad, "w") as tf:
         for n in (".SYPINFO.json", ".FILES.json", "data.tar.zst", ".SIGNATURE.json"):
             ti = tarfile.TarInfo(n)
             ti.size = len(members[n])
             tf.addfile(ti, io.BytesIO(members[n]))
-    with pytest.raises(SignatureError):
-        SypPackage(bad).verify(Keyring.from_dir(tmp_path))
+    root = setup_root(tmp_path, tmp_path / "repo", pub)
+    syp("-r", root, "-y", "install", p)
+    r = syp("-r", root, "-y", "install", bad, check=False)
+    assert r.returncode == 1 and "Signatur ungültig" in r.stderr
+    r = syp("-r", root, "-y", "install", make_pkg(tmp_path, "unsig", "1"), check=False)
+    assert "nicht signiert" in r.stderr
 
 
-def test_invalid_name():
-    with pytest.raises(PackageError):
-        PackageInfo(name="Bad Name", version="1").validate()
+def test_invalid_name(tmp_path):
+    with pytest.raises(AssertionError, match="Ungültiger Paketname"):
+        make_pkg(tmp_path, "Bad Name", "1")
 
 
-@pytest.fixture
-def env(tmp_path):
-    key = SecretKey.generate("symfonOS Test")
-    repo_dir = tmp_path / "repo"
-    root = setup_root(tmp_path, repo_dir, key)
-
-    def publish(*pkgs):
-        for p in pkgs:
-            repo.add_to_pool(repo_dir, p)
-        repo.build_index(repo_dir, "core", "x86_64", key)
-        assert main(["-r", str(root), "sync"]) == 0
-    return tmp_path, key, root, publish
-
-
-def test_end_to_end(env, capsys):
-    tmp, key, root, publish = env
-    R = ["-r", str(root), "-y"]
-    publish(
-        make_pkg(tmp, "libcolor", "1.0-1", {"usr/lib/libcolor.so.1": "v1"}, key,
-                 provides=["so:libcolor.so.1"]),
-        make_pkg(tmp, "paint", "1.0-1", {"usr/bin/paint": "paint1", "etc/paint.conf": "a=1\n"},
-                 key, depends=["so:libcolor.so.1"], backup=["etc/paint.conf"]),
-    )
-    assert main(R + ["install", "paint"]) == 0
+def test_end_to_end(env):
+    tmp, key, root, publish_, S, plan, pk = env
+    publish_(pk("libcolor", "1.0-1", {"usr/lib/libcolor.so.1": "v1"}, provides=["so:libcolor.so.1"]),
+             pk("paint", "1.0-1", {"usr/bin/paint": "paint1", "etc/paint.conf": "a=1\n"},
+                depends=["so:libcolor.so.1"], backup=["etc/paint.conf"], categories=["Graphics"]))
+    S("install", "paint")
     assert (root / "usr/bin/paint").read_text() == "paint1"
-    assert main(R + ["owns", str(root / "usr/lib/libcolor.so.1")]) in (0, 1)
+    assert syp("-r", root, "owns", root / "usr/bin/paint").stdout == "/usr/bin/paint gehört zu paint\n"
+    search = json.loads(syp("-r", root, "search", "paint", "--json").stdout)
+    assert search[0]["installed"] == "1.0-1" and search[0]["categories"] == ["Graphics"]
 
-    # Nutzer ändert Konfig -> Upgrade schreibt .sypnew
-    (root / "etc/paint.conf").write_text("a=2\n")
-    publish(make_pkg(tmp, "paint", "2.0-1", {"usr/bin/paint": "paint2", "etc/paint.conf": "a=1\nb=1\n"},
-                     key, depends=["so:libcolor.so.1"], backup=["etc/paint.conf"]))
-    assert main(R + ["upgrade"]) == 0
+    (root / "etc/paint.conf").write_text("a=2\n")      # Nutzer ändert Konfig
+    publish_(pk("paint", "2.0-1", {"usr/bin/paint": "paint2", "etc/paint.conf": "a=1\nb=1\n"},
+                depends=["so:libcolor.so.1"], backup=["etc/paint.conf"]))
+    S("upgrade")
     assert (root / "usr/bin/paint").read_text() == "paint2"
     assert (root / "etc/paint.conf").read_text() == "a=2\n"
     assert (root / "etc/paint.conf.sypnew").exists()
-    assert main(R + ["verify"]) == 0
+    S("verify")
+    assert "upgrade" in S("history").stdout
+    assert len(json.loads(syp("-r", root, "history", "--json").stdout)) == 2
 
-    # Rollback auf Stand vor dem Upgrade
-    capsys.readouterr()
-    assert main(R + ["history"]) == 0
-    assert "upgrade" in capsys.readouterr().out
-    assert main(R + ["rollback"]) == 0
+    S("rollback")                                       # Zustand vor dem Upgrade
     assert (root / "usr/bin/paint").read_text() == "paint1"
 
-    # Entfernen + verwaiste Abhängigkeiten
-    assert main(R + ["remove", "libcolor"]) == 1      # paint hängt davon ab
-    assert main(R + ["remove", "paint"]) == 0
+    assert syp("-r", root, "-y", "remove", "libcolor", check=False).returncode == 1
+    S("remove", "paint")
     assert not (root / "usr/bin/paint").exists()
-    assert (root / "etc/paint.conf.sypsave").exists()  # geänderte Konfig gesichert
-    assert main(R + ["autoremove"]) == 0
+    assert (root / "etc/paint.conf.sypsave").exists()
+    S("autoremove")
     assert not (root / "usr/lib/libcolor.so.1").exists()
+    assert "Keine Probleme" in syp("-r", root, "doctor", check=False).stdout
 
 
-def test_file_conflict(env):
-    tmp, key, root, publish = env
-    R = ["-r", str(root), "-y"]
-    publish(make_pkg(tmp, "a", "1-1", {"usr/bin/x": "a"}, key),
-            make_pkg(tmp, "b", "1-1", {"usr/bin/x": "b"}, key))
-    assert main(R + ["install", "a"]) == 0
-    assert main(R + ["install", "b"]) == 1
+def test_file_conflict_and_overwrite(env):
+    tmp, key, root, publish_, S, plan, pk = env
+    publish_(pk("a", "1-1", {"usr/bin/x": "a"}), pk("b", "1-1", {"usr/bin/x": "b"}),
+             pk("c", "1-1", {"usr/bin/y": "c"}))
+    S("install", "a")
+    r = syp("-r", root, "-y", "install", "b", check=False)
+    assert r.returncode == 1 and "existiert bereits in a" in r.stderr
     assert (root / "usr/bin/x").read_text() == "a"
+    (root / "usr/bin/y").write_text("unverwaltet")
+    assert syp("-r", root, "-y", "install", "c", check=False).returncode == 1
+    S("install", "c", "--overwrite", "/usr/bin/y")
+    assert (root / "usr/bin/y").read_text() == "c"
 
 
 def test_unsigned_index_rejected(tmp_path):
-    key = SecretKey.generate()
+    key, pub = keygen(tmp_path)
+    other, _ = keygen(tmp_path, "other")
     repo_dir = tmp_path / "repo"
-    root = setup_root(tmp_path, repo_dir, key)
-    repo.add_to_pool(repo_dir, make_pkg(tmp_path, "a", "1-1"))
-    repo.build_index(repo_dir, "core", "x86_64", SecretKey.generate())  # fremder Schlüssel
-    assert main(["-r", str(root), "sync"]) == 1
+    root = setup_root(tmp_path, repo_dir, pub)
+    publish(repo_dir, other, make_pkg(tmp_path, "a", "1-1", key=key))
+    r = syp("-r", root, "sync", check=False)
+    assert r.returncode == 1 and "Unbekannter Signaturschlüssel" in r.stderr
 
 
 def test_build_recipe(tmp_path):
@@ -204,28 +186,52 @@ name = "hello"
 version = "1.0-1"
 arch = "any"
 license = "MIT"
+makedepends = ["gcc"]
 [[source]]
 path = "hello.sh"
 [build]
-package = 'install -Dm755 hello.sh "$DESTDIR/usr/bin/hello"'
+check = 'test -x hello.sh || chmod +x hello.sh'
+package = \'\'\'
+install -Dm755 hello.sh "$DESTDIR/usr/bin/hello"
+echo "$PKGNAME $PKGVER $PKGREL" > "$DESTDIR/usr/bin/.meta"
+\'\'\'
+[scripts]
+post_install = "echo installiert"
 ''')
-    assert main(["build", str(tmp_path / "SYPBUILD.toml"), "-o", str(tmp_path / "o")]) == 0
-    pkg = SypPackage(tmp_path / "o/hello-1.0-1-any.syp")
-    assert [f["path"] for f in pkg.files] == ["usr", "usr/bin", "usr/bin/hello"]
-    assert pkg.files[-1]["mode"] == 0o755
+    syp("build", tmp_path / "SYPBUILD.toml", "-o", tmp_path / "o")
+    p = tmp_path / "o/hello-1.0-1-any.syp"
+    with tarfile.open(p) as tf:
+        files = json.loads(tf.extractfile(".FILES.json").read())
+        info = json.loads(tf.extractfile(".SYPINFO.json").read())
+    assert [f["path"] for f in files] == ["usr", "usr/bin", "usr/bin/.meta", "usr/bin/hello"]
+    assert files[-1]["mode"] == 0o755
+    assert "makedepends" not in info and info["scripts"]["post_install"] == "echo installiert"
 
 
-def test_pacman_import(tmp_path):
-    from syp.db import Database
-    from syp.pacman_import import import_db
-    root = tmp_path
-    d = root / "var/lib/pacman/local/bash-5.2-1"
-    d.mkdir(parents=True)
-    (d / "desc").write_text("%NAME%\nbash\n\n%VERSION%\n5.2-1\n\n%PROVIDES%\nsh\n\n%LICENSE%\nGPL-3.0-or-later\n")
-    (d / "files").write_text("%FILES%\nusr/\nusr/bin/\nusr/bin/bash\n")
-    (root / "usr/bin").mkdir(parents=True)
-    (root / "usr/bin/bash").write_text("x")
-    db = Database(root / "db.sqlite")
-    assert import_db(root, db, log=lambda *_: None) == 1
-    assert db.owners("usr/bin/bash") == ["bash"]
-    assert db.get("bash").info.provides == ["sh"]
+def test_buildall_order_and_resume(tmp_path):
+    key, pub = keygen(tmp_path)
+    rec = tmp_path / "recipes"
+    for name, deps in (("zlib", []), ("libpng", ["zlib"]), ("app", ["libpng", "sh"]), ("bash", [])):
+        d = rec / name
+        d.mkdir(parents=True)
+        extra = 'provides = ["sh"]\n' if name == "bash" else ""
+        (d / "SYPBUILD.toml").write_text(
+            f'[package]\nname = "{name}"\nversion = "1-1"\nmakedepends = {json.dumps(deps)}\n{extra}'
+            f'[build]\npackage = \'mkdir -p "$DESTDIR/usr/share/{name}" && date +%s%N > "$DESTDIR/usr/share/{name}/b"\'\n')
+    repo = tmp_path / "repo"
+    out = syp("buildall", rec, "--repo", repo, "-k", key).stdout
+    order = [line.split()[2] for line in out.splitlines() if line.startswith("==> [")]
+    assert order.index("zlib") < order.index("libpng") < order.index("app") and order.index("bash") < order.index("app")
+    out2 = syp("buildall", rec, "--repo", repo, "-k", key).stdout
+    assert "gebaut 0, vorhanden 4" in out2
+    root = setup_root(tmp_path, repo, pub)
+    syp("-r", root, "sync")
+    syp("-r", root, "-y", "install", "app")
+
+
+def test_buildall_dry_run(tmp_path):
+    rec = tmp_path / "r"
+    (rec / "x").mkdir(parents=True)
+    (rec / "x/SYPBUILD.toml").write_text('[package]\nname = "x"\nversion = "1"\n')
+    r = syp("buildall", rec, "--repo", tmp_path / "repo", "-n")
+    assert "würde bauen: x 1" in r.stdout
