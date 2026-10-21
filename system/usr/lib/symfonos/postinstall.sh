@@ -7,7 +7,8 @@ ln -sf ../usr/share/symfonos/os-release /etc/os-release
 rm -f /etc/sudoers.d/10-live /etc/sddm.conf.d/10-live-autologin.conf \
       /usr/share/applications/symfonos-install.desktop /etc/xdg/autostart/symfonos-welcome.desktop \
       /etc/systemd/system/multi-user.target.wants/symfonos-live-setup.service \
-      /etc/systemd/system/symfonos-live-setup.service /usr/local/bin/symfonos-live-setup
+      /etc/systemd/system/symfonos-live-setup.service /usr/local/bin/symfonos-live-setup \
+      /etc/systemd/system/systemd-firstboot.service
 rm -f /etc/mkinitcpio.conf.d/archiso.conf
 userdel -r liveuser 2>/dev/null || true
 

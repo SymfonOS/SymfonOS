@@ -17,6 +17,8 @@ bash-completion
 man-db
 man-pages
 nano
+glibc-locales
+terminus-font
 rsync
 gptfdisk
 # ---- Boot, Dateisystem, Snapshots ------------------------------------------
