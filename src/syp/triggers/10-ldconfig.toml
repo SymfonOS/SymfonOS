@@ -1,0 +1,3 @@
+description = "Bibliotheks-Cache aktualisieren"
+paths = ["usr/lib/*.so*", "usr/lib64/*.so*", "etc/ld.so.conf.d/*"]
+exec = ["ldconfig"]

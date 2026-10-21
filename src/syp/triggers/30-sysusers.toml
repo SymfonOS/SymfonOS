@@ -1,0 +1,3 @@
+description = "Systembenutzer anlegen"
+paths = ["usr/lib/sysusers.d/*"]
+exec = ["systemd-sysusers"]

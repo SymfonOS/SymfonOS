@@ -1,0 +1,3 @@
+description = "Icon-Cache aktualisieren"
+paths = ["usr/share/icons/hicolor/*"]
+exec = ["gtk-update-icon-cache", "-q", "-t", "-f", "/usr/share/icons/hicolor"]

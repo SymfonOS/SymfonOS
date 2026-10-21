@@ -1,0 +1,3 @@
+description = "Initramfs neu erzeugen"
+paths = ["usr/lib/modules/*/vmlinuz", "usr/lib/firmware/*", "usr/lib/initcpio/*"]
+exec = ["mkinitcpio", "-P"]

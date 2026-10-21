@@ -1,0 +1,3 @@
+description = "Desktop-Datenbank aktualisieren"
+paths = ["usr/share/applications/*.desktop"]
+exec = ["update-desktop-database", "-q"]

@@ -1,0 +1,3 @@
+description = "tmpfiles anwenden"
+paths = ["usr/lib/tmpfiles.d/*"]
+exec = ["systemd-tmpfiles", "--create"]
