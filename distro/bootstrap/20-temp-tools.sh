@@ -18,7 +18,7 @@ _tmp_ncurses() {
   unpack ncurses
   mkdir -p build; cd build; ../configure AWK=gawk; make -C include; make -C progs tic; cd ..
   ./configure --prefix=/usr --host=$TGT --build="$(./config.guess)" --mandir=/usr/share/man \
-  --with-manpage-format=normal --with-shared --without-normal --with-cxx-shared --without-debug \
+  --with-manpage-format=normal --with-shared --without-normal --without-cxx-binding --without-debug \
   --without-ada --disable-stripping AWK=gawk
   make; make DESTDIR="$SYM" TIC_PATH="$(pwd)/build/progs/tic" install
   ln -sf libncursesw.so "$SYM/usr/lib/libncurses.so"
