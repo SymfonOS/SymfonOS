@@ -405,3 +405,40 @@ def test_security_audit_and_upgrade(env):
     S("upgrade", "--security", "--no-sync")
     assert "Keine bekannten Sicherheitslücken" in syp("-r", root, "audit").stdout
     assert json.loads(syp("-r", root, "info", "curl", "--json").stdout)["version"] == "8.14.0-1"
+
+
+def test_fetch_retry_and_sums_keep_layout(tmp_path):
+    import http.server
+    import threading
+    hits = {"flaky": 0, "missing": 0}
+    class H(http.server.BaseHTTPRequestHandler):
+        def log_message(self, *a):
+            pass
+        def do_GET(self):
+            name = self.path.strip("/").split(".")[0]
+            hits[name] = hits.get(name, 0) + 1
+            if name == "flaky" and hits[name] == 1:
+                self.send_error(503)
+            elif name == "missing":
+                self.send_error(404)
+            else:
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(b"quelle\n")
+    srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), H)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    base = f"http://127.0.0.1:{srv.server_address[1]}"
+    rec = tmp_path / "SYPBUILD.toml"
+    text = ('[package]\nname = "f"\nversion = "1-1"\n\n[[source]]\nurl = "%s/flaky.txt"\nsha256 = "TODO"\n'
+            'extract = false\n\n[build]\npackage = "true"\n' % base)
+    rec.write_text(text)
+    env = dict(os.environ, SYP_SRCCACHE=str(tmp_path / "cache"), SYP_FETCH_RETRIES="3",
+               NO_PROXY="127.0.0.1", no_proxy="127.0.0.1")
+    r = syp("sums", rec, env=env)
+    assert hits["flaky"] == 2 and "Versuch 1/3" in r.stderr
+    import hashlib
+    assert rec.read_text() == text.replace("TODO", hashlib.sha256(b"quelle\n").hexdigest())  # Leerzeilen bleiben
+    rec.write_text(text.replace("flaky", "missing"))
+    r = syp("sums", rec, env=env, check=False)
+    assert r.returncode != 0 and hits["missing"] == 1                # 404: kein sinnloser Neuversuch
+    srv.shutdown()

@@ -263,6 +263,15 @@ def cmd_enroll(_: list[str]) -> int:
         guid, _ = VARS[var]
         write_var(var, guid, (KEYDIR / f"{var}.auth").read_bytes())
         print(f"  {var} eingetragen")
+    # Upstream-Kernel schalten Lockdown nicht von selbst mit Secure Boot ein (das ist ein Fedora-Patch):
+    # ausdrücklich in die eingebettete Kommandozeile aufnehmen, damit root den Kernel nicht verändern kann
+    cmdline = ROOT / "etc/kernel/cmdline"
+    if cmdline.exists() and "lockdown=" not in cmdline.read_text():
+        cmdline.write_text(cmdline.read_text().rstrip("\n") + " lockdown=integrity\n")
+        print("  lockdown=integrity in /etc/kernel/cmdline aufgenommen")
+    hook = ROOT / "usr/lib/syp/kernel-hook"
+    if hook.exists() and str(ROOT) == "/":
+        subprocess.run([str(hook)], check=False)
     print("Fertig. Jetzt signieren (symfonos-secureboot sign), neu starten und Secure Boot einschalten.")
     return 0
 

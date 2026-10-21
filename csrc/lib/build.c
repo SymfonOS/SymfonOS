@@ -90,9 +90,17 @@ static int write_sum(const char *recipe, const char *url, const char *sum) {
     if (read_file(recipe, &text, NULL)) return -1;
     sbuf out = {0};
     sb_init(&out);
-    char *save = NULL, *copy = xstrdup(text);
+    char *copy = xstrdup(text), *next = copy;
     int pending = 0, done = 0;
-    for (char *line = strtok_r(copy, "\n", &save); line; line = strtok_r(NULL, "\n", &save)) {
+    /* zeilenweise inklusive Leerzeilen (strtok würde sie verschlucken und das Rezept umformatieren) */
+    while (*next) {
+        char *line = next, *nl = strchr(next, '\n');
+        if (nl) {
+            *nl = 0;
+            next = nl + 1;
+        } else {
+            next = line + strlen(line);
+        }
         char *t = str_trim(xstrdup(line)), *tt = t;
         if (pending) {
             if (str_starts(tt, "sha256")) {
@@ -121,17 +129,41 @@ static int write_sum(const char *recipe, const char *url, const char *sum) {
     return rc;
 }
 
+/* Ausweichquellen für große Projektserver. Unbedenklich, weil jede Quelle über die sha256 im
+ * Rezept geprüft wird: ein Spiegel kann nichts unterschieben, nur ausfallen. */
+static const char *MIRRORS[][4] = {
+    {"https://ftp.gnu.org/gnu/", "https://ftpmirror.gnu.org/gnu/", "https://mirrors.kernel.org/gnu/",
+     "https://ftp.fau.de/gnu/"},
+    {"https://www.kernel.org/pub/", "https://mirrors.edge.kernel.org/pub/", "https://cdn.kernel.org/pub/", NULL},
+    {"https://www.cpan.org/", "https://cpan.metacpan.org/", NULL, NULL},
+    {"https://data.iana.org/time-zones/", "https://ftp.iana.org/tz/", NULL, NULL},
+};
+
 static char *fetch_source(const char *url, const char *fname, const char *srccache) {
     char *dest = path_join(srccache, fname);
-    if (!path_exists(dest)) {
-        printf("  Lade %s\n", url);
-        fflush(stdout);
-        if (fetch_url(url, dest)) {
-            free(dest);
-            return NULL;
+    if (path_exists(dest)) return dest;
+    printf("  Lade %s\n", url);
+    fflush(stdout);
+    if (fetch_url(url, dest) == 0) return dest;
+    char *first = xstrdup(last_error());
+    for (size_t m = 0; m < sizeof MIRRORS / sizeof *MIRRORS; m++) {
+        if (!str_starts(url, MIRRORS[m][0])) continue;
+        for (int k = 1; k < 4 && MIRRORS[m][k]; k++) {
+            char *alt = xasprintf("%s%s", MIRRORS[m][k], url + strlen(MIRRORS[m][0]));
+            printf("  Ausweichquelle %s\n", alt);
+            fflush(stdout);
+            int ok = fetch_url(alt, dest) == 0;
+            free(alt);
+            if (ok) {
+                free(first);
+                return dest;
+            }
         }
     }
-    return dest;
+    set_error("%s", first);
+    free(first);
+    free(dest);
+    return NULL;
 }
 
 int recipe_fetch(const char *recipe, const char *dir, int quiet) {

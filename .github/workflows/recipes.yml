@@ -22,13 +22,17 @@ jobs:
       - name: Fehlende Prüfsummen ermitteln (Quellen laden, sha256 eintragen)
         run: |
           set +e
-          failed=()
+          failed=() errs=""
           for r in distro/recipes/*/SYPBUILD.toml; do
             grep -q 'sha256 = "TODO"' "$r" || continue
-            csrc/bin/syp sums "$r" || failed+=("$(basename "$(dirname "$r")")")
+            name=$(basename "$(dirname "$r")")
+            if ! out=$(csrc/bin/syp sums "$r" 2>&1); then
+              failed+=("$name")
+              errs+="$name: $(echo "$out" | grep -E 'Fehler|Download|!!' | tail -1)%0A"   # eine Annotation (GitHub begrenzt die Anzahl)
+            fi
           done
           if ((${#failed[@]})); then
-            echo "::warning title=Quellen nicht ladbar::${failed[*]}"
+            echo "::warning title=Quellen nicht ladbar (${#failed[@]})::${errs:0:3800}"
           fi
           echo "Rezepte ohne Prüfsumme: $(grep -l 'sha256 = "TODO"' distro/recipes/*/SYPBUILD.toml | wc -l)"
       - name: Änderungen committen

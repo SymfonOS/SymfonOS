@@ -29,3 +29,25 @@
 - **Geräte:** `usb_storage`/`uas` gesperrt (Neuladen verhindert).
 - **Ende:** `sudo symfonos-exam stop` oder automatisch nach `--minutes N`. Der Normalzustand wird wiederhergestellt und das Prüfungs-Home gelöscht.
 - **Grenzen:** Lokale Root-Rechte heben jede Sperre auf. Der Modus schützt vor Bedienung im laufenden Betrieb, nicht vor einem Besitzer mit Admin-Rechten oder einem Live-USB-Stick. Für beaufsichtigte Prüfungen an Leihgeräten sollte das Gerät ohne Admin-Konto für Prüflinge betrieben werden.
+
+## SEB-Kompatibilität und Sicherheitsschicht
+
+Die Härtung (siehe [SICHERHEIT.md](SICHERHEIT.md)) ist auf alle fünf Optionen abgestimmt. Die
+automatischen Tests in `tests/test_security.py` prüfen das:
+
+| Option | Was sie braucht | Wie die Härtung damit umgeht |
+|---|---|---|
+| A. Kiosk-Firefox | eigene nftables-Tabelle | Die Tabelle `inet symfonos_exam` läuft zusätzlich zur Basis-Firewall (beide müssen ein Paket erlauben). Ein Firewall-Reload löscht sie nicht. |
+| B. seb-linux (AppImage) | FUSE, User-Namespaces für die Browser-Sandbox | FUSE ist nicht gesperrt, und User-Namespaces bleiben aktiv |
+| C. Windows-VM mit offiziellem SEB | KVM, QEMU | KVM ist nicht gesperrt; SELinux ordnet Benutzer `unconfined_u` zu, damit QEMU auch im Modus *enforcing* läuft |
+| E. Dual-Boot Windows | Windows startet mit Secure Boot | `symfonos-secureboot init` behält die Microsoft-Zertifikate in der db. Viele SEB-Konfigurationen verlangen unter Windows Secure Boot oder ein TPM. |
+
+Zusätzlich während einer Prüfung:
+- Es werden keine automatischen Updates eingespielt (`ConditionPathExists=!/run/symfonos-exam/active`).
+- Erzwungene Modulsignaturen und, mit Secure Boot, Kernel-Lockdown verhindern, dass sich zur Laufzeit ein fremdes Kernel-Modul einschleust, um Bildschirm oder Eingaben abzugreifen.
+- Die tägliche Sicherheitsprüfung wertet das vom Prüfungsmodus abgeschaltete SysRq nicht als Abweichung.
+
+In der Quellcode-Distribution steckt der Prüfungsmodus im Paket `symfonos-exam` (Teil von `symfonos-base`).
+Die grafischen Bestandteile `cage`, `firefox`, `sddm`, `qemu-desktop` und `fuse2` sind optionale
+Abhängigkeiten. Sie kommen mit der Desktop-Stufe. Bis dahin liefert das Arch-basierte ISO den
+vollständigen Prüfungsmodus.

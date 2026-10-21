@@ -57,4 +57,48 @@ Backtracking-Solver: Kandidaten sortiert nach installierter Version, Namensgleic
 - `syp doctor`: unterbrochene Transaktionen, verletzte Abhängigkeiten, Schlüssel, veraltete Repos, offene `.sypnew`.
 
 ## Bau-Rezept (`SYPBUILD.toml`)
-Siehe `src/syp/build.py` und `SYPBUILD.toml`: `[package]`-Metadaten, `[[source]]` (URL + Pflicht-sha256 oder lokaler Pfad), `[build]` mit `prepare/build/check/package` (bash, `$SRCDIR`, `$DESTDIR`), `[scripts]`.
+Implementierung: `csrc/lib/build.c`; Beispiele unter `distro/recipes/`.
+
+```toml
+[package]
+name = "openssl"
+version = "3.5.2-1"
+summary = "TLS/SSL und Kryptographie"
+license = "Apache-2.0"                      # SPDX
+depends = ["glibc", "zlib", "crypto-policies"]
+makedepends = ["perl"]                      # nur zum Bauen, nicht im Paket
+provides = ["so:libssl.so.3"]
+backup = ["etc/ssl/openssl.cnf"]            # nie still überschreiben (.sypnew)
+security = ["CVE-2025-9230"]                # behobene Lücken → syp audit, upgrade --security
+
+[[source]]
+url = "https://github.com/openssl/openssl/releases/download/openssl-3.5.2/openssl-3.5.2.tar.gz"
+sha256 = "c53a47e5…"                        # Pflicht; "TODO" füllt `syp sums` bzw. die CI
+[[source]]
+path = "@/distro/security/crypto/openssl.cnf"   # "@/" = Wurzel dieses Repositorys
+
+[build]
+style = "autotools"                         # autotools | make | meson | cmake | python | perl | meta
+configure_flags = "--openssldir=/etc/ssl"
+post_install = 'install -m644 "$SRCDIR/openssl.cnf" "$DESTDIR/etc/ssl/openssl.cnf"'
+# oder eigene Schritte: prepare / build / check / package (bash)
+
+[options]
+strip = true
+hardening = "strict"                        # strict (Standard) | warn | off; warn/off nur mit Begründung
+hardening_reason = ""
+
+[scripts]
+post_upgrade = "/usr/bin/update-crypto-policies"
+```
+
+Umgebung der Schritte: `SRCDIR`, `S` (entpackte Hauptquelle), `DESTDIR`, `RECIPEDIR`, `PKGNAME`, `PKGVER`,
+`PKGREL`, `CFLAGS`/`LDFLAGS` (gehärtet), `MAKEFLAGS`, `NPROC`, `SOURCE_DATE_EPOCH`.
+
+Nach `package` prüft `syp build` jede ELF-Datei (PIE, RELRO, BIND_NOW, NX-Stack, TEXTREL, RPATH) und
+alle Dateirechte (beschreibbar für alle → Fehler, setuid/setgid → Übersicht). Das Ergebnis steht
+im Paket unter `origin.hardening`.
+
+Bauen: `syp build REZEPT -k SCHLÜSSEL` (`--chroot WURZEL` für einen isolierten Bau), alle Rezepte
+in Abhängigkeitsreihenfolge mit `syp buildall distro/recipes --repo REPO`. Index ansehen:
+`syp repo-show REPO --pub SCHLÜSSEL.pub`.

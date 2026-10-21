@@ -4,7 +4,9 @@ Eine schlanke, moderne Linux-Distribution für kreative Arbeit: Grafik, Illustra
 
 | | |
 |---|---|
-| **Basis** | Arch Linux (Binärpakete werden nach `.syp` konvertiert und neu signiert) |
+| **Basis** | Zwei Wege: (1) **Quellcode-Distribution** – eigene Toolchain nach LFS, alle Pakete aus `distro/recipes/` mit `syp buildall` gebaut; (2) Arch-basiertes Live-ISO (konvertierte Pakete) als Übergang, bis der Desktop aus Quellcode steht |
+| **Sicherheit** | SELinux, erzwungene Kernel-Modulsignaturen, KSPP-Härtung, systemweite Krypto-Richtlinien, nftables (eingehend zu), auditd, LUKS2 + TPM2, Secure Boot mit eigenen Schlüsseln und UKI – siehe [SICHERHEIT.md](docs/SICHERHEIT.md) |
+| **Qualität** | Kanäle testing → stable mit Wartezeit, CI-Gates (Werror, ASan/UBSan, Härtungsprüfung je Paket), Freigabekriterien – siehe [QUALITAET.md](docs/QUALITAET.md) |
 | **Release-Modell** | Rolling Release (nächtlicher Abgleich, Snapshots vor jeder Änderung) |
 | **Kernel** | `linux-zen` (niedrige Latenz für Audio/Stift), Fallback `linux-lts` |
 | **Init** | systemd |
@@ -54,15 +56,18 @@ flowchart TB
 | 4 | ISO: archiso-Profil, Calamares (Btrfs/LUKS/GRUB), Live-Benutzer, Barrierefreiheit beim Boot | ✅ konfiguriert, Bau in CI |
 | 5 | Prüfungsmodus (nftables, Kiosk, Dienste/USB), SEB-Varianten | ✅ Trockenlauf getestet |
 | 6 | Repo-Spiegel aus Arch, CI/CD, Releases | ✅ Workflow, Secret nötig |
-| 7 | Staging-Kanal (`testing` → `stable` nach 7 Tagen + Smoke-Tests in QEMU) | offen |
-| 8 | Eigener `filesystem`/`base`-Rebuild, pacman-frei bauen (`syp --root` bootstrap), Secure Boot (shim + MOK) | offen |
+| 7 | Kanäle `testing` → `stable` (`tools/promote.py`: 7 Tage, Sicherheits-Schnellspur, Sperrliste, Abhängigkeitsprüfung) | ✅ getestet, Anbindung an die Bau-CI offen |
+| 8 | Kern in C (`syp`, `syp-convert`), Quellcode-Distribution: LFS-Toolchain, 137 Rezepte, `syp buildall` in der Chroot | ✅ Bau in CI, Boot auf Hardware offen |
+| 8a | Sicherheit auf Fedora-Niveau: SELinux, Krypto-Richtlinien, PAM, Audit, Firewall, Secure Boot (eigene Schlüssel, UKI), TPM2 | ✅ umgesetzt; SELinux zunächst permissive, kein MS-signierter shim |
+| 8b | Desktop aus Quellcode (Mesa, Wayland, Qt 6, KDE Plasma, PipeWire), GnuTLS/NSS in den Krypto-Richtlinien | offen |
 | 9 | Delta-Updates, Software-Center mit Screenshots/AppStream, Flatpak-Integration im Store | offen |
 
 ## Schnellstart (Entwicklung)
 
 ```bash
 pip install -e ".[gui,test]"
-make test                              # 54 Tests: Solver, Format, Signaturen, Rollback, Konverter, Assistent, Prüfungsmodus
+make -C csrc                           # syp und syp-convert (C11; libarchive, libzstd, libsodium, sqlite3, libcurl)
+make test                              # ~75 Tests: Paketsystem, Konverter, Sicherheitsschicht, Kanäle, Prüfungsmodus, Assistent
 syp keygen ~/dev --comment test        # Schlüsselpaar
 syp build SYPBUILD.toml -k ~/dev.key   # symfonos-tools als .syp bauen
 syp-convert paket.deb --offline        # Fremdpaket umwandeln
@@ -74,8 +79,12 @@ sudo ./iso/build.sh out                # ISO bauen (Arch Linux / Container archl
 
 | Pfad | Inhalt |
 |---|---|
-| `src/syp` | Paketmanager: Format, Krypto, Solver, Transaktionen, CLI |
-| `src/syp_convert` | Konverter (deb, rpm, arch, ELF, Mapping-Tabelle), CLI, GUI |
+| `csrc/` | `syp` und `syp-convert` in C: Format, Signaturen, Solver, Transaktionen, Bau, Härtungsprüfung, Konverter |
+| `distro/recipes/` | Rezepte (`SYPBUILD.toml`) der Quellcode-Distribution |
+| `distro/bootstrap/` | LFS-Stufen: Cross-Toolchain, temporäre Werkzeuge, Chroot, `syp buildall`, Image |
+| `distro/security/` | Sicherheitskonfiguration, `symfonos-security`, `symfonos-secureboot`, Krypto-Richtlinien |
+| `distro/installer/` | Konsolen-Installer (LUKS2, TPM2, systemd-boot/UKI oder GRUB, SELinux-Relabel) |
+| `src/syp_convert` | Konverter-GUI (nutzt das C-Werkzeug) |
 | `src/syp_store` | Software-Center |
 | `src/symfonos_design` | Design-Center + Plasma-Layouts |
 | `src/symfonos_assist` | Lokaler Assistent: RAG, Ollama/llama.cpp, Log-Regeln, Sicherheitslogik |
@@ -85,7 +94,7 @@ sudo ./iso/build.sh out                # ISO bauen (Arch Linux / Container archl
 | `iso/` | archiso-Profil inkl. Calamares-Konfiguration |
 | `exam/` | Prüfungsmodus |
 | `packaging/` | PKGBUILDs (ISO-Bau) |
-| `docs/` | [Paketformat](docs/PAKETFORMAT.md), [Apps & Lizenzen](docs/APPS.md), [SEB](docs/SEB.md), [Risiken & Aufwand](docs/RISIKEN.md), [Handbuch](docs/handbuch/) |
+| `docs/` | [Paketformat](docs/PAKETFORMAT.md), [Sicherheit](docs/SICHERHEIT.md), [Qualität](docs/QUALITAET.md), [Apps & Lizenzen](docs/APPS.md), [SEB](docs/SEB.md), [Risiken & Aufwand](docs/RISIKEN.md), [Handbuch](docs/handbuch/) |
 
 Lizenz: Code GPL-3.0-or-later, Artwork CC-BY-SA-4.0.
 

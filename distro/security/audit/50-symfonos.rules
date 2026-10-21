@@ -32,5 +32,8 @@
 -w /etc/syp/ -p wa -k software
 ## Rechteausweitung durch Programme mit setuid
 -a always,exit -F arch=b64 -S execve -C uid!=euid -F euid=0 -k setuid
+## Zugriffsverweigerungen durch Benutzer (EACCES/EPERM beim Öffnen und Kürzen)
+-a always,exit -F arch=b64 -S open,openat,openat2,creat,truncate,ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=unset -k access
+-a always,exit -F arch=b64 -S open,openat,openat2,creat,truncate,ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=unset -k access
 ## Regeln nach dem Laden sperren (Änderung nur per Neustart)
 -e 2

@@ -127,30 +127,46 @@ int fetch_url(const char *url, const char *dest) {
     } else if (str_starts(url, "file://")) {
         rc = copy_file(url + 7, part);
     } else {
-        FILE *f = fopen(part, "wb");
-        if (!f) {
-            set_error("%s: %s", part, strerror(errno));
-            free(part);
-            return -1;
-        }
-        CURL *h = curl_easy_init();
-        char err[CURL_ERROR_SIZE] = "";
-        curl_easy_setopt(h, CURLOPT_URL, url);
-        curl_easy_setopt(h, CURLOPT_WRITEFUNCTION, curl_write);
-        curl_easy_setopt(h, CURLOPT_WRITEDATA, f);
-        curl_easy_setopt(h, CURLOPT_FOLLOWLOCATION, 1L);
-        curl_easy_setopt(h, CURLOPT_FAILONERROR, 1L);
-        curl_easy_setopt(h, CURLOPT_USERAGENT, "syp/" SYP_VERSION);
-        curl_easy_setopt(h, CURLOPT_CONNECTTIMEOUT, 30L);
-        curl_easy_setopt(h, CURLOPT_LOW_SPEED_LIMIT, 1L);
-        curl_easy_setopt(h, CURLOPT_LOW_SPEED_TIME, 60L);
-        curl_easy_setopt(h, CURLOPT_ERRORBUFFER, err);
-        CURLcode r = curl_easy_perform(h);
-        curl_easy_cleanup(h);
-        fclose(f);
-        if (r != CURLE_OK) {
+        /* Vorübergehende Fehler (Zeitüberschreitung, Verbindungsabbruch, HTTP 5xx/429) bis zu
+         * SYP_FETCH_RETRIES-mal wiederholen; 404/403 sofort melden. */
+        const char *re = getenv("SYP_FETCH_RETRIES");
+        int tries = re && *re ? atoi(re) : 3;
+        if (tries < 1) tries = 1;
+        for (int attempt = 1;; attempt++) {
+            FILE *f = fopen(part, "wb");
+            if (!f) {
+                set_error("%s: %s", part, strerror(errno));
+                free(part);
+                return -1;
+            }
+            CURL *h = curl_easy_init();
+            char err[CURL_ERROR_SIZE] = "";
+            long code = 0;
+            curl_easy_setopt(h, CURLOPT_URL, url);
+            curl_easy_setopt(h, CURLOPT_WRITEFUNCTION, curl_write);
+            curl_easy_setopt(h, CURLOPT_WRITEDATA, f);
+            curl_easy_setopt(h, CURLOPT_FOLLOWLOCATION, 1L);
+            curl_easy_setopt(h, CURLOPT_MAXREDIRS, 10L);
+            curl_easy_setopt(h, CURLOPT_FAILONERROR, 1L);
+            curl_easy_setopt(h, CURLOPT_USERAGENT, "syp/" SYP_VERSION);
+            curl_easy_setopt(h, CURLOPT_CONNECTTIMEOUT, 30L);
+            curl_easy_setopt(h, CURLOPT_LOW_SPEED_LIMIT, 1L);
+            curl_easy_setopt(h, CURLOPT_LOW_SPEED_TIME, 60L);
+            curl_easy_setopt(h, CURLOPT_ERRORBUFFER, err);
+            CURLcode r = curl_easy_perform(h);
+            curl_easy_getinfo(h, CURLINFO_RESPONSE_CODE, &code);
+            curl_easy_cleanup(h);
+            fclose(f);
+            if (r == CURLE_OK) {
+                rc = 0;
+                break;
+            }
             set_error("Download %s: %s", url, *err ? err : curl_easy_strerror(r));
             rc = -1;
+            int permanent = r == CURLE_HTTP_RETURNED_ERROR && code >= 400 && code < 500 && code != 408 && code != 429;
+            if (permanent || attempt >= tries) break;
+            fprintf(stderr, "  Versuch %d/%d fehlgeschlagen (%s), neuer Versuch …\n", attempt, tries, last_error());
+            sleep((unsigned)(2 * attempt));
         }
     }
     if (!rc && rename(part, dest)) {
