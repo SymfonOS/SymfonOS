@@ -12,7 +12,7 @@ backup = ["etc/selinux/semanage.conf"]
 
 [[source]]
 url = "https://github.com/SELinuxProject/selinux/releases/download/3.8.1/libsemanage-3.8.1.tar.gz"
-sha256 = "TODO"
+sha256 = "7b39127b219cc70bfd935a4af6b0f2ba83d4b35c916f253c7e942c23ab490f07"
 
 [build]
 build = '''

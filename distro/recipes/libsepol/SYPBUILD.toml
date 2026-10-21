@@ -11,7 +11,7 @@ provides = ["so:libsepol.so.2"]
 
 [[source]]
 url = "https://github.com/SELinuxProject/selinux/releases/download/3.8.1/libsepol-3.8.1.tar.gz"
-sha256 = "TODO"
+sha256 = "0e78705305f955abd4c0654d37a5477ee26349ab74db9e2b03a7868897ae1ddf"
 
 [build]
 build = '''

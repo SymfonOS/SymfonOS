@@ -10,7 +10,7 @@ makedepends = ["gettext"]
 
 [[source]]
 url = "https://github.com/SELinuxProject/selinux/releases/download/3.8.1/policycoreutils-3.8.1.tar.gz"
-sha256 = "TODO"
+sha256 = "eef23196b501d141cb95f5fc52ef1a7289f459b65e4415ea0fe9aeedc5d80ef2"
 
 [build]
 build = '''

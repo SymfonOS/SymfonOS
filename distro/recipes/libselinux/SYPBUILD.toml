@@ -10,7 +10,7 @@ provides = ["so:libselinux.so.1"]
 
 [[source]]
 url = "https://github.com/SELinuxProject/selinux/releases/download/3.8.1/libselinux-3.8.1.tar.gz"
-sha256 = "TODO"
+sha256 = "ec2d2789f931152d21c1db1eb4bc202ce4eccede34d9be9e360e3b45243cee2c"
 
 [build]
 build = '''

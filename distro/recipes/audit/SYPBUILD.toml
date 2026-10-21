@@ -12,7 +12,7 @@ backup = ["etc/audit/auditd.conf"]
 
 [[source]]
 url = "https://github.com/linux-audit/audit-userspace/archive/v4.1.1/audit-userspace-4.1.1.tar.gz"
-sha256 = "TODO"
+sha256 = "c2dd5fe7c204a5725bc96e3a6eadc86ece4a13e4a4bb98e79f6fe104a09cd4c3"
 filename = "audit-userspace-4.1.1.tar.gz"
 
 [build]

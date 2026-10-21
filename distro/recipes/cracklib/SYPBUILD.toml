@@ -10,11 +10,11 @@ provides = ["so:libcrack.so.2"]
 
 [[source]]
 url = "https://github.com/cracklib/cracklib/releases/download/v2.10.3/cracklib-2.10.3.tar.xz"
-sha256 = "TODO"
+sha256 = "1d1b83676b5673051b9373e1ca0db81c1fa88faf9a195a3c1af984fd9c250d66"
 
 [[source]]
 url = "https://github.com/cracklib/cracklib/releases/download/v2.10.3/cracklib-words-2.10.3.xz"
-sha256 = "TODO"
+sha256 = "b3d1e0e0ae9bc7ffed65c0042d7c68bdb903368aa6b918f94572453c6ea874dc"
 
 [build]
 dir = "cracklib-2.10.3"

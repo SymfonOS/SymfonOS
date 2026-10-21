@@ -9,7 +9,7 @@ depends = ["glibc", "libmnl", "libnftnl", "gmp", "readline"]
 
 [[source]]
 url = "https://netfilter.org/projects/nftables/files/nftables-1.1.5.tar.xz"
-sha256 = "TODO"
+sha256 = "1daf10f322e14fd90a017538aaf2c034d7cc1eb1cc418ded47445d714ea168d4"
 
 [build]
 style = "autotools"
