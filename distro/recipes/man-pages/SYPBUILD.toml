@@ -1,0 +1,22 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "man-pages"
+version = "6.15-1"
+summary = "Linux-Handbuchseiten"
+license = "GPL-2.0-or-later AND BSD-3-Clause"
+url = "https://www.kernel.org/pub/linux/docs/man-pages/"
+makedepends = ["filesystem"]
+
+[[source]]
+url = "https://www.kernel.org/pub/linux/docs/man-pages/man-pages-6.15.tar.xz"
+sha256 = "TODO"
+
+[build]
+package = '''
+cd "$S"
+rm -f man3/crypt*
+make -R GIT=false prefix=/usr DESTDIR="$DESTDIR" install
+'''
+
+[options]
+strip = false

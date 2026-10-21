@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "automake"
+version = "1.18.1-1"
+summary = "Makefile-Generator"
+license = "GPL-2.0-or-later"
+url = "https://ftp.gnu.org/gnu/automake/"
+depends = ["perl", "autoconf"]
+
+[[source]]
+url = "https://ftp.gnu.org/gnu/automake/automake-1.18.1.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+
+[options]
+strip = false

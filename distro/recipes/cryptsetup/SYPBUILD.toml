@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "cryptsetup"
+version = "2.8.1-1"
+summary = "LUKS-Festplattenverschlüsselung"
+license = "GPL-2.0-or-later"
+url = "https://www.kernel.org/pub/linux/utils/cryptsetup/v2.8/"
+depends = ["glibc", "lvm2", "json-c", "popt", "openssl", "util-linux"]
+provides = ["so:libcryptsetup.so.12"]
+
+[[source]]
+url = "https://www.kernel.org/pub/linux/utils/cryptsetup/v2.8/cryptsetup-2.8.1.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--disable-ssh-token --disable-asciidoc"

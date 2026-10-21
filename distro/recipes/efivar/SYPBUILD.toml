@@ -1,0 +1,24 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "efivar"
+version = "39-1"
+summary = "EFI-Variablen"
+license = "LGPL-2.1-or-later"
+url = "https://github.com/rhboot/efivar/archive/39/"
+depends = ["glibc"]
+provides = ["so:libefivar.so.1"]
+
+[[source]]
+url = "https://github.com/rhboot/efivar/archive/39/efivar-39.tar.gz"
+sha256 = "TODO"
+filename = "efivar-39.tar.gz"
+
+[build]
+build = '''
+cd "$S"
+make ENABLE_DOCS=0
+'''
+package = '''
+cd "$S"
+make install ENABLE_DOCS=0 LIBDIR=/usr/lib DESTDIR="$DESTDIR"
+'''

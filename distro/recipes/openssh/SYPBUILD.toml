@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "openssh"
+version = "10.0p1-1"
+summary = "Secure Shell"
+license = "BSD-2-Clause"
+url = "https://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/"
+depends = ["glibc", "openssl", "zlib", "libxcrypt"]
+backup = ["etc/ssh/sshd_config", "etc/ssh/ssh_config"]
+
+[[source]]
+url = "https://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-10.0p1.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--sysconfdir=/etc/ssh --with-privsep-path=/var/lib/sshd --with-default-path=/usr/bin --with-superuser-path=/usr/sbin:/usr/bin --with-pid-dir=/run"

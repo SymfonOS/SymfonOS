@@ -1,0 +1,25 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "ninja"
+version = "1.13.1-1"
+summary = "Kleines Build-System"
+license = "Apache-2.0"
+url = "https://github.com/ninja-build/ninja/archive/v1.13.1/"
+depends = ["glibc", "gcc"]
+makedepends = ["python"]
+
+[[source]]
+url = "https://github.com/ninja-build/ninja/archive/v1.13.1/ninja-1.13.1.tar.gz"
+sha256 = "TODO"
+filename = "ninja-1.13.1.tar.gz"
+
+[build]
+build = '''
+cd "$S"
+python3 configure.py --bootstrap --verbose
+'''
+package = '''
+cd "$S"
+install -Dm755 ninja "$DESTDIR/usr/bin/ninja"
+install -Dm644 misc/bash-completion "$DESTDIR/usr/share/bash-completion/completions/ninja"
+'''

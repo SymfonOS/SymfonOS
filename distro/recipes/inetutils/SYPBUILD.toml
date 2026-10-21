@@ -1,0 +1,23 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "inetutils"
+version = "2.6-1"
+summary = "ping, hostname, ftp, telnet"
+license = "GPL-3.0-or-later"
+url = "https://ftp.gnu.org/gnu/inetutils/"
+depends = ["glibc", "ncurses", "libcap"]
+
+[[source]]
+url = "https://ftp.gnu.org/gnu/inetutils/inetutils-2.6.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--bindir=/usr/bin --localstatedir=/var --disable-logger --disable-whois --disable-rcp --disable-rexec --disable-rlogin --disable-rsh --disable-servers"
+pre_configure = '''
+sed -i 's/def HAVE_TERMCAP_TGETENT/ 1/' telnet/telnet.c
+'''
+post_install = '''
+install -d "$DESTDIR/usr/sbin"
+mv "$DESTDIR/usr/bin/ifconfig" "$DESTDIR/usr/sbin/ifconfig"
+'''

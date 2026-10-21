@@ -1,0 +1,32 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "ncurses"
+version = "6.5-1"
+summary = "Terminal-Bibliothek"
+license = "MIT"
+url = "https://invisible-mirror.net/archives/ncurses/"
+depends = ["glibc"]
+provides = ["so:libncursesw.so.6", "libtinfo"]
+
+[[source]]
+url = "https://invisible-mirror.net/archives/ncurses/ncurses-6.5.tar.gz"
+sha256 = "TODO"
+
+[build]
+build = '''
+cd "$S"
+./configure --prefix=/usr --mandir=/usr/share/man --with-shared --without-debug --without-normal \
+  --with-cxx-shared --enable-pc-files --with-pkg-config-libdir=/usr/lib/pkgconfig
+make
+'''
+package = '''
+cd "$S"
+make DESTDIR="$DESTDIR" install
+cd "$DESTDIR/usr/lib"
+for lib in ncurses form panel menu; do
+  ln -sf lib${lib}w.so lib${lib}.so
+  ln -sf ${lib}w.pc pkgconfig/${lib}.pc
+done
+ln -sf libncursesw.so libcurses.so
+ln -sf libncursesw.so libtinfo.so
+'''

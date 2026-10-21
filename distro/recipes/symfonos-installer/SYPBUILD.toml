@@ -1,0 +1,14 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "symfonos-installer"
+version = "1.0-1"
+arch = "any"
+summary = "Konsolen-Installer für das symfonOS-Basissystem (Btrfs, LUKS, GRUB)"
+license = "GPL-3.0-or-later"
+depends = ["bash", "util-linux", "btrfs-progs", "dosfstools", "cryptsetup", "grub", "efibootmgr", "dracut", "syp", "shadow"]
+
+[[source]]
+path = "@/distro/installer/symfonos-install"
+
+[build]
+package = 'install -Dm755 "$SRCDIR/symfonos-install" "$DESTDIR/usr/bin/symfonos-install"'

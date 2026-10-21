@@ -1,0 +1,15 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "acl"
+version = "2.3.2-1"
+summary = "POSIX-Zugriffskontrolllisten"
+license = "LGPL-2.1-or-later"
+url = "https://download.savannah.gnu.org/releases/acl/"
+depends = ["glibc", "attr"]
+
+[[source]]
+url = "https://download.savannah.gnu.org/releases/acl/acl-2.3.2.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

@@ -1,0 +1,16 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "file"
+version = "5.46-1"
+summary = "Dateityperkennung"
+license = "BSD-2-Clause"
+url = "https://astron.com/pub/file/"
+depends = ["glibc", "zlib", "xz", "bzip2", "zstd"]
+provides = ["so:libmagic.so.1"]
+
+[[source]]
+url = "https://astron.com/pub/file/file-5.46.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

@@ -1,0 +1,42 @@
+name: Rezepte
+
+on:
+  push:
+    branches: [main]
+    paths: ["distro/recipes/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  checksums:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: syp bauen
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q build-essential pkg-config libarchive-dev libzstd-dev libsodium-dev libsqlite3-dev libcurl4-openssl-dev
+          make -C csrc -j4
+      - name: Fehlende Prüfsummen ermitteln (Quellen laden, sha256 eintragen)
+        run: |
+          set +e
+          failed=()
+          for r in distro/recipes/*/SYPBUILD.toml; do
+            grep -q 'sha256 = "TODO"' "$r" || continue
+            csrc/bin/syp sums "$r" || failed+=("$(basename "$(dirname "$r")")")
+          done
+          if ((${#failed[@]})); then
+            echo "::warning title=Quellen nicht ladbar::${failed[*]}"
+          fi
+          echo "Rezepte ohne Prüfsumme: $(grep -l 'sha256 = "TODO"' distro/recipes/*/SYPBUILD.toml | wc -l)"
+      - name: Änderungen committen
+        run: |
+          if git diff --quiet; then echo "Keine neuen Prüfsummen"; exit 0; fi
+          git config user.name "symfonOS CI"
+          git config user.email "ci@users.noreply.github.com"
+          git commit -am "Rezepte: sha256 der Quellen eingetragen [skip ci]"
+          git push
+      - name: Abhängigkeitsgraph prüfen
+        run: csrc/bin/syp buildall distro/recipes --repo /tmp/dry -n | tail -3

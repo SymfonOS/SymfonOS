@@ -1,0 +1,29 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "perl"
+version = "5.42.0-1"
+summary = "Perl-Interpreter"
+license = "GPL-1.0-or-later OR Artistic-1.0-Perl"
+url = "https://www.cpan.org/src/5.0/"
+depends = ["glibc", "gdbm", "libxcrypt", "zlib", "bzip2"]
+provides = ["perl-base", "so:libperl.so"]
+
+[[source]]
+url = "https://www.cpan.org/src/5.0/perl-5.42.0.tar.xz"
+sha256 = "TODO"
+
+[build]
+build = '''
+cd "$S"
+export BUILD_ZLIB=False BUILD_BZIP2=0
+sh Configure -des -D prefix=/usr -D vendorprefix=/usr -D privlib=/usr/lib/perl5/5.42/core_perl \
+  -D archlib=/usr/lib/perl5/5.42/core_perl -D sitelib=/usr/lib/perl5/5.42/site_perl \
+  -D sitearch=/usr/lib/perl5/5.42/site_perl -D vendorlib=/usr/lib/perl5/5.42/vendor_perl \
+  -D vendorarch=/usr/lib/perl5/5.42/vendor_perl -D man1dir=/usr/share/man/man1 -D man3dir=/usr/share/man/man3 \
+  -D pager="/usr/bin/less -isR" -D useshrplib -D usethreads
+make
+'''
+package = '''
+cd "$S"
+make DESTDIR="$DESTDIR" install
+'''

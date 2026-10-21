@@ -1,0 +1,16 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "procps-ng"
+version = "4.0.5-1"
+summary = "ps, top, free, vmstat"
+license = "GPL-2.0-or-later AND LGPL-2.0-or-later"
+url = "https://sourceforge.net/projects/procps-ng/files/Production/"
+depends = ["glibc", "ncurses", "systemd"]
+
+[[source]]
+url = "https://sourceforge.net/projects/procps-ng/files/Production/procps-ng-4.0.5.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--disable-kill --enable-watch8bit --with-systemd"

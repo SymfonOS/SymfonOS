@@ -1,0 +1,20 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "kbd"
+version = "2.8.0-1"
+summary = "Tastatur- und Konsolenwerkzeuge"
+license = "GPL-2.0-or-later"
+url = "https://www.kernel.org/pub/linux/utils/kbd/"
+depends = ["glibc"]
+
+[[source]]
+url = "https://www.kernel.org/pub/linux/utils/kbd/kbd-2.8.0.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--disable-vlock"
+pre_configure = '''
+sed -i '/RESIZECONS_PROGS=/s/yes/no/' configure
+sed -i 's/resizecons.8 //' docs/man/man8/Makefile.in
+'''

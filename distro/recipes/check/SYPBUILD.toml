@@ -1,0 +1,15 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "check"
+version = "0.15.2-1"
+summary = "Unit-Test-Framework für C"
+license = "LGPL-2.1-or-later"
+url = "https://github.com/libcheck/check/releases/download/0.15.2/"
+depends = ["glibc"]
+
+[[source]]
+url = "https://github.com/libcheck/check/releases/download/0.15.2/check-0.15.2.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

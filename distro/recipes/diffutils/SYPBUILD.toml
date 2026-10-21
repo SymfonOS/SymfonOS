@@ -1,0 +1,15 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "diffutils"
+version = "3.12-1"
+summary = "diff, cmp"
+license = "GPL-3.0-or-later"
+url = "https://ftp.gnu.org/gnu/diffutils/"
+depends = ["glibc"]
+
+[[source]]
+url = "https://ftp.gnu.org/gnu/diffutils/diffutils-3.12.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

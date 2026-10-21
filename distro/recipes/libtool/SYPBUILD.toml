@@ -1,0 +1,16 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "libtool"
+version = "2.5.4-1"
+summary = "Bibliothekswerkzeuge"
+license = "GPL-2.0-or-later"
+url = "https://ftp.gnu.org/gnu/libtool/"
+depends = ["glibc", "bash"]
+makedepends = ["m4"]
+
+[[source]]
+url = "https://ftp.gnu.org/gnu/libtool/libtool-2.5.4.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

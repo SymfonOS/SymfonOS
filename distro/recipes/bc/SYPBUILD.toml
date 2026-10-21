@@ -1,0 +1,23 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "bc"
+version = "7.0.3-1"
+summary = "Rechner mit beliebiger Genauigkeit"
+license = "BSD-2-Clause"
+url = "https://github.com/gavinhoward/bc/releases/download/7.0.3/"
+depends = ["glibc", "readline"]
+
+[[source]]
+url = "https://github.com/gavinhoward/bc/releases/download/7.0.3/bc-7.0.3.tar.xz"
+sha256 = "TODO"
+
+[build]
+build = '''
+cd "$S"
+CC=gcc ./configure --prefix=/usr -G -O3 -r
+make
+'''
+package = '''
+cd "$S"
+make DESTDIR="$DESTDIR" install
+'''

@@ -1,0 +1,16 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "less"
+version = "679-1"
+summary = "Seitenanzeige"
+license = "GPL-3.0-or-later OR BSD-2-Clause"
+url = "https://www.greenwoodsoftware.com/less/"
+depends = ["glibc", "ncurses", "pcre2"]
+
+[[source]]
+url = "https://www.greenwoodsoftware.com/less/less-679.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--sysconfdir=/etc --with-regex=pcre2"

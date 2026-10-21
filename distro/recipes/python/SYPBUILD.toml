@@ -1,0 +1,32 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "python"
+version = "3.13.7-1"
+summary = "Python-Interpreter"
+license = "PSF-2.0"
+url = "https://www.python.org/ftp/python/3.13.7/"
+depends = ["glibc", "expat", "libffi", "openssl", "sqlite", "zlib", "bzip2", "xz", "ncurses", "readline", "gdbm", "libxcrypt"]
+provides = ["python3", "pip", "python-pip", "so:libpython3.13.so.1.0"]
+backup = ["etc/pip.conf"]
+
+[[source]]
+url = "https://www.python.org/ftp/python/3.13.7/Python-3.13.7.tar.xz"
+sha256 = "TODO"
+
+[build]
+build = '''
+cd "$S"
+./configure --prefix=/usr --enable-shared --with-system-expat
+make
+'''
+package = '''
+cd "$S"
+make DESTDIR="$DESTDIR" install
+ln -sf python3 "$DESTDIR/usr/bin/python"
+ln -sf pip3 "$DESTDIR/usr/bin/pip" 2>/dev/null || true
+install -Dm644 /dev/stdin "$DESTDIR/etc/pip.conf" <<'EOF'
+[global]
+root-user-action = ignore
+disable-pip-version-check = true
+EOF
+'''

@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "pkgconf"
+version = "2.5.1-1"
+summary = "pkg-config-Implementierung"
+license = "ISC"
+url = "https://distfiles.ariadne.space/pkgconf/"
+depends = ["glibc"]
+provides = ["pkg-config"]
+
+[[source]]
+url = "https://distfiles.ariadne.space/pkgconf/pkgconf-2.5.1.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+post_install = '''
+ln -sf pkgconf "$DESTDIR/usr/bin/pkg-config"
+'''

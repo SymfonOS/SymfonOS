@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "kmod"
+version = "34.2-1"
+summary = "Kernelmodul-Werkzeuge"
+license = "LGPL-2.1-or-later AND GPL-2.0-or-later"
+url = "https://www.kernel.org/pub/linux/utils/kernel/kmod/"
+depends = ["glibc", "zlib", "xz", "zstd", "openssl"]
+makedepends = ["meson"]
+provides = ["so:libkmod.so.2"]
+
+[[source]]
+url = "https://www.kernel.org/pub/linux/utils/kernel/kmod/kmod-34.2.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-D manpages=false"

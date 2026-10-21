@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "lvm2"
+version = "2.03.34-1"
+summary = "Logische Volumes und device-mapper"
+license = "GPL-2.0-only AND LGPL-2.1-only"
+url = "https://sourceware.org/ftp/lvm2/"
+depends = ["glibc", "util-linux", "systemd", "libaio"]
+provides = ["device-mapper", "so:libdevmapper.so.1.02"]
+
+[[source]]
+url = "https://sourceware.org/ftp/lvm2/LVM2.2.03.34.tgz"
+sha256 = "TODO"
+filename = "LVM2.2.03.34.tgz"
+
+[build]
+style = "autotools"
+configure_flags = "--enable-cmdlib --enable-pkgconfig --enable-udev_sync --enable-udev_rules --with-udev-prefix=/usr"

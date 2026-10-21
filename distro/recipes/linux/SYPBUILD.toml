@@ -1,0 +1,41 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "linux"
+version = "6.16.1-1"
+summary = "Linux-Kernel (symfonOS-Konfiguration)"
+license = "GPL-2.0-only"
+url = "https://www.kernel.org/pub/linux/kernel/v6.x/"
+depends = ["kmod", "dracut", "linux-firmware"]
+makedepends = ["bc", "libelf", "openssl", "flex", "bison", "perl", "cpio", "python"]
+
+[[source]]
+url = "https://www.kernel.org/pub/linux/kernel/v6.x/linux-6.16.1.tar.xz"
+sha256 = "TODO"
+
+[[source]]
+path = "symfonos.config"
+extract = false
+
+[build]
+dir = "linux-6.16.1"
+build = '''
+cd "$S"
+make mrproper
+make defconfig
+cat "$RECIPEDIR/symfonos.config" >> .config
+make olddefconfig
+make
+'''
+package = '''
+cd "$S"
+KVER=$(make -s kernelrelease)
+install -d "$DESTDIR/usr/lib/modules/$KVER"
+make INSTALL_MOD_PATH="$DESTDIR/usr" INSTALL_MOD_STRIP=1 modules_install
+rm -f "$DESTDIR/usr/lib/modules/$KVER/build"
+install -Dm644 "$(make -s image_name)" "$DESTDIR/usr/lib/modules/$KVER/vmlinuz"
+echo linux > "$DESTDIR/usr/lib/modules/$KVER/pkgbase"
+install -Dm644 System.map "$DESTDIR/usr/lib/modules/$KVER/System.map"
+'''
+
+[options]
+strip = false

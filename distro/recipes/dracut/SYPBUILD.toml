@@ -1,0 +1,30 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "dracut"
+version = "107-1"
+summary = "Initramfs-Generator (inkl. Live-Boot)"
+license = "GPL-2.0-or-later"
+url = "https://github.com/dracut-ng/dracut-ng/archive/refs/tags/"
+depends = ["bash", "coreutils", "util-linux", "kmod", "systemd", "cpio", "findutils", "gzip", "zstd"]
+backup = ["etc/dracut.conf"]
+
+[[source]]
+url = "https://github.com/dracut-ng/dracut-ng/archive/refs/tags/107.tar.gz"
+sha256 = "TODO"
+filename = "dracut-ng-107.tar.gz"
+
+[build]
+build = '''
+cd "$S"
+./configure --prefix=/usr --sysconfdir=/etc --libdir=/usr/lib --systemdsystemunitdir=/usr/lib/systemd/system --disable-documentation
+make
+'''
+package = '''
+cd "$S"
+make DESTDIR="$DESTDIR" install
+install -Dm644 /dev/stdin "$DESTDIR/etc/dracut.conf.d/symfonos.conf" <<'EOF'
+hostonly="yes"
+compress="zstd"
+add_dracutmodules+=" btrfs crypt lvm "
+EOF
+'''

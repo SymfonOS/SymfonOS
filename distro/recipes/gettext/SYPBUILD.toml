@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "gettext"
+version = "0.26-1"
+summary = "Internationalisierung"
+license = "GPL-3.0-or-later AND LGPL-2.1-or-later"
+url = "https://ftp.gnu.org/gnu/gettext/"
+depends = ["glibc", "acl", "ncurses"]
+
+[[source]]
+url = "https://ftp.gnu.org/gnu/gettext/gettext-0.26.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--docdir=/usr/share/doc/gettext-0.26"
+post_install = '''
+chmod 0755 "$DESTDIR"/usr/lib/preloadable_libintl.so
+'''

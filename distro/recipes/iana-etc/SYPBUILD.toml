@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "iana-etc"
+version = "20250807-1"
+summary = "Netzwerkdienste und Protokolle (/etc/services, /etc/protocols)"
+license = "MIT"
+url = "https://github.com/Mic92/iana-etc/releases/download/20250807/"
+makedepends = ["filesystem"]
+
+[[source]]
+url = "https://github.com/Mic92/iana-etc/releases/download/20250807/iana-etc-20250807.tar.gz"
+sha256 = "TODO"
+
+[build]
+package = '''
+cd "$S"
+install -Dm644 services protocols -t "$DESTDIR/etc"
+'''

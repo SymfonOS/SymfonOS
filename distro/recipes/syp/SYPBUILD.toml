@@ -1,0 +1,25 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "syp"
+version = "1.0.0-1"
+summary = "symfonOS-Paketmanager syp und Paket-Konverter syp-convert"
+license = "GPL-3.0-or-later"
+depends = ["glibc", "libarchive", "zstd", "libsodium", "sqlite", "curl", "bash"]
+makedepends = ["pkgconf", "make", "gcc"]
+backup = ["etc/syp/syp.toml"]
+
+[[source]]
+path = "@/csrc"
+
+[[source]]
+path = "@/system"
+
+[build]
+build = '''
+make -C "$SRCDIR/csrc" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS"
+'''
+package = '''
+make -C "$SRCDIR/csrc" DESTDIR="$DESTDIR" install
+install -Dm644 "$SRCDIR/system/etc/syp/syp.toml" "$DESTDIR/etc/syp/syp.toml"
+install -d "$DESTDIR/var/lib/syp" "$DESTDIR/var/cache/syp/pkg" "$DESTDIR/etc/syp/keys"
+'''

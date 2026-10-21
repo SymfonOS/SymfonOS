@@ -1,0 +1,24 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "zstd"
+version = "1.5.7-1"
+summary = "Zstandard-Kompression"
+license = "BSD-3-Clause OR GPL-2.0-only"
+url = "https://github.com/facebook/zstd/releases/download/v1.5.7/"
+depends = ["glibc", "zlib", "xz", "lz4"]
+provides = ["so:libzstd.so.1"]
+
+[[source]]
+url = "https://github.com/facebook/zstd/releases/download/v1.5.7/zstd-1.5.7.tar.gz"
+sha256 = "TODO"
+
+[build]
+build = '''
+cd "$S"
+make prefix=/usr
+'''
+package = '''
+cd "$S"
+make prefix=/usr DESTDIR="$DESTDIR" install
+rm -f "$DESTDIR/usr/lib/libzstd.a"
+'''

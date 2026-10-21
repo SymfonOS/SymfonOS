@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "xz"
+version = "5.8.1-1"
+summary = "LZMA/XZ-Kompression"
+license = "0BSD AND GPL-2.0-or-later"
+url = "https://github.com/tukaani-project/xz/releases/download/v5.8.1/"
+depends = ["glibc"]
+provides = ["so:liblzma.so.5"]
+
+[[source]]
+url = "https://github.com/tukaani-project/xz/releases/download/v5.8.1/xz-5.8.1.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--docdir=/usr/share/doc/xz-5.8.1"

@@ -1,0 +1,3 @@
+description = "GRUB-Bootmenü aktualisieren"
+paths = ["usr/lib/modules/*/vmlinuz", "etc/default/grub", "usr/lib/grub/*"]
+exec = ["sh", "-c", "[ -d /boot/grub ] && grub-mkconfig -o /boot/grub/grub.cfg || true"]

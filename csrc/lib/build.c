@@ -463,17 +463,46 @@ char *build_recipe(const char *recipe, const char *outdir, const seckey *signer,
             }
             free(f);
         } else if (path) {
-            char *p = path_join(rdir, path), *rp = realpath(p, NULL);
+            /* "@/pfad" = relativ zur Wurzel des Quell-Repositorys (SYP_SOURCE_ROOT oder nächstes .git) */
+            char *base = xstrdup(rdir);
+            if (str_starts(path, "@/")) {
+                free(base);
+                base = NULL;
+                const char *env = getenv("SYP_SOURCE_ROOT");
+                if (env && *env) base = realpath(env, NULL);
+                for (char *d = xstrdup(rdir); !base && strcmp(d, "/");) {
+                    char *g = path_join(d, ".git");
+                    if (path_exists(g)) base = xstrdup(d);
+                    free(g);
+                    char *up = path_dirname(d);
+                    free(d);
+                    d = up;
+                    if (base || !strcmp(d, "/")) {
+                        free(d);
+                        break;
+                    }
+                }
+                if (!base) {
+                    set_error("Quell-Repository für %s nicht gefunden (SYP_SOURCE_ROOT setzen)", path);
+                    fail = 1;
+                    break;
+                }
+                path += 2;
+            }
+            char *p = path_join(base, path), *rp = realpath(p, NULL);
             free(p);
-            if (!rp || (strcmp(rp, rdir) && !(str_starts(rp, rdir) && rp[strlen(rdir)] == '/'))) {
+            if (!rp || (strcmp(rp, base) && !(str_starts(rp, base) && rp[strlen(base)] == '/'))) {
+                free(base);
                 set_error("Quellpfad außerhalb des Rezepts: %s", path);
                 free(rp);
                 fail = 1;
                 break;
             }
+            free(base);
             const char *dn = jgets(s, "dest", path_basename(rp));
             char *d = path_join(src, dn);
-            static const char *ign[] = {".git", "out", "work", "__pycache__", "*.syp", ".pytest_cache", NULL};
+            static const char *ign[] = {".git", "out", "work", "__pycache__", "*.syp", ".pytest_cache", "*.o",
+                                        "*.a", NULL};
             if (copy_tree(rp, d, ign)) fail = 1;
             free(d);
             free(rp);

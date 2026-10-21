@@ -1,0 +1,16 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "python-wheel"
+version = "0.46.1-1"
+summary = "Wheel-Format"
+license = "MIT"
+url = "https://pypi.org/packages/source/w/wheel/"
+depends = ["python", "python-packaging"]
+makedepends = ["python-flit-core"]
+
+[[source]]
+url = "https://pypi.org/packages/source/w/wheel/wheel-0.46.1.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "python"

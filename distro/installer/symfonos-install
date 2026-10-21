@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+# symfonos-install – installiert symfonOS vom Live-Medium (offline aus dem Repo auf dem ISO).
+#   sudo symfonos-install [--disk /dev/nvme0n1] [--encrypt] [--user NAME] [--hostname NAME] [--yes]
+# Layout: GPT mit BIOS-Boot (1 MiB), EFI (512 MiB, FAT32), Btrfs (Rest; optional LUKS2)
+# Btrfs-Subvolumes: @ @home @snapshots @var_log @cache – Pakete und Snapshots verwaltet syp.
+set -euo pipefail
+DISK="" ENCRYPT=0 USERNAME="" HOST=symfonos YES=0
+REPO=${SYMFONOS_REPO:-/run/initramfs/live/repo}
+MNT=/mnt/symfonos-target
+while (($#)); do
+  case $1 in
+    --disk) DISK=$2; shift 2 ;; --encrypt) ENCRYPT=1; shift ;; --user) USERNAME=$2; shift 2 ;;
+    --hostname) HOST=$2; shift 2 ;; --yes|-y) YES=1; shift ;; --repo) REPO=$2; shift 2 ;;
+    -h|--help) sed -n '2,6p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    *) echo "Unbekannte Option: $1" >&2; exit 2 ;;
+  esac
+done
+[[ $EUID -eq 0 ]] || { echo "Bitte mit sudo ausführen." >&2; exit 1; }
+[[ -r $REPO/index.json.zst ]] || { echo "Paket-Repository nicht gefunden: $REPO" >&2; exit 1; }
+say() { printf '\033[1;35m::\033[0m %s\n' "$*"; }
+ask() { local a; read -rp "$1 " a; printf '%s' "$a"; }
+
+if [[ -z $DISK ]]; then
+  echo "Verfügbare Datenträger:"; lsblk -dpno NAME,SIZE,MODEL | grep -Ev 'loop|sr[0-9]|zram'
+  DISK=$(ask "Zieldatenträger (z. B. /dev/nvme0n1):")
+fi
+[[ -b $DISK ]] || { echo "Kein Blockgerät: $DISK" >&2; exit 1; }
+[[ -z $USERNAME ]] && USERNAME=$(ask "Benutzername:")
+[[ $USERNAME =~ ^[a-z_][a-z0-9_-]{0,31}$ ]] || { echo "Ungültiger Benutzername" >&2; exit 1; }
+if ((!YES)); then
+  echo "ALLE DATEN auf $DISK werden gelöscht."
+  [[ $(ask "Zum Bestätigen den Gerätenamen eintippen ($DISK):") == "$DISK" ]] || { echo "Abgebrochen."; exit 1; }
+fi
+part() { [[ $DISK =~ [0-9]$ ]] && echo "${DISK}p$1" || echo "${DISK}$1"; }
+UEFI=0; [[ -d /sys/firmware/efi ]] && UEFI=1
+
+say "Partitionieren ($( ((UEFI)) && echo UEFI || echo BIOS ))"
+wipefs -af "$DISK" >/dev/null
+sfdisk --quiet "$DISK" <<PARTS
+label: gpt
+size=1MiB, type=21686148-6248-6449-6E6F-744E656564EF, name="bios"
+size=512MiB, type=U, name="EFI"
+type=L, name="symfonOS"
+PARTS
+udevadm settle
+EFI=$(part 2) ROOT=$(part 3) ROOTDEV=$(part 3)
+mkfs.fat -F32 -n EFI "$EFI" >/dev/null
+if ((ENCRYPT)); then
+  say "Verschlüsselung (LUKS2, PBKDF2 für GRUB)"
+  cryptsetup luksFormat --type luks2 --pbkdf pbkdf2 --batch-mode --verify-passphrase "$ROOT"
+  cryptsetup open "$ROOT" cryptroot
+  ROOTDEV=/dev/mapper/cryptroot
+fi
+mkfs.btrfs -f -L symfonOS "$ROOTDEV" >/dev/null
+mkdir -p "$MNT"; mount "$ROOTDEV" "$MNT"
+for sv in @ @home @snapshots @var_log @cache; do btrfs subvolume create "$MNT/$sv" >/dev/null; done
+umount "$MNT"
+OPT=noatime,compress=zstd:1
+mount -o "$OPT,subvol=@" "$ROOTDEV" "$MNT"
+mkdir -p "$MNT"/{home,.snapshots,var/log,var/cache,boot/efi}
+mount -o "$OPT,subvol=@home" "$ROOTDEV" "$MNT/home"
+mount -o "$OPT,subvol=@snapshots" "$ROOTDEV" "$MNT/.snapshots"
+mount -o "$OPT,subvol=@var_log" "$ROOTDEV" "$MNT/var/log"
+mount -o "$OPT,subvol=@cache" "$ROOTDEV" "$MNT/var/cache"
+mount "$EFI" "$MNT/boot/efi"
+cleanup() { for m in run sys proc dev; do mountpoint -q "$MNT/$m" && umount -l "$MNT/$m"; done; true; }
+trap cleanup EXIT
+
+say "Pakete installieren (syp, offline)"
+mkdir -p "$MNT/etc/syp/keys"
+cp "$REPO/symfonos-release.pub" "$MNT/etc/syp/keys/"
+printf 'arch = "x86_64"\n[[repo]]\nname = "symfonos"\nurl = "file://%s"\n[snapshots]\nenabled = false\n' "$REPO" > "$MNT/etc/syp/syp.toml"
+syp -r "$MNT" sync
+syp -r "$MNT" -y install symfonos-base
+cp /etc/syp/syp.toml "$MNT/etc/syp/syp.toml"   # Online-Repos für Updates
+
+say "System konfigurieren"
+for m in dev proc sys run; do mount --bind "/$m" "$MNT/$m"; done
+uuid() { blkid -s UUID -o value "$1"; }
+RU=$(uuid "$ROOTDEV")
+{
+  echo "UUID=$RU / btrfs $OPT,subvol=@ 0 0"
+  echo "UUID=$RU /home btrfs $OPT,subvol=@home 0 0"
+  echo "UUID=$RU /.snapshots btrfs $OPT,subvol=@snapshots 0 0"
+  echo "UUID=$RU /var/log btrfs $OPT,subvol=@var_log 0 0"
+  echo "UUID=$RU /var/cache btrfs $OPT,subvol=@cache 0 0"
+  echo "UUID=$(uuid "$EFI") /boot/efi vfat umask=0077 0 2"
+} > "$MNT/etc/fstab"
+echo "$HOST" > "$MNT/etc/hostname"
+cp /etc/locale.conf /etc/vconsole.conf "$MNT/etc/" 2>/dev/null || true
+ln -sf "../usr/share/zoneinfo/${TZ_NAME:-Europe/Berlin}" "$MNT/etc/localtime"
+CMDLINE="rootflags=subvol=@ quiet"
+if ((ENCRYPT)); then
+  LU=$(uuid "$ROOT")
+  echo "cryptroot UUID=$LU none luks" > "$MNT/etc/crypttab"
+  CMDLINE="rd.luks.uuid=$LU $CMDLINE"
+  sed -i 's/^#\?GRUB_ENABLE_CRYPTODISK=.*//' "$MNT/etc/default/grub"
+  echo 'GRUB_ENABLE_CRYPTODISK=y' >> "$MNT/etc/default/grub"
+fi
+sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"$CMDLINE\"|" "$MNT/etc/default/grub"
+in_target() { chroot "$MNT" /usr/bin/env -i PATH=/usr/bin:/usr/sbin HOME=/root /bin/bash -euo pipefail -c "$1"; }
+in_target "systemd-machine-id-setup >/dev/null; systemd-sysusers; systemd-tmpfiles --create >/dev/null 2>&1 || true
+  useradd -m -G wheel,audio,video,input -s /bin/bash '$USERNAME'
+  systemctl enable systemd-networkd systemd-resolved systemd-timesyncd iwd fstrim.timer >/dev/null"
+echo "Passwort für $USERNAME:"; chroot "$MNT" passwd "$USERNAME"
+echo "Root-Konto bleibt gesperrt; Verwaltung über sudo (Gruppe wheel)."
+say "Initramfs und Bootloader"
+KVER=$(ls "$MNT/usr/lib/modules" | head -1)
+in_target "dracut --force --kver '$KVER' /boot/initramfs-$KVER.img
+  cp /usr/lib/modules/$KVER/vmlinuz /boot/vmlinuz-$KVER"
+if ((UEFI)); then
+  in_target "grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=symfonOS
+    grub-install --target=x86_64-efi --efi-directory=/boot/efi --removable"
+fi
+in_target "grub-install --target=i386-pc '$DISK'"
+in_target "grub-mkconfig -o /boot/grub/grub.cfg"
+cleanup
+umount -R "$MNT"
+((ENCRYPT)) && cryptsetup close cryptroot
+say "Fertig. Medium entfernen und neu starten."

@@ -1,0 +1,23 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "lz4"
+version = "1.10.0-1"
+summary = "Schnelle Kompression"
+license = "BSD-2-Clause AND GPL-2.0-or-later"
+url = "https://github.com/lz4/lz4/releases/download/v1.10.0/"
+depends = ["glibc"]
+provides = ["so:liblz4.so.1"]
+
+[[source]]
+url = "https://github.com/lz4/lz4/releases/download/v1.10.0/lz4-1.10.0.tar.gz"
+sha256 = "TODO"
+
+[build]
+build = '''
+cd "$S"
+make BUILD_STATIC=no PREFIX=/usr
+'''
+package = '''
+cd "$S"
+make BUILD_STATIC=no PREFIX=/usr DESTDIR="$DESTDIR" install
+'''

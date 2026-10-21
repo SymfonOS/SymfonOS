@@ -1,0 +1,16 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "python-markupsafe"
+version = "3.0.2-1"
+summary = "MarkupSafe"
+license = "BSD-3-Clause"
+url = "https://pypi.org/packages/source/M/MarkupSafe/"
+depends = ["python"]
+makedepends = ["python-setuptools"]
+
+[[source]]
+url = "https://pypi.org/packages/source/M/MarkupSafe/markupsafe-3.0.2.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "python"

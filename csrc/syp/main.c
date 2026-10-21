@@ -686,9 +686,11 @@ static void usage(void) {
          "  doctor                    Systemzustand prüfen\n"
          "  build [REZEPT]            Paket aus SYPBUILD.toml bauen (-o, -k, --nocheck, --update-sums, --chroot W)\n"
          "  fetch REZEPT...           Quellen eines Rezepts laden und prüfen (-o VERZEICHNIS)\n"
+         "  sums REZEPT...            Fehlende sha256 der Quellen ermitteln und ins Rezept schreiben\n"
          "  buildall REZEPTE --repo R Alle Rezepte abhängigkeitsgerecht bauen (siehe --help)\n"
          "  pack DIR INFO.json        Verzeichnis als .syp packen (-o, -k)\n"
          "  keygen AUSGABE            Signaturschlüssel erzeugen (--comment)\n"
+         "  pubkey GEHEIM AUSGABE     Öffentlichen Schlüssel aus einem geheimen ableiten\n"
          "  repo-add REPO [PAKET...]  Pakete ins Repo aufnehmen, Index signieren (--name, --arch, -k)\n"
          "  vercmp A B                Versionen vergleichen (-1, 0, 1)\n\n"
          "Transaktionsoptionen: --overwrite GLOB, --allow-unsigned, --trust-scripts, --no-scripts");
@@ -767,11 +769,36 @@ int main(int argc, char **argv) {
     c.cmdline = sb_take(&cl);
 
     /* Befehle ohne Systemkontext */
+    if (!strcmp(cmd, "pubkey")) {
+        if (pos.n != 2) die("Aufruf: syp pubkey GEHEIM.key AUSGABE.pub");
+        seckey k;
+        if (seckey_load(pos.v[0], &k)) die("%s", last_error());
+        char *tmp = xasprintf("%s.tmp-secret", pos.v[1]);
+        int rc = seckey_save(&k, tmp, pos.v[1]);
+        unlink(tmp);
+        free(tmp);
+        if (rc) die("%s", last_error());
+        printf(":: %s (%s)\n", pos.v[1], k.id);
+        return 0;
+    }
     if (!strcmp(cmd, "keygen")) {
         if (!pos.n) die("Aufruf: syp keygen AUSGABE");
         return c_keygen(pos.v[0], comment);
     }
     if (!strcmp(cmd, "repo-add")) return c_repo_add((int)pos.n, pos.v, rname, arch, key);
+    if (!strcmp(cmd, "sums")) {
+        if (!pos.n) die("Aufruf: syp sums REZEPT... (fehlende sha256 ermitteln und eintragen)");
+        const char *cache = getenv("SYP_SRCCACHE");
+        char *home = cache ? NULL : xasprintf("%s/.cache/syp/sources", getenv("HOME") ? getenv("HOME") : "/tmp");
+        int bad = 0;
+        for (size_t k = 0; k < pos.n; k++)
+            if (recipe_fill_sums(pos.v[k], cache ? cache : home)) {
+                fprintf(stderr, "%s!! %s: %s%s\n", col("31;1"), pos.v[k], last_error(), col_end());
+                bad++;
+            }
+        free(home);
+        return bad ? 1 : 0;
+    }
     if (!strcmp(cmd, "fetch")) {
         if (!pos.n) die("Aufruf: syp fetch REZEPT... [-o VERZEICHNIS]");
         for (size_t k = 0; k < pos.n; k++)

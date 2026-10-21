@@ -1,0 +1,23 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "efibootmgr"
+version = "18-1"
+summary = "EFI-Bootmanager-Einträge"
+license = "GPL-2.0-or-later"
+url = "https://github.com/rhboot/efibootmgr/archive/18/"
+depends = ["glibc", "efivar", "popt"]
+
+[[source]]
+url = "https://github.com/rhboot/efibootmgr/archive/18/efibootmgr-18.tar.gz"
+sha256 = "TODO"
+filename = "efibootmgr-18.tar.gz"
+
+[build]
+build = '''
+cd "$S"
+make EFIDIR=symfonOS EFI_LOADER=grubx64.efi
+'''
+package = '''
+cd "$S"
+make install EFIDIR=symfonOS DESTDIR="$DESTDIR"
+'''

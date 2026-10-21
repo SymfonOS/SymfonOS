@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "autoconf"
+version = "2.72-1"
+summary = "Configure-Generator"
+license = "GPL-3.0-or-later"
+url = "https://ftp.gnu.org/gnu/autoconf/"
+depends = ["perl", "m4", "bash"]
+
+[[source]]
+url = "https://ftp.gnu.org/gnu/autoconf/autoconf-2.72.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+
+[options]
+strip = false

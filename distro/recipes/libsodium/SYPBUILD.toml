@@ -1,0 +1,16 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "libsodium"
+version = "1.0.20-1"
+summary = "Moderne Kryptographie (Ed25519 für syp)"
+license = "ISC"
+url = "https://download.libsodium.org/libsodium/releases/"
+depends = ["glibc"]
+provides = ["so:libsodium.so.26"]
+
+[[source]]
+url = "https://download.libsodium.org/libsodium/releases/libsodium-1.0.20.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

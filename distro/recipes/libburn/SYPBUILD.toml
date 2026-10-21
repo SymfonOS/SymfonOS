@@ -1,0 +1,15 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "libburn"
+version = "1.5.6-1"
+summary = "Brennbibliothek"
+license = "GPL-2.0-or-later"
+url = "https://files.libburnia-project.org/releases/"
+depends = ["glibc"]
+
+[[source]]
+url = "https://files.libburnia-project.org/releases/libburn-1.5.6.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

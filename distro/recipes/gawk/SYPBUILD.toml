@@ -1,0 +1,21 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "gawk"
+version = "5.3.2-1"
+summary = "GNU awk"
+license = "GPL-3.0-or-later"
+url = "https://ftp.gnu.org/gnu/gawk/"
+depends = ["glibc", "readline", "mpfr", "gmp"]
+
+[[source]]
+url = "https://ftp.gnu.org/gnu/gawk/gawk-5.3.2.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+pre_configure = '''
+sed -i 's/extras//' Makefile.in
+'''
+post_install = '''
+rm -f "$DESTDIR/usr/bin/gawk-5.3.2"
+'''

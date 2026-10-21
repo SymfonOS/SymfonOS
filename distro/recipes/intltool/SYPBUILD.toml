@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "intltool"
+version = "0.51.0-1"
+summary = "Internationalisierungswerkzeuge"
+license = "GPL-2.0-or-later"
+url = "https://launchpad.net/intltool/trunk/0.51.0/+download/"
+depends = ["perl-xml-parser"]
+
+[[source]]
+url = "https://launchpad.net/intltool/trunk/0.51.0/+download/intltool-0.51.0.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+pre_configure = '''
+sed -i 's:\\\${:\\\$\\{:' intltool-update.in
+'''

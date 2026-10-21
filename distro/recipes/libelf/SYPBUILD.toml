@@ -1,0 +1,26 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "libelf"
+version = "0.193-1"
+summary = "ELF-Bibliothek (aus elfutils)"
+license = "LGPL-3.0-or-later OR GPL-2.0-or-later"
+url = "https://sourceware.org/ftp/elfutils/0.193/"
+depends = ["glibc", "zlib", "zstd", "xz", "bzip2"]
+provides = ["so:libelf.so.1"]
+
+[[source]]
+url = "https://sourceware.org/ftp/elfutils/0.193/elfutils-0.193.tar.bz2"
+sha256 = "TODO"
+
+[build]
+build = '''
+cd "$S"
+./configure --prefix=/usr --disable-debuginfod --enable-libdebuginfod=dummy
+make
+'''
+package = '''
+cd "$S"
+make -C libelf DESTDIR="$DESTDIR" install
+install -Dm644 config/libelf.pc "$DESTDIR/usr/lib/pkgconfig/libelf.pc"
+rm -f "$DESTDIR/usr/lib/libelf.a"
+'''

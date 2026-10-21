@@ -1,0 +1,36 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "shadow"
+version = "4.18.0-1"
+summary = "Benutzer- und Gruppenverwaltung"
+license = "BSD-3-Clause"
+url = "https://github.com/shadow-maint/shadow/releases/download/4.18.0/"
+depends = ["glibc", "acl", "attr", "libxcrypt"]
+backup = ["etc/login.defs", "etc/default/useradd"]
+
+[[source]]
+url = "https://github.com/shadow-maint/shadow/releases/download/4.18.0/shadow-4.18.0.tar.xz"
+sha256 = "TODO"
+
+[build]
+prepare = '''
+cd "$S"
+sed -i 's/groups$(EXEEXT) //' src/Makefile.in
+find man -name Makefile.in -exec sed -i 's/groups\.1 / /' {} \;
+find man -name Makefile.in -exec sed -i 's/getspnam\.3 / /' {} \;
+find man -name Makefile.in -exec sed -i 's/passwd\.5 / /' {} \;
+sed -e 's:#ENCRYPT_METHOD DES:ENCRYPT_METHOD YESCRYPT:' -e 's:/var/spool/mail:/var/mail:' \
+    -e '/PATH=/{s@/sbin:@@;s@/bin:@@}' -i etc/login.defs
+'''
+build = '''
+cd "$S"
+./configure --sysconfdir=/etc --disable-static --with-{b,yes}crypt --without-libbsd --with-group-name-max-length=32
+make
+'''
+package = '''
+cd "$S"
+make DESTDIR="$DESTDIR" exec_prefix=/usr install
+make -C man DESTDIR="$DESTDIR" install-man
+install -d "$DESTDIR/etc/default"
+printf 'GROUP=999\nHOME=/home\nINACTIVE=-1\nEXPIRE=\nSHELL=/bin/bash\nSKEL=/etc/skel\nCREATE_MAIL_SPOOL=no\n' > "$DESTDIR/etc/default/useradd"
+'''

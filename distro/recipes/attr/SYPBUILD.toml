@@ -1,0 +1,16 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "attr"
+version = "2.5.2-1"
+summary = "Erweiterte Dateiattribute"
+license = "LGPL-2.1-or-later"
+url = "https://download.savannah.gnu.org/releases/attr/"
+depends = ["glibc"]
+
+[[source]]
+url = "https://download.savannah.gnu.org/releases/attr/attr-2.5.2.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--docdir=/usr/share/doc/attr-2.5.2"

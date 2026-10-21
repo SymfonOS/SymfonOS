@@ -1,0 +1,25 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "sqlite"
+version = "3.50.4-1"
+summary = "Eingebettete SQL-Datenbank"
+license = "LicenseRef-Public-Domain"
+url = "https://sqlite.org/2025/"
+depends = ["glibc", "readline", "zlib"]
+provides = ["so:libsqlite3.so.0"]
+
+[[source]]
+url = "https://sqlite.org/2025/sqlite-autoconf-3500400.tar.gz"
+sha256 = "TODO"
+
+[build]
+build = '''
+cd "$S"
+CFLAGS="$CFLAGS -DSQLITE_ENABLE_COLUMN_METADATA=1 -DSQLITE_ENABLE_UNLOCK_NOTIFY=1 -DSQLITE_ENABLE_DBSTAT_VTAB=1 -DSQLITE_SECURE_DELETE=1" \
+./configure --prefix=/usr --disable-static --enable-fts4 --enable-fts5
+make
+'''
+package = '''
+cd "$S"
+make DESTDIR="$DESTDIR" install
+'''

@@ -1,0 +1,110 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "filesystem"
+version = "2025.10-1"
+arch = "any"
+summary = "symfonOS-Grundverzeichnisse und Systemdateien"
+license = "GPL-3.0-or-later"
+backup = ["etc/passwd", "etc/group", "etc/shadow", "etc/gshadow", "etc/hosts", "etc/fstab", "etc/profile", "etc/nsswitch.conf", "etc/ld.so.conf", "etc/shells", "etc/hostname", "etc/locale.conf", "etc/vconsole.conf"]
+
+[build]
+style = "meta"
+package = '''
+D="$DESTDIR"
+install -d "$D"/{boot,dev,etc/{opt,sysconfig,profile.d,ld.so.conf.d},home,mnt,opt,proc,run,srv,sys,tmp,root}
+install -d "$D"/usr/{bin,lib/firmware,sbin,include,share/{doc,info,man/man{1..8},misc,terminfo,zoneinfo},src,local/{bin,lib,share}}
+install -d "$D"/var/{cache,lib/{misc,locate,hwclock},local,log,mail,opt,spool,tmp}
+ln -s usr/bin "$D/bin"; ln -s usr/lib "$D/lib"; ln -s usr/sbin "$D/sbin"; ln -s usr/lib "$D/lib64"
+ln -s ../run "$D/var/run"; ln -s ../run/lock "$D/var/lock"
+chmod 0750 "$D/root"; chmod 1777 "$D/tmp" "$D/var/tmp"
+cat > "$D/etc/passwd" <<'EOF'
+root:x:0:0:root:/root:/bin/bash
+bin:x:1:1:bin:/dev/null:/usr/bin/false
+daemon:x:6:6:Daemon User:/dev/null:/usr/bin/false
+messagebus:x:18:18:D-Bus Message Daemon User:/run/dbus:/usr/bin/false
+systemd-journal-gateway:x:73:73:systemd Journal Gateway:/:/usr/bin/false
+systemd-journal-remote:x:74:74:systemd Journal Remote:/:/usr/bin/false
+systemd-journal-upload:x:75:75:systemd Journal Upload:/:/usr/bin/false
+systemd-network:x:76:76:systemd Network Management:/:/usr/bin/false
+systemd-resolve:x:77:77:systemd Resolver:/:/usr/bin/false
+systemd-timesync:x:78:78:systemd Time Synchronization:/:/usr/bin/false
+systemd-coredump:x:79:79:systemd Core Dumper:/:/usr/bin/false
+uuidd:x:80:80:UUID Generation Daemon User:/dev/null:/usr/bin/false
+systemd-oom:x:81:81:systemd Out Of Memory Daemon:/:/usr/bin/false
+nobody:x:65534:65534:Unprivileged User:/dev/null:/usr/bin/false
+EOF
+cat > "$D/etc/group" <<'EOF'
+root:x:0:
+bin:x:1:daemon
+sys:x:2:
+kmem:x:3:
+tape:x:4:
+tty:x:5:
+daemon:x:6:
+floppy:x:7:
+disk:x:8:
+lp:x:9:
+dialout:x:10:
+audio:x:11:
+video:x:12:
+utmp:x:13:
+cdrom:x:15:
+adm:x:16:
+messagebus:x:18:
+systemd-journal:x:23:
+input:x:24:
+mail:x:34:
+kvm:x:61:
+systemd-journal-gateway:x:73:
+systemd-journal-remote:x:74:
+systemd-journal-upload:x:75:
+systemd-network:x:76:
+systemd-resolve:x:77:
+systemd-timesync:x:78:
+systemd-coredump:x:79:
+uuidd:x:80:
+systemd-oom:x:81:
+wheel:x:97:
+realtime:x:98:
+users:x:999:
+nogroup:x:65534:
+EOF
+printf 'root:!*:20000::::::\n' > "$D/etc/shadow"; chmod 600 "$D/etc/shadow"
+printf 'root:::\n' > "$D/etc/gshadow"; chmod 600 "$D/etc/gshadow"
+printf '127.0.0.1 localhost\n::1       localhost\n127.0.1.1 symfonos\n' > "$D/etc/hosts"
+echo symfonos > "$D/etc/hostname"
+printf '# <Gerät> <Mountpunkt> <Typ> <Optionen> <dump> <pass>\n' > "$D/etc/fstab"
+printf 'LANG=de_DE.UTF-8\n' > "$D/etc/locale.conf"
+printf 'KEYMAP=de-latin1\n' > "$D/etc/vconsole.conf"
+printf '/bin/sh\n/bin/bash\n' > "$D/etc/shells"
+printf 'include /etc/ld.so.conf.d/*.conf\n' > "$D/etc/ld.so.conf"
+cat > "$D/etc/nsswitch.conf" <<'EOF'
+passwd: files systemd
+group: files systemd
+shadow: files systemd
+hosts: mymachines resolve [!UNAVAIL=return] files myhostname dns
+networks: files
+protocols: files
+services: files
+ethers: files
+rpc: files
+EOF
+cat > "$D/etc/profile" <<'EOF'
+# /etc/profile – symfonOS
+export PATH=/usr/local/bin:/usr/bin
+umask 022
+for f in /etc/profile.d/*.sh; do [ -r "$f" ] && . "$f"; done
+unset f
+EOF
+cat > "$D/usr/lib/os-release" <<'EOF'
+NAME="symfonOS"
+PRETTY_NAME="symfonOS (Rolling)"
+ID=symfonos
+BUILD_ID=rolling
+ANSI_COLOR="38;2;124;92;255"
+HOME_URL="https://github.com/thomasrohm23-bit/symfonOS"
+BUG_REPORT_URL="https://github.com/thomasrohm23-bit/symfonOS/issues"
+LOGO=symfonos
+EOF
+ln -s ../usr/lib/os-release "$D/etc/os-release"
+'''

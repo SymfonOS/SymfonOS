@@ -120,7 +120,19 @@ void run_triggers(config *c, strvec *changed, int quiet) {
         for (size_t i = 0; i < changed->n && !hit; i++)
             for (size_t j = 0; j < paths->n && !hit; j++)
                 if (glob_match(paths->items[j]->s, changed->v[i])) hit = 1;
-        if (!hit || !which(ex->items[0]->s, binpath)) continue;
+        const char *prog = ex->items[0]->s;
+        int found;
+        if (prog[0] == '/') {
+            char *pp = cfg_path(c, prog);
+            found = access(pp, X_OK) == 0;
+            free(pp);
+        } else {
+            char *sbin = cfg_path(c, "usr/sbin"), *both = xasprintf("%s:%s", binpath, sbin);
+            found = which(prog, both);
+            free(sbin);
+            free(both);
+        }
+        if (!hit || !found) continue;
         if (!quiet) printf(":: Trigger: %s\n", jgets(t, "description", ids.v[k]));
         size_t extra = cfg_is_root(c) ? 0 : 2;
         char **argv = xcalloc(ex->n + extra + 1, sizeof(char *));

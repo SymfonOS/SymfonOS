@@ -1,0 +1,16 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "cpio"
+version = "2.15-1"
+summary = "cpio-Archive (Initramfs)"
+license = "GPL-3.0-or-later"
+url = "https://ftp.gnu.org/gnu/cpio/"
+depends = ["glibc"]
+
+[[source]]
+url = "https://ftp.gnu.org/gnu/cpio/cpio-2.15.tar.bz2"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--enable-mt --with-rmt=/usr/libexec/rmt"

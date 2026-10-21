@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "json-c"
+version = "0.18-1"
+summary = "JSON-Bibliothek"
+license = "MIT"
+url = "https://s3.amazonaws.com/json-c_releases/releases/"
+depends = ["glibc"]
+makedepends = ["cmake"]
+provides = ["so:libjson-c.so.5"]
+
+[[source]]
+url = "https://s3.amazonaws.com/json-c_releases/releases/json-c-0.18.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "cmake"
+configure_flags = "-DBUILD_STATIC_LIBS=OFF"

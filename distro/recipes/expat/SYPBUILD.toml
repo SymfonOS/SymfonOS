@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "expat"
+version = "2.7.1-1"
+summary = "XML-Parser"
+license = "MIT"
+url = "https://prdownloads.sourceforge.net/expat/"
+depends = ["glibc"]
+provides = ["so:libexpat.so.1"]
+
+[[source]]
+url = "https://prdownloads.sourceforge.net/expat/expat-2.7.1.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--docdir=/usr/share/doc/expat-2.7.1"

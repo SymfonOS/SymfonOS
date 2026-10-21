@@ -1,0 +1,16 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "python-packaging"
+version = "25.0-1"
+summary = "Python-Paketierungshilfen"
+license = "Apache-2.0 OR BSD-2-Clause"
+url = "https://pypi.org/packages/source/p/packaging/"
+depends = ["python"]
+makedepends = ["python-flit-core"]
+
+[[source]]
+url = "https://pypi.org/packages/source/p/packaging/packaging-25.0.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "python"

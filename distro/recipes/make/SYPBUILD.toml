@@ -1,0 +1,15 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "make"
+version = "4.4.1-1"
+summary = "GNU make"
+license = "GPL-3.0-or-later"
+url = "https://ftp.gnu.org/gnu/make/"
+depends = ["glibc"]
+
+[[source]]
+url = "https://ftp.gnu.org/gnu/make/make-4.4.1.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

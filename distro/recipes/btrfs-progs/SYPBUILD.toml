@@ -1,0 +1,16 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "btrfs-progs"
+version = "6.16-1"
+summary = "Btrfs-Werkzeuge"
+license = "GPL-2.0-only"
+url = "https://www.kernel.org/pub/linux/kernel/people/kdave/btrfs-progs/"
+depends = ["glibc", "util-linux", "zlib", "zstd", "lzo", "e2fsprogs"]
+
+[[source]]
+url = "https://www.kernel.org/pub/linux/kernel/people/kdave/btrfs-progs/btrfs-progs-v6.16.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--disable-documentation --disable-python"

@@ -1,0 +1,16 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "mpfr"
+version = "4.2.2-1"
+summary = "Gleitkomma mit beliebiger Genauigkeit"
+license = "LGPL-3.0-or-later"
+url = "https://ftp.gnu.org/gnu/mpfr/"
+depends = ["glibc", "gmp"]
+
+[[source]]
+url = "https://ftp.gnu.org/gnu/mpfr/mpfr-4.2.2.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--enable-thread-safe --docdir=/usr/share/doc/mpfr-4.2.2"

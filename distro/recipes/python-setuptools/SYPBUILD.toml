@@ -1,0 +1,15 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "python-setuptools"
+version = "80.9.0-1"
+summary = "Setuptools"
+license = "MIT"
+url = "https://pypi.org/packages/source/s/setuptools/"
+depends = ["python"]
+
+[[source]]
+url = "https://pypi.org/packages/source/s/setuptools/setuptools-80.9.0.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "python"

@@ -1,0 +1,22 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "pciutils"
+version = "3.14.0-1"
+summary = "lspci"
+license = "GPL-2.0-or-later"
+url = "https://www.kernel.org/pub/software/utils/pciutils/"
+depends = ["glibc", "kmod", "zlib"]
+
+[[source]]
+url = "https://www.kernel.org/pub/software/utils/pciutils/pciutils-3.14.0.tar.xz"
+sha256 = "TODO"
+
+[build]
+build = '''
+cd "$S"
+make PREFIX=/usr SHAREDIR=/usr/share/hwdata SHARED=yes
+'''
+package = '''
+cd "$S"
+make PREFIX=/usr SHAREDIR=/usr/share/hwdata SHARED=yes DESTDIR="$DESTDIR" install install-lib
+'''

@@ -1,0 +1,15 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "gperf"
+version = "3.3-1"
+summary = "Perfekte Hashfunktionen"
+license = "GPL-3.0-or-later"
+url = "https://ftp.gnu.org/gnu/gperf/"
+depends = ["glibc"]
+
+[[source]]
+url = "https://ftp.gnu.org/gnu/gperf/gperf-3.3.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

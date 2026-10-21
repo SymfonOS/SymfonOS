@@ -1,0 +1,15 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "gzip"
+version = "1.14-1"
+summary = "gzip-Kompression"
+license = "GPL-3.0-or-later"
+url = "https://ftp.gnu.org/gnu/gzip/"
+depends = ["glibc", "bash"]
+
+[[source]]
+url = "https://ftp.gnu.org/gnu/gzip/gzip-1.14.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

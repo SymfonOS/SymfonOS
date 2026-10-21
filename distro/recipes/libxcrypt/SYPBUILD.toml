@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "libxcrypt"
+version = "4.4.38-1"
+summary = "Passwort-Hashing (libcrypt)"
+license = "LGPL-2.1-or-later"
+url = "https://github.com/besser82/libxcrypt/releases/download/v4.4.38/"
+depends = ["glibc"]
+provides = ["so:libcrypt.so.2"]
+
+[[source]]
+url = "https://github.com/besser82/libxcrypt/releases/download/v4.4.38/libxcrypt-4.4.38.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--enable-hashes=strong,glibc --enable-obsolete-api=no --disable-failure-tokens"

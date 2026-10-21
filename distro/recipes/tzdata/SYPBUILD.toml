@@ -1,0 +1,31 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "tzdata"
+version = "2025b-1"
+summary = "Zeitzonendaten"
+license = "LicenseRef-Public-Domain"
+url = "https://data.iana.org/time-zones/releases/"
+makedepends = ["glibc"]
+
+[[source]]
+url = "https://data.iana.org/time-zones/releases/tzdata2025b.tar.gz"
+sha256 = "TODO"
+filename = "tzdata2025b.tar.gz"
+
+[build]
+dir = "."
+package = '''
+ZONEINFO="$DESTDIR/usr/share/zoneinfo"
+install -d "$ZONEINFO"/{posix,right}
+for tz in etcetera southamerica northamerica europe africa antarctica asia australasia backward; do
+  zic -L /dev/null -d "$ZONEINFO" ${tz}
+  zic -L /dev/null -d "$ZONEINFO/posix" ${tz}
+  zic -L leapseconds -d "$ZONEINFO/right" ${tz}
+done
+cp zone.tab zone1970.tab iso3166.tab "$ZONEINFO"
+zic -d "$ZONEINFO" -p Europe/Berlin
+install -d "$DESTDIR/etc"; ln -sf ../usr/share/zoneinfo/Europe/Berlin "$DESTDIR/etc/localtime"
+'''
+
+[options]
+strip = false

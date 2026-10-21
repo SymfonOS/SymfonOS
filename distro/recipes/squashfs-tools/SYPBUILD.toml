@@ -1,0 +1,23 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "squashfs-tools"
+version = "4.7.2-1"
+summary = "SquashFS-Werkzeuge (Live-System)"
+license = "GPL-2.0-or-later"
+url = "https://github.com/plougher/squashfs-tools/archive/refs/tags/"
+depends = ["glibc", "zlib", "xz", "lz4", "zstd", "lzo"]
+
+[[source]]
+url = "https://github.com/plougher/squashfs-tools/archive/refs/tags/4.7.2.tar.gz"
+sha256 = "TODO"
+filename = "squashfs-tools-4.7.2.tar.gz"
+
+[build]
+build = '''
+cd "$S/squashfs-tools"
+make XZ_SUPPORT=1 LZO_SUPPORT=1 LZ4_SUPPORT=1 ZSTD_SUPPORT=1
+'''
+package = '''
+cd "$S/squashfs-tools"
+make INSTALL_PREFIX="$DESTDIR/usr" INSTALL_MANPAGES_DIR="$DESTDIR/usr/share/man/man1" install
+'''

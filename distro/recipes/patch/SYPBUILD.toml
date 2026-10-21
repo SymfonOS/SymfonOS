@@ -1,0 +1,15 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "patch"
+version = "2.8-1"
+summary = "Patches anwenden"
+license = "GPL-3.0-or-later"
+url = "https://ftp.gnu.org/gnu/patch/"
+depends = ["glibc", "attr"]
+
+[[source]]
+url = "https://ftp.gnu.org/gnu/patch/patch-2.8.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

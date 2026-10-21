@@ -1,0 +1,41 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "systemd"
+version = "257.8-1"
+summary = "System- und Dienstverwaltung"
+license = "LGPL-2.1-or-later"
+url = "https://github.com/systemd/systemd/archive/v257.8/"
+depends = ["glibc", "acl", "libcap", "libxcrypt", "kmod", "util-linux", "openssl", "zstd", "xz", "lz4", "libelf"]
+makedepends = ["meson", "python-jinja", "gperf", "pkgconf", "coreutils"]
+provides = ["udev", "systemd-libs", "so:libsystemd.so.0", "so:libudev.so.1"]
+backup = ["etc/systemd/journald.conf", "etc/systemd/logind.conf", "etc/systemd/system.conf", "etc/systemd/resolved.conf", "etc/systemd/timesyncd.conf"]
+
+[[source]]
+url = "https://github.com/systemd/systemd/archive/v257.8/systemd-257.8.tar.gz"
+sha256 = "TODO"
+filename = "systemd-257.8.tar.gz"
+
+[build]
+prepare = '''
+cd "$S"
+sed -e 's/GROUP="render"/GROUP="video"/' -e 's/GROUP="sgx", //' -i rules.d/50-udev-default.rules.in
+'''
+build = '''
+meson setup "$S/_build" "$S" --prefix=/usr --buildtype=release -D default-dnssec=no -D firstboot=true \
+  -D install-tests=false -D ldconfig=false -D sysusers=true -D rpmmacrosdir=no -D homed=disabled -D userdb=false \
+  -D man=disabled -D mode=release -D pamconf=false -D pam=disabled -D dev-kvm-mode=0660 -D nobody-group=nogroup \
+  -D sysupdate=disabled -D ukify=disabled -D docdir=/usr/share/doc/systemd-257.8 -D default-locale=C.UTF-8
+ninja -C "$S/_build"
+'''
+package = '''
+DESTDIR="$DESTDIR" ninja -C "$S/_build" install
+install -d "$DESTDIR/etc/systemd/network"
+cat > "$DESTDIR/etc/systemd/network/20-wired.network" <<'EOF'
+[Match]
+Type=ether
+
+[Network]
+DHCP=yes
+EOF
+ln -sf ../run/systemd/resolve/stub-resolv.conf "$DESTDIR/etc/resolv.conf"
+'''

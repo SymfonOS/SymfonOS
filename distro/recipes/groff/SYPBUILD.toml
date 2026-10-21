@@ -1,0 +1,23 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "groff"
+version = "1.23.0-1"
+summary = "Textsatz für Handbuchseiten"
+license = "GPL-3.0-or-later"
+url = "https://ftp.gnu.org/gnu/groff/"
+depends = ["glibc", "gcc", "perl"]
+
+[[source]]
+url = "https://ftp.gnu.org/gnu/groff/groff-1.23.0.tar.gz"
+sha256 = "TODO"
+
+[build]
+build = '''
+cd "$S"
+PAGE=A4 ./configure --prefix=/usr
+make
+'''
+package = '''
+cd "$S"
+make DESTDIR="$DESTDIR" install
+'''

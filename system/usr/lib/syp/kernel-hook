@@ -1,0 +1,15 @@
+#!/bin/sh
+# Wird von syp nach Kernel-, Firmware- oder dracut-Änderungen ausgeführt.
+set -eu
+for d in /usr/lib/modules/*/; do
+  k=$(basename "$d")
+  [ -f "$d/vmlinuz" ] || continue
+  install -Dm644 "$d/vmlinuz" "/boot/vmlinuz-$k"
+  dracut --force --kver "$k" "/boot/initramfs-$k.img"
+done
+# Verwaiste Kernel in /boot entfernen
+for f in /boot/vmlinuz-*; do
+  [ -e "$f" ] || continue
+  k=${f#/boot/vmlinuz-}
+  [ -d "/usr/lib/modules/$k" ] || rm -f "$f" "/boot/initramfs-$k.img"
+done

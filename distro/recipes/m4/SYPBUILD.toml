@@ -1,0 +1,15 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "m4"
+version = "1.4.20-1"
+summary = "Makroprozessor"
+license = "GPL-3.0-or-later"
+url = "https://ftp.gnu.org/gnu/m4/"
+depends = ["glibc"]
+
+[[source]]
+url = "https://ftp.gnu.org/gnu/m4/m4-1.4.20.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

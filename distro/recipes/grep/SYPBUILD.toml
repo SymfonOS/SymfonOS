@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "grep"
+version = "3.12-1"
+summary = "Textsuche"
+license = "GPL-3.0-or-later"
+url = "https://ftp.gnu.org/gnu/grep/"
+depends = ["glibc", "pcre2"]
+
+[[source]]
+url = "https://ftp.gnu.org/gnu/grep/grep-3.12.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+pre_configure = '''
+sed -i 's/echo/#echo/' src/egrep.sh
+'''

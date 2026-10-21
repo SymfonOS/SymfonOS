@@ -1,0 +1,50 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "grub"
+version = "2.12-1"
+summary = "GRUB-Bootloader (BIOS und UEFI)"
+license = "GPL-3.0-or-later"
+url = "https://ftp.gnu.org/gnu/grub/"
+depends = ["glibc", "xz", "gettext", "efibootmgr", "dosfstools"]
+makedepends = ["bison", "flex", "python"]
+backup = ["etc/default/grub"]
+
+[[source]]
+url = "https://ftp.gnu.org/gnu/grub/grub-2.12.tar.xz"
+sha256 = "TODO"
+
+[build]
+prepare = '''
+cd "$S"
+echo depends bli part_gpt > grub-core/extra_deps.lst
+'''
+build = '''
+cd "$S"
+unset CFLAGS CXXFLAGS LDFLAGS
+for t in i386-pc x86_64-efi; do
+  mkdir -p "build-$t"; cd "build-$t"
+  ../configure --prefix=/usr --sysconfdir=/etc --disable-efiemu --disable-werror \
+    --with-platform=${t#*-} --target=${t%%-*}
+  make; cd ..
+done
+'''
+package = '''
+cd "$S"
+for t in i386-pc x86_64-efi; do make -C "build-$t" DESTDIR="$DESTDIR" install; done
+install -d "$DESTDIR/usr/share/bash-completion/completions"
+mv "$DESTDIR/etc/bash_completion.d/grub" "$DESTDIR/usr/share/bash-completion/completions" 2>/dev/null || true
+install -Dm644 /dev/stdin "$DESTDIR/etc/default/grub" <<'EOF'
+GRUB_DEFAULT=saved
+GRUB_SAVEDEFAULT=true
+GRUB_TIMEOUT=3
+GRUB_DISTRIBUTOR="symfonOS"
+GRUB_CMDLINE_LINUX_DEFAULT="quiet loglevel=3"
+GRUB_CMDLINE_LINUX=""
+GRUB_TERMINAL_OUTPUT=gfxterm
+GRUB_DISABLE_RECOVERY=true
+GRUB_DISABLE_OS_PROBER=false
+EOF
+'''
+
+[options]
+strip = false

@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "curl"
+version = "8.15.0-1"
+summary = "URL-Übertragungen (curl, libcurl)"
+license = "curl"
+url = "https://curl.se/download/"
+depends = ["glibc", "openssl", "zlib", "zstd", "ca-certificates"]
+provides = ["so:libcurl.so.4"]
+
+[[source]]
+url = "https://curl.se/download/curl-8.15.0.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--with-openssl --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt --without-libpsl --enable-threaded-resolver"

@@ -1,0 +1,15 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "texinfo"
+version = "7.2-1"
+summary = "Dokumentationssystem"
+license = "GPL-3.0-or-later"
+url = "https://ftp.gnu.org/gnu/texinfo/"
+depends = ["glibc", "ncurses", "perl", "gzip"]
+
+[[source]]
+url = "https://ftp.gnu.org/gnu/texinfo/texinfo-7.2.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

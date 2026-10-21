@@ -1,0 +1,16 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "libisoburn"
+version = "1.5.6-1"
+summary = "xorriso (ISO-Erstellung)"
+license = "GPL-2.0-or-later"
+url = "https://files.libburnia-project.org/releases/"
+depends = ["glibc", "libburn", "libisofs", "readline"]
+provides = ["xorriso"]
+
+[[source]]
+url = "https://files.libburnia-project.org/releases/libisoburn-1.5.6.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

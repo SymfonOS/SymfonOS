@@ -1,0 +1,16 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "meson"
+version = "1.8.3-1"
+summary = "Meson-Build-System"
+license = "Apache-2.0"
+url = "https://github.com/mesonbuild/meson/releases/download/1.8.3/"
+depends = ["python", "ninja"]
+makedepends = ["python-setuptools", "python-wheel"]
+
+[[source]]
+url = "https://github.com/mesonbuild/meson/releases/download/1.8.3/meson-1.8.3.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "python"

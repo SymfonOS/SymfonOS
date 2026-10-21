@@ -1,0 +1,27 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "openssl"
+version = "3.5.2-1"
+summary = "TLS/SSL und Kryptographie"
+license = "Apache-2.0"
+url = "https://github.com/openssl/openssl/releases/download/openssl-3.5.2/"
+depends = ["glibc", "zlib"]
+makedepends = ["perl"]
+provides = ["so:libssl.so.3", "so:libcrypto.so.3"]
+backup = ["etc/ssl/openssl.cnf"]
+
+[[source]]
+url = "https://github.com/openssl/openssl/releases/download/openssl-3.5.2/openssl-3.5.2.tar.gz"
+sha256 = "TODO"
+
+[build]
+build = '''
+cd "$S"
+./config --prefix=/usr --openssldir=/etc/ssl --libdir=lib shared zlib-dynamic
+make
+'''
+package = '''
+cd "$S"
+sed -i '/INSTALL_LIBS/s/libcrypto.a libssl.a//' Makefile
+make DESTDIR="$DESTDIR" MANSUFFIX=ssl install
+'''

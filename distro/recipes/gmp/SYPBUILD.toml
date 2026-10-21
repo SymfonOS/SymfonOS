@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "gmp"
+version = "6.3.0-1"
+summary = "Arithmetik mit beliebiger Genauigkeit"
+license = "LGPL-3.0-or-later OR GPL-2.0-or-later"
+url = "https://ftp.gnu.org/gnu/gmp/"
+depends = ["glibc"]
+makedepends = ["m4", "binutils"]
+provides = ["so:libgmp.so.10"]
+
+[[source]]
+url = "https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--enable-cxx --host=none-linux-gnu --docdir=/usr/share/doc/gmp-6.3.0"

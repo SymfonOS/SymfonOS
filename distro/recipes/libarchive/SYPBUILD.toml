@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "libarchive"
+version = "3.8.1-1"
+summary = "Archivbibliothek (tar, cpio, zip …)"
+license = "BSD-2-Clause"
+url = "https://github.com/libarchive/libarchive/releases/download/v3.8.1/"
+depends = ["glibc", "acl", "attr", "bzip2", "xz", "zlib", "zstd", "lz4", "openssl", "expat"]
+provides = ["so:libarchive.so.13", "bsdtar"]
+
+[[source]]
+url = "https://github.com/libarchive/libarchive/releases/download/v3.8.1/libarchive-3.8.1.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--without-xml2 --with-expat"

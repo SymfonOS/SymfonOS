@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "libffi"
+version = "3.5.2-1"
+summary = "Foreign Function Interface"
+license = "MIT"
+url = "https://github.com/libffi/libffi/releases/download/v3.5.2/"
+depends = ["glibc"]
+provides = ["so:libffi.so.8"]
+
+[[source]]
+url = "https://github.com/libffi/libffi/releases/download/v3.5.2/libffi-3.5.2.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--with-gcc-arch=x86-64"

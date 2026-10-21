@@ -1,0 +1,16 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "findutils"
+version = "4.10.0-1"
+summary = "find, xargs"
+license = "GPL-3.0-or-later"
+url = "https://ftp.gnu.org/gnu/findutils/"
+depends = ["glibc"]
+
+[[source]]
+url = "https://ftp.gnu.org/gnu/findutils/findutils-4.10.0.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--localstatedir=/var/lib/locate"

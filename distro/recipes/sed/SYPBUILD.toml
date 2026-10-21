@@ -1,0 +1,15 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "sed"
+version = "4.9-1"
+summary = "Stream-Editor"
+license = "GPL-3.0-or-later"
+url = "https://ftp.gnu.org/gnu/sed/"
+depends = ["glibc", "acl"]
+
+[[source]]
+url = "https://ftp.gnu.org/gnu/sed/sed-4.9.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

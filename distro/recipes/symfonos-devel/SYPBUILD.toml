@@ -1,0 +1,11 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "symfonos-devel"
+version = "2025.10-1"
+arch = "any"
+summary = "Werkzeuge zum Bauen von Paketen"
+license = "GPL-3.0-or-later"
+depends = ["gcc", "binutils", "make", "patch", "autoconf", "automake", "libtool", "pkgconf", "bison", "flex", "m4", "gettext", "texinfo", "perl", "python", "meson", "ninja", "cmake", "groff"]
+
+[build]
+style = "meta"

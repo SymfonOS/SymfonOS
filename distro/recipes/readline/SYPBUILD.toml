@@ -1,0 +1,30 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "readline"
+version = "8.3-1"
+summary = "Zeileneditor-Bibliothek"
+license = "GPL-3.0-or-later"
+url = "https://ftp.gnu.org/gnu/readline/"
+depends = ["glibc", "ncurses"]
+provides = ["so:libreadline.so.8"]
+
+[[source]]
+url = "https://ftp.gnu.org/gnu/readline/readline-8.3.tar.gz"
+sha256 = "TODO"
+
+[build]
+prepare = '''
+cd "$S"
+sed -i '/MV.*old/d' Makefile.in
+sed -i '/{OLDSUFF}/c:' support/shlib-install
+sed -i 's/-Wl,-rpath,[^ ]*//' support/shobj-conf
+'''
+build = '''
+cd "$S"
+./configure --prefix=/usr --disable-static --with-curses --docdir=/usr/share/doc/readline-8.3
+make SHLIB_LIBS="-lncursesw"
+'''
+package = '''
+cd "$S"
+make SHLIB_LIBS="-lncursesw" DESTDIR="$DESTDIR" install
+'''

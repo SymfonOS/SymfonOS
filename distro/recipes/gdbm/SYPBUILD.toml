@@ -1,0 +1,16 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "gdbm"
+version = "1.26-1"
+summary = "GNU-Datenbankbibliothek"
+license = "GPL-3.0-or-later"
+url = "https://ftp.gnu.org/gnu/gdbm/"
+depends = ["glibc", "readline"]
+
+[[source]]
+url = "https://ftp.gnu.org/gnu/gdbm/gdbm-1.26.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--enable-libgdbm-compat"

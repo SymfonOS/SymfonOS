@@ -1,0 +1,15 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "which"
+version = "2.23-1"
+summary = "Programme im PATH finden"
+license = "GPL-3.0-or-later"
+url = "https://ftp.gnu.org/gnu/which/"
+depends = ["glibc"]
+
+[[source]]
+url = "https://ftp.gnu.org/gnu/which/which-2.23.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

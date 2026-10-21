@@ -1,0 +1,23 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "cmake"
+version = "4.1.1-1"
+summary = "CMake-Build-System"
+license = "BSD-3-Clause"
+url = "https://cmake.org/files/v4.1/"
+depends = ["glibc", "gcc", "curl", "libarchive", "expat", "zlib", "xz", "bzip2", "zstd", "ncurses"]
+
+[[source]]
+url = "https://cmake.org/files/v4.1/cmake-4.1.1.tar.gz"
+sha256 = "TODO"
+
+[build]
+build = '''
+cd "$S"
+./bootstrap --prefix=/usr --system-libs --no-system-jsoncpp --no-system-cppdap --no-system-librhash --no-system-libuv --mandir=/share/man --docdir=/share/doc/cmake-4.1.1 --parallel=$NPROC
+make
+'''
+package = '''
+cd "$S"
+make DESTDIR="$DESTDIR" install
+'''

@@ -1,0 +1,15 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "python-flit-core"
+version = "3.12.0-1"
+summary = "Flit-Build-Backend"
+license = "BSD-3-Clause"
+url = "https://pypi.org/packages/source/f/flit-core/"
+depends = ["python"]
+
+[[source]]
+url = "https://pypi.org/packages/source/f/flit-core/flit_core-3.12.0.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "python"

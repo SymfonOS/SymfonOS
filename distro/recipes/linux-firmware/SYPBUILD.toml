@@ -1,0 +1,23 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "linux-firmware"
+version = "20250808-1"
+summary = "Firmware für Grafik, WLAN, Bluetooth, Audio"
+license = "LicenseRef-linux-firmware"
+url = "https://www.kernel.org/pub/linux/kernel/firmware/"
+
+[[source]]
+url = "https://www.kernel.org/pub/linux/kernel/firmware/linux-firmware-20250808.tar.xz"
+sha256 = "TODO"
+
+[build]
+build = '''
+true
+'''
+package = '''
+cd "$S"
+make DESTDIR="$DESTDIR" FIRMWAREDIR=/usr/lib/firmware install-nodedup
+'''
+
+[options]
+strip = false

@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "mtools"
+version = "4.0.49-1"
+summary = "FAT-Images ohne Mount (EFI-Boot-Image)"
+license = "GPL-3.0-or-later"
+url = "https://ftp.gnu.org/gnu/mtools/"
+depends = ["glibc"]
+backup = ["etc/mtools.conf"]
+
+[[source]]
+url = "https://ftp.gnu.org/gnu/mtools/mtools-4.0.49.tar.bz2"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--sysconfdir=/etc"

@@ -1,0 +1,49 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "glibc"
+version = "2.42-1"
+summary = "GNU C-Bibliothek"
+license = "LGPL-2.1-or-later AND GPL-2.0-or-later"
+url = "https://ftp.gnu.org/gnu/glibc/"
+depends = ["filesystem", "linux-api-headers"]
+makedepends = ["man-pages", "iana-etc"]
+provides = ["libc", "so:libc.so.6", "so:libm.so.6", "so:libpthread.so.0", "so:libdl.so.2", "so:librt.so.1", "so:ld-linux-x86-64.so.2", "so:libresolv.so.2", "so:libutil.so.1"]
+backup = ["etc/nsswitch.conf", "etc/ld.so.conf"]
+
+[[source]]
+url = "https://ftp.gnu.org/gnu/glibc/glibc-2.42.tar.xz"
+sha256 = "TODO"
+
+[[source]]
+url = "https://www.linuxfromscratch.org/patches/lfs/12.4/glibc-2.42-fhs-1.patch"
+sha256 = "TODO"
+extract = false
+
+[build]
+dir = "glibc-2.42"
+prepare = '''
+cd "$S"
+patch -Np1 -i ../glibc-2.42-fhs-1.patch
+'''
+build = '''
+cd "$S"; mkdir -p build; cd build
+echo "rootsbindir=/usr/sbin" > configparms
+../configure --prefix=/usr --disable-werror --disable-nscd libc_cv_slibdir=/usr/lib \
+  --enable-stack-protector=strong --enable-kernel=5.4 --enable-bind-now
+make
+'''
+package = '''
+cd "$S/build"
+sed '/test-installation/s@$(PERL)@echo not running@' -i ../Makefile
+install -d "$DESTDIR/etc"; touch "$DESTDIR/etc/ld.so.conf"
+make DESTDIR="$DESTDIR" install
+sed '/RTLDLIST=/s@/usr@@g' -i "$DESTDIR/usr/bin/ldd"
+install -d "$DESTDIR/usr/lib/locale"
+for l in C.UTF-8 de_DE.UTF-8 en_US.UTF-8 en_GB.UTF-8 fr_FR.UTF-8 es_ES.UTF-8 it_IT.UTF-8 nl_NL.UTF-8 pl_PL.UTF-8 tr_TR.UTF-8 ja_JP.UTF-8 zh_CN.UTF-8; do
+  localedef --prefix="$DESTDIR" -i "${l%.UTF-8}" -f UTF-8 "$l" || true
+done
+printf '/usr/local/lib\n/opt/lib\n' > "$DESTDIR/etc/ld.so.conf.d/local.conf"
+rm -f "$DESTDIR/etc/ld.so.conf"
+printf 'include /etc/ld.so.conf.d/*.conf\n' > "$DESTDIR/etc/ld.so.conf"
+rm -f "$DESTDIR/etc/nsswitch.conf"
+'''

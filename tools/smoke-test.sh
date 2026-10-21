@@ -7,14 +7,20 @@ T=$(mktemp -d)
 trap 'rm -rf "$T"' EXIT
 label=$(isoinfo -d -i "$ISO" 2>/dev/null | awk -F': ' '/Volume id/ {print $2}') ||
   label=$(blkid -o value -s LABEL "$ISO")
-xorriso -osirrox on -indev "$ISO" \
-  -extract /symfonos/boot/x86_64/vmlinuz-linux-zen "$T/vmlinuz" \
-  -extract /symfonos/boot/x86_64/initramfs-linux-zen.img "$T/initrd" >/dev/null 2>&1
+# Zwei Layouts: Quellcode-ISO (/boot/vmlinuz, dracut-Live) und archiso (/symfonos/boot/x86_64)
+if xorriso -osirrox on -indev "$ISO" -extract /boot/vmlinuz "$T/vmlinuz" -extract /boot/initramfs.img "$T/initrd" >/dev/null 2>&1; then
+  APPEND="root=live:CDLABEL=$label rd.live.image"
+else
+  xorriso -osirrox on -indev "$ISO" \
+    -extract /symfonos/boot/x86_64/vmlinuz-linux-zen "$T/vmlinuz" \
+    -extract /symfonos/boot/x86_64/initramfs-linux-zen.img "$T/initrd" >/dev/null 2>&1
+  APPEND="archisobasedir=symfonos archisolabel=$label"
+fi
 accel=tcg; [[ -w /dev/kvm ]] && accel=kvm
 echo ":: Boote $ISO (Label $label, $accel)"
 timeout "${TIMEOUT:-900}" qemu-system-x86_64 -machine q35,accel=$accel -m 4096 -smp 2 \
   -cdrom "$ISO" -kernel "$T/vmlinuz" -initrd "$T/initrd" \
-  -append "archisobasedir=symfonos archisolabel=$label console=ttyS0,115200 systemd.unit=multi-user.target" \
+  -append "$APPEND console=ttyS0,115200 systemd.unit=multi-user.target" \
   -nographic -no-reboot -serial file:"$T/serial.log" -monitor none &
 qpid=$!
 ok=0
@@ -30,7 +36,7 @@ cp "$T/serial.log" "${LOG:-smoke-serial.log}"
 fails=$(grep -E "\[FAILED\]" "$T/serial.log" | sed 's/\x1b\[[0-9;]*m//g' || true)
 if ((ok)); then
   echo ":: Live-System erreicht multi-user.target"
-  grep -q "symfonOS Live-Benutzer anlegen" "$T/serial.log" && echo ":: Live-Benutzer-Einrichtung gelaufen"
+  grep -q "symfonOS Live-Benutzer anlegen" "$T/serial.log" && echo ":: Live-Benutzer-Einrichtung gelaufen" || true
   [[ -n $fails ]] && echo "::warning title=Fehlgeschlagene Units::$(echo "$fails" | sed ':a;N;$!ba;s/\n/%0A/g')"
   exit 0
 fi

@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "flex"
+version = "2.6.4-1"
+summary = "Lexer-Generator"
+license = "BSD-2-Clause"
+url = "https://github.com/westes/flex/releases/download/v2.6.4/"
+depends = ["glibc", "m4"]
+
+[[source]]
+url = "https://github.com/westes/flex/releases/download/v2.6.4/flex-2.6.4.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--docdir=/usr/share/doc/flex-2.6.4"
+post_install = '''
+ln -sf flex "$DESTDIR/usr/bin/lex"
+'''

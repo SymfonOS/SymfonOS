@@ -1,0 +1,15 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "libpipeline"
+version = "1.5.8-1"
+summary = "Pipeline-Bibliothek"
+license = "GPL-3.0-or-later"
+url = "https://download.savannah.gnu.org/releases/libpipeline/"
+depends = ["glibc"]
+
+[[source]]
+url = "https://download.savannah.gnu.org/releases/libpipeline/libpipeline-1.5.8.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

@@ -1,0 +1,26 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "libcap"
+version = "2.76-1"
+summary = "POSIX-Capabilities"
+license = "BSD-3-Clause OR GPL-2.0-only"
+url = "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/"
+depends = ["glibc", "attr"]
+
+[[source]]
+url = "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.76.tar.xz"
+sha256 = "TODO"
+
+[build]
+prepare = '''
+cd "$S"
+sed -i '/install -m.*STA/d' libcap/Makefile
+'''
+build = '''
+cd "$S"
+make prefix=/usr lib=lib
+'''
+package = '''
+cd "$S"
+make prefix=/usr lib=lib DESTDIR="$DESTDIR" install
+'''
