@@ -123,3 +123,11 @@ jobs:
           gh release delete source-nightly --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag || true
           gh release edit "$tmp" --repo "$GITHUB_REPOSITORY" --tag source-nightly
           gh api -X DELETE "repos/$GITHUB_REPOSITORY/git/refs/tags/$tmp" || true
+      - name: Ergebnis
+        if: always()
+        run: |
+          case "${{ steps.build.outputs.rc }}" in
+            0) echo "Bootstrap vollständig" ;;
+            3) echo "Zeitbudget erreicht – der nächste Lauf setzt fort" ;;
+            *) echo "::error::Bootstrap fehlgeschlagen (Exit ${{ steps.build.outputs.rc }}), Zwischenstand gesichert"; exit 1 ;;
+          esac

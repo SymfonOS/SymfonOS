@@ -142,16 +142,15 @@ static const char *MIRRORS[][4] = {
 static char *fetch_source(const char *url, const char *fname, const char *srccache) {
     char *dest = path_join(srccache, fname);
     if (path_exists(dest)) return dest;
-    printf("  Lade %s\n", url);
-    fflush(stdout);
+    /* Fortschritt auf stderr: stdout von "syp fetch" ist maschinenlesbar (ein Pfad pro Zeile) */
+    fprintf(stderr, "  Lade %s\n", url);
     if (fetch_url(url, dest) == 0) return dest;
     char *first = xstrdup(last_error());
     for (size_t m = 0; m < sizeof MIRRORS / sizeof *MIRRORS; m++) {
         if (!str_starts(url, MIRRORS[m][0])) continue;
         for (int k = 1; k < 4 && MIRRORS[m][k]; k++) {
             char *alt = xasprintf("%s%s", MIRRORS[m][k], url + strlen(MIRRORS[m][0]));
-            printf("  Ausweichquelle %s\n", alt);
-            fflush(stdout);
+            fprintf(stderr, "  Ausweichquelle %s\n", alt);
             int ok = fetch_url(alt, dest) == 0;
             free(alt);
             if (ok) {

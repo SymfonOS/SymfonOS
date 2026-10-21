@@ -443,3 +443,16 @@ def test_fetch_retry_and_sums_keep_layout(tmp_path):
     r = syp("sums", rec, env=env, check=False)
     assert r.returncode != 0 and hits["missing"] == 1                # 404: kein sinnloser Neuversuch
     srv.shutdown()
+
+
+def test_fetch_stdout_is_only_paths(tmp_path):
+    """Bootstrap liest die Pfade aus stdout von "syp fetch" – Fortschritt darf dort nicht landen."""
+    src = tmp_path / "quelle.txt"
+    src.write_text("inhalt\n")
+    import hashlib
+    rec = tmp_path / "SYPBUILD.toml"
+    rec.write_text('[package]\nname = "f"\nversion = "1-1"\n\n[[source]]\n'
+                   f'url = "file://{src}"\nsha256 = "{hashlib.sha256(b"inhalt\n").hexdigest()}"\n')
+    r = syp("fetch", rec, "-o", tmp_path / "out")
+    assert r.stdout.splitlines() == [str(tmp_path / "out/quelle.txt")]
+    assert "Lade" in r.stderr
