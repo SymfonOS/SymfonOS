@@ -55,15 +55,22 @@ jobs:
           SYP_SIGNING_KEY: ${{ secrets.SYP_SIGNING_KEY }}
         run: |
           make -C csrc -j4
+          # Öffentliches Repository: Ohne Secret gibt es keinen sicheren Ort für den privaten Schlüssel.
+          # Niemals einen Schlüssel erzeugen und mit dem Zwischenstand veröffentlichen.
+          if [ -z "$SYP_SIGNING_KEY" ]; then
+            echo "::error title=Signaturschlüssel fehlt::Secret SYP_SIGNING_KEY anlegen (Settings → Secrets and variables → Actions)"
+            exit 1
+          fi
           mkdir -p keys
-          if [ -n "$SYP_SIGNING_KEY" ]; then
-            umask 077; printf '%s\n' "$SYP_SIGNING_KEY" > keys/release.key
-            rm -f keys/.dev
-            csrc/bin/syp pubkey keys/release.key keys/release.pub
-          elif [ ! -f keys/release.key ]; then
-            csrc/bin/syp keygen keys/release --comment "symfonOS Bootstrap (Entwicklungsschlüssel)"
-            touch keys/.dev
-            echo "::warning::Kein Secret SYP_SIGNING_KEY – Entwicklungsschlüssel erzeugt (nicht für Releases)"
+          old_pub=$(cat keys/release.pub 2>/dev/null || true)
+          rm -f keys/release.key keys/.dev
+          (umask 077; printf '%s\n' "$SYP_SIGNING_KEY" > keys/release.key)
+          csrc/bin/syp pubkey keys/release.key keys/release.pub
+          if [ -n "$old_pub" ] && [ "$old_pub" != "$(cat keys/release.pub)" ]; then
+            # Schlüsselwechsel: mit dem alten Schlüssel signierte Pakete verwerfen und neu bauen
+            # (Toolchain und Chroot bleiben); die Bauumgebung vertraut danach nur dem neuen Schlüssel.
+            echo "::warning title=Schlüsselwechsel::Pakete des alten Schlüssels werden verworfen und neu gebaut"
+            sudo rm -rf out/repo "$SYM/etc/syp/keys" "$SYM/var/lib/syp/repos"
           fi
       - name: Bauen (Etappe)
         id: build
@@ -98,8 +105,8 @@ jobs:
         run: |
           sudo umount -l "$SYM"/{run,sys,proc,dev/pts,dev} 2>/dev/null || true
           sudo tar --zstd -cpf - -C / "${SYM#/}" "${GITHUB_WORKSPACE#/}/out" 2>/dev/null | split -b 1900M -d -a 2 - state.tar.zst.part
-          # Nur ein selbst erzeugter Entwicklungsschlüssel wird gesichert – niemals das Release-Secret
-          if [ -f keys/.dev ]; then tar -cf keys.tar keys; else tar -cf keys.tar keys/release.pub; fi
+          # Nur der öffentliche Schlüssel kommt in den (öffentlichen) Zwischenstand
+          tar -cf keys.tar keys/release.pub
           # Erst vollständig hochladen, dann den alten Stand ersetzen: ein fehlgeschlagener Upload
           # darf den letzten guten Zwischenstand (Stunden Rechenzeit) nicht löschen.
           tmp="$STATE_TAG-run-$GITHUB_RUN_ID"

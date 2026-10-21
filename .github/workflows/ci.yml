@@ -93,10 +93,11 @@ jobs:
         run: |
           mkdir -p keys
           if [ -n "$SYP_SIGNING_KEY" ]; then
-            umask 077; printf '%s\n' "$SYP_SIGNING_KEY" > keys/release.key
-            pip install -q cryptography zstandard
-            PYTHONPATH=src python3 -c "from syp.crypto import SecretKey; import pathlib; k=SecretKey.load(pathlib.Path('keys/release.key')); k.save(pathlib.Path('keys/tmp.key'), pathlib.Path('keys/release.pub'))"
-            rm -f keys/release.key keys/tmp.key
+            sudo apt-get install -y -q build-essential pkg-config libarchive-dev libzstd-dev libsodium-dev libsqlite3-dev libcurl4-openssl-dev >/dev/null
+            make -C csrc -j4 >/dev/null
+            (umask 077; printf '%s\n' "$SYP_SIGNING_KEY" > keys/release.key)
+            csrc/bin/syp pubkey keys/release.key keys/release.pub
+            rm -f keys/release.key   # nur der öffentliche Schlüssel kommt ins ISO
           fi
       - name: ISO bauen (archlinux-Container)
         run: |
