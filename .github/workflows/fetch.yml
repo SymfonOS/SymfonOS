@@ -1,0 +1,32 @@
+name: Referenz holen
+
+# Lädt Dateien (z. B. Doku oder Quellen) herunter und stellt sie als Artefakt bereit –
+# für Arbeitsumgebungen ohne direkten Zugriff auf die Quell-Server.
+on:
+  workflow_dispatch:
+    inputs:
+      urls:
+        description: "URLs, durch Leerzeichen getrennt"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Laden
+        env:
+          URLS: ${{ inputs.urls }}
+        run: |
+          mkdir -p dl && cd dl
+          for u in $URLS; do
+            curl -fsSL --retry 3 -O "$u" || echo "FEHLER $u" | tee -a ../errors.txt
+          done
+          ls -la
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fetched
+          path: dl/
+          retention-days: 3
