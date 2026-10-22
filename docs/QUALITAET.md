@@ -81,4 +81,5 @@ Ein Release (z. B. 2026.10) ist ein eingefrorener Stand von stable mit Installat
 - Bau ohne Netzzugriff (`unshare -n`) und Vergleich zweier unabhängiger Bauten (reproduzierbare Pakete).
 - Upstream-Signaturen der Quell-Tarballs prüfen (GPG), statt Prüfsummen nur beim ersten Laden festzuhalten.
 - `/usr/bin` und `/usr/sbin` zusammenlegen (wie Fedora 42). Bis dahin legen einzelne Pakete Verweise in `/usr/sbin` an, wo Programme fest dort erwartet werden (z. B. `/sbin/modprobe` durch den Kernel).
+- util-linux wird vor systemd gebaut und installiert deshalb keine Units (z. B. `fstrim.timer` für SSD-TRIM). Abhilfe: zweiter Bau nach systemd oder eigene Unit.
 - Ein Lookaside-Cache für Quellen, wie bei Fedora, damit Bauten nicht von der Erreichbarkeit fremder Server abhängen.

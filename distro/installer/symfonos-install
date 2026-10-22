@@ -165,8 +165,9 @@ in_target "systemd-machine-id-setup >/dev/null; systemd-sysusers; systemd-tmpfil
   useradd -m -G wheel,audio,video,input -s /bin/bash '$USERNAME'
   passwd -l root >/dev/null
   systemctl preset-all >/dev/null 2>&1 || true
-  systemctl enable systemd-networkd systemd-resolved systemd-timesyncd iwd fstrim.timer nftables auditd \
-    symfonos-security-check.timer >/dev/null
+  # Pflichtdienste (Netz, Firewall, Audit) müssen sich aktivieren lassen; optionale nur mit Hinweis
+  systemctl enable systemd-networkd systemd-resolved systemd-timesyncd nftables auditd symfonos-security-check.timer >/dev/null
+  for u in iwd.service fstrim.timer; do systemctl enable \"\$u\" >/dev/null 2>&1 || echo \"Hinweis: \$u nicht vorhanden\"; done
   # SELinux: Anmeldungen wie bei Fedora unconfined_u zuordnen (Desktop, QEMU/KVM, Browser-Sandboxen)
   if command -v semanage >/dev/null; then semanage login -m -s unconfined_u -r s0-s0:c0.c1023 __default__ 2>/dev/null || true; fi"
 # SYMFONOS_PASSWORD: nicht-interaktiv (automatische Installationstests); sonst interaktiv
