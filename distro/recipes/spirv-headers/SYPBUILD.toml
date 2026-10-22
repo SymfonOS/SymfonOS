@@ -11,7 +11,7 @@ makedepends = ["cmake"]
 
 [[source]]
 url = "https://github.com/KhronosGroup/SPIRV-Headers/archive/vulkan-sdk-1.4.321.0/SPIRV-Headers-vulkan-sdk-1.4.321.0.tar.gz"
-sha256 = "TODO"
+sha256 = "5bbea925663d4cd2bab23efad53874f2718248a73dcaf9dd21dff8cb48e602fc"
 
 [build]
 style = "cmake"

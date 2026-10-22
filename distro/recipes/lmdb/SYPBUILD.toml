@@ -10,7 +10,7 @@ depends = ["glibc"]
 
 [[source]]
 url = "https://git.openldap.org/openldap/openldap/-/archive/LMDB_0.9.33.tar.bz2"
-sha256 = "TODO"
+sha256 = "bfd085edd5940925140484d757b92d10d19c09438b775c22ccc85b0cdd4b4279"
 filename = "openldap-LMDB_0.9.33.tar.bz2"
 
 [build]

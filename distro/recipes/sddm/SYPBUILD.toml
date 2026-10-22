@@ -12,7 +12,7 @@ backup = ["etc/pam.d/sddm", "etc/pam.d/sddm-autologin", "etc/pam.d/sddm-greeter"
 
 [[source]]
 url = "https://github.com/sddm/sddm/archive/v0.21.0/sddm-0.21.0.tar.gz"
-sha256 = "TODO"
+sha256 = "f895de2683627e969e4849dbfbbb2b500787481ca5ba0de6d6dfdae5f1549abf"
 
 [build]
 style = "cmake"

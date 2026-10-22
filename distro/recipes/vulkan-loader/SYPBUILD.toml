@@ -12,7 +12,7 @@ provides = ["so:libvulkan.so.1"]
 
 [[source]]
 url = "https://github.com/KhronosGroup/Vulkan-Loader/archive/v1.4.321/Vulkan-Loader-1.4.321.tar.gz"
-sha256 = "TODO"
+sha256 = "00669f6bb2db35c8df07f0b118c09bfe0ebffecaad7d80647a429eece0e37ac3"
 
 [build]
 style = "cmake"

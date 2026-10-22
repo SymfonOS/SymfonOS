@@ -12,7 +12,7 @@ provides = ["so:libpolkit-gobject-1.so.0"]
 
 [[source]]
 url = "https://github.com/polkit-org/polkit/archive/126/polkit-126.tar.gz"
-sha256 = "TODO"
+sha256 = "2814a7281989f6baa9e57bd33bbc5e148827e2721ccef22aaf28ab2b376068e8"
 
 [build]
 style = "meson"

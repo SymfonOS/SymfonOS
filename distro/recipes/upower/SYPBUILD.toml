@@ -11,7 +11,7 @@ makedepends = ["meson", "gettext"]
 
 [[source]]
 url = "https://gitlab.freedesktop.org/upower/upower/-/archive/v1.90.9/upower-v1.90.9.tar.bz2"
-sha256 = "TODO"
+sha256 = "ca6018535817c2ea687e389e6b47583342154123c0eea0497b409c49dff319b6"
 
 [build]
 style = "meson"

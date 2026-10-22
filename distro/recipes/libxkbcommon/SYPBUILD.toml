@@ -12,7 +12,7 @@ provides = ["so:libxkbcommon.so.0"]
 
 [[source]]
 url = "https://github.com/lfs-book/libxkbcommon/archive/v1.11.0/libxkbcommon-1.11.0.tar.gz"
-sha256 = "TODO"
+sha256 = "f904e9ee39da16b5faabc2d36aa3615d2f8f64218c484c700e9d9d96c056029a"
 
 [build]
 style = "meson"

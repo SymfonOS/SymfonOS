@@ -11,7 +11,7 @@ makedepends = ["cmake", "ninja", "qt6-tools"]
 
 [[source]]
 url = "https://github.com/ksnip/kImageAnnotator/archive/v0.7.1/kImageAnnotator-0.7.1.tar.gz"
-sha256 = "TODO"
+sha256 = "2335c5be15a5dde34c3333c10a6339da114e2232e4c4642dea1793e491e09677"
 
 [build]
 style = "cmake"

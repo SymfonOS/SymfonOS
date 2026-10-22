@@ -11,7 +11,7 @@ makedepends = ["cmake", "spirv-headers"]
 
 [[source]]
 url = "https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v20.1.5/SPIRV-LLVM-Translator-20.1.5.tar.gz"
-sha256 = "TODO"
+sha256 = "83048509774d865dab7631c887b0673753f59f337256bb56829ea32f30d7584b"
 
 [build]
 style = "cmake"

@@ -11,7 +11,7 @@ makedepends = ["cmake"]
 
 [[source]]
 url = "https://github.com/Exiv2/exiv2/archive/v0.28.5/exiv2-0.28.5.tar.gz"
-sha256 = "TODO"
+sha256 = "e1671f744e379a87ba0c984617406fdf8c0ad0c594e5122f525b2fb7c28d394d"
 
 [build]
 style = "cmake"

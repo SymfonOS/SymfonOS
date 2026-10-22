@@ -12,7 +12,7 @@ provides = ["pulseaudio-server", "jack", "so:libpipewire-0.3.so.0", "so:libjack.
 
 [[source]]
 url = "https://gitlab.freedesktop.org/pipewire/pipewire/-/archive/1.4.7/pipewire-1.4.7.tar.bz2"
-sha256 = "TODO"
+sha256 = "17599eab9cf1ac98bce41954057b1b66d16c99aef341e16d41dbc7302f4fa960"
 
 [build]
 style = "meson"

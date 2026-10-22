@@ -11,7 +11,7 @@ makedepends = ["cmake", "ninja"]
 
 [[source]]
 url = "https://github.com/ksnip/kColorPicker/archive/v0.3.1/kColorPicker-0.3.1.tar.gz"
-sha256 = "TODO"
+sha256 = "e78c785ec4a8a22a48a91835c97601f5704b5076b154415353b0d2697dc0b4f7"
 
 [build]
 style = "cmake"
