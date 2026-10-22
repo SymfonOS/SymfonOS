@@ -1,7 +1,7 @@
 # symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
 [package]
 name = "mtools"
-version = "4.0.49-1"
+version = "4.0.49-2"
 summary = "FAT-Images ohne Mount (EFI-Boot-Image)"
 license = "GPL-3.0-or-later"
 url = "https://ftp.gnu.org/gnu/mtools/"
@@ -16,5 +16,7 @@ sha256 = "6fe5193583d6e7c59da75e63d7234f76c0b07caf33b103894f46f66a871ffc9f"
 style = "autotools"
 configure_flags = "--sysconfdir=/etc"
 post_install = '''
+# Die Beispieldatei enthält die Zeile "SAMPLE FILE", an der mtools selbst scheitert (wie Arch: auskommentieren)
+sed -i '/^SAMPLE FILE$/s:^:# :' mtools.conf
 install -Dm644 mtools.conf "$DESTDIR/etc/mtools.conf"
 '''
