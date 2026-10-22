@@ -39,6 +39,9 @@ Ein Commit auf `main` und jeder Paketbau müssen bestehen:
 | Prüfsumme jeder Quelle | `syp build` | keine Quelle ohne sha256 |
 | Abhängigkeitsgraph ohne Zyklen | `recipes.yml` | `syp buildall -n` |
 | Boot-Test in QEMU | `ci.yml`, `bootstrap.yml` | Live-System muss `multi-user.target` erreichen; Quellcode-ISO: kein Absturz, keine fehlgeschlagene Unit, sonst wird nichts veröffentlicht |
+| Installationstest | `bootstrap.yml` | `symfonos-install` auf eine virtuelle Platte (GPT, UEFI und BIOS), das installierte System startet bis zur Anmeldung |
+| Desktop-Test (grafisch) | `bootstrap.yml` | Desktop-ISO mit virtio-GPU: `graphical.target`, KWin und Plasma-Sitzung, kein Absturz, Bildschirmfotos |
+| Rezept-Generator synchron | `ci.yml` | erzeugte Desktop-Rezepte entsprechen `tools/desktop-recipes.py` |
 
 ## Robustheit der Werkzeuge
 
@@ -77,7 +80,7 @@ Ein Release (z. B. 2026.10) ist ein eingefrorener Stand von stable mit Installat
 ## Offene Punkte
 
 - Karma-Abstimmung und eine Weboberfläche für testing-Updates fehlen; bisher gibt es nur die Sperrliste.
-- Openqa-artige Tests, die Installation und Desktop automatisch in QEMU durchspielen. Bisher gibt es nur den Boot-Test des Live-Systems.
+- Openqa-artige Tests mit Bildvergleich und Eingaben (Maus, Tastatur). Bisher prüfen die Tests Boot, Installation und den Start der Plasma-Sitzung anhand des Journals und halten Bildschirmfotos fest.
 - Bau ohne Netzzugriff (`unshare -n`) und Vergleich zweier unabhängiger Bauten (reproduzierbare Pakete).
 - Upstream-Signaturen der Quell-Tarballs prüfen (GPG), statt Prüfsummen nur beim ersten Laden festzuhalten.
 - `/usr/bin` und `/usr/sbin` zusammenlegen (wie Fedora 42). Bis dahin legen einzelne Pakete Verweise in `/usr/sbin` an, wo Programme fest dort erwartet werden (z. B. `/sbin/modprobe` durch den Kernel).

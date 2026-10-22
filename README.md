@@ -59,7 +59,7 @@ flowchart TB
 | 7 | Kanäle `testing` → `stable` (`tools/promote.py`: 7 Tage, Sicherheits-Schnellspur, Sperrliste, Abhängigkeitsprüfung) | ✅ getestet, Anbindung an die Bau-CI offen |
 | 8 | Kern in C (`syp`, `syp-convert`), Quellcode-Distribution: LFS-Toolchain, 140 Rezepte, `syp buildall` in der Chroot, Live-/Installations-ISO | ✅ ISO `source-nightly`, Boot-Test in QEMU bestanden (Firewall, Audit, SELinux, WLAN-Dienst laufen); Test auf echter Hardware offen |
 | 8a | Sicherheit auf Fedora-Niveau: SELinux, Krypto-Richtlinien, PAM, Audit, Firewall, Secure Boot (eigene Schlüssel, UKI), TPM2 | ✅ umgesetzt; SELinux zunächst permissive, kein MS-signierter shim |
-| 8b | Desktop aus Quellcode (Mesa, Wayland, Qt 6, KDE Plasma, PipeWire), GnuTLS/NSS in den Krypto-Richtlinien | offen |
+| 8b | Desktop aus Quellcode (LLVM, Mesa, Wayland, Qt 6, KDE Plasma 6, SDDM, PipeWire) – siehe [docs/DESKTOP.md](docs/DESKTOP.md) | 🔨 329 Rezepte, CI-Bau läuft; ISO `desktop-nightly` mit grafischem Boot-Test |
 | 9 | Delta-Updates, Software-Center mit Screenshots/AppStream, Flatpak-Integration im Store | offen |
 
 ## Schnellstart (Entwicklung)
