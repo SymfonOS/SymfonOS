@@ -21,7 +21,11 @@ while (($#)); do
   esac
 done
 [[ $EUID -eq 0 ]] || { echo "Bitte mit sudo ausführen." >&2; exit 1; }
-[[ -r $REPO/index.json.zst ]] || { echo "Paket-Repository nicht gefunden: $REPO" >&2; exit 1; }
+# Quelle: Paket-Repository auf dem Medium (falls vorhanden) oder das laufende Live-System selbst
+LIVE_ROOT=${SYMFONOS_LIVE_ROOT:-/run/rootfsbase}
+if [[ -r $REPO/index.json.zst ]]; then SOURCE=repo
+elif [[ -d $LIVE_ROOT/usr/bin && -d $LIVE_ROOT/var/lib/syp ]]; then SOURCE=live
+else echo "Weder Paket-Repository ($REPO) noch Live-System ($LIVE_ROOT) gefunden" >&2; exit 1; fi
 say() { printf '\033[1;35m::\033[0m %s\n' "$*"; }
 ask() { local a; read -rp "$1 " a; printf '%s' "$a"; }
 
@@ -38,6 +42,8 @@ if ((!YES)); then
 fi
 part() { [[ $DISK =~ [0-9]$ ]] && echo "${DISK}p$1" || echo "${DISK}$1"; }
 UEFI=0; [[ -d /sys/firmware/efi ]] && UEFI=1
+NONVRAM="" NOVARS=""
+[[ ${SYMFONOS_NO_NVRAM:-0} == 1 ]] && NONVRAM=--no-nvram NOVARS=--no-variables
 [[ -z $BOOT ]] && { ((UEFI)) && BOOT=systemd-boot || BOOT=grub; }
 [[ $BOOT == systemd-boot || $BOOT == grub ]] || { echo "--boot: systemd-boot oder grub" >&2; exit 2; }
 [[ $BOOT == systemd-boot && $UEFI == 0 ]] && { echo "systemd-boot braucht UEFI" >&2; exit 1; }
@@ -58,7 +64,7 @@ size=1MiB, type=21686148-6248-6449-6E6F-744E656564EF, name="bios"
 size=1GiB, type=U, name="EFI"
 type=L, name="symfonOS"
 PARTS
-udevadm settle
+udevadm settle 2>/dev/null || sleep 2   # ohne laufendes udev (Chroot/Test) kurz warten
 EFI=$(part 2) ROOT=$(part 3) ROOTDEV=$(part 3)
 mkfs.fat -F32 -n EFI "$EFI" >/dev/null
 if ((ENCRYPT)); then
@@ -86,13 +92,27 @@ mount -o umask=0077 "$EFI" "$MNT$ESPDIR"
 cleanup() { for m in run sys proc dev; do mountpoint -q "$MNT/$m" && umount -l "$MNT/$m"; done; true; }
 trap cleanup EXIT
 
-say "Pakete installieren (syp, offline)"
-mkdir -p "$MNT/etc/syp/keys"
-cp "$REPO/symfonos-release.pub" "$MNT/etc/syp/keys/"
-printf 'arch = "x86_64"\n[[repo]]\nname = "symfonos"\nurl = "file://%s"\n[snapshots]\nenabled = false\n' "$REPO" > "$MNT/etc/syp/syp.toml"
-syp -r "$MNT" sync
-syp -r "$MNT" -y install --overwrite /etc/syp/syp.toml symfonos-base   # vorläufige Offline-Konfiguration ersetzen
-cp /etc/syp/syp.toml "$MNT/etc/syp/syp.toml"   # Online-Repos für Updates
+if [[ $SOURCE == repo ]]; then
+  say "Pakete installieren (syp, offline)"
+  mkdir -p "$MNT/etc/syp/keys"
+  cp "$REPO/symfonos-release.pub" "$MNT/etc/syp/keys/"
+  printf 'arch = "x86_64"\n[[repo]]\nname = "symfonos"\nurl = "file://%s"\n[snapshots]\nenabled = false\n' "$REPO" > "$MNT/etc/syp/syp.toml"
+  syp -r "$MNT" sync
+  syp -r "$MNT" -y install --overwrite /etc/syp/syp.toml symfonos-base   # vorläufige Offline-Konfiguration ersetzen
+  cp /etc/syp/syp.toml "$MNT/etc/syp/syp.toml"   # Online-Repos für Updates
+else
+  # Das Live-System ist mit syp aus signierten Paketen gebaut; seine Paketdatenbank wird mitkopiert,
+  # das installierte System ist also genauso verwaltbar und aktualisierbar.
+  say "System kopieren (Live-System inkl. Paketdatenbank und SELinux-Labels)"
+  cp -a --preserve=all "$LIVE_ROOT/." "$MNT/"
+  # Nur für das Live-Medium gedachte Einstellungen entfernen
+  rm -f "$MNT/etc/sudoers.d/90-live" "$MNT/etc/motd"
+  rm -rf "$MNT/etc/systemd/system/getty@tty1.service.d"
+  if grep -q '^live:' "$MNT/etc/passwd"; then chroot "$MNT" userdel -r live 2>/dev/null || chroot "$MNT" userdel live; fi
+  : > "$MNT/etc/machine-id"
+  rm -f "$MNT"/etc/ssh/ssh_host_*
+  syp -r "$MNT" verify >/dev/null || echo "Hinweis: syp verify meldet Abweichungen (Live-Anpassungen)"
+fi
 
 say "System konfigurieren"
 for m in dev proc sys run; do mount --bind "/$m" "$MNT/$m"; done
@@ -137,17 +157,19 @@ in_target "systemd-machine-id-setup >/dev/null; systemd-sysusers; systemd-tmpfil
     symfonos-security-check.timer >/dev/null
   # SELinux: Anmeldungen wie bei Fedora unconfined_u zuordnen (Desktop, QEMU/KVM, Browser-Sandboxen)
   if command -v semanage >/dev/null; then semanage login -m -s unconfined_u -r s0-s0:c0.c1023 __default__ 2>/dev/null || true; fi"
-echo "Passwort für $USERNAME:"; chroot "$MNT" passwd "$USERNAME"
+# SYMFONOS_PASSWORD: nicht-interaktiv (automatische Installationstests); sonst interaktiv
+if [[ -n ${SYMFONOS_PASSWORD:-} ]]; then printf '%s:%s\n' "$USERNAME" "$SYMFONOS_PASSWORD" | chroot "$MNT" chpasswd
+else echo "Passwort für $USERNAME:"; chroot "$MNT" passwd "$USERNAME"; fi
 echo "Root-Konto bleibt gesperrt; Verwaltung über sudo (Gruppe wheel)."
 say "Bootloader ($BOOT) und Kernel"
 if [[ $BOOT == systemd-boot ]]; then
-  in_target "bootctl --esp-path=/efi install >/dev/null
+  in_target "bootctl --esp-path=/efi install $NOVARS >/dev/null
     printf 'timeout 3\\neditor no\\nconsole-mode auto\\n' > /efi/loader/loader.conf
     /usr/lib/syp/kernel-hook"
 else
   in_target "/usr/lib/syp/kernel-hook"
   if ((UEFI)); then
-    in_target "grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=symfonOS
+    in_target "grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=symfonOS $NONVRAM
       grub-install --target=x86_64-efi --efi-directory=/boot/efi --removable"
   fi
   in_target "grub-install --target=i386-pc '$DISK'"

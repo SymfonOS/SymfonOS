@@ -146,19 +146,29 @@ jobs:
           sudo apt-get install -y -q qemu-system-x86 xorriso genisoimage
           sudo chmod 666 /dev/kvm 2>/dev/null || true
           LOG=out/smoke-serial.log STRICT=1 SETTLE=45 tools/smoke-test.sh out/symfonos-base-*.iso
+      - name: Installationstest
+        # Gate: aus dem ISO auf eine virtuelle Platte installieren und das Ergebnis booten
+        if: steps.build.outputs.rc == '0'
+        run: |
+          sudo -E env "PATH=$PATH" LOG="$PWD/out/install-serial.log" tools/install-test.sh out/symfonos-base-*.iso
+          sudo chown -R "$USER" out
       - name: ISO veröffentlichen
         if: steps.build.outputs.rc == '0'
         run: |
           cd out
           iso=$(ls symfonos-base-*.iso)
-          split -b 1900M -d -a 2 "$iso" "$iso.part"
+          # GitHub nimmt je Datei höchstens 2 GiB an: darunter als eine Datei, sonst in Teilen
+          if [ "$(stat -c %s "$iso")" -lt 2147483648 ]; then files=("$iso"); note="Direkt herunterladen: $iso"
+          else split -b 1900M -d -a 2 "$iso" "$iso.part"; files=("$iso".part*); note="Zusammensetzen: cat $iso.part* > $iso"; fi
           tmp="source-nightly-run-$GITHUB_RUN_ID"
           gh release create "$tmp" --repo "$GITHUB_REPOSITORY" --prerelease \
             --title "symfonOS Basissystem aus Quellcode $(date +%Y-%m-%d)" \
-            --notes "Zusammensetzen: cat $iso.part* > $iso" "$iso".part* "$iso.sha256" $(ls smoke-serial.log 2>/dev/null)
+            --notes "$note · Prüfen: sha256sum -c $iso.sha256 · Auf USB: sudo dd if=$iso of=/dev/sdX bs=4M status=progress oflag=sync" \
+            "${files[@]}" "$iso.sha256" $(ls smoke-serial.log install-serial.log 2>/dev/null)
           gh release delete source-nightly --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag || true
           gh release edit "$tmp" --repo "$GITHUB_REPOSITORY" --tag source-nightly
           gh api -X DELETE "repos/$GITHUB_REPOSITORY/git/refs/tags/$tmp" || true
+          echo "::notice title=ISO veröffentlicht::$iso ($(du -h "$iso" | cut -f1), ${#files[@]} Datei(en))"
       - name: Ergebnis
         if: always()
         run: |

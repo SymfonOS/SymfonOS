@@ -7,7 +7,7 @@ lint:
 	ruff check src tests --select E,F,W --ignore E501,E731,E741
 	shellcheck -S warning exam/symfonos-exam iso/build.sh tools/repo-sync.sh system/usr/bin/* system/usr/lib/symfonos/*.sh iso/airootfs/usr/local/bin/* \
 	  system/usr/lib/syp/kernel-hook distro/bootstrap/*.sh distro/installer/symfonos-install distro/security/install.sh \
-	  distro/security/bin/symfonos-security distro/security/bin/update-crypto-policies
+	  distro/security/bin/symfonos-security distro/security/bin/update-crypto-policies tools/smoke-test.sh tools/install-test.sh
 	ruff check --select E,F,W --ignore E501 distro/security/bin/symfonos-secureboot
 
 # Benötigt Arch Linux (oder Container archlinux:latest --privileged) und root

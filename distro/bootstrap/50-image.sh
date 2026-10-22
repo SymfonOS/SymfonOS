@@ -8,20 +8,24 @@ OUTISO=${1:-$REPO_ROOT/out/symfonos-base-$(date +%Y.%m.%d)-x86_64.iso}
 WORK=$SYM/var/tmp/image            # liegt in der Werkzeugwurzel, damit mksquashfs/grub-mkrescue dort laufen
 IMG=$WORK/rootfs ISO=$WORK/iso
 LABEL=SYMFONOS
-rm -rf "$WORK"; mkdir -p "$IMG/etc/syp/keys" "$ISO"/{boot,LiveOS,repo}
+rm -rf "$WORK"; mkdir -p "$IMG/etc/syp/keys" "$ISO"/{boot,LiveOS}
 for m in dev proc sys run; do mkdir -p "$SYM/$m"; mountpoint -q "$SYM/$m" || mount --bind "/$m" "$SYM/$m"; done
 trap 'for m in run sys proc dev; do mountpoint -q "$SYM/$m" && umount -l "$SYM/$m"; done; true' EXIT
 
-log "Repository ins ISO übernehmen (Offline-Installation)"
-cp -a "$PKGREPO"/. "$ISO/repo/"
-cp "$SYP_PUB" "$ISO/repo/symfonos-release.pub"
+# Der Installer kopiert das Live-System (samt Paketdatenbank); ein zusätzliches Paket-Repository auf dem
+# Medium würde jedes Programm doppelt enthalten. INCLUDE_REPO=1 legt es trotzdem bei (Offline-Paketauswahl).
+if [[ ${INCLUDE_REPO:-0} == 1 ]]; then
+  log "Repository ins ISO übernehmen"
+  cp -a "$PKGREPO"/. "$ISO/repo/"
+  cp "$SYP_PUB" "$ISO/repo/symfonos-release.pub"
+fi
 
 log "Live-System mit syp aufbauen"
 cat > "$IMG/etc/syp/syp.toml" <<CONF
 arch = "x86_64"
 [[repo]]
 name = "symfonos"
-url = "file://$ISO/repo"
+url = "file://$PKGREPO"
 [snapshots]
 enabled = false
 CONF
@@ -78,7 +82,7 @@ fi
 
 log "SquashFS"
 chroot "$SYM" mksquashfs "/var/tmp/image/rootfs" "/var/tmp/image/iso/LiveOS/squashfs.img" \
-  -comp zstd -Xcompression-level 19 -b 1M -noappend -no-progress
+  -comp xz -Xbcj x86 -b 1M -noappend -no-progress   # xz + x86-Filter: deutlich kleiner als zstd
 
 log "GRUB (UEFI + BIOS) und ISO"
 mkdir -p "$ISO/boot/grub"
