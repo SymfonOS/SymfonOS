@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libxcursor"
+version = "1.2.3-1"
+summary = "X11-Bibliothek libXcursor"
+license = "MIT"
+url = "https://www.x.org/pub/individual/lib/"
+depends = ["libxrender", "libxfixes", "xorgproto"]
+makedepends = ["util-macros", "pkgconf"]
+
+[[source]]
+url = "https://www.x.org/pub/individual/lib/libXcursor-1.2.3.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

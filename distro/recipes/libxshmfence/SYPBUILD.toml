@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libxshmfence"
+version = "1.3.3-1"
+summary = "X11-Bibliothek libxshmfence"
+license = "MIT"
+url = "https://www.x.org/pub/individual/lib/"
+depends = ["xorgproto"]
+makedepends = ["util-macros", "pkgconf"]
+
+[[source]]
+url = "https://www.x.org/pub/individual/lib/libxshmfence-1.3.3.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

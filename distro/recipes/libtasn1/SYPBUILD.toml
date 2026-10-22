@@ -1,0 +1,16 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libtasn1"
+version = "4.20.0-1"
+summary = "ASN.1-Bibliothek"
+license = "LGPL-2.1-or-later"
+url = "https://ftp.gnu.org/gnu/libtasn1/"
+depends = ["glibc"]
+
+[[source]]
+url = "https://ftp.gnu.org/gnu/libtasn1/libtasn1-4.20.0.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

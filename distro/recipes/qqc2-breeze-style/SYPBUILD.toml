@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "qqc2-breeze-style"
+version = "6.4.4-1"
+summary = "Breeze-Stil für Qt Quick"
+license = "LGPL-2.1-or-later"
+url = "https://download.kde.org/stable/plasma/6.4.4/"
+depends = ["qt6-base", "kirigami", "kcolorscheme", "kconfig", "kguiaddons", "kiconthemes", "kquickcharts", "qt6-declarative"]
+makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", "gettext"]
+
+[[source]]
+url = "https://download.kde.org/stable/plasma/6.4.4/qqc2-breeze-style-6.4.4.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "cmake"
+configure_flags = "-DKDE_INSTALL_LIBEXECDIR=lib -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF -Wno-dev"

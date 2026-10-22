@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "xrdb"
+version = "1.2.2-1"
+summary = "X11-Programm xrdb"
+license = "MIT"
+url = "https://www.x.org/pub/individual/app/"
+depends = ["libxmu"]
+makedepends = ["util-macros"]
+
+[[source]]
+url = "https://www.x.org/pub/individual/app/xrdb-1.2.2.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

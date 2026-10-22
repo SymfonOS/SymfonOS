@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libass"
+version = "0.17.4-1"
+summary = "Untertitel-Darstellung"
+license = "ISC"
+url = "https://github.com/libass/libass/releases/download/0.17.4/"
+depends = ["freetype", "fribidi", "fontconfig", "harfbuzz"]
+makedepends = ["nasm"]
+
+[[source]]
+url = "https://github.com/libass/libass/releases/download/0.17.4/libass-0.17.4.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

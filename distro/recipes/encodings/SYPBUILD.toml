@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "encodings"
+version = "1.1.0-1"
+arch = "any"
+summary = "X11-Zeichenkodierungen"
+license = "MIT"
+url = "https://www.x.org/pub/individual/font/"
+makedepends = ["font-util", "mkfontscale"]
+
+[[source]]
+url = "https://www.x.org/pub/individual/font/encodings-1.1.0.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

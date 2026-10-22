@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "md4c"
+version = "0.5.2-1"
+summary = "Markdown-Parser"
+license = "MIT"
+url = "url/"
+depends = ["glibc"]
+makedepends = ["cmake"]
+
+[[source]]
+url = "url"
+sha256 = "TODO"
+
+[build]
+style = "cmake"

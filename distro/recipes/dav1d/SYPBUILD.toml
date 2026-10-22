@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "dav1d"
+version = "1.5.1-1"
+summary = "AV1-Decoder (schnell)"
+license = "BSD-2-Clause"
+url = "https://downloads.videolan.org/pub/videolan/dav1d/1.5.1/"
+depends = ["glibc"]
+makedepends = ["meson", "nasm"]
+
+[[source]]
+url = "https://downloads.videolan.org/pub/videolan/dav1d/1.5.1/dav1d-1.5.1.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Denable_tests=false -Denable_tools=false"

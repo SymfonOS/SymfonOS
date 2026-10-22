@@ -1,0 +1,42 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "llvm"
+version = "20.1.8-1"
+summary = "LLVM-Compiler-Infrastruktur und Clang"
+license = "Apache-2.0 WITH LLVM-exception"
+url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.8/"
+depends = ["glibc", "gcc", "libffi", "zlib", "zstd", "libxml2", "ncurses"]
+makedepends = ["cmake", "ninja", "python"]
+provides = ["so:libLLVM.so.20.1", "clang"]
+
+[[source]]
+url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.8/llvm-20.1.8.src.tar.xz"
+sha256 = "TODO"
+
+[[source]]
+url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.8/llvm-cmake-20.1.8.src.tar.xz"
+sha256 = "TODO"
+
+[[source]]
+url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.8/llvm-third-party-20.1.8.src.tar.xz"
+sha256 = "TODO"
+
+[[source]]
+url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.8/clang-20.1.8.src.tar.xz"
+sha256 = "TODO"
+
+[build]
+dir = "llvm-20.1.8.src"
+style = "cmake"
+configure_flags = "-DCMAKE_SKIP_INSTALL_RPATH=ON -DLLVM_ENABLE_FFI=ON -DLLVM_BUILD_LLVM_DYLIB=ON -DLLVM_LINK_LLVM_DYLIB=ON -DLLVM_ENABLE_RTTI=ON -DLLVM_TARGETS_TO_BUILD='host;AMDGPU' -DLLVM_BINUTILS_INCDIR=/usr/include -DLLVM_INCLUDE_BENCHMARKS=OFF -DLLVM_INCLUDE_TESTS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_ENABLE_ZSTD=ON -DLLVM_PARALLEL_LINK_JOBS=2 -DCLANG_DEFAULT_PIE_ON_LINUX=ON -DCLANG_CONFIG_FILE_SYSTEM_DIR=/etc/clang -DLLVM_INSTALL_UTILS=ON -Wno-dev"
+pre_configure = '''
+mv ../cmake-20.1.8.src ../cmake
+mv ../third-party-20.1.8.src ../third-party
+mv ../clang-20.1.8.src tools/clang
+grep -rl '#!.*python' | xargs sed -i '1s/python$/python3/'
+sed 's/utility/tool/' -i utils/FileCheck/CMakeLists.txt
+'''
+
+[options]
+env = ["CC=gcc", "CXX=g++"]

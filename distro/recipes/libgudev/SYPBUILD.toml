@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libgudev"
+version = "238-1"
+summary = "GObject-Anbindung für udev"
+license = "LGPL-2.1-or-later"
+url = "https://download.gnome.org/sources/libgudev/238/"
+depends = ["glib2", "systemd"]
+makedepends = ["meson"]
+
+[[source]]
+url = "https://download.gnome.org/sources/libgudev/238/libgudev-238.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Dintrospection=disabled -Dvapi=disabled -Dtests=disabled"

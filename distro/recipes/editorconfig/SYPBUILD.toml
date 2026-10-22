@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "editorconfig"
+version = "0.12.9-1"
+summary = "EditorConfig-Bibliothek"
+license = "BSD-2-Clause"
+url = "url/"
+depends = ["pcre2"]
+makedepends = ["cmake"]
+
+[[source]]
+url = "url"
+sha256 = "TODO"
+
+[build]
+style = "cmake"
+configure_flags = "-DBUILD_DOCUMENTATION=OFF"

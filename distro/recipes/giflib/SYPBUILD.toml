@@ -1,0 +1,40 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "giflib"
+version = "5.2.2-1"
+summary = "GIF-Bibliothek"
+license = "MIT"
+url = "https://sourceforge.net/projects/giflib/files/"
+depends = ["glibc"]
+
+[[source]]
+url = "https://sourceforge.net/projects/giflib/files/giflib-5.2.2.tar.gz"
+sha256 = "TODO"
+
+[[source]]
+url = "https://www.linuxfromscratch.org/patches/blfs/12.4/giflib-5.2.2-upstream_fixes-1.patch"
+sha256 = "TODO"
+extract = false
+
+[[source]]
+url = "https://www.linuxfromscratch.org/patches/blfs/12.4/giflib-5.2.2-security_fixes-1.patch"
+sha256 = "TODO"
+extract = false
+
+[build]
+prepare = '''
+cd "$S"
+patch -Np1 -i ../giflib-5.2.2-upstream_fixes-1.patch
+patch -Np1 -i ../giflib-5.2.2-security_fixes-1.patch
+cp pic/gifgrid.gif doc/giflib-logo.gif
+'''
+build = '''
+cd "$S"
+make CFLAGS="$CFLAGS -std=gnu99 -fPIC" LDFLAGS="$LDFLAGS" libgif.so gifbuild gifclrmp giffix giftext giftool
+'''
+package = '''
+cd "$S"
+make PREFIX=/usr DESTDIR="$DESTDIR" install-bin install-include install-lib
+rm -f "$DESTDIR/usr/lib/libgif.a"
+'''

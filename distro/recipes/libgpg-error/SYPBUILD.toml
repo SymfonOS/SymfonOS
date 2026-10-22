@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libgpg-error"
+version = "1.55-1"
+summary = "Fehlercodes der GnuPG-Bibliotheken"
+license = "LGPL-2.1-or-later"
+url = "https://www.gnupg.org/ftp/gcrypt/libgpg-error/"
+depends = ["glibc"]
+provides = ["so:libgpg-error.so.0"]
+
+[[source]]
+url = "https://www.gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-1.55.tar.bz2"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

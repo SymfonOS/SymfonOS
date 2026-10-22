@@ -1,0 +1,25 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "fuse3"
+version = "3.17.4-1"
+summary = "Dateisysteme im Benutzerraum (FUSE 3)"
+license = "GPL-2.0-only AND LGPL-2.1-only"
+url = "https://github.com/libfuse/libfuse/releases/download/fuse-3.17.4/"
+depends = ["glibc"]
+makedepends = ["meson"]
+
+[[source]]
+url = "https://github.com/libfuse/libfuse/releases/download/fuse-3.17.4/fuse-3.17.4.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Dexamples=false"
+pre_configure = "sed -i '/^udev/,$ s/^/#/' util/meson.build"
+post_install = '''
+chmod u+s "$DESTDIR/usr/bin/fusermount3"
+'''
+
+[options]
+hardening_reason = "fusermount3 ist setuid (wie bei Fedora)"

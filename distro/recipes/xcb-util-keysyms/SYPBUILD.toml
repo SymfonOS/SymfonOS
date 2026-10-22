@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "xcb-util-keysyms"
+version = "0.4.1-1"
+summary = "XCB-Hilfsbibliothek xcb-util-keysyms"
+license = "MIT"
+url = "https://xcb.freedesktop.org/dist/"
+depends = ["libxcb", "xcb-util"]
+makedepends = ["util-macros", "m4"]
+
+[[source]]
+url = "https://xcb.freedesktop.org/dist/xcb-util-keysyms-0.4.1.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

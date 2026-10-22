@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libxaw"
+version = "1.0.16-1"
+summary = "X11-Bibliothek libXaw"
+license = "MIT"
+url = "https://www.x.org/pub/individual/lib/"
+depends = ["libxmu", "libxpm", "xorgproto"]
+makedepends = ["util-macros", "pkgconf"]
+
+[[source]]
+url = "https://www.x.org/pub/individual/lib/libXaw-1.0.16.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

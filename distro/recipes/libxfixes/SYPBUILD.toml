@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libxfixes"
+version = "6.0.1-1"
+summary = "X11-Bibliothek libXfixes"
+license = "MIT"
+url = "https://www.x.org/pub/individual/lib/"
+depends = ["libx11", "xorgproto"]
+makedepends = ["util-macros", "pkgconf"]
+
+[[source]]
+url = "https://www.x.org/pub/individual/lib/libXfixes-6.0.1.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

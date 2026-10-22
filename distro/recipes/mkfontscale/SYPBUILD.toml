@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "mkfontscale"
+version = "1.2.3-1"
+summary = "X11-Programm mkfontscale"
+license = "MIT"
+url = "https://www.x.org/pub/individual/app/"
+depends = ["libfontenc", "freetype"]
+makedepends = ["util-macros"]
+
+[[source]]
+url = "https://www.x.org/pub/individual/app/mkfontscale-1.2.3.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

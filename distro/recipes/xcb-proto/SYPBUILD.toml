@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "xcb-proto"
+version = "1.17.0-1"
+arch = "any"
+summary = "XCB-Protokollbeschreibungen"
+license = "MIT"
+url = "https://www.x.org/pub/individual/proto/"
+depends = ["python"]
+
+[[source]]
+url = "https://www.x.org/pub/individual/proto/xcb-proto-1.17.0.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "PYTHON=python3"

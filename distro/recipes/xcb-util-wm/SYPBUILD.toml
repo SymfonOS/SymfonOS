@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "xcb-util-wm"
+version = "0.4.2-1"
+summary = "XCB-Hilfsbibliothek xcb-util-wm"
+license = "MIT"
+url = "https://xcb.freedesktop.org/dist/"
+depends = ["libxcb", "xcb-util"]
+makedepends = ["util-macros", "m4"]
+
+[[source]]
+url = "https://xcb.freedesktop.org/dist/xcb-util-wm-0.4.2.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

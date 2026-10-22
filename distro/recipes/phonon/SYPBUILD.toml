@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "phonon"
+version = "4.12.0-1"
+summary = "Multimedia-Schnittstelle (Phonon)"
+license = "LGPL-2.1-or-later"
+url = "https://download.kde.org/stable/phonon/4.12.0/"
+depends = ["qt6-base", "qt6-5compat", "glib2", "pulseaudio"]
+makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", "gettext"]
+
+[[source]]
+url = "https://download.kde.org/stable/phonon/4.12.0/phonon-4.12.0.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "cmake"
+configure_flags = "-DPHONON_BUILD_QT5=OFF -DPHONON_BUILD_QT6=ON -Wno-dev"

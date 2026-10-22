@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "vulkan-loader"
+version = "1.4.321-1"
+summary = "Vulkan-Lader"
+license = "Apache-2.0"
+url = "url/"
+depends = ["libx11", "libxrandr", "wayland"]
+makedepends = ["cmake", "vulkan-headers", "python"]
+provides = ["so:libvulkan.so.1"]
+
+[[source]]
+url = "url"
+sha256 = "TODO"
+
+[build]
+style = "cmake"
+configure_flags = "-DCMAKE_SKIP_INSTALL_RPATH=ON"

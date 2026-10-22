@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "xcb-util-cursor"
+version = "0.1.5-1"
+summary = "XCB-Hilfsbibliothek xcb-util-cursor"
+license = "MIT"
+url = "https://xcb.freedesktop.org/dist/"
+depends = ["libxcb", "xcb-util", "xcb-util-image", "xcb-util-renderutil"]
+makedepends = ["util-macros", "m4"]
+
+[[source]]
+url = "https://xcb.freedesktop.org/dist/xcb-util-cursor-0.1.5.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

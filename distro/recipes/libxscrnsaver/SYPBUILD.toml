@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libxscrnsaver"
+version = "1.2.4-1"
+summary = "X11-Bibliothek libXScrnSaver"
+license = "MIT"
+url = "https://www.x.org/pub/individual/lib/"
+depends = ["libxext", "xorgproto"]
+makedepends = ["util-macros", "pkgconf"]
+
+[[source]]
+url = "https://www.x.org/pub/individual/lib/libXScrnSaver-1.2.4.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

@@ -1,0 +1,38 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "docbook-xsl-nons"
+version = "1.79.2-1"
+arch = "any"
+summary = "DocBook-XSL-Stylesheets"
+license = "MIT"
+url = "https://github.com/docbook/xslt10-stylesheets/releases/download/release/1.79.2/"
+depends = ["libxml2", "docbook-xml"]
+
+[[source]]
+url = "https://github.com/docbook/xslt10-stylesheets/releases/download/release/1.79.2/docbook-xsl-nons-1.79.2.tar.bz2"
+sha256 = "TODO"
+
+[[source]]
+url = "https://www.linuxfromscratch.org/patches/blfs/12.4/docbook-xsl-nons-1.79.2-stack_fix-1.patch"
+sha256 = "TODO"
+extract = false
+
+[build]
+prepare = '''
+cd "$S"
+patch -Np1 -i ../docbook-xsl-nons-1.79.2-stack_fix-1.patch
+'''
+build = ":"
+package = '''
+cd "$S"
+d="$DESTDIR/usr/share/xml/docbook/xsl-stylesheets-nons-1.79.2"
+install -d "$d"
+cp -R VERSION assembly common eclipse epub epub3 extensions fo highlighting html htmlhelp images javahelp lib \
+  manpages params profiling roundtrip slides template tests tools webhelp website xhtml xhtml-1_1 xhtml5 "$d"
+ln -s VERSION "$d/VERSION.xsl"
+'''
+
+[scripts]
+post_install = "/usr/lib/syp/xmlcatalog-docbook"
+post_upgrade = "/usr/lib/syp/xmlcatalog-docbook"

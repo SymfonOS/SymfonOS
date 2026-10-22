@@ -1,0 +1,22 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "gdk-pixbuf"
+version = "2.42.12-1"
+summary = "Bildlade-Bibliothek (GdkPixbuf)"
+license = "LGPL-2.1-or-later"
+url = "https://download.gnome.org/sources/gdk-pixbuf/2.42/"
+depends = ["glib2", "libpng", "libjpeg-turbo", "libtiff", "shared-mime-info"]
+makedepends = ["meson", "python-docutils"]
+
+[[source]]
+url = "https://download.gnome.org/sources/gdk-pixbuf/2.42/gdk-pixbuf-2.42.12.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Dothers=enabled -Dintrospection=disabled -Dman=false -Dtests=false -Dinstalled_tests=false"
+
+[scripts]
+post_install = "gdk-pixbuf-query-loaders --update-cache"
+post_upgrade = "gdk-pixbuf-query-loaders --update-cache"

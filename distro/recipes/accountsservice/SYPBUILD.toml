@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "accountsservice"
+version = "23.13.9-1"
+summary = "Benutzerkonten über D-Bus (Anmeldebild, Benutzer-KCM)"
+license = "GPL-3.0-or-later"
+url = "https://www.freedesktop.org/software/accountsservice/"
+depends = ["polkit", "glib2", "systemd", "shadow"]
+makedepends = ["meson", "gettext"]
+
+[[source]]
+url = "https://www.freedesktop.org/software/accountsservice/accountsservice-23.13.9.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Dadmin_group=wheel -Dintrospection=false -Dvapi=false -Ddocbook=false -Dgtk_doc=false -Dtests=false"

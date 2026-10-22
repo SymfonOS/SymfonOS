@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "polkit-qt6"
+version = "0.200.0-1"
+summary = "Qt-Anbindung für polkit"
+license = "LGPL-2.1-or-later"
+url = "https://download.kde.org/stable/polkit-qt-1/"
+depends = ["polkit", "qt6-base"]
+makedepends = ["cmake", "ninja"]
+
+[[source]]
+url = "https://download.kde.org/stable/polkit-qt-1/polkit-qt-1-0.200.0.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "cmake"
+configure_flags = "-DQT_MAJOR_VERSION=6 -Wno-dev"

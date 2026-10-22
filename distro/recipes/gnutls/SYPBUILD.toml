@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "gnutls"
+version = "3.8.10-1"
+summary = "TLS-Bibliothek (GnuTLS)"
+license = "LGPL-2.1-or-later"
+url = "https://www.gnupg.org/ftp/gcrypt/gnutls/v3.8/"
+depends = ["nettle", "libtasn1", "libunistring", "gmp", "zlib", "zstd", "brotli"]
+
+[[source]]
+url = "https://www.gnupg.org/ftp/gcrypt/gnutls/v3.8/gnutls-3.8.10.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--with-default-trust-store-file=/etc/ssl/certs/ca-certificates.crt --with-included-unistring=no --without-p11-kit --disable-guile --disable-doc"

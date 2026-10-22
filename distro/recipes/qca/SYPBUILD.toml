@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "qca"
+version = "2.3.10-1"
+summary = "Qt-Kryptographie (QCA)"
+license = "LGPL-2.1-or-later"
+url = "https://download.kde.org/stable/qca/2.3.10/"
+depends = ["qt6-base", "openssl", "libgcrypt", "ca-certificates"]
+makedepends = ["cmake", "ninja"]
+
+[[source]]
+url = "https://download.kde.org/stable/qca/2.3.10/qca-2.3.10.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "cmake"
+configure_flags = "-DQT6=ON -DBUILD_WITH_QT6=ON -DQCA_INSTALL_IN_QT_PREFIX=ON -DQCA_MAN_INSTALL_DIR:PATH=/usr/share/man -DBUILD_TESTS=OFF -DQCA_FEATURE_INSTALL_DIR=/usr/lib/qt6/mkspecs/features"
+pre_configure = "sed -i 's@cert.pem@certs/ca-bundle.crt@' CMakeLists.txt"

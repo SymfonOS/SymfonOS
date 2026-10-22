@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "setxkbmap"
+version = "1.3.4-1"
+summary = "X11-Programm setxkbmap"
+license = "MIT"
+url = "https://www.x.org/pub/individual/app/"
+depends = ["libxkbfile"]
+makedepends = ["util-macros"]
+
+[[source]]
+url = "https://www.x.org/pub/individual/app/setxkbmap-1.3.4.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

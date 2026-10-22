@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "mesa"
+version = "25.1.8-1"
+summary = "OpenGL-, Vulkan- und Videotreiber (Mesa)"
+license = "MIT AND BSD-3-Clause AND SGI-B-2.0"
+url = "https://mesa.freedesktop.org/archive/"
+depends = ["libdrm", "wayland", "libx11", "libxext", "libxfixes", "libxshmfence", "libxxf86vm", "libxrandr", "libxcb", "expat", "zlib", "zstd", "libelf", "llvm", "libclc", "spirv-llvm-translator", "spirv-tools", "libva", "lm-sensors", "vulkan-loader"]
+makedepends = ["meson", "python-mako", "python-pyyaml", "python-ply", "glslang", "wayland-protocols", "bison", "flex", "libxrender", "xorgproto"]
+provides = ["opengl", "so:libGL.so.1", "so:libEGL.so.1", "so:libgbm.so.1", "so:libGLESv2.so.2"]
+
+[[source]]
+url = "https://mesa.freedesktop.org/archive/mesa-25.1.8.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Dplatforms=x11,wayland -Dgallium-drivers=radeonsi,r600,r300,nouveau,iris,crocus,i915,virgl,llvmpipe,softpipe,svga,zink -Dvulkan-drivers=amd,intel,intel_hasvk,swrast,virtio -Dvulkan-layers=device-select,overlay -Dvideo-codecs=all -Dgallium-va=enabled -Dglvnd=disabled -Dvalgrind=disabled -Dlibunwind=disabled -Dlmsensors=enabled -Dbuild-tests=false -Dosmesa=false"

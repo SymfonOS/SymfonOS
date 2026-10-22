@@ -1,0 +1,24 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "qt6-websockets"
+version = "6.9.2-1"
+summary = "Qt 6 WebSockets"
+license = "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only"
+url = "https://download.qt.io/archive/qt/6.9/6.9.2/submodules/"
+depends = ["qt6-base", "qt6-declarative"]
+makedepends = ["cmake", "ninja", "pkgconf"]
+
+[[source]]
+url = "https://download.qt.io/archive/qt/6.9/6.9.2/submodules/qtwebsockets-everywhere-src-6.9.2.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "cmake"
+configure_flags = "-DQT_BUILD_TESTS=OFF -DQT_BUILD_EXAMPLES=OFF"
+post_install = '''
+cd "$DESTDIR"
+install -d usr/bin
+[ -f "$S/_build/user_facing_tool_links.txt" ] && while read -r l; do ln -sf $l; done < "$S/_build/user_facing_tool_links.txt"
+true
+'''

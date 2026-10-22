@@ -141,6 +141,14 @@ static const char *MIRRORS[][4] = {
      "https://mirrors.kernel.org/nongnu/", "https://ftp.fau.de/nongnu/"},
     {"https://www.cpan.org/", "https://cpan.metacpan.org/", NULL, NULL},
     {"https://data.iana.org/time-zones/", "https://ftp.iana.org/tz/", NULL, NULL},
+    /* KDE und Qt verschieben ältere Versionen ins Archiv */
+    {"https://download.kde.org/stable/", "https://download.kde.org/Attic/", "https://mirrors.mit.edu/kde/stable/",
+     "https://ftp.fau.de/kde/stable/"},
+    {"https://download.qt.io/official_releases/", "https://download.qt.io/archive/",
+     "https://qt-mirror.dannhauer.de/archive/", NULL},
+    {"https://www.x.org/pub/", "https://xorg.freedesktop.org/archive/", "https://ftp.fau.de/x.org/pub/", NULL},
+    {"https://download.gnome.org/sources/", "https://ftp.gnome.org/pub/GNOME/sources/",
+     "https://ftp.fau.de/gnome/sources/", NULL},
 };
 
 static char *fetch_source(const char *url, const char *fname, const char *srccache) {
@@ -442,6 +450,10 @@ static char **build_env(const char *src, const char *sdir, const char *dest, con
     sv_push_own(&env, xasprintf("MAKEFLAGS=-j%ld", nproc > 0 ? nproc : 1));
     sv_push_own(&env, xasprintf("NPROC=%ld", nproc > 0 ? nproc : 1));
     if (!getenv("SOURCE_DATE_EPOCH")) sv_push(&env, "SOURCE_DATE_EPOCH=1700000000");
+    /* [options] env = ["NAME=wert", …]: zusätzliche Umgebung für alle Bauschritte (zuletzt, gewinnt) */
+    jval *extra = jgeta(opts, "env");
+    for (size_t i = 0; extra && i < extra->n; i++)
+        if (extra->items[i]->t == J_STR && strchr(extra->items[i]->s, '=')) sv_push(&env, extra->items[i]->s);
     free(v);
     free(rel);
     sv_push_own(&env, NULL);

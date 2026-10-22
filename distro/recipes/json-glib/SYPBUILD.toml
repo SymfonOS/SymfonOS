@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "json-glib"
+version = "1.10.6-1"
+summary = "JSON für GLib"
+license = "LGPL-2.1-or-later"
+url = "https://download.gnome.org/sources/json-glib/1.10/"
+depends = ["glib2"]
+makedepends = ["meson"]
+
+[[source]]
+url = "https://download.gnome.org/sources/json-glib/1.10/json-glib-1.10.6.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Dintrospection=disabled -Dtests=false -Ddocumentation=disabled -Dman=false"

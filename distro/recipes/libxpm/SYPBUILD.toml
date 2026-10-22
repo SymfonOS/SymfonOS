@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libxpm"
+version = "3.5.17-1"
+summary = "X11-Bibliothek libXpm"
+license = "MIT"
+url = "https://www.x.org/pub/individual/lib/"
+depends = ["libxt", "libxext", "xorgproto"]
+makedepends = ["util-macros", "pkgconf"]
+
+[[source]]
+url = "https://www.x.org/pub/individual/lib/libXpm-3.5.17.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--disable-open-zfile"

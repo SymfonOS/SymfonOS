@@ -1,0 +1,16 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "nasm"
+version = "2.16.03-1"
+summary = "Netwide Assembler"
+license = "BSD-2-Clause"
+url = "https://www.nasm.us/pub/nasm/releasebuilds/2.16.03/"
+depends = ["glibc"]
+
+[[source]]
+url = "https://www.nasm.us/pub/nasm/releasebuilds/2.16.03/nasm-2.16.03.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

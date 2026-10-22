@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libzip"
+version = "1.11.4-1"
+summary = "ZIP-Bibliothek"
+license = "BSD-3-Clause"
+url = "https://libzip.org/download/"
+depends = ["zlib", "bzip2", "xz", "zstd", "openssl"]
+makedepends = ["cmake", "ninja"]
+
+[[source]]
+url = "https://libzip.org/download/libzip-1.11.4.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "cmake"
+configure_flags = "-DBUILD_EXAMPLES=OFF -DBUILD_REGRESS=OFF -DBUILD_DOC=OFF -DENABLE_GNUTLS=OFF -DENABLE_MBEDTLS=OFF"

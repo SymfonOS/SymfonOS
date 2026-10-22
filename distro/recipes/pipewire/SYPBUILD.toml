@@ -1,0 +1,27 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "pipewire"
+version = "1.4.7-1"
+summary = "Audio- und Videoserver (PipeWire, mit Pulse- und JACK-Ersatz)"
+license = "MIT"
+url = "url/"
+depends = ["alsa-lib", "dbus", "systemd", "libsndfile", "opus", "sbc", "libcanberra", "readline", "ncurses", "libusb", "openssl", "libselinux"]
+makedepends = ["meson", "python-docutils"]
+provides = ["pulseaudio-server", "jack", "so:libpipewire-0.3.so.0", "so:libjack.so.0"]
+
+[[source]]
+url = "url"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "'-Dsession-managers=[]' -Dtests=disabled -Dexamples=disabled -Ddocs=disabled -Dman=enabled -Dbluez5=disabled -Dgstreamer=disabled -Dlibcamera=disabled -Droc=disabled -Dlv2=disabled -Dlibffado=disabled -Djack=disabled -Dpipewire-jack=enabled -Djack-devel=true -Dpipewire-alsa=enabled -Dlibpulse=disabled -Davahi=disabled -Dx11=disabled -Dx11-xfixes=disabled -Dsdl2=disabled -Dvulkan=disabled -Dselinux=enabled -Decho-cancel-webrtc=disabled"
+post_install = '''
+# PipeWire ersetzt PulseAudio und JACK (wie bei Fedora): ALSA-Standardgerät und Benutzerdienste
+install -d "$DESTDIR/etc/alsa/conf.d" "$DESTDIR/usr/lib/systemd/user-preset"
+ln -s /usr/share/alsa/alsa.conf.d/50-pipewire.conf "$DESTDIR/etc/alsa/conf.d/50-pipewire.conf"
+ln -s /usr/share/alsa/alsa.conf.d/99-pipewire-default.conf "$DESTDIR/etc/alsa/conf.d/99-pipewire-default.conf"
+printf 'enable pipewire.socket\nenable pipewire-pulse.socket\nenable wireplumber.service\n' \
+  > "$DESTDIR/usr/lib/systemd/user-preset/50-pipewire.preset"
+'''

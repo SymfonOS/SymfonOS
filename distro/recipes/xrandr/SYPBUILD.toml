@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "xrandr"
+version = "1.5.3-1"
+summary = "X11-Programm xrandr"
+license = "MIT"
+url = "https://www.x.org/pub/individual/app/"
+depends = ["libxrandr"]
+makedepends = ["util-macros"]
+
+[[source]]
+url = "https://www.x.org/pub/individual/app/xrandr-1.5.3.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

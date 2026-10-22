@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "spirv-tools"
+version = "1.4.321.0-1"
+summary = "SPIR-V-Werkzeuge"
+license = "Apache-2.0"
+url = "url/"
+depends = ["gcc"]
+makedepends = ["cmake", "spirv-headers", "python"]
+
+[[source]]
+url = "url"
+sha256 = "TODO"
+
+[build]
+style = "cmake"
+configure_flags = "-DSPIRV_WERROR=OFF -DBUILD_SHARED_LIBS=ON -DSPIRV_TOOLS_BUILD_STATIC=OFF -DSPIRV-Headers_SOURCE_DIR=/usr -DSPIRV_SKIP_TESTS=ON"

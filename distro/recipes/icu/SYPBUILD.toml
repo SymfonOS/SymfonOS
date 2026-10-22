@@ -1,0 +1,30 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "icu"
+version = "77.1-1"
+summary = "Unicode-Bibliothek (ICU)"
+license = "Unicode-3.0"
+url = "url/"
+depends = ["glibc", "gcc"]
+provides = ["so:libicuuc.so.77", "so:libicui18n.so.77", "so:libicudata.so.77"]
+
+[[source]]
+url = "url"
+sha256 = "TODO"
+
+[[source]]
+url = "filename"
+sha256 = "TODO"
+
+[build]
+dir = "icu"
+build = '''
+cd "$S/source"
+./configure --prefix=/usr
+make
+'''
+package = '''
+cd "$S/source"
+make DESTDIR="$DESTDIR" install
+'''

@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libsndfile"
+version = "1.2.2-1"
+summary = "Audiodateien lesen und schreiben"
+license = "LGPL-2.1-or-later"
+url = "https://github.com/libsndfile/libsndfile/releases/download/1.2.2/"
+depends = ["flac", "opus", "libvorbis", "lame", "mpg123", "alsa-lib"]
+
+[[source]]
+url = "https://github.com/libsndfile/libsndfile/releases/download/1.2.2/libsndfile-1.2.2.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+pre_configure = "sed '/typedef enum/,/bool ;/d' -i src/ALAC/alac_encoder.c src/ALAC/alac_decoder.c"

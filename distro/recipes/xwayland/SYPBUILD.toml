@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "xwayland"
+version = "24.1.8-1"
+summary = "X11-Programme unter Wayland"
+license = "MIT"
+url = "https://www.x.org/pub/individual/xserver/"
+depends = ["libxcvt", "pixman", "libxfont2", "libepoxy", "mesa", "wayland", "libdrm", "libxshmfence", "xkbcomp", "libxau", "libxdmcp", "libxcb", "openssl"]
+makedepends = ["meson", "wayland-protocols", "font-util", "xorgproto", "xtrans", "libxkbfile"]
+
+[[source]]
+url = "https://www.x.org/pub/individual/xserver/xwayland-24.1.8.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Dxkb_output_dir=/var/lib/xkb -Dsecure-rpc=false -Dxvfb=false -Ddocs=false -Ddevel-docs=false -Dxwayland_eglstream=false -Dlibdecor=false"
+pre_configure = "sed -i '/install_man/,$d' meson.build"

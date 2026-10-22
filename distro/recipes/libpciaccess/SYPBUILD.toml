@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libpciaccess"
+version = "0.18.1-1"
+summary = "PCI-Zugriff"
+license = "MIT"
+url = "https://www.x.org/pub/individual/lib/"
+depends = ["zlib", "hwdata"]
+makedepends = ["meson"]
+
+[[source]]
+url = "https://www.x.org/pub/individual/lib/libpciaccess-0.18.1.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"

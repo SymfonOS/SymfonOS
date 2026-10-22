@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libdisplay-info"
+version = "0.3.0-1"
+summary = "EDID/DisplayID-Auswertung"
+license = "MIT"
+url = "https://gitlab.freedesktop.org/emersion/libdisplay-info/-/releases/0.3.0/downloads/"
+depends = ["glibc"]
+makedepends = ["meson", "hwdata"]
+
+[[source]]
+url = "https://gitlab.freedesktop.org/emersion/libdisplay-info/-/releases/0.3.0/downloads/libdisplay-info-0.3.0.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"

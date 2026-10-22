@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "ocean-sound-theme"
+version = "6.4.4-1"
+arch = "any"
+summary = "Ocean-Systemklänge"
+license = "CC-BY-SA-4.0"
+url = "https://download.kde.org/stable/plasma/6.4.4/"
+depends = ["qt6-base"]
+makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", "gettext"]
+
+[[source]]
+url = "https://download.kde.org/stable/plasma/6.4.4/ocean-sound-theme-6.4.4.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "cmake"
+configure_flags = "-DKDE_INSTALL_LIBEXECDIR=lib -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF -Wno-dev"

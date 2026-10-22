@@ -1,0 +1,36 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "symfonos-desktop-config"
+version = "1.0-1"
+arch = "any"
+summary = "symfonOS-Desktop: Farbschemata, globales Design, SDDM (Wayland), PAM, Voreinstellungen"
+license = "GPL-3.0-or-later"
+url = "path/"
+depends = ["plasma-workspace", "sddm", "inter-font", "jetbrains-mono-font", "breeze-icons"]
+backup = ["etc/xdg/kdeglobals", "etc/xdg/kwinrc", "etc/pam.d/kde"]
+
+[[source]]
+url = "path"
+sha256 = "TODO"
+
+[build]
+build = ":"
+package = '''
+cd "$SRCDIR/desktop"
+install -d "$DESTDIR/usr/share/color-schemes" "$DESTDIR/usr/share/plasma/look-and-feel" "$DESTDIR/etc/xdg/plasma-workspace/env"
+cp color-schemes/*.colors "$DESTDIR/usr/share/color-schemes/"
+cp -r look-and-feel/. "$DESTDIR/usr/share/plasma/look-and-feel/"
+install -m644 xdg/kdeglobals xdg/kwinrc "$DESTDIR/etc/xdg/"
+install -m644 xdg/plasma-workspace-env-symfonos.sh "$DESTDIR/etc/xdg/plasma-workspace/env/"
+install -Dm644 branding/symfonos.svg "$DESTDIR/usr/share/icons/hicolor/scalable/apps/symfonos.svg"
+install -Dm644 sddm/10-symfonos.conf "$DESTDIR/usr/lib/sddm/sddm.conf.d/10-symfonos.conf"
+for f in pam.d/*; do install -Dm644 "$f" "$DESTDIR/etc/$f"; done
+install -Dm644 /dev/stdin "$DESTDIR/usr/lib/systemd/system-preset/40-symfonos-desktop.preset" <<'PRE'
+enable sddm.service
+enable accounts-daemon.service
+enable upower.service
+PRE
+install -d "$DESTDIR/etc/systemd/system"
+ln -s /usr/lib/systemd/system/graphical.target "$DESTDIR/etc/systemd/system/default.target"
+'''

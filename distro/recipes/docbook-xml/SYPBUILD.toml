@@ -1,0 +1,61 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "docbook-xml"
+version = "4.5-1"
+arch = "any"
+summary = "DocBook-XML-DTD 4.5"
+license = "MIT"
+url = "https://www.docbook.org/xml/4.5/"
+depends = ["libxml2"]
+
+[[source]]
+url = "https://www.docbook.org/xml/4.5/docbook-xml-4.5.zip"
+sha256 = "TODO"
+
+[build]
+build = '''
+cd "$SRCDIR"
+install -Dm755 /dev/stdin "$SRCDIR/xmlcatalog-docbook" <<'EOF'
+#!/bin/sh
+# Trägt DocBook-XML 4.5 und die XSL-Stylesheets in die XML-Kataloge ein (idempotent)
+set -e
+C=/etc/xml/catalog D=/etc/xml/docbook
+[ -e $D ] || xmlcatalog --noout --create $D
+[ -e $C ] || xmlcatalog --noout --create $C
+X=/usr/share/xml/docbook/xml-dtd-4.5
+add() { xmlcatalog --noout --add "$1" "$2" "$3" "$4"; }
+add public "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" $D
+add public "-//OASIS//DTD DocBook XML CALS Table Model V4.5//EN" "file://$X/calstblx.dtd" $D
+add public "-//OASIS//DTD XML Exchange Table Model 19990315//EN" "file://$X/soextblx.dtd" $D
+add public "-//OASIS//ELEMENTS DocBook XML Information Pool V4.5//EN" "file://$X/dbpoolx.mod" $D
+add public "-//OASIS//ELEMENTS DocBook XML Document Hierarchy V4.5//EN" "file://$X/dbhierx.mod" $D
+add public "-//OASIS//ELEMENTS DocBook XML HTML Tables V4.5//EN" "file://$X/htmltblx.mod" $D
+add public "-//OASIS//ENTITIES DocBook XML Notations V4.5//EN" "file://$X/dbnotnx.mod" $D
+add public "-//OASIS//ENTITIES DocBook XML Character Entities V4.5//EN" "file://$X/dbcentx.mod" $D
+add public "-//OASIS//ENTITIES DocBook XML Additional General Entities V4.5//EN" "file://$X/dbgenent.mod" $D
+add rewriteSystem "http://www.oasis-open.org/docbook/xml/4.5" "file://$X" $D
+add rewriteURI "http://www.oasis-open.org/docbook/xml/4.5" "file://$X" $D
+add delegatePublic "-//OASIS//ENTITIES DocBook XML" "file://$D" $C
+add delegatePublic "-//OASIS//DTD DocBook XML" "file://$D" $C
+add delegateSystem "http://www.oasis-open.org/docbook/" "file://$D" $C
+add delegateURI "http://www.oasis-open.org/docbook/" "file://$D" $C
+S=$(ls -d /usr/share/xml/docbook/xsl-stylesheets-nons-* 2>/dev/null | tail -1)
+if [ -n "$S" ]; then
+  for u in http://cdn.docbook.org/release/xsl-nons/current http://docbook.sourceforge.net/release/xsl/current; do
+    add rewriteSystem "$u" "$S" $C; add rewriteURI "$u" "$S" $C
+  done
+fi
+EOF
+'''
+package = '''
+cd "$SRCDIR"
+d="$DESTDIR/usr/share/xml/docbook/xml-dtd-4.5"
+install -d "$d" "$DESTDIR/etc/xml"
+cp -af --no-preserve=ownership docbook.cat *.dtd ent/ *.mod "$d"
+install -Dm755 "$SRCDIR/xmlcatalog-docbook" "$DESTDIR/usr/lib/syp/xmlcatalog-docbook"
+'''
+
+[scripts]
+post_install = "/usr/lib/syp/xmlcatalog-docbook"
+post_upgrade = "/usr/lib/syp/xmlcatalog-docbook"

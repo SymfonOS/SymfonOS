@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "hicolor-icon-theme"
+version = "0.18-1"
+arch = "any"
+summary = "Grundgerüst für Symbolthemen"
+license = "GPL-2.0-only"
+url = "https://icon-theme.freedesktop.org/releases/"
+makedepends = ["meson"]
+
+[[source]]
+url = "https://icon-theme.freedesktop.org/releases/hicolor-icon-theme-0.18.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"

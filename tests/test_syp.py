@@ -277,6 +277,32 @@ package = 'install -Dm755 hello "$DESTDIR/usr/bin/hello"'
     assert subprocess.run([root / "usr/bin/hello"], capture_output=True, text=True).stdout == "chroot\n"
 
 
+def test_build_options_env_reaches_every_step(tmp_path):
+    # [options] env setzt Variablen für alle Bauschritte (z. B. LC_ALL=C.UTF-8 für libxcb, CC=gcc für LLVM)
+    (tmp_path / "SYPBUILD.toml").write_text('''
+[package]
+name = "envtest"
+version = "1-1"
+arch = "any"
+[build]
+build = 'test "$FOO" = "bar baz"'
+package = 'install -Dm644 /dev/null "$DESTDIR/usr/share/envtest/$FOO2"'
+[options]
+env = ["FOO=bar baz", "FOO2=ok", "kaputt"]
+''')
+    syp("build", tmp_path / "SYPBUILD.toml", "-o", tmp_path / "o")
+    with tarfile.open(tmp_path / "o/envtest-1-1-any.syp") as tf:
+        files = [f["path"] for f in json.loads(tf.extractfile(".FILES.json").read())]
+    assert "usr/share/envtest/ok" in files
+
+
+def test_desktop_recipe_generator_is_in_sync():
+    # Die erzeugten Rezepte der Desktop-Stufe dürfen nicht vom Generator abweichen (Änderungen dort vornehmen)
+    import sys
+    r = subprocess.run([sys.executable, str(ROOT / "tools/desktop-recipes.py"), "--check"], capture_output=True, text=True)
+    assert r.returncode == 0, r.stdout + r.stderr
+
+
 def test_build_style_make_and_source_dir(tmp_path):
     proj = tmp_path / "src/tool-2.0"
     proj.mkdir(parents=True)

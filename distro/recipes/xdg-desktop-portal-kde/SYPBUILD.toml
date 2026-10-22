@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "xdg-desktop-portal-kde"
+version = "6.4.4-1"
+summary = "Portale für Plasma (Dateidialog, Bildschirmfreigabe)"
+license = "LGPL-2.0-or-later"
+url = "https://download.kde.org/stable/plasma/6.4.4/"
+depends = ["qt6-base", "kwayland", "kio", "kirigami", "kglobalaccel", "knotifications", "kstatusnotifieritem", "kwindowsystem", "libplasma", "qt6-wayland", "libxkbcommon", "xdg-desktop-portal", "kiconthemes", "kcoreaddons", "ki18n", "kservice", "kwidgetsaddons"]
+makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", "gettext", "plasma-wayland-protocols", "wayland-protocols"]
+
+[[source]]
+url = "https://download.kde.org/stable/plasma/6.4.4/xdg-desktop-portal-kde-6.4.4.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "cmake"
+configure_flags = "-DKDE_INSTALL_LIBEXECDIR=lib -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF -Wno-dev"

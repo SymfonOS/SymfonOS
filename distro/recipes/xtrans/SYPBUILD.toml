@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "xtrans"
+version = "1.6.0-1"
+arch = "any"
+summary = "X11-Bibliothek xtrans"
+license = "MIT"
+url = "https://www.x.org/pub/individual/lib/"
+depends = ["xorgproto"]
+makedepends = ["util-macros", "pkgconf"]
+
+[[source]]
+url = "https://www.x.org/pub/individual/lib/xtrans-1.6.0.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

@@ -1,0 +1,40 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "ffmpeg"
+version = "7.1.1-1"
+summary = "Audio- und Video-Werkzeugkasten (FFmpeg)"
+license = "GPL-3.0-or-later"
+url = "https://ffmpeg.org/releases/"
+depends = ["libaom", "dav1d", "libass", "freetype", "lame", "libvpx", "opus", "libvorbis", "x264", "x265", "alsa-lib", "libva", "libdrm", "libwebp", "openssl", "zlib", "bzip2", "xz", "pulseaudio", "libxcb", "vulkan-loader", "openjpeg", "speexdsp"]
+makedepends = ["nasm", "vulkan-headers", "glslang"]
+provides = ["so:libavcodec.so.61", "so:libavformat.so.61", "so:libavutil.so.59", "so:libswscale.so.8"]
+
+[[source]]
+url = "https://ffmpeg.org/releases/ffmpeg-7.1.1.tar.xz"
+sha256 = "TODO"
+
+[[source]]
+url = "https://www.linuxfromscratch.org/patches/blfs/12.4/ffmpeg-7.1.1-chromium_method-1.patch"
+sha256 = "TODO"
+extract = false
+
+[build]
+dir = "ffmpeg-7.1.1"
+prepare = '''
+cd "$S"
+patch -Np1 -i ../ffmpeg-7.1.1-chromium_method-1.patch
+'''
+build = '''
+cd "$S"
+./configure --prefix=/usr --enable-gpl --enable-version3 --disable-static --enable-shared --disable-debug \
+  --enable-libaom --enable-libdav1d --enable-libass --enable-libfreetype --enable-libmp3lame --enable-libopus \
+  --enable-libvorbis --enable-libvpx --enable-libx264 --enable-libx265 --enable-libwebp --enable-libopenjpeg \
+  --enable-openssl --enable-vaapi --enable-libdrm --enable-vulkan --enable-libpulse --enable-libxcb \
+  --disable-doc --ignore-tests=enhanced-flv-av1
+make
+'''
+package = '''
+cd "$S"
+make DESTDIR="$DESTDIR" install
+'''

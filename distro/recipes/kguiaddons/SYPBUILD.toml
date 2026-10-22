@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "kguiaddons"
+version = "6.17.0-1"
+summary = "GUI-Hilfen"
+license = "LGPL-2.1-or-later"
+url = "https://download.kde.org/stable/frameworks/6.17/"
+depends = ["qt6-base", "qt6-wayland", "wayland"]
+makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", "gettext", "plasma-wayland-protocols", "wayland-protocols"]
+
+[[source]]
+url = "https://download.kde.org/stable/frameworks/6.17/kguiaddons-6.17.0.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "cmake"
+configure_flags = "-DKDE_INSTALL_LIBEXECDIR=lib -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF -Wno-dev"

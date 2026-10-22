@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "shared-mime-info"
+version = "2.4-1"
+summary = "MIME-Datenbank"
+license = "GPL-2.0-or-later"
+url = "url/"
+depends = ["glib2", "libxml2"]
+makedepends = ["meson", "gettext"]
+
+[[source]]
+url = "url"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Dupdate-mimedb=false -Dbuild-tests=false -Dbuild-translations=true"

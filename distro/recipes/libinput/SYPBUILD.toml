@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libinput"
+version = "1.29.0-1"
+summary = "Eingabegeräte (Maus, Touchpad, Tablett)"
+license = "MIT"
+url = "url/"
+depends = ["libevdev", "mtdev", "systemd", "libwacom"]
+makedepends = ["meson"]
+provides = ["so:libinput.so.10"]
+
+[[source]]
+url = "url"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Ddebug-gui=false -Dtests=false -Dlibwacom=true -Dudev-dir=/usr/lib/udev -Ddocumentation=false"

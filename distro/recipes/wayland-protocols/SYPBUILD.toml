@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "wayland-protocols"
+version = "1.45-1"
+arch = "any"
+summary = "Wayland-Protokollerweiterungen"
+license = "MIT"
+url = "https://gitlab.freedesktop.org/wayland/wayland-protocols/-/releases/1.45/downloads/"
+makedepends = ["meson", "wayland"]
+
+[[source]]
+url = "https://gitlab.freedesktop.org/wayland/wayland-protocols/-/releases/1.45/downloads/wayland-protocols-1.45.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Dtests=false"

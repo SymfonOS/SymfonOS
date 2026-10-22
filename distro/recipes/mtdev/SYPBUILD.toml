@@ -1,0 +1,16 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "mtdev"
+version = "1.1.7-1"
+summary = "Multitouch-Protokoll"
+license = "MIT"
+url = "https://bitmath.org/code/mtdev/"
+depends = ["glibc"]
+
+[[source]]
+url = "https://bitmath.org/code/mtdev/mtdev-1.1.7.tar.bz2"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

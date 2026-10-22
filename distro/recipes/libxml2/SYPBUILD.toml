@@ -1,0 +1,21 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libxml2"
+version = "2.14.5-1"
+summary = "XML-Bibliothek"
+license = "MIT"
+url = "https://download.gnome.org/sources/libxml2/2.14/"
+depends = ["glibc", "zlib", "xz", "icu", "readline"]
+provides = ["so:libxml2.so.16"]
+
+[[source]]
+url = "https://download.gnome.org/sources/libxml2/2.14/libxml2-2.14.5.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--with-history --with-icu PYTHON=/usr/bin/python3"
+post_install = '''
+sed '/libs=/s/xml2.*/xml2"/' -i "$DESTDIR/usr/bin/xml2-config"
+'''

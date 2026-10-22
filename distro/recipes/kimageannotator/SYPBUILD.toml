@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "kimageannotator"
+version = "0.7.1-1"
+summary = "Bildanmerkungen (Qt)"
+license = "LGPL-3.0-or-later"
+url = "url/"
+depends = ["qt6-base", "qt6-svg", "kcolorpicker"]
+makedepends = ["cmake", "ninja", "qt6-tools"]
+
+[[source]]
+url = "url"
+sha256 = "TODO"
+
+[build]
+style = "cmake"
+configure_flags = "-DBUILD_WITH_QT6=ON -DBUILD_SHARED_LIBS=ON"

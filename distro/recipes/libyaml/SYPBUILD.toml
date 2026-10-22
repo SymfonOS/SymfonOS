@@ -1,0 +1,16 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libyaml"
+version = "0.2.5-1"
+summary = "YAML-Parser"
+license = "MIT"
+url = "https://github.com/yaml/libyaml/releases/download/0.2.5/"
+depends = ["glibc"]
+
+[[source]]
+url = "https://github.com/yaml/libyaml/releases/download/0.2.5/yaml-0.2.5.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

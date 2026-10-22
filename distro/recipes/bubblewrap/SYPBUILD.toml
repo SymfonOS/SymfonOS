@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "bubblewrap"
+version = "0.11.0-1"
+summary = "Sandbox-Werkzeug (Portale, Flatpak)"
+license = "LGPL-2.0-or-later"
+url = "https://github.com/containers/bubblewrap/releases/download/v0.11.0/"
+depends = ["glibc", "libcap", "libselinux"]
+makedepends = ["meson"]
+
+[[source]]
+url = "https://github.com/containers/bubblewrap/releases/download/v0.11.0/bubblewrap-0.11.0.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Dman=disabled -Dselinux=enabled"

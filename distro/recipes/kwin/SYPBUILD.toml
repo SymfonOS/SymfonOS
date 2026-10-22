@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "kwin"
+version = "6.4.4-1"
+summary = "Fenstermanager und Wayland-Compositor (KWin)"
+license = "GPL-2.0-or-later"
+url = "https://download.kde.org/stable/plasma/6.4.4/"
+depends = ["qt6-base", "kconfig", "kcoreaddons", "ki18n", "kwidgetsaddons", "kiconthemes", "kxmlgui", "kio", "kdbusaddons", "kcrash", "knotifications", "kwindowsystem", "kservice", "kglobalaccel", "kcmutils", "kirigami", "qt6-declarative", "kdecoration", "kwayland", "libplasma", "kscreenlocker", "breeze", "kauth", "kcolorscheme", "kconfigwidgets", "kguiaddons", "kidletime", "knewstuff", "kpackage", "ksvg", "plasma-activities", "kglobalacceld", "libdisplay-info", "libinput", "libxkbcommon", "mesa", "libdrm", "lcms2", "libepoxy", "pipewire", "libcanberra", "xwayland", "libxcvt", "hwdata", "qt6-sensors", "qt6-5compat", "qt6-shadertools", "wayland", "libxcb", "xcb-util-keysyms", "xcb-util-wm", "xcb-util-cursor", "libxi", "libx11", "systemd", "libcap"]
+makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", "gettext", "plasma-wayland-protocols", "wayland-protocols", "kdoctools"]
+
+[[source]]
+url = "https://download.kde.org/stable/plasma/6.4.4/kwin-6.4.4.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "cmake"
+configure_flags = "-DKDE_INSTALL_LIBEXECDIR=lib -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF -Wno-dev -DKWIN_BUILD_X11=OFF"

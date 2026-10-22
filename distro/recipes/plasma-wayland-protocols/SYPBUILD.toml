@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "plasma-wayland-protocols"
+version = "1.18.0-1"
+arch = "any"
+summary = "Wayland-Protokolle von Plasma"
+license = "LGPL-2.1-or-later"
+url = "https://download.kde.org/stable/plasma-wayland-protocols/"
+makedepends = ["extra-cmake-modules", "cmake"]
+
+[[source]]
+url = "https://download.kde.org/stable/plasma-wayland-protocols/plasma-wayland-protocols-1.18.0.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "cmake"

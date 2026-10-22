@@ -1,0 +1,25 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "glib2"
+version = "2.84.4-1"
+summary = "GLib-Kernbibliothek"
+license = "LGPL-2.1-or-later"
+url = "https://download.gnome.org/sources/glib/2.84/"
+depends = ["glibc", "libffi", "pcre2", "zlib", "util-linux", "libselinux", "libelf"]
+makedepends = ["meson", "python-packaging", "python-docutils", "libxslt"]
+provides = ["glib", "so:libglib-2.0.so.0", "so:libgio-2.0.so.0", "so:libgobject-2.0.so.0"]
+
+[[source]]
+url = "https://download.gnome.org/sources/glib/2.84/glib-2.84.4.tar.xz"
+sha256 = "TODO"
+
+[[source]]
+url = "https://www.linuxfromscratch.org/patches/blfs/12.4/glib-skip_warnings-1.patch"
+sha256 = "TODO"
+extract = false
+
+[build]
+style = "meson"
+configure_flags = "-Dintrospection=disabled -Dglib_debug=disabled -Dman-pages=disabled -Dsysprof=disabled -Dselinux=enabled -Dtests=false"
+pre_configure = "patch -Np1 -i ../glib-skip_warnings-1.patch"

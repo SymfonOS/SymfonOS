@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libsm"
+version = "1.2.6-1"
+summary = "X11-Bibliothek libSM"
+license = "MIT"
+url = "https://www.x.org/pub/individual/lib/"
+depends = ["libice", "util-linux", "xorgproto"]
+makedepends = ["util-macros", "pkgconf"]
+
+[[source]]
+url = "https://www.x.org/pub/individual/lib/libSM-1.2.6.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

@@ -1,0 +1,30 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "extra-cmake-modules"
+version = "6.17.0-1"
+arch = "any"
+summary = "Zusätzliche CMake-Module (KDE)"
+license = "BSD-3-Clause"
+url = "https://download.kde.org/stable/frameworks/6.17/"
+depends = ["cmake"]
+makedepends = ["qt6-base", "qt6-tools"]
+
+[[source]]
+url = "https://download.kde.org/stable/frameworks/6.17/extra-cmake-modules-6.17.0.tar.xz"
+sha256 = "TODO"
+
+[[source]]
+url = "https://www.linuxfromscratch.org/patches/blfs/12.4/extra-cmake-modules-6.17.0-upstream_fix-1.patch"
+sha256 = "TODO"
+extract = false
+
+[build]
+dir = "extra-cmake-modules-6.17.0"
+style = "cmake"
+configure_flags = "-DBUILD_WITH_QT6=ON -DBUILD_HTML_DOCS=OFF -DBUILD_MAN_DOCS=OFF -DBUILD_QTHELP_DOCS=OFF"
+pre_configure = '''
+patch -Np1 -i ../extra-cmake-modules-6.17.0-upstream_fix-1.patch
+sed -i '/"lib64"/s/64//' kde-modules/KDEInstallDirsCommon.cmake
+sed -e '/PACKAGE_INIT/i set(SAVE_PACKAGE_PREFIX_DIR "${PACKAGE_PREFIX_DIR}")' -e '/^include/a set(PACKAGE_PREFIX_DIR "${SAVE_PACKAGE_PREFIX_DIR}")' -i ECMConfig.cmake.in
+'''

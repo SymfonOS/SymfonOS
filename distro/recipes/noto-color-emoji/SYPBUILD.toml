@@ -1,0 +1,24 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "noto-color-emoji"
+version = "2.047-1"
+arch = "any"
+summary = "Farbige Emoji (Noto)"
+license = "OFL-1.1"
+url = "url/"
+depends = ["fontconfig"]
+
+[[source]]
+url = "url"
+sha256 = "TODO"
+
+[[source]]
+url = "filename"
+sha256 = "TODO"
+
+[build]
+build = ":"
+package = '''
+install -Dm644 "$SRCDIR/NotoColorEmoji-2.047.ttf" "$DESTDIR/usr/share/fonts/noto/NotoColorEmoji.ttf"
+'''

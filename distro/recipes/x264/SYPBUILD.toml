@@ -1,0 +1,25 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "x264"
+version = "20250815-1"
+summary = "H.264-Encoder"
+license = "GPL-2.0-or-later"
+url = "https://anduin.linuxfromscratch.org/BLFS/x264/"
+depends = ["glibc"]
+makedepends = ["nasm"]
+
+[[source]]
+url = "https://anduin.linuxfromscratch.org/BLFS/x264/x264-20250815.tar.xz"
+sha256 = "TODO"
+
+[build]
+build = '''
+cd "$S"
+./configure --prefix=/usr --enable-shared --disable-cli --enable-pic
+make
+'''
+package = '''
+cd "$S"
+make DESTDIR="$DESTDIR" install
+'''

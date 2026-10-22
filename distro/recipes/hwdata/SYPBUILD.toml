@@ -1,0 +1,23 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "hwdata"
+version = "0.398-1"
+arch = "any"
+summary = "Hardware-Kennungen (PCI, USB, Monitore)"
+license = "GPL-2.0-or-later"
+url = "url/"
+
+[[source]]
+url = "url"
+sha256 = "TODO"
+
+[build]
+build = '''
+cd "$S"
+./configure --prefix=/usr --disable-blacklist
+'''
+package = '''
+cd "$S"
+make DESTDIR="$DESTDIR" install
+'''

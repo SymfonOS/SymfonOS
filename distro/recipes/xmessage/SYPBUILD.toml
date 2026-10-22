@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "xmessage"
+version = "1.0.7-1"
+summary = "X11-Programm xmessage"
+license = "MIT"
+url = "https://www.x.org/pub/individual/app/"
+depends = ["libxaw"]
+makedepends = ["util-macros"]
+
+[[source]]
+url = "https://www.x.org/pub/individual/app/xmessage-1.0.7.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "upower"
+version = "1.90.9-1"
+summary = "Energieverwaltung (Akku, Netzteil)"
+license = "GPL-2.0-or-later"
+url = "url/"
+depends = ["libgudev", "libusb", "glib2", "systemd", "polkit"]
+makedepends = ["meson", "gettext"]
+
+[[source]]
+url = "url"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Dgtk-doc=false -Dman=false -Dintrospection=disabled -Didevice=disabled"

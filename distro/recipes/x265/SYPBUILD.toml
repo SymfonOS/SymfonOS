@@ -1,0 +1,28 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "x265"
+version = "4.1-1"
+summary = "H.265-Encoder"
+license = "GPL-2.0-or-later"
+url = "https://bitbucket.org/multicoreware/x265_git/downloads/"
+depends = ["gcc"]
+makedepends = ["cmake", "nasm", "ninja"]
+
+[[source]]
+url = "https://bitbucket.org/multicoreware/x265_git/downloads/x265_4.1.tar.gz"
+sha256 = "TODO"
+
+[build]
+prepare = '''
+cd "$S"
+sed -r '/cmake_policy.*(0025|0054)/d' -i source/CMakeLists.txt
+'''
+build = '''
+cmake -S "$S/source" -B "$S/bld" -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DGIT_ARCHETYPE=1 -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DENABLE_CLI=OFF -Wno-dev
+ninja -C "$S/bld"
+'''
+package = '''
+DESTDIR="$DESTDIR" ninja -C "$S/bld" install
+rm -f "$DESTDIR/usr/lib/libx265.a"
+'''

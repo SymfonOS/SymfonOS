@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libwacom"
+version = "2.16.1-1"
+summary = "Grafiktablett-Beschreibungen (Wacom, Huion, XP-Pen …)"
+license = "HPND"
+url = "https://github.com/linuxwacom/libwacom/releases/download/libwacom-2.16.1/"
+depends = ["libevdev", "libgudev", "glib2", "libxml2"]
+makedepends = ["meson"]
+
+[[source]]
+url = "https://github.com/linuxwacom/libwacom/releases/download/libwacom-2.16.1/libwacom-2.16.1.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Dtests=disabled"

@@ -1,0 +1,24 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libaom"
+version = "3.12.1-1"
+summary = "AV1-Video (Referenz)"
+license = "BSD-2-Clause"
+url = "https://storage.googleapis.com/aom-releases/"
+depends = ["gcc"]
+makedepends = ["cmake", "nasm", "perl", "ninja"]
+
+[[source]]
+url = "https://storage.googleapis.com/aom-releases/libaom-3.12.1.tar.gz"
+sha256 = "TODO"
+
+[build]
+build = '''
+cmake -S "$S" -B "$S/aom-build" -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=1 -DENABLE_DOCS=no -DENABLE_TESTS=0 -DENABLE_EXAMPLES=0
+ninja -C "$S/aom-build"
+'''
+package = '''
+DESTDIR="$DESTDIR" ninja -C "$S/aom-build" install
+rm -f "$DESTDIR/usr/lib/libaom.a"
+'''

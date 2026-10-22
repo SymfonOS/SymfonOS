@@ -1,0 +1,12 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "symfonos-desktop"
+version = "2025.10-1"
+arch = "any"
+summary = "symfonOS-Desktop (KDE Plasma 6, Wayland, PipeWire)"
+license = "GPL-3.0-or-later"
+depends = ["symfonos-base", "symfonos-desktop-config", "plasma-desktop", "plasma-workspace", "kwin", "xwayland", "sddm", "sddm-kcm", "breeze", "breeze-icons", "qqc2-breeze-style", "qqc2-desktop-style", "plasma-integration", "xdg-desktop-portal-kde", "kscreen", "powerdevil", "plasma-pa", "kinfocenter", "systemsettings", "kde-cli-tools", "kmenuedit", "kwallet-pam", "ksshaskpass", "kwrited", "milou", "polkit-kde-agent-1", "plasma-systemmonitor", "ksystemstats", "kdeplasma-addons", "ocean-sound-theme", "kactivitymanagerd", "kglobalacceld", "kimageformats", "qt6-imageformats", "qt6-translations", "qt6-wayland", "mesa", "vulkan-loader", "libva", "pipewire", "wireplumber", "alsa-utils", "ffmpeg", "xdg-user-dirs", "konsole", "dolphin", "kate", "ark", "gwenview", "kcalc", "kcharselect", "inter-font", "jetbrains-mono-font", "dejavu-fonts", "noto-color-emoji", "hunspell", "upower", "accountsservice", "polkit"]
+
+[build]
+style = "meta"

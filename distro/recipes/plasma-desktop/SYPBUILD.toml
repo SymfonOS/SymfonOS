@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "plasma-desktop"
+version = "6.4.4-1"
+summary = "Plasma-Desktop"
+license = "GPL-2.0-or-later"
+url = "https://download.kde.org/stable/plasma/6.4.4/"
+depends = ["qt6-base", "plasma-workspace", "kcmutils", "attica", "knewstuff", "kpeople", "libxkbfile", "xkeyboard-config", "libwacom", "libinput", "accountsservice", "kirigami-addons", "kglobalacceld", "plasma-activities-stats", "baloo", "krunner", "kitemmodels", "qqc2-desktop-style", "ksvg", "libcanberra", "kpipewire", "xf86-input-libinput", "xf86-input-evdev", "xorg-server", "libxi", "libxcursor", "libx11", "polkit-kde-agent-1", "breeze", "kmenuedit", "kscreen", "powerdevil", "plasma-pa", "kde-cli-tools", "systemsettings", "kactivitymanagerd", "plasma-integration", "xdg-desktop-portal-kde", "milou", "kinfocenter"]
+makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", "gettext", "kdoctools", "wayland-protocols", "plasma-wayland-protocols", "boost"]
+
+[[source]]
+url = "https://download.kde.org/stable/plasma/6.4.4/plasma-desktop-6.4.4.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "cmake"
+configure_flags = "-DKDE_INSTALL_LIBEXECDIR=lib -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF -Wno-dev"

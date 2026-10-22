@@ -1,0 +1,16 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "socat"
+version = "1.8.0.3-1"
+summary = "Datenkanäle (für pam_kwallet)"
+license = "GPL-2.0-only"
+url = "http://www.dest-unreach.org/socat/download/"
+depends = ["openssl", "readline"]
+
+[[source]]
+url = "http://www.dest-unreach.org/socat/download/socat-1.8.0.3.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libdrm"
+version = "2.4.125-1"
+summary = "Direct-Rendering-Bibliothek"
+license = "MIT"
+url = "https://dri.freedesktop.org/libdrm/"
+depends = ["libpciaccess", "systemd"]
+makedepends = ["meson"]
+provides = ["so:libdrm.so.2"]
+
+[[source]]
+url = "https://dri.freedesktop.org/libdrm/libdrm-2.4.125.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Dudev=true -Dvalgrind=disabled -Dtests=false -Dman-pages=disabled"

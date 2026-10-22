@@ -1,0 +1,24 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libcanberra"
+version = "0.30-1"
+summary = "Ereignisklänge"
+license = "LGPL-2.1-or-later"
+url = "https://0pointer.de/lennart/projects/libcanberra/"
+depends = ["libvorbis", "alsa-lib", "sound-theme-freedesktop", "systemd"]
+
+[[source]]
+url = "https://0pointer.de/lennart/projects/libcanberra/libcanberra-0.30.tar.xz"
+sha256 = "TODO"
+
+[[source]]
+url = "https://www.linuxfromscratch.org/patches/blfs/12.4/libcanberra-0.30-wayland-1.patch"
+sha256 = "TODO"
+extract = false
+
+[build]
+dir = "libcanberra-0.30"
+style = "autotools"
+configure_flags = "--disable-oss --disable-gtk --disable-gtk3 --disable-pulse --disable-gstreamer --disable-lynx"
+pre_configure = "patch -Np1 -i ../libcanberra-0.30-wayland-1.patch"

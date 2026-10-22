@@ -1,0 +1,22 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libxcb"
+version = "1.17.0-1"
+summary = "X-Protokoll-C-Bibliothek (XCB)"
+license = "MIT"
+url = "https://www.x.org/pub/individual/lib/"
+depends = ["libxau", "libxdmcp"]
+makedepends = ["xcb-proto", "python"]
+provides = ["so:libxcb.so.1"]
+
+[[source]]
+url = "https://www.x.org/pub/individual/lib/libxcb-1.17.0.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--without-doxygen"
+
+[options]
+env = ["LC_ALL=C.UTF-8"]

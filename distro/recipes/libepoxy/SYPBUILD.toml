@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libepoxy"
+version = "1.5.10-1"
+summary = "OpenGL-Funktionszeiger"
+license = "MIT"
+url = "https://download.gnome.org/sources/libepoxy/1.5/"
+depends = ["mesa"]
+makedepends = ["meson"]
+
+[[source]]
+url = "https://download.gnome.org/sources/libepoxy/1.5/libepoxy-1.5.10.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Ddocs=false -Dtests=false"

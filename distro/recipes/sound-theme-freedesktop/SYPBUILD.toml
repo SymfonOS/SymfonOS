@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "sound-theme-freedesktop"
+version = "0.8-1"
+arch = "any"
+summary = "Systemklänge (freedesktop)"
+license = "GPL-2.0-or-later"
+url = "https://people.freedesktop.org/~mccann/dist/"
+makedepends = ["intltool", "perl-xml-parser"]
+
+[[source]]
+url = "https://people.freedesktop.org/~mccann/dist/sound-theme-freedesktop-0.8.tar.bz2"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

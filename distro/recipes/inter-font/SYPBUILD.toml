@@ -1,0 +1,22 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "inter-font"
+version = "4.1-1"
+arch = "any"
+summary = "Schrift Inter (Oberfläche)"
+license = "OFL-1.1"
+url = "url/"
+depends = ["fontconfig"]
+
+[[source]]
+url = "url"
+sha256 = "TODO"
+
+[build]
+build = ":"
+package = '''
+cd "$SRCDIR"
+find . -type f \( -name '*.ttf' -o -name '*.ttc' -o -name '*.otf' \) -not -path '*/web/*' -not -path '*/extras/*' -print0 |
+  while IFS= read -r -d '' f; do install -Dm644 "$f" "$DESTDIR/usr/share/fonts/inter/$(basename "$f")"; done
+'''

@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "python-pyyaml"
+version = "6.0.2-1"
+summary = "YAML für Python"
+license = "MIT"
+url = "https://files.pythonhosted.org/packages/source/P/PyYAML/"
+depends = ["python", "libyaml"]
+makedepends = ["python-setuptools", "python-wheel", "python-cython"]
+
+[[source]]
+url = "https://files.pythonhosted.org/packages/source/P/PyYAML/pyyaml-6.0.2.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "python"

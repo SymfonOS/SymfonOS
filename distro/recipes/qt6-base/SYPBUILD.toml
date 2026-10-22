@@ -1,0 +1,25 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "qt6-base"
+version = "6.9.2-1"
+summary = "Qt 6 Basis (Core, Gui, Widgets, Network, DBus, Sql …)"
+license = "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only"
+url = "https://download.qt.io/archive/qt/6.9/6.9.2/submodules/"
+depends = ["glibc", "gcc", "zlib", "zstd", "pcre2", "icu", "glib2", "dbus", "openssl", "sqlite", "systemd", "harfbuzz", "freetype", "fontconfig", "libpng", "libjpeg-turbo", "brotli", "double-conversion", "md4c", "libb2", "mesa", "libdrm", "libinput", "mtdev", "libxkbcommon", "libx11", "libxcb", "xcb-util-wm", "xcb-util-image", "xcb-util-keysyms", "xcb-util-renderutil", "xcb-util-cursor", "libxi", "libxrender", "libxext", "vulkan-loader"]
+makedepends = ["cmake", "ninja", "pkgconf", "vulkan-headers", "perl", "python"]
+provides = ["qt6-base", "so:libQt6Core.so.6", "so:libQt6Gui.so.6", "so:libQt6Widgets.so.6"]
+
+[[source]]
+url = "https://download.qt.io/archive/qt/6.9/6.9.2/submodules/qtbase-everywhere-src-6.9.2.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "cmake"
+configure_flags = "-DINSTALL_BINDIR=lib/qt6/bin -DINSTALL_PUBLICBINDIR=usr/bin -DINSTALL_LIBEXECDIR=lib/qt6 -DINSTALL_DOCDIR=share/doc/qt6 -DINSTALL_ARCHDATADIR=lib/qt6 -DINSTALL_DATADIR=share/qt6 -DINSTALL_INCLUDEDIR=include/qt6 -DINSTALL_MKSPECSDIR=lib/qt6/mkspecs -DINSTALL_EXAMPLESDIR=share/doc/qt6/examples -DINSTALL_SYSCONFDIR=/etc/xdg -DFEATURE_journald=ON -DFEATURE_openssl_linked=ON -DFEATURE_system_sqlite=ON -DFEATURE_system_xcb_xinput=ON -DFEATURE_no_direct_extern_access=ON -DFEATURE_dbus_linked=ON -DFEATURE_cups=OFF -DFEATURE_libproxy=OFF -DFEATURE_vulkan=ON -DFEATURE_xcb=ON -DFEATURE_system_harfbuzz=ON -DFEATURE_system_freetype=ON -DFEATURE_system_pcre2=ON -DFEATURE_system_zlib=ON -DFEATURE_system_png=ON -DFEATURE_system_jpeg=ON -DFEATURE_icu=ON -DQT_BUILD_TESTS=OFF -DQT_BUILD_EXAMPLES=OFF"
+post_install = '''
+cd "$DESTDIR"
+install -d usr/bin
+[ -f "$S/_build/user_facing_tool_links.txt" ] && while read -r l; do ln -sf $l; done < "$S/_build/user_facing_tool_links.txt"
+true
+'''

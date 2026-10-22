@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "xinput"
+version = "1.6.4-1"
+summary = "X11-Programm xinput"
+license = "MIT"
+url = "https://www.x.org/pub/individual/app/"
+depends = ["libxi", "libxrandr", "libxinerama"]
+makedepends = ["util-macros"]
+
+[[source]]
+url = "https://www.x.org/pub/individual/app/xinput-1.6.4.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

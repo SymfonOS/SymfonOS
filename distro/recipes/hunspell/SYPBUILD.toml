@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "hunspell"
+version = "1.7.2-1"
+summary = "Rechtschreibprüfung (Hunspell)"
+license = "MPL-1.1 OR GPL-2.0-or-later OR LGPL-2.1-or-later"
+url = "https://github.com/hunspell/hunspell/releases/download/v1.7.2/"
+depends = ["gcc", "readline", "ncurses"]
+
+[[source]]
+url = "https://github.com/hunspell/hunspell/releases/download/v1.7.2/hunspell-1.7.2.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--with-ui --with-readline"

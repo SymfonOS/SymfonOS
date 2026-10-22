@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "mpg123"
+version = "1.33.2-1"
+summary = "MP3-Decoder"
+license = "LGPL-2.1-only"
+url = "https://downloads.sourceforge.net/mpg123/"
+depends = ["alsa-lib"]
+
+[[source]]
+url = "https://downloads.sourceforge.net/mpg123/mpg123-1.33.2.tar.bz2"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--with-default-audio=alsa"

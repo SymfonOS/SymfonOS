@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "xf86-input-evdev"
+version = "2.11.0-1"
+summary = "X11-Eingabetreiber (evdev)"
+license = "MIT"
+url = "https://www.x.org/pub/individual/driver/"
+depends = ["libevdev", "mtdev", "xorg-server"]
+makedepends = ["util-macros"]
+
+[[source]]
+url = "https://www.x.org/pub/individual/driver/xf86-input-evdev-2.11.0.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

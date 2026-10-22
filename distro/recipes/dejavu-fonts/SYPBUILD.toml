@@ -1,0 +1,24 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "dejavu-fonts"
+version = "2.37-1"
+arch = "any"
+summary = "Schriften DejaVu (große Zeichenabdeckung)"
+license = "Bitstream-Vera"
+url = "https://github.com/dejavu-fonts/dejavu-fonts/releases/download/version_2_37/"
+depends = ["fontconfig"]
+
+[[source]]
+url = "https://github.com/dejavu-fonts/dejavu-fonts/releases/download/version_2_37/dejavu-fonts-ttf-2.37.tar.bz2"
+sha256 = "TODO"
+
+[build]
+build = ":"
+package = '''
+cd "$SRCDIR"
+find . -type f \( -name '*.ttf' -o -name '*.ttc' -o -name '*.otf' \)  -print0 |
+  while IFS= read -r -d '' f; do install -Dm644 "$f" "$DESTDIR/usr/share/fonts/dejavu/$(basename "$f")"; done
+install -d "$DESTDIR/usr/share/fontconfig/conf.avail"
+cp dejavu-fonts-ttf-2.37/fontconfig/*.conf "$DESTDIR/usr/share/fontconfig/conf.avail/"
+'''

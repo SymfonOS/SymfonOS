@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "wireplumber"
+version = "0.5.10-1"
+summary = "Sitzungsverwaltung für PipeWire"
+license = "MIT"
+url = "url/"
+depends = ["pipewire", "glib2", "systemd", "lua"]
+makedepends = ["meson"]
+
+[[source]]
+url = "url"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Dsystem-lua=true -Dintrospection=disabled -Ddoc=disabled -Dtests=false"

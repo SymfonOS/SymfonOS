@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libtiff"
+version = "4.7.0-1"
+summary = "TIFF-Bibliothek"
+license = "libtiff"
+url = "https://download.osgeo.org/libtiff/"
+depends = ["zlib", "xz", "zstd", "libjpeg-turbo", "libwebp"]
+makedepends = ["cmake"]
+provides = ["so:libtiff.so.6"]
+
+[[source]]
+url = "https://download.osgeo.org/libtiff/tiff-4.7.0.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "cmake"
+configure_flags = "-Dtiff-docs=OFF -Dtiff-tests=OFF -Dtiff-contrib=OFF"

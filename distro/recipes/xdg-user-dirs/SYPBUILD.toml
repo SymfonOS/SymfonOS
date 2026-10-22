@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "xdg-user-dirs"
+version = "0.18-1"
+summary = "Standardordner (Dokumente, Bilder, Musik …)"
+license = "GPL-2.0-or-later"
+url = "https://user-dirs.freedesktop.org/releases/"
+depends = ["glibc"]
+backup = ["etc/xdg/user-dirs.conf", "etc/xdg/user-dirs.defaults"]
+
+[[source]]
+url = "https://user-dirs.freedesktop.org/releases/xdg-user-dirs-0.18.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--disable-documentation"

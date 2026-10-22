@@ -1,0 +1,16 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "util-macros"
+version = "1.20.2-1"
+arch = "any"
+summary = "Xorg-Autotools-Makros"
+license = "MIT"
+url = "https://www.x.org/pub/individual/util/"
+
+[[source]]
+url = "https://www.x.org/pub/individual/util/util-macros-1.20.2.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

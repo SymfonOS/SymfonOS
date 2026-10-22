@@ -1,0 +1,24 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "lm-sensors"
+version = "3.6.2-1"
+summary = "Hardware-Sensoren"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
+url = "url/"
+depends = ["glibc", "perl"]
+makedepends = ["which", "bison", "flex"]
+
+[[source]]
+url = "url"
+sha256 = "TODO"
+
+[build]
+build = '''
+cd "$S"
+make PREFIX=/usr BUILD_STATIC_LIB=0 MANDIR=/usr/share/man SBINDIR=/usr/bin CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS"
+'''
+package = '''
+cd "$S"
+make PREFIX=/usr BUILD_STATIC_LIB=0 MANDIR=/usr/share/man SBINDIR=/usr/bin DESTDIR="$DESTDIR" install
+'''

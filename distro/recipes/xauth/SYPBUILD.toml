@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "xauth"
+version = "1.1.4-1"
+summary = "X11-Programm xauth"
+license = "MIT"
+url = "https://www.x.org/pub/individual/app/"
+depends = ["libxau", "libxext", "libxmu"]
+makedepends = ["util-macros"]
+
+[[source]]
+url = "https://www.x.org/pub/individual/app/xauth-1.1.4.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

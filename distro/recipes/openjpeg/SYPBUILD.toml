@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "openjpeg"
+version = "2.5.3-1"
+summary = "JPEG-2000-Bibliothek"
+license = "BSD-2-Clause"
+url = "url/"
+depends = ["libpng", "libtiff", "lcms2"]
+makedepends = ["cmake"]
+
+[[source]]
+url = "url"
+sha256 = "TODO"
+
+[build]
+style = "cmake"
+configure_flags = "-DBUILD_STATIC_LIBS=OFF"

@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "xkbcomp"
+version = "1.4.7-1"
+summary = "X11-Programm xkbcomp"
+license = "MIT"
+url = "https://www.x.org/pub/individual/app/"
+depends = ["libxkbfile", "libx11"]
+makedepends = ["util-macros"]
+
+[[source]]
+url = "https://www.x.org/pub/individual/app/xkbcomp-1.4.7.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

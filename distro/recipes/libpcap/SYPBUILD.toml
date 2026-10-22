@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libpcap"
+version = "1.10.5-1"
+summary = "Paketmitschnitt-Bibliothek"
+license = "BSD-3-Clause"
+url = "https://www.tcpdump.org/release/"
+depends = ["glibc", "libnl", "dbus"]
+
+[[source]]
+url = "https://www.tcpdump.org/release/libpcap-1.10.5.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+post_install = '''
+rm -f "$DESTDIR/usr/lib/libpcap.a"
+'''

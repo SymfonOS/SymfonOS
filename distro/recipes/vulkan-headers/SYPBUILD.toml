@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "vulkan-headers"
+version = "1.4.321-1"
+arch = "any"
+summary = "Vulkan-Header"
+license = "Apache-2.0"
+url = "url/"
+makedepends = ["cmake"]
+
+[[source]]
+url = "url"
+sha256 = "TODO"
+
+[build]
+style = "cmake"

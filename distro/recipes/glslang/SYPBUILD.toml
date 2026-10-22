@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "glslang"
+version = "15.4.0-1"
+summary = "GLSL/HLSL-Compiler"
+license = "BSD-3-Clause"
+url = "url/"
+depends = ["spirv-tools"]
+makedepends = ["cmake", "python"]
+
+[[source]]
+url = "url"
+sha256 = "TODO"
+
+[build]
+style = "cmake"
+configure_flags = "-DALLOW_EXTERNAL_SPIRV_TOOLS=ON -DBUILD_SHARED_LIBS=ON -DGLSLANG_TESTS=OFF -DENABLE_OPT=ON"

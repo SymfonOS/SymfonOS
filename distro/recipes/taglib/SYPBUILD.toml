@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "taglib"
+version = "2.1.1-1"
+summary = "Audio-Metadaten"
+license = "LGPL-2.1-only OR MPL-1.1"
+url = "https://taglib.org/releases/"
+depends = ["zlib", "gcc"]
+makedepends = ["cmake", "utfcpp"]
+
+[[source]]
+url = "https://taglib.org/releases/taglib-2.1.1.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "cmake"
+configure_flags = "-DBUILD_SHARED_LIBS=ON"

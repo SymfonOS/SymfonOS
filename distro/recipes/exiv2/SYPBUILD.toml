@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "exiv2"
+version = "0.28.5-1"
+summary = "Bild-Metadaten (Exif, IPTC, XMP)"
+license = "GPL-2.0-or-later"
+url = "url/"
+depends = ["expat", "zlib", "brotli", "curl", "inih"]
+makedepends = ["cmake"]
+
+[[source]]
+url = "url"
+sha256 = "TODO"
+
+[build]
+style = "cmake"
+configure_flags = "-DEXIV2_ENABLE_VIDEO=yes -DEXIV2_ENABLE_WEBREADY=yes -DEXIV2_ENABLE_CURL=yes -DEXIV2_BUILD_SAMPLES=no -DEXIV2_BUILD_UNIT_TESTS=no -DCMAKE_SKIP_INSTALL_RPATH=ON"

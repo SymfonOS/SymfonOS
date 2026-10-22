@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libb2"
+version = "0.98.1-1"
+summary = "BLAKE2-Hash"
+license = "CC0-1.0"
+url = "https://github.com/BLAKE2/libb2/releases/download/v0.98.1/"
+depends = ["glibc"]
+
+[[source]]
+url = "https://github.com/BLAKE2/libb2/releases/download/v0.98.1/libb2-0.98.1.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--enable-native=no --enable-openmp=no"

@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libsigsegv"
+version = "2.15-1"
+summary = "Seitenfehler-Behandlung"
+license = "GPL-2.0-or-later"
+url = "https://ftp.gnu.org/gnu/libsigsegv/"
+depends = ["glibc"]
+
+[[source]]
+url = "https://ftp.gnu.org/gnu/libsigsegv/libsigsegv-2.15.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--enable-shared"

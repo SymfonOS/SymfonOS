@@ -1,0 +1,16 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "speexdsp"
+version = "1.2.1-1"
+summary = "Sprachsignal-Verarbeitung"
+license = "BSD-3-Clause"
+url = "https://downloads.xiph.org/releases/speex/"
+depends = ["glibc"]
+
+[[source]]
+url = "https://downloads.xiph.org/releases/speex/speexdsp-1.2.1.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

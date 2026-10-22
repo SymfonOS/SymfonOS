@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "pango"
+version = "1.56.4-1"
+summary = "Textlayout"
+license = "LGPL-2.1-or-later"
+url = "https://download.gnome.org/sources/pango/1.56/"
+depends = ["fontconfig", "freetype", "harfbuzz", "fribidi", "glib2", "cairo", "libxft"]
+makedepends = ["meson"]
+
+[[source]]
+url = "https://download.gnome.org/sources/pango/1.56/pango-1.56.4.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "--wrap-mode=nofallback -Dintrospection=disabled -Dbuild-testsuite=false -Dbuild-examples=false"

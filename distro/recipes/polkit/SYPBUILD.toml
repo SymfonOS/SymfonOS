@@ -1,0 +1,24 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "polkit"
+version = "126-1"
+summary = "Berechtigungsdienst (polkit)"
+license = "LGPL-2.0-or-later"
+url = "url/"
+depends = ["duktape", "glib2", "systemd", "linux-pam", "expat"]
+makedepends = ["meson", "libxslt", "docbook-xsl-nons", "gettext"]
+provides = ["so:libpolkit-gobject-1.so.0"]
+
+[[source]]
+url = "url"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Dman=false -Dsession_tracking=logind -Dtests=false -Dintrospection=false -Djs_engine=duktape -Dpolkitd_user=polkitd -Dpolkitd_uid=27 -Dexamples=false -Dgtk_doc=false -Dpam_include=system-auth"
+post_install = '''
+install -Dm644 /dev/stdin "$DESTDIR/usr/lib/sysusers.d/polkit.conf" <<'SYS'
+u polkitd 27 "PolicyKit Daemon Owner" /etc/polkit-1 /usr/bin/nologin
+SYS
+'''

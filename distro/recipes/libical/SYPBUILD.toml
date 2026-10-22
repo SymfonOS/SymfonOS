@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libical"
+version = "3.0.20-1"
+summary = "iCalendar-Bibliothek"
+license = "LGPL-2.1-only OR MPL-2.0"
+url = "https://github.com/libical/libical/releases/download/v3.0.20/"
+depends = ["glibc", "icu", "glib2", "libxml2"]
+makedepends = ["cmake"]
+
+[[source]]
+url = "https://github.com/libical/libical/releases/download/v3.0.20/libical-3.0.20.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "cmake"
+configure_flags = "-DSHARED_ONLY=yes -DICAL_BUILD_DOCS=false -DGOBJECT_INTROSPECTION=false -DICAL_GLIB_VAPI=false -DLIBICAL_BUILD_TESTING=false"
+make_flags = "-j1"

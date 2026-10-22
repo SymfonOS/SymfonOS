@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "spirv-llvm-translator"
+version = "20.1.5-1"
+summary = "LLVM-IR ↔ SPIR-V"
+license = "Apache-2.0 WITH LLVM-exception"
+url = "url/"
+depends = ["llvm", "spirv-tools"]
+makedepends = ["cmake", "spirv-headers"]
+
+[[source]]
+url = "url"
+sha256 = "TODO"
+
+[build]
+style = "cmake"
+configure_flags = "-DBUILD_SHARED_LIBS=ON -DCMAKE_SKIP_INSTALL_RPATH=ON -DLLVM_EXTERNAL_SPIRV_HEADERS_SOURCE_DIR=/usr -DLLVM_INCLUDE_TESTS=OFF"

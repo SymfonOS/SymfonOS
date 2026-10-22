@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libqrencode"
+version = "4.1.1-1"
+summary = "QR-Code-Bibliothek"
+license = "LGPL-2.1-or-later"
+url = "url/"
+depends = ["glibc", "libpng"]
+makedepends = ["autoconf", "automake", "libtool"]
+
+[[source]]
+url = "url"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+pre_configure = "sh autogen.sh"

@@ -1,0 +1,60 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "sddm"
+version = "0.21.0-1"
+summary = "Anmeldebildschirm (SDDM)"
+license = "GPL-2.0-or-later"
+url = "url/"
+depends = ["qt6-base", "qt6-declarative", "linux-pam", "systemd", "libxcb", "libxau", "upower", "xauth", "xkeyboard-config"]
+makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "python-docutils"]
+backup = ["etc/pam.d/sddm", "etc/pam.d/sddm-autologin", "etc/pam.d/sddm-greeter"]
+
+[[source]]
+url = "url"
+sha256 = "TODO"
+
+[build]
+style = "cmake"
+configure_flags = "-DRUNTIME_DIR=/run/sddm -DBUILD_MAN_PAGES=OFF -DBUILD_WITH_QT6=ON -DDATA_INSTALL_DIR=/usr/share/sddm -DDBUS_CONFIG_FILENAME=sddm_org.freedesktop.DisplayManager.conf -DSYSTEMD_TMPFILES_DIR=/usr/lib/tmpfiles.d -DSYSTEMD_SYSUSERS_DIR=/usr/lib/sysusers.d -DUID_MIN=1000 -DUID_MAX=60513 -DNO_SYSTEMD=OFF -DCMAKE_INSTALL_SYSCONFDIR=/etc"
+post_install = '''
+# PAM wie bei Fedora (system-auth), nicht die Vorgaben von SDDM (system-login)
+install -d "$DESTDIR/etc/pam.d"
+cat > "$DESTDIR/etc/pam.d/sddm" <<'PAM'
+auth       requisite    pam_nologin.so
+auth       include      system-auth
+-auth      optional     pam_kwallet5.so
+account    required     pam_access.so
+account    include      system-auth
+password   include      system-auth
+session    required     pam_selinux.so close
+session    required     pam_loginuid.so
+session    include      system-auth
+session    required     pam_selinux.so open
+-session   optional     pam_kwallet5.so auto_start
+PAM
+cat > "$DESTDIR/etc/pam.d/sddm-autologin" <<'PAM'
+auth       requisite    pam_nologin.so
+auth       required     pam_permit.so
+account    include      system-auth
+password   include      system-auth
+session    required     pam_selinux.so close
+session    required     pam_loginuid.so
+session    include      system-auth
+session    required     pam_selinux.so open
+PAM
+cat > "$DESTDIR/etc/pam.d/sddm-greeter" <<'PAM'
+auth       required     pam_env.so
+auth       required     pam_permit.so
+account    required     pam_permit.so
+password   required     pam_deny.so
+session    required     pam_unix.so
+-session   optional     pam_systemd.so
+PAM
+[ -f "$DESTDIR/usr/lib/sysusers.d/sddm.conf" ] || install -Dm644 /dev/stdin "$DESTDIR/usr/lib/sysusers.d/sddm.conf" <<'SYS'
+u sddm - "SDDM Greeter" /var/lib/sddm /usr/bin/nologin
+SYS
+[ -f "$DESTDIR/usr/lib/tmpfiles.d/sddm.conf" ] || install -Dm644 /dev/stdin "$DESTDIR/usr/lib/tmpfiles.d/sddm.conf" <<'TMP'
+d /var/lib/sddm 0750 sddm sddm -
+TMP
+'''

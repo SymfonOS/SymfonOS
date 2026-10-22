@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libxrender"
+version = "0.9.12-1"
+summary = "X11-Bibliothek libXrender"
+license = "MIT"
+url = "https://www.x.org/pub/individual/lib/"
+depends = ["libx11", "xorgproto"]
+makedepends = ["util-macros", "pkgconf"]
+
+[[source]]
+url = "https://www.x.org/pub/individual/lib/libXrender-0.9.12.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

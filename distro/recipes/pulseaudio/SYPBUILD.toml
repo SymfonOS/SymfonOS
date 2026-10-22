@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "pulseaudio"
+version = "17.0-1"
+summary = "PulseAudio-Clientbibliothek (der Server ist PipeWire)"
+license = "LGPL-2.1-or-later"
+url = "https://www.freedesktop.org/software/pulseaudio/releases/"
+depends = ["libsndfile", "dbus", "glib2", "systemd"]
+makedepends = ["meson"]
+provides = ["libpulse", "so:libpulse.so.0"]
+
+[[source]]
+url = "https://www.freedesktop.org/software/pulseaudio/releases/pulseaudio-17.0.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Ddaemon=false -Ddoxygen=false -Dman=false -Dtests=false -Ddatabase=simple -Dbluez5=disabled -Dgtk=disabled -Dx11=disabled"

@@ -1,0 +1,16 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libsamplerate"
+version = "0.2.2-1"
+summary = "Abtastratenwandlung"
+license = "BSD-2-Clause"
+url = "https://github.com/libsndfile/libsamplerate/releases/download/0.2.2/"
+depends = ["glibc"]
+
+[[source]]
+url = "https://github.com/libsndfile/libsamplerate/releases/download/0.2.2/libsamplerate-0.2.2.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

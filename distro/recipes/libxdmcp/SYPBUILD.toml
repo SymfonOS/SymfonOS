@@ -1,0 +1,16 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libxdmcp"
+version = "1.1.5-1"
+summary = "X Display Manager Control Protocol"
+license = "MIT"
+url = "https://www.x.org/pub/individual/lib/"
+depends = ["xorgproto"]
+
+[[source]]
+url = "https://www.x.org/pub/individual/lib/libXdmcp-1.1.5.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

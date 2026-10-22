@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libjpeg-turbo"
+version = "3.0.1-1"
+summary = "JPEG-Bibliothek"
+license = "IJG AND BSD-3-Clause AND Zlib"
+url = "https://downloads.sourceforge.net/libjpeg-turbo/"
+depends = ["glibc"]
+makedepends = ["cmake", "nasm"]
+provides = ["libjpeg", "so:libjpeg.so.8", "so:libturbojpeg.so.0"]
+
+[[source]]
+url = "https://downloads.sourceforge.net/libjpeg-turbo/libjpeg-turbo-3.0.1.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "cmake"
+configure_flags = "-DENABLE_STATIC=FALSE -DCMAKE_INSTALL_DEFAULT_LIBDIR=lib -DCMAKE_SKIP_INSTALL_RPATH=ON"

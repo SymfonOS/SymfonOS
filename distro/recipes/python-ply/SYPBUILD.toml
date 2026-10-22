@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "python-ply"
+version = "3.11-1"
+arch = "any"
+summary = "Lex/Yacc für Python (Intel-Vulkan-Treiber)"
+license = "BSD-3-Clause"
+url = "https://files.pythonhosted.org/packages/source/p/ply/"
+depends = ["python"]
+makedepends = ["python-setuptools", "python-wheel"]
+
+[[source]]
+url = "https://files.pythonhosted.org/packages/source/p/ply/ply-3.11.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "python"

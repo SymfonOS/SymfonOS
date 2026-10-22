@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "harfbuzz"
+version = "11.4.1-1"
+summary = "Text-Shaping"
+license = "MIT"
+url = "https://github.com/harfbuzz/harfbuzz/releases/download/11.4.1/"
+depends = ["glib2", "graphite2", "icu", "freetype"]
+makedepends = ["meson"]
+provides = ["so:libharfbuzz.so.0"]
+
+[[source]]
+url = "https://github.com/harfbuzz/harfbuzz/releases/download/11.4.1/harfbuzz-11.4.1.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Dgraphite2=enabled -Dicu=enabled -Dfreetype=enabled -Dglib=enabled -Dgobject=enabled -Dintrospection=disabled -Dtests=disabled -Ddocs=disabled -Dcairo=disabled"

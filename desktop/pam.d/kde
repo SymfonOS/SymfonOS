@@ -1,0 +1,3 @@
+# Bildschirmsperre (kscreenlocker) – gleiche Regeln wie die Anmeldung (Fehlversuche, Sperre)
+auth       include      system-auth
+account    include      system-auth

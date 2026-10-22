@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libxfont2"
+version = "2.0.7-1"
+summary = "X11-Bibliothek libXfont2"
+license = "MIT"
+url = "https://www.x.org/pub/individual/lib/"
+depends = ["freetype", "libfontenc", "xtrans", "xorgproto"]
+makedepends = ["util-macros", "pkgconf"]
+
+[[source]]
+url = "https://www.x.org/pub/individual/lib/libXfont2-2.0.7.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--disable-devel-docs"

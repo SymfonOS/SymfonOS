@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "desktop-file-utils"
+version = "0.28-1"
+summary = "Werkzeuge für .desktop-Dateien"
+license = "GPL-2.0-or-later"
+url = "https://www.freedesktop.org/software/desktop-file-utils/releases/"
+depends = ["glib2"]
+makedepends = ["meson"]
+
+[[source]]
+url = "https://www.freedesktop.org/software/desktop-file-utils/releases/desktop-file-utils-0.28.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"

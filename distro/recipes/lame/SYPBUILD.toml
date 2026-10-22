@@ -1,0 +1,21 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "lame"
+version = "3.100-1"
+summary = "MP3-Encoder"
+license = "LGPL-2.0-or-later"
+url = "https://downloads.sourceforge.net/lame/"
+depends = ["ncurses"]
+makedepends = ["nasm"]
+
+[[source]]
+url = "https://downloads.sourceforge.net/lame/lame-3.100.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--enable-mp3rtp --enable-nasm"
+pre_configure = '''
+sed -i -e 's/^\(\s*hardcode_libdir_flag_spec\s*=\).*/\1/' configure
+'''

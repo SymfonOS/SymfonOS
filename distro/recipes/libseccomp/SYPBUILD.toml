@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libseccomp"
+version = "2.6.0-1"
+summary = "Seccomp-Filterbibliothek"
+license = "LGPL-2.1-only"
+url = "https://github.com/seccomp/libseccomp/releases/download/v2.6.0/"
+depends = ["glibc"]
+makedepends = ["gperf"]
+
+[[source]]
+url = "https://github.com/seccomp/libseccomp/releases/download/v2.6.0/libseccomp-2.6.0.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

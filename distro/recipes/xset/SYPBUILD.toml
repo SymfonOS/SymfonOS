@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "xset"
+version = "1.2.5-1"
+summary = "X11-Programm xset"
+license = "MIT"
+url = "https://www.x.org/pub/individual/app/"
+depends = ["libxmu"]
+makedepends = ["util-macros"]
+
+[[source]]
+url = "https://www.x.org/pub/individual/app/xset-1.2.5.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

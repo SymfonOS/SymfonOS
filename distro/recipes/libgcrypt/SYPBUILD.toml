@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libgcrypt"
+version = "1.11.2-1"
+summary = "Kryptographie-Bibliothek (GnuPG)"
+license = "LGPL-2.1-or-later"
+url = "https://www.gnupg.org/ftp/gcrypt/libgcrypt/"
+depends = ["libgpg-error"]
+provides = ["so:libgcrypt.so.20"]
+
+[[source]]
+url = "https://www.gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-1.11.2.tar.bz2"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libclc"
+version = "20.1.8-1"
+arch = "any"
+summary = "OpenCL-C-Bibliothek (für Intel-Treiber in Mesa)"
+license = "Apache-2.0 WITH LLVM-exception"
+url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.8/"
+makedepends = ["llvm", "spirv-llvm-translator", "cmake", "python"]
+
+[[source]]
+url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.8/libclc-20.1.8.src.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "cmake"
+configure_flags = "-DLIBCLC_TARGETS_TO_BUILD='spirv-mesa3d-;spirv64-mesa3d-'"

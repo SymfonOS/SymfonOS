@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libevdev"
+version = "1.13.4-1"
+summary = "evdev-Geräte"
+license = "MIT"
+url = "https://www.freedesktop.org/software/libevdev/"
+depends = ["glibc"]
+makedepends = ["meson", "python"]
+
+[[source]]
+url = "https://www.freedesktop.org/software/libevdev/libevdev-1.13.4.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Ddocumentation=disabled -Dtests=disabled"

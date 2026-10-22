@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "xorgproto"
+version = "2024.1-1"
+arch = "any"
+summary = "X11-Protokoll-Header"
+license = "MIT"
+url = "https://www.x.org/pub/individual/proto/"
+makedepends = ["meson", "util-macros"]
+
+[[source]]
+url = "https://www.x.org/pub/individual/proto/xorgproto-2024.1.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"

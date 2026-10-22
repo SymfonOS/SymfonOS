@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "inih"
+version = "61-1"
+summary = "INI-Parser"
+license = "BSD-3-Clause"
+url = "url/"
+depends = ["glibc"]
+makedepends = ["meson"]
+
+[[source]]
+url = "url"
+sha256 = "TODO"
+
+[build]
+style = "meson"

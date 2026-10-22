@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "cairo"
+version = "1.18.4-1"
+summary = "2D-Grafikbibliothek"
+license = "LGPL-2.1-only OR MPL-1.1"
+url = "https://www.cairographics.org/releases/"
+depends = ["libpng", "pixman", "fontconfig", "freetype", "glib2", "libx11", "libxext", "libxrender", "libxcb", "lzo", "zlib"]
+makedepends = ["meson"]
+provides = ["so:libcairo.so.2"]
+
+[[source]]
+url = "https://www.cairographics.org/releases/cairo-1.18.4.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Dtests=disabled -Dxlib-xcb=enabled"

@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libxkbcommon"
+version = "1.11.0-1"
+summary = "Tastaturbelegungen (Bibliothek)"
+license = "MIT"
+url = "url/"
+depends = ["xkeyboard-config", "libxcb", "wayland", "libxml2"]
+makedepends = ["meson", "wayland-protocols", "bison"]
+provides = ["so:libxkbcommon.so.0"]
+
+[[source]]
+url = "url"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Denable-docs=false"

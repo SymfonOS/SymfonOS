@@ -1,0 +1,28 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "lmdb"
+version = "0.9.33-1"
+summary = "Lightning Memory-Mapped Database"
+license = "OLDAP-2.8"
+url = "url/"
+depends = ["glibc"]
+
+[[source]]
+url = "url"
+sha256 = "TODO"
+
+[[source]]
+url = "filename"
+sha256 = "TODO"
+
+[build]
+build = '''
+cd "$S/libraries/liblmdb"
+make CC=gcc XCFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS"
+sed -i "s| liblmdb.a||" Makefile
+'''
+package = '''
+cd "$S/libraries/liblmdb"
+make prefix=/usr DESTDIR="$DESTDIR" install
+'''

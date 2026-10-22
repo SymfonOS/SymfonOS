@@ -1,0 +1,27 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "xorg-server"
+version = "21.1.18-1"
+summary = "X.Org-Server (für X11-Eingabetreiber; die Sitzung läuft unter Wayland)"
+license = "MIT"
+url = "https://www.x.org/pub/individual/xserver/"
+depends = ["libxcvt", "pixman", "libxfont2", "xkeyboard-config", "xkbcomp", "libepoxy", "mesa", "libdrm", "libxshmfence", "systemd", "libpciaccess", "libxau", "libxdmcp", "libxkbfile", "libxcb", "xcb-util", "xcb-util-image", "xcb-util-keysyms", "xcb-util-renderutil", "xcb-util-wm"]
+makedepends = ["meson", "font-util", "xorgproto", "xtrans", "xbitmaps", "libxext", "libxrender", "libx11"]
+
+[[source]]
+url = "https://www.x.org/pub/individual/xserver/xorg-server-21.1.18.tar.xz"
+sha256 = "TODO"
+
+[[source]]
+url = "https://www.linuxfromscratch.org/patches/blfs/12.4/xorg-server-21.1.18-tearfree_backport-1.patch"
+sha256 = "TODO"
+extract = false
+
+[build]
+style = "meson"
+configure_flags = "-Dglamor=true -Dxkb_output_dir=/var/lib/xkb -Dsecure-rpc=false -Dsystemd_logind=true -Dsuid_wrapper=false -Dxephyr=false -Dxvfb=false -Dxnest=false -Ddocs=false -Ddevel-docs=false"
+pre_configure = "patch -Np1 -i ../xorg-server-21.1.18-tearfree_backport-1.patch"
+post_install = '''
+install -d "$DESTDIR/etc/X11/xorg.conf.d"
+'''

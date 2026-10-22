@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "opus"
+version = "1.5.2-1"
+summary = "Opus-Audio"
+license = "BSD-3-Clause"
+url = "https://downloads.xiph.org/releases/opus/"
+depends = ["glibc"]
+
+[[source]]
+url = "https://downloads.xiph.org/releases/opus/opus-1.5.2.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--disable-doc"

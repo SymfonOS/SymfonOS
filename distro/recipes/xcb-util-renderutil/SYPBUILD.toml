@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "xcb-util-renderutil"
+version = "0.3.10-1"
+summary = "XCB-Hilfsbibliothek xcb-util-renderutil"
+license = "MIT"
+url = "https://xcb.freedesktop.org/dist/"
+depends = ["libxcb", "xcb-util"]
+makedepends = ["util-macros", "m4"]
+
+[[source]]
+url = "https://xcb.freedesktop.org/dist/xcb-util-renderutil-0.3.10.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
