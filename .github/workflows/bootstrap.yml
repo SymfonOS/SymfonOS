@@ -12,6 +12,11 @@ on:
         default: false
   schedule:
     - cron: "41 */6 * * *"
+  # Änderungen an Rezepten, Bauskripten oder syp setzen den Bau fort (laufende Etappen werden nicht
+  # abgebrochen; GitHub hält höchstens einen wartenden Lauf je concurrency-Gruppe)
+  push:
+    branches: [main]
+    paths: ["distro/**", "csrc/**", "tools/*.sh", ".github/workflows/bootstrap.yml"]
 
 concurrency:
   group: bootstrap
@@ -239,7 +244,13 @@ jobs:
             sudo ls -la "$SYM/usr/lib64" > "$d/lib64.txt" 2>&1 || true
           fi
           cp -r out/desktop-test "$d/" 2>/dev/null || true
-          echo "Lauf $GITHUB_RUN_ID, $(date -u), rc=${{ steps.build.outputs.rc }}" > "$d/README"
+          {
+            echo "Lauf $GITHUB_RUN_ID, $(date -u), rc=${{ steps.build.outputs.rc }}"
+            echo "Commit: $GITHUB_SHA"
+            echo "ISO: ${{ steps.build.outputs.rc == '0' && 'ja' || 'nein' }} · Desktop-ISO: ${{ steps.desktop.outcome }}"
+            grep -E '^:: gebaut' build.log 2>/dev/null | tail -1
+            ls -la out/*.iso out/desktop/*.iso 2>/dev/null
+          } > "$d/README"
           cd "$d" && git init -q -b ci-diag && git add -A
           git -c user.name="symfonOS CI" -c user.email=ci@users.noreply.github.com commit -qm "Diagnose Lauf $GITHUB_RUN_ID"
           git push -qf "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}" ci-diag || true
