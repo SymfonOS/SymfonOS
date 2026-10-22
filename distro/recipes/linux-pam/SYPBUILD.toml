@@ -16,4 +16,4 @@ sha256 = "21dbcec6e01dd578f14789eac9024a18941e6f2702a05cf91b28c232eeb26ab0"
 
 [build]
 style = "meson"
-configure_flags = "-D docs=disabled -D examples=false -D xtests=false -D selinux=enabled -D audit=enabled -D logind=enabled"
+configure_flags = "-D docs=disabled -D examples=false -D xtests=false -D selinux=enabled -D audit=enabled -D logind=disabled"
