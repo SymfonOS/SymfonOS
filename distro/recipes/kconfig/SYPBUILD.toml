@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/frameworks/6.17/kconfig-6.17.0.tar.xz"
-sha256 = "TODO"
+sha256 = "067435b24ca9f7cf56a8ce5b108438a15607b26dc52905ae07dc187c7e2949de"
 
 [build]
 style = "cmake"

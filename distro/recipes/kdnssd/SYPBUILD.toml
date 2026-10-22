@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/frameworks/6.17/kdnssd-6.17.0.tar.xz"
-sha256 = "TODO"
+sha256 = "6e1681a01a4cd09650ba4de1bbad4ec03d3f6452fc07ff4f74e24b24040f3e0a"
 
 [build]
 style = "cmake"

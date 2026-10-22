@@ -10,7 +10,7 @@ depends = ["glibc"]
 
 [[source]]
 url = "https://ftp.gnu.org/gnu/libsigsegv/libsigsegv-2.15.tar.gz"
-sha256 = "TODO"
+sha256 = "036855660225cb3817a190fc00e6764ce7836051bacb48d35e26444b8c1729d9"
 
 [build]
 style = "autotools"

@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/plasma/6.4.4/systemsettings-6.4.4.tar.xz"
-sha256 = "TODO"
+sha256 = "6b14788bf19397f58f0231cb9ccd57c3218ca71afd2d9f1c745581e13fa57748"
 
 [build]
 style = "cmake"

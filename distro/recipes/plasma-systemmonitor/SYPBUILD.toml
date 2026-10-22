@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/plasma/6.4.4/plasma-systemmonitor-6.4.4.tar.xz"
-sha256 = "TODO"
+sha256 = "c9d4a27ef93f1ec29a9b181c56dbf16ce81aa1a6ad30c837ff987c3552888e78"
 
 [build]
 style = "cmake"

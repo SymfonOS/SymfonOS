@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/plasma/6.4.4/breeze-6.4.4.tar.xz"
-sha256 = "TODO"
+sha256 = "307cfcb5505bd376d959b364f5231cac4a280af938a938ce3a4e3b7a9f71f70d"
 
 [build]
 style = "cmake"

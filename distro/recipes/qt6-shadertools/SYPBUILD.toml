@@ -11,7 +11,7 @@ makedepends = ["cmake", "ninja", "pkgconf"]
 
 [[source]]
 url = "https://download.qt.io/archive/qt/6.9/6.9.2/submodules/qtshadertools-everywhere-src-6.9.2.tar.xz"
-sha256 = "TODO"
+sha256 = "17678af9d9543224bbb932bf18d4fc05e180b2b3a3216241e557631bd6bf1495"
 
 [build]
 style = "cmake"

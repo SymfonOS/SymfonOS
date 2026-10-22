@@ -11,7 +11,7 @@ provides = ["so:libxml2.so.16"]
 
 [[source]]
 url = "https://download.gnome.org/sources/libxml2/2.14/libxml2-2.14.5.tar.xz"
-sha256 = "TODO"
+sha256 = "03d006f3537616833c16c53addcdc32a0eb20e55443cba4038307e3fa7d8d44b"
 
 [build]
 style = "autotools"

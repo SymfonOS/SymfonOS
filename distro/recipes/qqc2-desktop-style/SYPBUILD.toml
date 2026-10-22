@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/frameworks/6.17/qqc2-desktop-style-6.17.0.tar.xz"
-sha256 = "TODO"
+sha256 = "631bd89d5c82a7f93ea26bc2079d1df81c32e75f177d3346a9cb10a9cd747797"
 
 [build]
 style = "cmake"

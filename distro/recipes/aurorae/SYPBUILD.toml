@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/plasma/6.4.4/aurorae-6.4.4.tar.xz"
-sha256 = "TODO"
+sha256 = "b358a775772052e46b4978c63ad765996ca4600af0db1189260129fd91de6589"
 
 [build]
 style = "cmake"

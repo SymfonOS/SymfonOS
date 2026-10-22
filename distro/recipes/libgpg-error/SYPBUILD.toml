@@ -11,7 +11,7 @@ provides = ["so:libgpg-error.so.0"]
 
 [[source]]
 url = "https://www.gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-1.55.tar.bz2"
-sha256 = "TODO"
+sha256 = "95b178148863f07d45df0cea67e880a79b9ef71f5d230baddc0071128516ef78"
 
 [build]
 style = "autotools"

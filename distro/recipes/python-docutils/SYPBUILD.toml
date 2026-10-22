@@ -12,7 +12,7 @@ makedepends = ["python-flit-core"]
 
 [[source]]
 url = "https://files.pythonhosted.org/packages/source/d/docutils/docutils-0.21.2.tar.gz"
-sha256 = "TODO"
+sha256 = "3a6b18732edf182daa3cd12775bbb338cf5691468f91eeeb109deff6ebfa986f"
 
 [build]
 style = "python"

@@ -11,11 +11,11 @@ provides = ["so:libasound.so.2"]
 
 [[source]]
 url = "https://www.alsa-project.org/files/pub/lib/alsa-lib-1.2.14.tar.bz2"
-sha256 = "TODO"
+sha256 = "be9c88a0b3604367dd74167a2b754a35e142f670292ae47a2fdef27a2ee97a32"
 
 [[source]]
 url = "https://www.alsa-project.org/files/pub/lib/alsa-ucm-conf-1.2.14.tar.bz2"
-sha256 = "TODO"
+sha256 = "32e9809f592d92b978aa1032e35293c33b8d0f1ec475f937022c3ee9a3069c21"
 extract = false
 
 [build]

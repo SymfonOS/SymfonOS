@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/plasma/6.4.4/kwayland-6.4.4.tar.xz"
-sha256 = "TODO"
+sha256 = "f458ae7ed1118e1a2165a37378c8ce0e9fff80d1a4cfe86217f06cf24ca49f9b"
 
 [build]
 style = "cmake"

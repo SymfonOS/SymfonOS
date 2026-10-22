@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/plasma/6.4.4/plasma-activities-stats-6.4.4.tar.xz"
-sha256 = "TODO"
+sha256 = "dd43899617b0cc0e927a13bfb88146b761f7390c1fba568e2e4522f07f0f5901"
 
 [build]
 style = "cmake"

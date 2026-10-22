@@ -11,7 +11,7 @@ makedepends = ["util-macros", "pkgconf"]
 
 [[source]]
 url = "https://www.x.org/pub/individual/lib/libXScrnSaver-1.2.4.tar.xz"
-sha256 = "TODO"
+sha256 = "75cd2859f38e207a090cac980d76bc71e9da99d48d09703584e00585abc920fe"
 
 [build]
 style = "autotools"

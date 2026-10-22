@@ -11,7 +11,7 @@ makedepends = ["meson", "gettext"]
 
 [[source]]
 url = "https://www.freedesktop.org/software/accountsservice/accountsservice-23.13.9.tar.xz"
-sha256 = "TODO"
+sha256 = "adda4cdeae24fa0992e7df3ffff9effa7090be3ac233a3edfdf69d5a9c9b924f"
 
 [build]
 style = "meson"

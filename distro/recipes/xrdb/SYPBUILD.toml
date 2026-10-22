@@ -11,7 +11,7 @@ makedepends = ["util-macros"]
 
 [[source]]
 url = "https://www.x.org/pub/individual/app/xrdb-1.2.2.tar.xz"
-sha256 = "TODO"
+sha256 = "31f5fcab231b38f255b00b066cf7ea3b496df712c9eb2d0d50c670b63e5033f4"
 
 [build]
 style = "autotools"

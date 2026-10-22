@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/plasma/6.4.4/kscreen-6.4.4.tar.xz"
-sha256 = "TODO"
+sha256 = "5890d24614ac6f93cc97964f9ca8b1bef95ec14508408dc87f3904d03b3af876"
 
 [build]
 style = "cmake"

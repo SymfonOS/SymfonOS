@@ -11,7 +11,7 @@ makedepends = ["cmake", "ninja", "pkgconf"]
 
 [[source]]
 url = "https://download.qt.io/archive/qt/6.9/6.9.2/submodules/qtspeech-everywhere-src-6.9.2.tar.xz"
-sha256 = "TODO"
+sha256 = "b2b667375111637e45517a6e63475987691b922a19900abc52996617a0a088b1"
 
 [build]
 style = "cmake"

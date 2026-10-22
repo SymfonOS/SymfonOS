@@ -11,7 +11,7 @@ makedepends = ["util-macros"]
 
 [[source]]
 url = "https://www.x.org/pub/individual/app/xprop-1.2.8.tar.xz"
-sha256 = "TODO"
+sha256 = "d689e2adb7ef7b439f6469b51cda8a7daefc83243854c2a3b8f84d0f029d67ee"
 
 [build]
 style = "autotools"

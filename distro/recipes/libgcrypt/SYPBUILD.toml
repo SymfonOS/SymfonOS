@@ -11,7 +11,7 @@ provides = ["so:libgcrypt.so.20"]
 
 [[source]]
 url = "https://www.gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-1.11.2.tar.bz2"
-sha256 = "TODO"
+sha256 = "6ba59dd192270e8c1d22ddb41a07d95dcdbc1f0fb02d03c4b54b235814330aac"
 
 [build]
 style = "autotools"

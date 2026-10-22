@@ -12,7 +12,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/plasma/6.4.4/ocean-sound-theme-6.4.4.tar.xz"
-sha256 = "TODO"
+sha256 = "ddd87c9021947a5eff06e2f92566b9d81fe06ea444430745e896d647994e37eb"
 
 [build]
 style = "cmake"

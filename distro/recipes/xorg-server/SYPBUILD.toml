@@ -11,11 +11,11 @@ makedepends = ["meson", "font-util", "xorgproto", "xtrans", "xbitmaps", "libxext
 
 [[source]]
 url = "https://www.x.org/pub/individual/xserver/xorg-server-21.1.18.tar.xz"
-sha256 = "TODO"
+sha256 = "c878d1930d87725d4a5bf498c24f4be8130d5b2646a9fd0f2994deff90116352"
 
 [[source]]
 url = "https://www.linuxfromscratch.org/patches/blfs/12.4/xorg-server-21.1.18-tearfree_backport-1.patch"
-sha256 = "TODO"
+sha256 = "df3406c2fa906d97c0e095e3c85a93d3eeadd04f6f6e2b9979442b4d581cc884"
 extract = false
 
 [build]

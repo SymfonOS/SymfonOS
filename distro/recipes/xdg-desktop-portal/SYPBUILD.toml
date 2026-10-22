@@ -11,7 +11,7 @@ makedepends = ["meson", "python-docutils"]
 
 [[source]]
 url = "https://github.com/flatpak/xdg-desktop-portal/releases/download/1.20.3/xdg-desktop-portal-1.20.3.tar.xz"
-sha256 = "TODO"
+sha256 = "4bfb164937f59107eb1a3cc21abaa948d903c76f3b99fac210cea38ce1da9edc"
 
 [build]
 style = "meson"

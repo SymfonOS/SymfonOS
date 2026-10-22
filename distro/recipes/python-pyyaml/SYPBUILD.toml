@@ -11,7 +11,7 @@ makedepends = ["python-setuptools", "python-wheel", "python-cython"]
 
 [[source]]
 url = "https://files.pythonhosted.org/packages/source/P/PyYAML/pyyaml-6.0.2.tar.gz"
-sha256 = "TODO"
+sha256 = "d584d9ec91ad65861cc08d42e834324ef890a082e591037abe114850ff7bbc3e"
 
 [build]
 style = "python"

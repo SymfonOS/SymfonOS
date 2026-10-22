@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/plasma/6.4.4/kactivitymanagerd-6.4.4.tar.xz"
-sha256 = "TODO"
+sha256 = "38f24d9529810495db1a2d0f102a89885d22813f131fb6453b79d898bfcbe2a4"
 
 [build]
 style = "cmake"

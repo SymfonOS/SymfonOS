@@ -12,7 +12,7 @@ makedepends = ["python-setuptools", "python-wheel"]
 
 [[source]]
 url = "https://files.pythonhosted.org/packages/source/p/ply/ply-3.11.tar.gz"
-sha256 = "TODO"
+sha256 = "00c7c1aaa88358b9c765b6d3000c6eec0ba42abca5351b095321aef446081da3"
 
 [build]
 style = "python"

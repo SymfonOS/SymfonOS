@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/frameworks/6.17/kded-6.17.0.tar.xz"
-sha256 = "TODO"
+sha256 = "4f5f04b9dbcf3a0ba42815419d969b01a6624024d14994d540a973a6371cf277"
 
 [build]
 style = "cmake"

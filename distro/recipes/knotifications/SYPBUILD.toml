@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/frameworks/6.17/knotifications-6.17.0.tar.xz"
-sha256 = "TODO"
+sha256 = "b7801c546935e6082a72d4c7dd0387407b6a1905ab88de9bddaf369a8eca4141"
 
 [build]
 style = "cmake"

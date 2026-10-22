@@ -11,7 +11,7 @@ makedepends = ["util-macros"]
 
 [[source]]
 url = "https://www.x.org/pub/individual/app/xset-1.2.5.tar.xz"
-sha256 = "TODO"
+sha256 = "9f692d55635b3862cd63633b1222a87680ec283c7a8e8ed6dd698a3147f75e2f"
 
 [build]
 style = "autotools"

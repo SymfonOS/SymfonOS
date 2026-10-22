@@ -11,7 +11,7 @@ makedepends = ["util-macros", "pkgconf"]
 
 [[source]]
 url = "https://www.x.org/pub/individual/lib/libXcomposite-0.4.6.tar.xz"
-sha256 = "TODO"
+sha256 = "fe40bcf0ae1a09070eba24088a5eb9810efe57453779ec1e20a55080c6dc2c87"
 
 [build]
 style = "autotools"

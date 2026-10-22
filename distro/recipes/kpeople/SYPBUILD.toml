@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/frameworks/6.17/kpeople-6.17.0.tar.xz"
-sha256 = "TODO"
+sha256 = "dd0ec4b9baed40a2f960ce4903bdc79073f551969393314e3aa97c75f730f7bf"
 
 [build]
 style = "cmake"

@@ -11,7 +11,7 @@ makedepends = ["util-macros", "pkgconf"]
 
 [[source]]
 url = "https://www.x.org/pub/individual/lib/libfontenc-1.1.8.tar.xz"
-sha256 = "TODO"
+sha256 = "7b02c3d405236e0d86806b1de9d6868fe60c313628b38350b032914aa4fd14c6"
 
 [build]
 style = "autotools"

@@ -11,7 +11,7 @@ depends = ["perl"]
 
 [[source]]
 url = "https://www.cpan.org/authors/id/O/OA/OALDERS/URI-5.32.tar.gz"
-sha256 = "TODO"
+sha256 = "9632067d34e14e0dae2da94631c4f25a387fcc48d06fa29330e8b3c04c4e913d"
 
 [build]
 style = "perl"

@@ -11,7 +11,7 @@ makedepends = ["cmake", "ninja", "pkgconf"]
 
 [[source]]
 url = "https://download.qt.io/archive/qt/6.9/6.9.2/submodules/qtpositioning-everywhere-src-6.9.2.tar.xz"
-sha256 = "TODO"
+sha256 = "489a9801ffbda04b16c62f64a687efae4c1a07807f6b67f40ce1f37c3dfdbc1a"
 
 [build]
 style = "cmake"

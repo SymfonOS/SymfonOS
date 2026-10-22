@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/frameworks/6.17/kwidgetsaddons-6.17.0.tar.xz"
-sha256 = "TODO"
+sha256 = "dcb33387953cd0429d4297d628b4872e7a3a970cce5ea84b446677d8b7487ea1"
 
 [build]
 style = "cmake"

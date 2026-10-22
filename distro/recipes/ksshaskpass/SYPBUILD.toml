@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/plasma/6.4.4/ksshaskpass-6.4.4.tar.xz"
-sha256 = "TODO"
+sha256 = "ab47b94b6024fab148c9a7a8f8c4403a81edea96eabbb0d5f805a120fc5df230"
 
 [build]
 style = "cmake"

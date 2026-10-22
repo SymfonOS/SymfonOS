@@ -11,7 +11,7 @@ makedepends = ["cmake", "nasm", "perl", "ninja"]
 
 [[source]]
 url = "https://storage.googleapis.com/aom-releases/libaom-3.12.1.tar.gz"
-sha256 = "TODO"
+sha256 = "9e9775180dec7dfd61a79e00bda3809d43891aee6b2e331ff7f26986207ea22e"
 
 [build]
 build = '''

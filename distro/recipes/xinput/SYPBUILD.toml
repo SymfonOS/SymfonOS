@@ -11,7 +11,7 @@ makedepends = ["util-macros"]
 
 [[source]]
 url = "https://www.x.org/pub/individual/app/xinput-1.6.4.tar.xz"
-sha256 = "TODO"
+sha256 = "ad04d00d656884d133110eeddc34e9c69e626ebebbbab04dc95791c2907057c8"
 
 [build]
 style = "autotools"

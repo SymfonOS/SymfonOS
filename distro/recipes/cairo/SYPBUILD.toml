@@ -12,7 +12,7 @@ provides = ["so:libcairo.so.2"]
 
 [[source]]
 url = "https://www.cairographics.org/releases/cairo-1.18.4.tar.xz"
-sha256 = "TODO"
+sha256 = "445ed8208a6e4823de1226a74ca319d3600e83f6369f99b14265006599c32ccb"
 
 [build]
 style = "meson"

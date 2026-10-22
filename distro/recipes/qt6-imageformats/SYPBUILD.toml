@@ -11,7 +11,7 @@ makedepends = ["cmake", "ninja", "pkgconf"]
 
 [[source]]
 url = "https://download.qt.io/archive/qt/6.9/6.9.2/submodules/qtimageformats-everywhere-src-6.9.2.tar.xz"
-sha256 = "TODO"
+sha256 = "8a023f7e2f57dedc02e2ab10c975f7cb3cccac9b8f0823c12fd6824834549139"
 
 [build]
 style = "cmake"

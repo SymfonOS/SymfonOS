@@ -10,7 +10,7 @@ depends = ["glibc"]
 
 [[source]]
 url = "https://www.kernel.org/pub/linux/bluetooth/sbc-2.1.tar.xz"
-sha256 = "TODO"
+sha256 = "426633cabd7c798236443516dfa8335b47e004b0ef37ff107e0c7ead3299fcc2"
 
 [build]
 style = "autotools"

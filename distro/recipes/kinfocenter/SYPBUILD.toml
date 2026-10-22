@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/plasma/6.4.4/kinfocenter-6.4.4.tar.xz"
-sha256 = "TODO"
+sha256 = "27629f287c4361e3f127daac38f01d0abb23355ca6da3822f418b398bf0ea0b1"
 
 [build]
 style = "cmake"

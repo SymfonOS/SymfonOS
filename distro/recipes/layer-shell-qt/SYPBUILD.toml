@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/plasma/6.4.4/layer-shell-qt-6.4.4.tar.xz"
-sha256 = "TODO"
+sha256 = "84b31a3e73b150fa611fb51150987600eddd0edc578888e953e7fd37f550643d"
 
 [build]
 style = "cmake"

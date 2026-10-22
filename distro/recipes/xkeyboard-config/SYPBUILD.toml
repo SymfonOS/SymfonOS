@@ -11,7 +11,7 @@ makedepends = ["meson", "libxslt", "python", "gettext"]
 
 [[source]]
 url = "https://www.x.org/pub/individual/data/xkeyboard-config/xkeyboard-config-2.45.tar.xz"
-sha256 = "TODO"
+sha256 = "169e075a92d957a57787c199e84e359df2931b7196c1c5b4a3d576ee6235a87c"
 
 [build]
 style = "meson"

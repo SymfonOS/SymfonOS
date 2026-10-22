@@ -11,7 +11,7 @@ makedepends = ["util-macros", "pkgconf"]
 
 [[source]]
 url = "https://www.x.org/pub/individual/lib/libXdamage-1.1.6.tar.xz"
-sha256 = "TODO"
+sha256 = "52733c1f5262fca35f64e7d5060c6fcd81a880ba8e1e65c9621cf0727afb5d11"
 
 [build]
 style = "autotools"

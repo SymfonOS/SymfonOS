@@ -12,7 +12,7 @@ provides = ["so:libharfbuzz.so.0"]
 
 [[source]]
 url = "https://github.com/harfbuzz/harfbuzz/releases/download/11.4.1/harfbuzz-11.4.1.tar.xz"
-sha256 = "TODO"
+sha256 = "7aafab93115eb56cdc9a931ab7d19ff60d7f2937b599d140f17236f374e32698"
 
 [build]
 style = "meson"

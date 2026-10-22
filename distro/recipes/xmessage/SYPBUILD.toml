@@ -11,7 +11,7 @@ makedepends = ["util-macros"]
 
 [[source]]
 url = "https://www.x.org/pub/individual/app/xmessage-1.0.7.tar.xz"
-sha256 = "TODO"
+sha256 = "703fccb7a0b772d61d7e603c189b9739866aa97ba985c727275420f829a30356"
 
 [build]
 style = "autotools"

@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/release-service/25.08.0/src/kate-25.08.0.tar.xz"
-sha256 = "TODO"
+sha256 = "7fed779b76da86f687c9509c1c22b419b2a97d57c41e693d880664b6c20a2f37"
 
 [build]
 style = "cmake"

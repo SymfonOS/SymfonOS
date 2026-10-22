@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/release-service/25.08.0/src/kcharselect-25.08.0.tar.xz"
-sha256 = "TODO"
+sha256 = "ec9f2be0e119b1c7bff3363d4d405a3fa58c9cddeab68e3cdfe1d0a7908d3ee5"
 
 [build]
 style = "cmake"

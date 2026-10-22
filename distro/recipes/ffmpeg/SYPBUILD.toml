@@ -12,11 +12,11 @@ provides = ["so:libavcodec.so.61", "so:libavformat.so.61", "so:libavutil.so.59",
 
 [[source]]
 url = "https://ffmpeg.org/releases/ffmpeg-7.1.1.tar.xz"
-sha256 = "TODO"
+sha256 = "733984395e0dbbe5c046abda2dc49a5544e7e0e1e2366bba849222ae9e3a03b1"
 
 [[source]]
 url = "https://www.linuxfromscratch.org/patches/blfs/12.4/ffmpeg-7.1.1-chromium_method-1.patch"
-sha256 = "TODO"
+sha256 = "ba75bed1121425b15b485c0af10673900ab9df48d86e64a706aff3ef94f2e139"
 extract = false
 
 [build]

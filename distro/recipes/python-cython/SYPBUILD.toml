@@ -11,7 +11,7 @@ makedepends = ["python-setuptools", "python-wheel"]
 
 [[source]]
 url = "https://github.com/cython/cython/releases/download/3.1.3/cython-3.1.3.tar.gz"
-sha256 = "TODO"
+sha256 = "10ee785e42328924b78f75a74f66a813cb956b4a9bc91c44816d089d5934c089"
 
 [build]
 style = "python"

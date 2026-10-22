@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "cmake"]
 
 [[source]]
 url = "https://download.kde.org/stable/plasma-wayland-protocols/plasma-wayland-protocols-1.18.0.tar.xz"
-sha256 = "TODO"
+sha256 = "2567472671ad5d989f88b51baef9dd59353a5e7c3f2ed7e6b989755cb9004233"
 
 [build]
 style = "cmake"

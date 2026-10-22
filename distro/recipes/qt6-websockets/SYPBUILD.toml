@@ -11,7 +11,7 @@ makedepends = ["cmake", "ninja", "pkgconf"]
 
 [[source]]
 url = "https://download.qt.io/archive/qt/6.9/6.9.2/submodules/qtwebsockets-everywhere-src-6.9.2.tar.xz"
-sha256 = "TODO"
+sha256 = "be833f667ed8d6c2f41c0b9d1f8addf20b8d2b11c3a9466ec6d70c62121708ee"
 
 [build]
 style = "cmake"

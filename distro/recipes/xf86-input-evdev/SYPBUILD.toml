@@ -11,7 +11,7 @@ makedepends = ["util-macros"]
 
 [[source]]
 url = "https://www.x.org/pub/individual/driver/xf86-input-evdev-2.11.0.tar.xz"
-sha256 = "TODO"
+sha256 = "730022de934cc366bb12439daf202a7bfff52a028cf4573e457642e25a071315"
 
 [build]
 style = "autotools"

@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/plasma/6.4.4/kwallet-pam-6.4.4.tar.xz"
-sha256 = "TODO"
+sha256 = "e464f9bc73a4db2b593d1b19e1e8aee385d155513e58b6b11470fa78c52efbc1"
 
 [build]
 style = "cmake"

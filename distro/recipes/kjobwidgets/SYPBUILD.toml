@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/frameworks/6.17/kjobwidgets-6.17.0.tar.xz"
-sha256 = "TODO"
+sha256 = "0dc56de19bce3769b78c34dab1399588017180f298de8419eda1909a4211b624"
 
 [build]
 style = "cmake"

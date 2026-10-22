@@ -12,11 +12,11 @@ provides = ["glib", "so:libglib-2.0.so.0", "so:libgio-2.0.so.0", "so:libgobject-
 
 [[source]]
 url = "https://download.gnome.org/sources/glib/2.84/glib-2.84.4.tar.xz"
-sha256 = "TODO"
+sha256 = "8a9ea10943c36fc117e253f80c91e477b673525ae45762942858aef57631bb90"
 
 [[source]]
 url = "https://www.linuxfromscratch.org/patches/blfs/12.4/glib-skip_warnings-1.patch"
-sha256 = "TODO"
+sha256 = "8f9ee9f4a6a08c49c9c912241c63d55b969950c49f4d40337c6fd9557b9daa1b"
 extract = false
 
 [build]

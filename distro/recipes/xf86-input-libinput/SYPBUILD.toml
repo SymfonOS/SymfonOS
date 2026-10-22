@@ -11,7 +11,7 @@ makedepends = ["util-macros"]
 
 [[source]]
 url = "https://www.x.org/pub/individual/driver/xf86-input-libinput-1.5.0.tar.xz"
-sha256 = "TODO"
+sha256 = "2524c35f196554ea11aef3bba1cf324759454e1d49f98ac026ace2f6003580e6"
 
 [build]
 style = "autotools"

@@ -11,7 +11,7 @@ makedepends = ["cmake", "ninja", "pkgconf"]
 
 [[source]]
 url = "https://download.qt.io/archive/qt/6.9/6.9.2/submodules/qtmultimedia-everywhere-src-6.9.2.tar.xz"
-sha256 = "TODO"
+sha256 = "7bf8a19a57a7432181b05d0e264acfd8ca4b75a3901d01a27a32935703e5ab12"
 
 [build]
 style = "cmake"

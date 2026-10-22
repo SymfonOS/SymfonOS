@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/release-service/25.08.0/src/ark-25.08.0.tar.xz"
-sha256 = "TODO"
+sha256 = "391fae7a08757dd5cc2b0081251c513859345e49d30ce7f10c3da5f4ce4ba3a0"
 
 [build]
 style = "cmake"

@@ -11,7 +11,7 @@ makedepends = ["util-macros"]
 
 [[source]]
 url = "https://www.x.org/pub/individual/app/xrandr-1.5.3.tar.xz"
-sha256 = "TODO"
+sha256 = "f8dd7566adb74147fab9964680b6bbadee87cf406a7fcff51718a5e6949b841c"
 
 [build]
 style = "autotools"

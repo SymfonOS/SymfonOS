@@ -11,7 +11,7 @@ makedepends = ["cmake", "utfcpp"]
 
 [[source]]
 url = "https://taglib.org/releases/taglib-2.1.1.tar.gz"
-sha256 = "TODO"
+sha256 = "3716d31f7c83cbf17b67c8cf44dd82b2a2f17e6780472287a16823e70305ddba"
 
 [build]
 style = "cmake"

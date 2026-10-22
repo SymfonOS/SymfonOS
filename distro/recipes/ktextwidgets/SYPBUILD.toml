@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/frameworks/6.17/ktextwidgets-6.17.0.tar.xz"
-sha256 = "TODO"
+sha256 = "33d46ecdd03ff68582da5cef251921a8c6e7a5db7ad9bfd0432cb00712ac29e3"
 
 [build]
 style = "cmake"

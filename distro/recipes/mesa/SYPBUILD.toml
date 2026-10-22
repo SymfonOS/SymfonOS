@@ -12,7 +12,7 @@ provides = ["opengl", "so:libGL.so.1", "so:libEGL.so.1", "so:libgbm.so.1", "so:l
 
 [[source]]
 url = "https://mesa.freedesktop.org/archive/mesa-25.1.8.tar.xz"
-sha256 = "TODO"
+sha256 = "5cf1571d0d646d90047f3d93f57acc787cf88ec7e95efe172c555b492c30fb71"
 
 [build]
 style = "meson"

@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/frameworks/6.17/knewstuff-6.17.0.tar.xz"
-sha256 = "TODO"
+sha256 = "1059cb7cdb9ba8170de82a08c6833490007a152a46e4bdbe24304eeddc263d66"
 
 [build]
 style = "cmake"

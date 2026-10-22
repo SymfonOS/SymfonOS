@@ -11,11 +11,11 @@ provides = ["so:libpng16.so.16"]
 
 [[source]]
 url = "https://downloads.sourceforge.net/libpng/libpng-1.6.50.tar.xz"
-sha256 = "TODO"
+sha256 = "4df396518620a7aa3651443e87d1b2862e4e88cad135a8b93423e01706232307"
 
 [[source]]
 url = "https://downloads.sourceforge.net/sourceforge/libpng-apng/libpng-1.6.47-apng.patch.gz"
-sha256 = "TODO"
+sha256 = "5b086fafe7e12784b28693e19a5bcf68677a8c52947115712a56c3d123944f6f"
 extract = false
 
 [build]

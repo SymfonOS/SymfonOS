@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/frameworks/6.17/ktexttemplate-6.17.0.tar.xz"
-sha256 = "TODO"
+sha256 = "15d75941d15eac3cd1243066b13a30d6c1451ca630b0c29b3624be34ad73e972"
 
 [build]
 style = "cmake"

@@ -11,7 +11,7 @@ makedepends = ["cmake", "ninja", "pkgconf", "qt6-tools"]
 
 [[source]]
 url = "https://download.qt.io/archive/qt/6.9/6.9.2/submodules/qttranslations-everywhere-src-6.9.2.tar.xz"
-sha256 = "TODO"
+sha256 = "c73bb6281ed365c0f954f4b1b6e1b13e1b3fefd94854f46fcd9a412f641f7ed6"
 
 [build]
 style = "cmake"

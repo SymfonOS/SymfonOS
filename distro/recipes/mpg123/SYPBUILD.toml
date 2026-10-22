@@ -10,7 +10,7 @@ depends = ["alsa-lib"]
 
 [[source]]
 url = "https://downloads.sourceforge.net/mpg123/mpg123-1.33.2.tar.bz2"
-sha256 = "TODO"
+sha256 = "2c54fabbfa696dce8f9b137c8ef7a429a061f8fe633cd7d0a511809855f2c219"
 
 [build]
 style = "autotools"

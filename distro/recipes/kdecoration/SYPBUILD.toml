@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/plasma/6.4.4/kdecoration-6.4.4.tar.xz"
-sha256 = "TODO"
+sha256 = "a02ac71ea8ee7ad6ab34578f1b50f32b91347a05a932cfc50b253729ccadee6f"
 
 [build]
 style = "cmake"

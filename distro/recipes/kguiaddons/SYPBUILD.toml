@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/frameworks/6.17/kguiaddons-6.17.0.tar.xz"
-sha256 = "TODO"
+sha256 = "5d07dbc8e24ab1077de75b7830a1f362dff3710fb041d61b8da02c577056ab6b"
 
 [build]
 style = "cmake"

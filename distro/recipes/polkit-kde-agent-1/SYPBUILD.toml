@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/plasma/6.4.4/polkit-kde-agent-1-6.4.4.tar.xz"
-sha256 = "TODO"
+sha256 = "2c218f4e66f5f933b9cdd0c6886f53625a2bf7f1c8df64bb485835ae72877e3d"
 
 [build]
 style = "cmake"

@@ -11,7 +11,7 @@ makedepends = ["util-macros", "m4"]
 
 [[source]]
 url = "https://xcb.freedesktop.org/dist/xcb-util-0.4.1.tar.xz"
-sha256 = "TODO"
+sha256 = "5abe3bbbd8e54f0fa3ec945291b7e8fa8cfd3cccc43718f8758430f94126e512"
 
 [build]
 style = "autotools"

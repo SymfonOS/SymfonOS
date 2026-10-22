@@ -11,7 +11,7 @@ makedepends = ["cmake", "ninja", "pkgconf"]
 
 [[source]]
 url = "https://download.qt.io/archive/qt/6.9/6.9.2/submodules/qtquicktimeline-everywhere-src-6.9.2.tar.xz"
-sha256 = "TODO"
+sha256 = "bc65688d8cb588ff67d32a63a821163211452ae7cb07dd07c261230f380ec526"
 
 [build]
 style = "cmake"
