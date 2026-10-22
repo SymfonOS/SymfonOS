@@ -319,8 +319,12 @@ static char *style_step(const jval *b, const char *step) {
             return xasprintf("DESTDIR=\"$DESTDIR\" ninja -C \"$S/_build\" install %s\n%s", inf, post);
     } else if (!strcmp(style, "cmake")) {
         if (!strcmp(step, "build"))
-            return xasprintf("cmake -S \"$S\" -B \"$S/_build\" -G Ninja -DCMAKE_INSTALL_PREFIX=/usr "
-                             "-DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF %s\n"
+            /* Ninja nur, wenn vorhanden (nicht jedes Rezept führt es als Bauabhängigkeit);
+             * CMake 4 lehnt cmake_minimum_required < 3.5 ab – ältere Projekte trotzdem zulassen */
+            return xasprintf("gen=Ninja; command -v ninja >/dev/null || gen='Unix Makefiles'\n"
+                             "cmake -S \"$S\" -B \"$S/_build\" -G \"$gen\" -DCMAKE_INSTALL_PREFIX=/usr "
+                             "-DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF "
+                             "-DCMAKE_POLICY_VERSION_MINIMUM=3.5 %s\n"
                              "cmake --build \"$S/_build\" %s",
                              cf, mf);
         if (!strcmp(step, "check")) return run_check ? xstrdup("ctest --test-dir \"$S/_build\" --output-on-failure") : NULL;

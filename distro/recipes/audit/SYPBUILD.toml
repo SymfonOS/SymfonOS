@@ -20,6 +20,8 @@ build = '''
 cd "$S"
 if [ -x ./autogen.sh ]; then ./autogen.sh; else autoreconf -fiv; fi
 ./configure --prefix=/usr --sysconfdir=/etc --enable-shared --disable-static --without-python3 --disable-zos-remote --without-libcap-ng --with-arm=no --with-aarch64=no
+# Testprogramme nicht mitbauen (Bau mit --nocheck; databuf_test nutzt nicht exportierte Funktionen)
+find . -name Makefile -exec sed -i '/^SUBDIRS =/s/ test\b//g' {} +
 make
 '''
 package = '''
