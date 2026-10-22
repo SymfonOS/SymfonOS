@@ -6,7 +6,7 @@ summary = "SELinux Reference Policy (MCS, systemd)"
 license = "GPL-2.0-only"
 url = "https://github.com/SELinuxProject/refpolicy/releases/download/RELEASE_2_20250213/"
 depends = ["policycoreutils"]
-makedepends = ["checkpolicy", "secilc", "python", "m4", "policycoreutils", "libsemanage"]
+makedepends = ["checkpolicy", "secilc", "python", "m4", "policycoreutils", "libsemanage", "semodule-utils"]
 backup = ["etc/selinux/config"]
 
 [[source]]

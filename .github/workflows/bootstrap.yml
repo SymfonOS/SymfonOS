@@ -100,7 +100,7 @@ jobs:
           for name in $(echo "$failed" | head -9); do
             sect=$(awk -v n="$name" '/^==> \[[0-9]+\/[0-9]+\] /{on=($3==n)} on' build.log | grep -v '^ *[0-9.]*%')
             # echte Fehler zuerst, Folgemeldungen danach; Wiederholungen nur einmal
-            errs=$( { echo "$sect" | grep -E 'error:|Error [0-9]|undefined reference|cannot find|No rule|fehlgeschlagen|Fehler'
+            errs=$( { echo "$sect" | grep -E 'error:|ERROR|Error [0-9]|undefined reference|cannot find|No rule|fehlgeschlagen|Fehler|fehlt|missing'
                       echo "$sect" | grep -E 'No such file|not found' | grep -v '^chmod'; } | awk '!seen[$0]++' | head -14)
             echo "::error title=Rezept $name::$( { echo "$errs"; echo '…'; echo "$sect" | tail -n 6; } | tail -c 2800 | enc)"
           done

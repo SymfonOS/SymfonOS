@@ -1,0 +1,22 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "semodule-utils"
+version = "3.8.1-1"
+summary = "SELinux-Modulwerkzeuge (semodule_package, semodule_link, semodule_expand)"
+license = "GPL-2.0-only"
+url = "https://github.com/SELinuxProject/selinux/releases/download/3.8.1/"
+depends = ["glibc", "libsepol"]
+
+[[source]]
+url = "https://github.com/SELinuxProject/selinux/releases/download/3.8.1/semodule-utils-3.8.1.tar.gz"
+sha256 = "TODO"
+
+[build]
+build = '''
+cd "$S"
+make PREFIX=/usr SBINDIR=/usr/sbin LIBDIR=/usr/lib SHLIBDIR=/usr/lib
+'''
+package = '''
+cd "$S"
+make PREFIX=/usr SBINDIR=/usr/sbin LIBDIR=/usr/lib SHLIBDIR=/usr/lib DESTDIR="$DESTDIR" install
+'''
