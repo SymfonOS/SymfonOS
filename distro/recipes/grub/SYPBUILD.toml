@@ -1,12 +1,13 @@
 # symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
 [package]
 name = "grub"
-version = "2.12-1"
+version = "2.12-2"
 summary = "GRUB-Bootloader (BIOS und UEFI)"
 license = "GPL-3.0-or-later"
 url = "https://ftp.gnu.org/gnu/grub/"
 depends = ["glibc", "xz", "gettext", "efibootmgr", "dosfstools"]
-makedepends = ["bison", "flex", "python"]
+# freetype + unifont: GRUB erzeugt daraus unicode.pf2 (Pflicht für grub-mkrescue, Umlaute im Menü)
+makedepends = ["bison", "flex", "python", "freetype", "unifont"]
 backup = ["etc/default/grub"]
 
 [[source]]
@@ -24,13 +25,14 @@ unset CFLAGS CXXFLAGS LDFLAGS
 for t in i386-pc x86_64-efi; do
   mkdir -p "build-$t"; cd "build-$t"
   ../configure --prefix=/usr --sysconfdir=/etc --disable-efiemu --disable-werror \
-    --with-platform=${t#*-} --target=${t%%-*}
+    --with-platform=${t#*-} --target=${t%%-*} --enable-grub-mkfont
   make; cd ..
 done
 '''
 package = '''
 cd "$S"
 for t in i386-pc x86_64-efi; do make -C "build-$t" DESTDIR="$DESTDIR" install; done
+test -f "$DESTDIR/usr/share/grub/unicode.pf2" || { echo "unicode.pf2 fehlt (freetype/unifont beim Bau nicht gefunden?)" >&2; exit 1; }
 install -d "$DESTDIR/usr/share/bash-completion/completions"
 mv "$DESTDIR/etc/bash_completion.d/grub" "$DESTDIR/usr/share/bash-completion/completions" 2>/dev/null || true
 install -Dm644 /dev/stdin "$DESTDIR/etc/default/grub" <<'EOF'

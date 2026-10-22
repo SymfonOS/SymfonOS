@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "freetype"
+version = "2.13.3-1"
+summary = "Schriftrasterung (FreeType 2)"
+license = "FTL OR GPL-2.0-or-later"
+url = "https://download.savannah.gnu.org/releases/freetype/"
+depends = ["glibc", "zlib", "bzip2"]
+makedepends = ["pkgconf"]
+provides = ["so:libfreetype.so.6"]
+
+[[source]]
+url = "https://download.savannah.gnu.org/releases/freetype/freetype-2.13.3.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--enable-freetype-config --without-harfbuzz --without-png --without-brotli"
