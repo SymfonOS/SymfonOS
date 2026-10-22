@@ -180,6 +180,31 @@ def test_unsigned_index_rejected(tmp_path):
     assert r.returncode == 1 and "Unbekannter Signaturschlüssel" in r.stderr
 
 
+def test_install_exclude_skips_docs_and_foreign_locales(tmp_path):
+    # [install] exclude/include (wie tsflags=nodocs): Live-Medien lassen Doku und fremde Übersetzungen weg
+    key, pub = keygen(tmp_path)
+    repo = tmp_path / "repo"
+    root = setup_root(tmp_path, repo, pub)
+    with open(root / "etc/syp/syp.toml", "a") as f:
+        f.write('[install]\nexclude = ["/usr/share/doc/*", "/usr/share/locale/*"]\n'
+                'include = ["/usr/share/locale/de/*"]\n')
+    files = {"usr/bin/app": "x", "usr/share/doc/app/README": "doku",
+             "usr/share/locale/de/LC_MESSAGES/app.mo": "de", "usr/share/locale/fr/LC_MESSAGES/app.mo": "fr"}
+    publish(repo, key, make_pkg(tmp_path, "app", "1-1", files, key=key))
+    syp("-r", root, "sync")
+    syp("-r", root, "-y", "install", "app")
+    assert (root / "usr/bin/app").exists() and (root / "usr/share/locale/de/LC_MESSAGES/app.mo").exists()
+    assert not (root / "usr/share/doc/app/README").exists()
+    assert not (root / "usr/share/locale/fr/LC_MESSAGES/app.mo").exists()
+    assert "intakt" in syp("-r", root, "verify").stdout
+    # Die Dateien bleiben dem Paket zugeordnet; ein Update und das Entfernen funktionieren
+    publish(repo, key, make_pkg(tmp_path, "app", "2-1", files, key=key))
+    syp("-r", root, "sync")
+    syp("-r", root, "-y", "upgrade")
+    syp("-r", root, "-y", "remove", "app")
+    assert not (root / "usr/bin/app").exists()
+
+
 def test_build_recipe(tmp_path):
     (tmp_path / "hello.sh").write_text("#!/bin/sh\necho Hallo\n")
     (tmp_path / "SYPBUILD.toml").write_text('''

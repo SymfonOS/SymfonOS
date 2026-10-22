@@ -41,6 +41,21 @@ name = "symfonos"
 url = "file://$PKGREPO"
 [snapshots]
 enabled = false
+# Live-Medium schlank halten (eine Download-Datei unter 2 GiB): Doku, fremde Übersetzungen und Firmware
+# reiner Server- und ARM-Hardware werden nicht ausgepackt, bleiben aber den Paketen zugeordnet.
+# Das installierte System bekommt die normale Konfiguration; »syp reinstall« holt Ausgelassenes nach.
+[install]
+exclude = ["/usr/share/doc/*", "/usr/share/gtk-doc/*", "/usr/share/info/*", "/usr/share/help/*",
+           "/usr/share/locale/*", "/usr/share/qt6/translations/*", "/usr/share/man/??/*", "/usr/share/man/??_??/*",
+           "/usr/lib/firmware/netronome/*", "/usr/lib/firmware/liquidio/*", "/usr/lib/firmware/mellanox/*",
+           "/usr/lib/firmware/mlxsw_spectrum/*", "/usr/lib/firmware/cxgb4/*", "/usr/lib/firmware/bnx2x/*",
+           "/usr/lib/firmware/qed/*", "/usr/lib/firmware/qcom/*", "/usr/lib/firmware/mrvl/prestera/*",
+           "/usr/lib/firmware/dpaa2/*", "/usr/lib/firmware/ti-keystone/*", "/usr/lib/firmware/meson/*",
+           "/usr/lib/firmware/imx/*", "/usr/lib/firmware/arm/*", "/usr/lib/firmware/cnm/*",
+           "/usr/lib/firmware/inside-secure/*", "/usr/lib/firmware/ql2*", "/usr/lib/firmware/phanfw.bin*"]
+include = ["/usr/share/locale/de/*", "/usr/share/locale/de_*", "/usr/share/locale/en/*", "/usr/share/locale/en_*",
+           "/usr/share/locale/locale.alias", "/usr/share/qt6/translations/*_de.qm", "/usr/share/qt6/translations/*_en.qm",
+           "/usr/share/help/de/*", "/usr/share/help/C/*", "/usr/share/doc/HTML/de/*"]
 CONF
 cp "$SYP_PUB" "$IMG/etc/syp/keys/symfonos-release.pub"
 "$SYP" -r "$IMG" sync

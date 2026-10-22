@@ -64,6 +64,12 @@ int config_load(const char *root, config *c) {
         jval *sec = jget(t, "security");
         c->run_scripts = jgetb(sec, "run_scripts", 1);
         c->require_signatures = jgetb(sec, "require_signatures", 1);
+        jval *ins = jget(t, "install");
+        jval *ex = jgeta(ins, "exclude"), *in = jgeta(ins, "include");
+        for (size_t i = 0; ex && i < ex->n; i++)
+            if (ex->items[i]->t == J_STR) sv_push(&c->exclude, ex->items[i]->s);
+        for (size_t i = 0; in && i < in->n; i++)
+            if (in->items[i]->t == J_STR) sv_push(&c->include, in->items[i]->s);
         json_free(t);
     }
     free(f);
@@ -73,6 +79,18 @@ int config_load(const char *root, config *c) {
 
 char *cfg_path(const config *c, const char *rel) { return path_join(c->root, rel); }
 int cfg_is_root(const config *c) { return strcmp(c->root, "/") == 0; }
+
+int cfg_excluded(const config *c, const char *path) {
+    if (!c->exclude.n) return 0;
+    while (*path == '/') path++;
+    char *abs = xasprintf("/%s", path);
+    int ex = 0;
+    for (size_t i = 0; i < c->exclude.n && !ex; i++) ex = glob_match(c->exclude.v[i], abs);
+    for (size_t i = 0; ex && i < c->include.n; i++)
+        if (glob_match(c->include.v[i], abs)) ex = 0;
+    free(abs);
+    return ex;
+}
 
 /* --- zstd ----------------------------------------------------------------------- */
 int zstd_compress_buf(const char *in, size_t n, int level, char **out, size_t *outn) {

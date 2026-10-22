@@ -525,6 +525,7 @@ static int c_verify(ctx *c, int argc, char **argv) {
         jval *f = db_files_of(DB(c), p->name);
         for (size_t k = 0; k < f->n; k++) {
             const char *path = jgets(f->items[k], "path", "");
+            if (!strcmp(jgets(f->items[k], "type", ""), "excluded")) continue; /* [install] exclude */
             char *full = cfg_path(&c->cfg, path);
             if (!path_exists(full)) {
                 printf("%s: fehlt /%s\n", p->name, path);

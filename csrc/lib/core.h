@@ -20,7 +20,12 @@ typedef struct {
     int snapshots;
     char *snapshot_backend;
     int keep_cache, run_scripts, require_signatures;
+    /* [install] exclude/include: Muster (fnmatch auf "/pfad"), deren Dateien nicht ausgepackt werden,
+     * z. B. Doku und fremde Übersetzungen auf dem Live-Medium (wie tsflags=nodocs bei dnf) */
+    strvec exclude, include;
 } config;
+
+int cfg_excluded(const config *c, const char *path); /* path relativ zur Wurzel */
 
 int config_load(const char *root, config *c);
 char *cfg_path(const config *c, const char *rel); /* root + rel */

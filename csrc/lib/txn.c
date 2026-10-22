@@ -330,6 +330,7 @@ static int do_install(txn *t, hmap *inst, sypfile *f, const char *reason) {
         jval *e = f->files->items[i];
         const char *path = jgets(e, "path", "");
         hm_set(&keep, path, (void *)1);
+        if (strcmp(jgets(e, "type", ""), "dir") && cfg_excluded(t->cfg, path)) continue; /* [install] exclude */
         char *src = path_join(staging, path), *dst = rp(t, path);
         struct stat st;
         if (in_list(backup, path) && lstat(dst, &st) == 0 && S_ISREG(st.st_mode)) {
@@ -365,8 +366,11 @@ static int do_install(txn *t, hmap *inst, sypfile *f, const char *reason) {
         jval *dbfiles = jarr();
         for (size_t i = 0; i < f->files->n; i++) {
             jval *e = f->files->items[i], *x = jobj();
+            const char *ty = jgets(e, "type", "file");
+            /* ausgelassene Dateien bleiben verzeichnet (Konflikte, Updates), gelten aber nicht als fehlend */
+            if (strcmp(ty, "dir") && cfg_excluded(t->cfg, jgets(e, "path", ""))) ty = "excluded";
             jset(x, "path", jstr(jgets(e, "path", "")));
-            jset(x, "type", jstr(jgets(e, "type", "file")));
+            jset(x, "type", jstr(ty));
             const char *h = jgets(e, "sha256", NULL);
             jset(x, "sha256", h ? jstr(h) : jnull());
             jpush(dbfiles, x);
