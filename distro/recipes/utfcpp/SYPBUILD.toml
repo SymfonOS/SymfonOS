@@ -6,11 +6,11 @@ version = "4.0.6-1"
 arch = "any"
 summary = "UTF-8 für C++ (Header)"
 license = "BSL-1.0"
-url = "url/"
+url = "https://github.com/nemtrif/utfcpp/archive/v4.0.6/"
 makedepends = ["cmake"]
 
 [[source]]
-url = "url"
+url = "https://github.com/nemtrif/utfcpp/archive/v4.0.6/utfcpp-4.0.6.tar.gz"
 sha256 = "TODO"
 
 [build]

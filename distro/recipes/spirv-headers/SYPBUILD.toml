@@ -6,11 +6,11 @@ version = "1.4.321.0-1"
 arch = "any"
 summary = "SPIR-V-Header"
 license = "MIT"
-url = "url/"
+url = "https://github.com/KhronosGroup/SPIRV-Headers/archive/vulkan-sdk-1.4.321.0/"
 makedepends = ["cmake"]
 
 [[source]]
-url = "url"
+url = "https://github.com/KhronosGroup/SPIRV-Headers/archive/vulkan-sdk-1.4.321.0/SPIRV-Headers-vulkan-sdk-1.4.321.0.tar.gz"
 sha256 = "TODO"
 
 [build]

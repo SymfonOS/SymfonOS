@@ -5,12 +5,12 @@ name = "spirv-tools"
 version = "1.4.321.0-1"
 summary = "SPIR-V-Werkzeuge"
 license = "Apache-2.0"
-url = "url/"
+url = "https://github.com/KhronosGroup/SPIRV-Tools/archive/vulkan-sdk-1.4.321.0/"
 depends = ["gcc"]
 makedepends = ["cmake", "spirv-headers", "python"]
 
 [[source]]
-url = "url"
+url = "https://github.com/KhronosGroup/SPIRV-Tools/archive/vulkan-sdk-1.4.321.0/SPIRV-Tools-vulkan-sdk-1.4.321.0.tar.gz"
 sha256 = "TODO"
 
 [build]

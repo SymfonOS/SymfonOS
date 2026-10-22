@@ -5,12 +5,12 @@ name = "libva"
 version = "2.22.0-1"
 summary = "Video-Beschleunigung (VA-API)"
 license = "MIT"
-url = "url/"
+url = "https://github.com/intel/libva/archive/2.22.0/"
 depends = ["libdrm", "libx11", "libxext", "libxfixes", "wayland"]
 makedepends = ["meson"]
 
 [[source]]
-url = "url"
+url = "https://github.com/intel/libva/archive/2.22.0/libva-2.22.0.tar.gz"
 sha256 = "TODO"
 
 [build]

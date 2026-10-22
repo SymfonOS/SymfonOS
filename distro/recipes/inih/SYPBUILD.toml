@@ -5,12 +5,12 @@ name = "inih"
 version = "61-1"
 summary = "INI-Parser"
 license = "BSD-3-Clause"
-url = "url/"
+url = "https://github.com/benhoyt/inih/archive/r61/"
 depends = ["glibc"]
 makedepends = ["meson"]
 
 [[source]]
-url = "url"
+url = "https://github.com/benhoyt/inih/archive/r61/inih-r61.tar.gz"
 sha256 = "TODO"
 
 [build]

@@ -5,13 +5,13 @@ name = "libxkbcommon"
 version = "1.11.0-1"
 summary = "Tastaturbelegungen (Bibliothek)"
 license = "MIT"
-url = "url/"
+url = "https://github.com/lfs-book/libxkbcommon/archive/v1.11.0/"
 depends = ["xkeyboard-config", "libxcb", "wayland", "libxml2"]
 makedepends = ["meson", "wayland-protocols", "bison"]
 provides = ["so:libxkbcommon.so.0"]
 
 [[source]]
-url = "url"
+url = "https://github.com/lfs-book/libxkbcommon/archive/v1.11.0/libxkbcommon-1.11.0.tar.gz"
 sha256 = "TODO"
 
 [build]

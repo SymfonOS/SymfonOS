@@ -5,13 +5,13 @@ name = "polkit"
 version = "126-1"
 summary = "Berechtigungsdienst (polkit)"
 license = "LGPL-2.0-or-later"
-url = "url/"
+url = "https://github.com/polkit-org/polkit/archive/126/"
 depends = ["duktape", "glib2", "systemd", "linux-pam", "expat"]
 makedepends = ["meson", "libxslt", "docbook-xsl-nons", "gettext"]
 provides = ["so:libpolkit-gobject-1.so.0"]
 
 [[source]]
-url = "url"
+url = "https://github.com/polkit-org/polkit/archive/126/polkit-126.tar.gz"
 sha256 = "TODO"
 
 [build]

@@ -5,12 +5,12 @@ name = "spirv-llvm-translator"
 version = "20.1.5-1"
 summary = "LLVM-IR ↔ SPIR-V"
 license = "Apache-2.0 WITH LLVM-exception"
-url = "url/"
+url = "https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v20.1.5/"
 depends = ["llvm", "spirv-tools"]
 makedepends = ["cmake", "spirv-headers"]
 
 [[source]]
-url = "url"
+url = "https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v20.1.5/SPIRV-LLVM-Translator-20.1.5.tar.gz"
 sha256 = "TODO"
 
 [build]

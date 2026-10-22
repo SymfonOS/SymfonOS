@@ -5,12 +5,12 @@ name = "kcolorpicker"
 version = "0.3.1-1"
 summary = "Farbwähler (Qt)"
 license = "LGPL-3.0-or-later"
-url = "url/"
+url = "https://github.com/ksnip/kColorPicker/archive/v0.3.1/"
 depends = ["qt6-base"]
 makedepends = ["cmake", "ninja"]
 
 [[source]]
-url = "url"
+url = "https://github.com/ksnip/kColorPicker/archive/v0.3.1/kColorPicker-0.3.1.tar.gz"
 sha256 = "TODO"
 
 [build]

@@ -5,12 +5,12 @@ name = "libvpx"
 version = "1.15.2-1"
 summary = "VP8/VP9-Video"
 license = "BSD-3-Clause"
-url = "url/"
+url = "https://github.com/webmproject/libvpx/archive/v1.15.2/"
 depends = ["glibc"]
 makedepends = ["nasm", "which", "perl"]
 
 [[source]]
-url = "url"
+url = "https://github.com/webmproject/libvpx/archive/v1.15.2/libvpx-1.15.2.tar.gz"
 sha256 = "TODO"
 
 [build]

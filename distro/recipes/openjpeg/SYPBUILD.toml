@@ -5,12 +5,12 @@ name = "openjpeg"
 version = "2.5.3-1"
 summary = "JPEG-2000-Bibliothek"
 license = "BSD-2-Clause"
-url = "url/"
+url = "https://github.com/uclouvain/openjpeg/archive/v2.5.3/"
 depends = ["libpng", "libtiff", "lcms2"]
 makedepends = ["cmake"]
 
 [[source]]
-url = "url"
+url = "https://github.com/uclouvain/openjpeg/archive/v2.5.3/openjpeg-2.5.3.tar.gz"
 sha256 = "TODO"
 
 [build]

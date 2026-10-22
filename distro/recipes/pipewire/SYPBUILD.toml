@@ -5,13 +5,13 @@ name = "pipewire"
 version = "1.4.7-1"
 summary = "Audio- und Videoserver (PipeWire, mit Pulse- und JACK-Ersatz)"
 license = "MIT"
-url = "url/"
+url = "https://gitlab.freedesktop.org/pipewire/pipewire/-/archive/1.4.7/"
 depends = ["alsa-lib", "dbus", "systemd", "libsndfile", "opus", "sbc", "libcanberra", "readline", "ncurses", "libusb", "openssl", "libselinux"]
 makedepends = ["meson", "python-docutils"]
 provides = ["pulseaudio-server", "jack", "so:libpipewire-0.3.so.0", "so:libjack.so.0"]
 
 [[source]]
-url = "url"
+url = "https://gitlab.freedesktop.org/pipewire/pipewire/-/archive/1.4.7/pipewire-1.4.7.tar.bz2"
 sha256 = "TODO"
 
 [build]

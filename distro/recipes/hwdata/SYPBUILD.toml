@@ -6,10 +6,10 @@ version = "0.398-1"
 arch = "any"
 summary = "Hardware-Kennungen (PCI, USB, Monitore)"
 license = "GPL-2.0-or-later"
-url = "url/"
+url = "https://github.com/vcrhonek/hwdata/archive/v0.398/"
 
 [[source]]
-url = "url"
+url = "https://github.com/vcrhonek/hwdata/archive/v0.398/hwdata-0.398.tar.gz"
 sha256 = "TODO"
 
 [build]

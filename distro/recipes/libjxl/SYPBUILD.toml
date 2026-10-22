@@ -5,12 +5,12 @@ name = "libjxl"
 version = "0.11.1-1"
 summary = "JPEG-XL-Bilder"
 license = "BSD-3-Clause"
-url = "url/"
+url = "https://github.com/libjxl/libjxl/archive/v0.11.1/"
 depends = ["highway", "brotli", "lcms2", "libpng", "libjpeg-turbo", "giflib", "libwebp"]
 makedepends = ["cmake", "ninja", "python"]
 
 [[source]]
-url = "url"
+url = "https://github.com/libjxl/libjxl/archive/v0.11.1/libjxl-0.11.1.tar.gz"
 sha256 = "TODO"
 
 [build]

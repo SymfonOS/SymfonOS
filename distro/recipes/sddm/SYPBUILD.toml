@@ -5,13 +5,13 @@ name = "sddm"
 version = "0.21.0-1"
 summary = "Anmeldebildschirm (SDDM)"
 license = "GPL-2.0-or-later"
-url = "url/"
+url = "https://github.com/sddm/sddm/archive/v0.21.0/"
 depends = ["qt6-base", "qt6-declarative", "linux-pam", "systemd", "libxcb", "libxau", "upower", "xauth", "xkeyboard-config"]
 makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "python-docutils"]
 backup = ["etc/pam.d/sddm", "etc/pam.d/sddm-autologin", "etc/pam.d/sddm-greeter"]
 
 [[source]]
-url = "url"
+url = "https://github.com/sddm/sddm/archive/v0.21.0/sddm-0.21.0.tar.gz"
 sha256 = "TODO"
 
 [build]

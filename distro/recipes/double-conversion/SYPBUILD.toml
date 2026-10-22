@@ -5,12 +5,12 @@ name = "double-conversion"
 version = "3.3.1-1"
 summary = "Gleitkomma-Konvertierung"
 license = "BSD-3-Clause"
-url = "url/"
+url = "https://github.com/google/double-conversion/archive/v3.3.1/"
 depends = ["gcc"]
 makedepends = ["cmake"]
 
 [[source]]
-url = "url"
+url = "https://github.com/google/double-conversion/archive/v3.3.1/double-conversion-3.3.1.tar.gz"
 sha256 = "TODO"
 
 [build]

@@ -6,11 +6,11 @@ version = "4.1-1"
 arch = "any"
 summary = "Schrift Inter (Oberfläche)"
 license = "OFL-1.1"
-url = "url/"
+url = "https://github.com/rsms/inter/releases/download/v4.1/"
 depends = ["fontconfig"]
 
 [[source]]
-url = "url"
+url = "https://github.com/rsms/inter/releases/download/v4.1/Inter-4.1.zip"
 sha256 = "TODO"
 
 [build]

@@ -5,12 +5,12 @@ name = "glslang"
 version = "15.4.0-1"
 summary = "GLSL/HLSL-Compiler"
 license = "BSD-3-Clause"
-url = "url/"
+url = "https://github.com/KhronosGroup/glslang/archive/15.4.0/"
 depends = ["spirv-tools"]
 makedepends = ["cmake", "python"]
 
 [[source]]
-url = "url"
+url = "https://github.com/KhronosGroup/glslang/archive/15.4.0/glslang-15.4.0.tar.gz"
 sha256 = "TODO"
 
 [build]

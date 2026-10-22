@@ -5,12 +5,12 @@ name = "upower"
 version = "1.90.9-1"
 summary = "Energieverwaltung (Akku, Netzteil)"
 license = "GPL-2.0-or-later"
-url = "url/"
+url = "https://gitlab.freedesktop.org/upower/upower/-/archive/v1.90.9/"
 depends = ["libgudev", "libusb", "glib2", "systemd", "polkit"]
 makedepends = ["meson", "gettext"]
 
 [[source]]
-url = "url"
+url = "https://gitlab.freedesktop.org/upower/upower/-/archive/v1.90.9/upower-v1.90.9.tar.bz2"
 sha256 = "TODO"
 
 [build]

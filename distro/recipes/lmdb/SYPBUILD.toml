@@ -5,16 +5,13 @@ name = "lmdb"
 version = "0.9.33-1"
 summary = "Lightning Memory-Mapped Database"
 license = "OLDAP-2.8"
-url = "url/"
+url = "https://git.openldap.org/openldap/openldap/-/archive/"
 depends = ["glibc"]
 
 [[source]]
-url = "url"
+url = "https://git.openldap.org/openldap/openldap/-/archive/LMDB_0.9.33.tar.bz2"
 sha256 = "TODO"
-
-[[source]]
-url = "filename"
-sha256 = "TODO"
+filename = "openldap-LMDB_0.9.33.tar.bz2"
 
 [build]
 build = '''

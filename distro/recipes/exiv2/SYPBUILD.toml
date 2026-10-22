@@ -5,12 +5,12 @@ name = "exiv2"
 version = "0.28.5-1"
 summary = "Bild-Metadaten (Exif, IPTC, XMP)"
 license = "GPL-2.0-or-later"
-url = "url/"
+url = "https://github.com/Exiv2/exiv2/archive/v0.28.5/"
 depends = ["expat", "zlib", "brotli", "curl", "inih"]
 makedepends = ["cmake"]
 
 [[source]]
-url = "url"
+url = "https://github.com/Exiv2/exiv2/archive/v0.28.5/exiv2-0.28.5.tar.gz"
 sha256 = "TODO"
 
 [build]

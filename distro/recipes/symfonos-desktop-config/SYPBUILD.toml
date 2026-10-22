@@ -6,13 +6,11 @@ version = "1.0-1"
 arch = "any"
 summary = "symfonOS-Desktop: Farbschemata, globales Design, SDDM (Wayland), PAM, Voreinstellungen"
 license = "GPL-3.0-or-later"
-url = "path/"
 depends = ["plasma-workspace", "sddm", "inter-font", "jetbrains-mono-font", "breeze-icons"]
 backup = ["etc/xdg/kdeglobals", "etc/xdg/kwinrc", "etc/pam.d/kde"]
 
 [[source]]
-url = "path"
-sha256 = "TODO"
+path = "@/desktop"
 
 [build]
 build = ":"

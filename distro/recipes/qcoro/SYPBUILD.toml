@@ -5,12 +5,12 @@ name = "qcoro"
 version = "0.12.0-1"
 summary = "C++-Koroutinen für Qt"
 license = "MIT"
-url = "url/"
+url = "https://github.com/danvratil/qcoro/archive/v0.12.0/"
 depends = ["qt6-base", "qt6-declarative", "qt6-websockets"]
 makedepends = ["cmake", "ninja"]
 
 [[source]]
-url = "url"
+url = "https://github.com/danvratil/qcoro/archive/v0.12.0/qcoro-0.12.0.tar.gz"
 sha256 = "TODO"
 
 [build]

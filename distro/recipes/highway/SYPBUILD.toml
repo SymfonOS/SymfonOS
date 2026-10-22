@@ -5,12 +5,12 @@ name = "highway"
 version = "1.3.0-1"
 summary = "SIMD-Bibliothek (für JPEG XL)"
 license = "Apache-2.0 OR BSD-3-Clause"
-url = "url/"
+url = "https://github.com/google/highway/archive/1.3.0/"
 depends = ["gcc"]
 makedepends = ["cmake", "ninja"]
 
 [[source]]
-url = "url"
+url = "https://github.com/google/highway/archive/1.3.0/highway-1.3.0.tar.gz"
 sha256 = "TODO"
 
 [build]

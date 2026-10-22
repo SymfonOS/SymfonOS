@@ -5,17 +5,14 @@ name = "icu"
 version = "77.1-1"
 summary = "Unicode-Bibliothek (ICU)"
 license = "Unicode-3.0"
-url = "url/"
+url = "https://github.com/unicode-org/icu/releases/download/release-77-1/"
 depends = ["glibc", "gcc"]
 provides = ["so:libicuuc.so.77", "so:libicui18n.so.77", "so:libicudata.so.77"]
 
 [[source]]
-url = "url"
+url = "https://github.com/unicode-org/icu/releases/download/release-77-1/icu4c-77_1-src.tgz"
 sha256 = "TODO"
-
-[[source]]
-url = "filename"
-sha256 = "TODO"
+filename = "icu4c-77_1-src.tgz"
 
 [build]
 dir = "icu"

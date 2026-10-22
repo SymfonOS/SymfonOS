@@ -6,16 +6,13 @@ version = "2.047-1"
 arch = "any"
 summary = "Farbige Emoji (Noto)"
 license = "OFL-1.1"
-url = "url/"
+url = "https://github.com/googlefonts/noto-emoji/raw/v2.047/fonts/"
 depends = ["fontconfig"]
 
 [[source]]
-url = "url"
+url = "https://github.com/googlefonts/noto-emoji/raw/v2.047/fonts/NotoColorEmoji.ttf"
 sha256 = "TODO"
-
-[[source]]
-url = "filename"
-sha256 = "TODO"
+filename = "NotoColorEmoji-2.047.ttf"
 
 [build]
 build = ":"

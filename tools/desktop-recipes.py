@@ -35,7 +35,7 @@ PKGS: list[dict] = []
 def pkg(name, version, sources, summary, license, depends=(), makedepends=(), style=None, flags="",
         pre="", post="", build=None, package=None, provides=(), backup=(), dir=None, rel=1, options=None,
         scripts=None, arch=None, url=None, mf="", check=None):
-    if isinstance(sources, str):
+    if isinstance(sources, (str, dict)):
         sources = [sources]
     PKGS.append(dict(name=name, version=f"{version}-{rel}", sources=list(sources), summary=summary,
                      license=license, depends=list(depends), makedepends=list(makedepends), style=style,
@@ -71,7 +71,7 @@ pkg("libxml2", "2.14.5", "https://download.gnome.org/sources/libxml2/2.14/libxml
     post='sed \'/libs=/s/xml2.*/xml2"/\' -i "$DESTDIR/usr/bin/xml2-config"', provides=["so:libxml2.so.16"])
 pkg("libxslt", "1.1.43", "https://download.gnome.org/sources/libxslt/1.1/libxslt-1.1.43.tar.xz",
     "XSLT-Bibliothek", "MIT", ["libxml2", "libgcrypt"], style="autotools")
-pkg("docbook-xml", "4.5", "https://www.docbook.org/xml/4.5/docbook-xml-4.5.zip", "DocBook-XML-DTD 4.5",
+pkg("docbook-xml", "4.5", "https://archive.docbook.org/xml/4.5/docbook-xml-4.5.zip", "DocBook-XML-DTD 4.5",
     "MIT", ["libxml2"], arch="any",
     package=r'''cd "$SRCDIR"
 d="$DESTDIR/usr/share/xml/docbook/xml-dtd-4.5"
@@ -403,8 +403,8 @@ pkg("libxkbcommon", "1.11.0", {"url": "https://github.com/lfs-book/libxkbcommon/
     ["meson", "wayland-protocols", "bison"], style="meson", flags="-Denable-docs=false",
     provides=["so:libxkbcommon.so.0"])
 pkg("llvm", LLVM, [f"https://github.com/llvm/llvm-project/releases/download/llvmorg-{LLVM}/llvm-{LLVM}.src.tar.xz",
-                  f"https://github.com/llvm/llvm-project/releases/download/llvmorg-{LLVM}/llvm-cmake-{LLVM}.src.tar.xz",
-                  f"https://github.com/llvm/llvm-project/releases/download/llvmorg-{LLVM}/llvm-third-party-{LLVM}.src.tar.xz",
+                  f"https://github.com/llvm/llvm-project/releases/download/llvmorg-{LLVM}/cmake-{LLVM}.src.tar.xz",
+                  f"https://github.com/llvm/llvm-project/releases/download/llvmorg-{LLVM}/third-party-{LLVM}.src.tar.xz",
                   f"https://github.com/llvm/llvm-project/releases/download/llvmorg-{LLVM}/clang-{LLVM}.src.tar.xz"],
     "LLVM-Compiler-Infrastruktur und Clang", "Apache-2.0 WITH LLVM-exception",
     ["glibc", "gcc", "libffi", "zlib", "zstd", "libxml2", "ncurses"], ["cmake", "ninja", "python"],

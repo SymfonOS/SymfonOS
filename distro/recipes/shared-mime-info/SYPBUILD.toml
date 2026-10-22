@@ -5,12 +5,12 @@ name = "shared-mime-info"
 version = "2.4-1"
 summary = "MIME-Datenbank"
 license = "GPL-2.0-or-later"
-url = "url/"
+url = "https://gitlab.freedesktop.org/xdg/shared-mime-info/-/archive/2.4/"
 depends = ["glib2", "libxml2"]
 makedepends = ["meson", "gettext"]
 
 [[source]]
-url = "url"
+url = "https://gitlab.freedesktop.org/xdg/shared-mime-info/-/archive/2.4/shared-mime-info-2.4.tar.gz"
 sha256 = "TODO"
 
 [build]

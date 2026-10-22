@@ -5,12 +5,12 @@ name = "wireplumber"
 version = "0.5.10-1"
 summary = "Sitzungsverwaltung für PipeWire"
 license = "MIT"
-url = "url/"
+url = "https://gitlab.freedesktop.org/pipewire/wireplumber/-/archive/0.5.10/"
 depends = ["pipewire", "glib2", "systemd", "lua"]
 makedepends = ["meson"]
 
 [[source]]
-url = "url"
+url = "https://gitlab.freedesktop.org/pipewire/wireplumber/-/archive/0.5.10/wireplumber-0.5.10.tar.bz2"
 sha256 = "TODO"
 
 [build]

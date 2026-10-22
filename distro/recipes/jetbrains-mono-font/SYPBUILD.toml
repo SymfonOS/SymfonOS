@@ -6,11 +6,11 @@ version = "2.304-1"
 arch = "any"
 summary = "Schrift JetBrains Mono (Terminal, Code)"
 license = "OFL-1.1"
-url = "url/"
+url = "https://github.com/JetBrains/JetBrainsMono/releases/download/v2.304/"
 depends = ["fontconfig"]
 
 [[source]]
-url = "url"
+url = "https://github.com/JetBrains/JetBrainsMono/releases/download/v2.304/JetBrainsMono-2.304.zip"
 sha256 = "TODO"
 
 [build]

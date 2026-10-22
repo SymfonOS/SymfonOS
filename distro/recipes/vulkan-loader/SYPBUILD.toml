@@ -5,13 +5,13 @@ name = "vulkan-loader"
 version = "1.4.321-1"
 summary = "Vulkan-Lader"
 license = "Apache-2.0"
-url = "url/"
+url = "https://github.com/KhronosGroup/Vulkan-Loader/archive/v1.4.321/"
 depends = ["libx11", "libxrandr", "wayland"]
 makedepends = ["cmake", "vulkan-headers", "python"]
 provides = ["so:libvulkan.so.1"]
 
 [[source]]
-url = "url"
+url = "https://github.com/KhronosGroup/Vulkan-Loader/archive/v1.4.321/Vulkan-Loader-1.4.321.tar.gz"
 sha256 = "TODO"
 
 [build]

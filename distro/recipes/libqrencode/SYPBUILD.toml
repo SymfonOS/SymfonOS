@@ -5,12 +5,12 @@ name = "libqrencode"
 version = "4.1.1-1"
 summary = "QR-Code-Bibliothek"
 license = "LGPL-2.1-or-later"
-url = "url/"
+url = "https://github.com/fukuchi/libqrencode/archive/v4.1.1/"
 depends = ["glibc", "libpng"]
 makedepends = ["autoconf", "automake", "libtool"]
 
 [[source]]
-url = "url"
+url = "https://github.com/fukuchi/libqrencode/archive/v4.1.1/libqrencode-4.1.1.tar.gz"
 sha256 = "TODO"
 
 [build]

@@ -5,12 +5,12 @@ name = "kimageannotator"
 version = "0.7.1-1"
 summary = "Bildanmerkungen (Qt)"
 license = "LGPL-3.0-or-later"
-url = "url/"
+url = "https://github.com/ksnip/kImageAnnotator/archive/v0.7.1/"
 depends = ["qt6-base", "qt6-svg", "kcolorpicker"]
 makedepends = ["cmake", "ninja", "qt6-tools"]
 
 [[source]]
-url = "url"
+url = "https://github.com/ksnip/kImageAnnotator/archive/v0.7.1/kImageAnnotator-0.7.1.tar.gz"
 sha256 = "TODO"
 
 [build]
