@@ -13,7 +13,7 @@ url = "https://dbus.freedesktop.org/releases/dbus/dbus-1.16.2.tar.xz"
 sha256 = "0ba2a1a4b16afe7bceb2c07e9ce99a8c2c3508e5dec290dbb643384bd6beb7e2"
 [build]
 style = "meson"
-configure_flags = "-D systemd=enabled -D selinux=enabled -D libaudit=enabled -D systemd_system_unitdir=/usr/lib/systemd/system -D systemd_user_unitdir=/usr/lib/systemd/user"
+configure_flags = "-D systemd=enabled -D selinux=enabled -D libaudit=disabled -D systemd_system_unitdir=/usr/lib/systemd/system -D systemd_user_unitdir=/usr/lib/systemd/user"
 post_install = '''
 ln -sf /etc/machine-id "$DESTDIR/var/lib/dbus/machine-id" 2>/dev/null || true
 '''

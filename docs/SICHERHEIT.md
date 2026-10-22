@@ -101,8 +101,9 @@ Umschalten: `sudo update-crypto-policies --set FUTURE` (oder `symfonos-security 
 2. **Kein von Microsoft signierter shim.** Dafür ist ein Review durch das shim-review-Board und eine Signatur durch Microsoft nötig, was eine Organisation mit Sicherheitsprozess voraussetzt. Bis dahin gilt: Secure Boot mit eigenen Schlüsseln, oder Secure Boot aus.
 3. **Echtheit der Quellen.** Prüfsummen werden beim ersten Laden festgehalten (Trust on first use). Die Prüfung upstream-signierter Tarballs (GPG-Signaturen von GNU, kernel.org und anderen) fehlt noch.
 4. **Reproduzierbarkeit.** `SOURCE_DATE_EPOCH` wird gesetzt, ein unabhängiger Zweitbau mit Bit-Vergleich läuft aber noch nicht in der CI.
-5. **IMA/EVM** sind im Kernel aktiv, laden aber noch keine Appraisal-Richtlinie. Es gibt außerdem weder fapolicyd noch USBGuard.
-6. **Noch nicht auf echter Hardware gebootet.** Die Quellcode-Distro wird in der CI gebaut. Kernel-Konfiguration, UKI-Start und TPM-Entsperrung müssen erst auf Testgeräten bestätigt werden, bevor sie als stabil gelten.
+5. **dbus ohne Audit-Anbindung.** Die SELinux-Prüfungen von dbus sind aktiv, ihre Verweigerungen landen aber im Journal statt im Audit-Log, weil dafür libcap-ng nötig ist, das noch nicht gebaut wird.
+6. **IMA/EVM** sind im Kernel aktiv, laden aber noch keine Appraisal-Richtlinie. Es gibt außerdem weder fapolicyd noch USBGuard.
+7. **Noch nicht auf echter Hardware gebootet.** Die Quellcode-Distro wird in der CI gebaut. Kernel-Konfiguration, UKI-Start und TPM-Entsperrung müssen erst auf Testgeräten bestätigt werden, bevor sie als stabil gelten.
 
 ## Zusammenspiel mit dem Prüfungsmodus (SEB)
 
