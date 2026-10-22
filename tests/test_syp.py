@@ -566,3 +566,43 @@ def test_source_dir_with_extra_files(tmp_path):
         f'sha256 = "{hashlib.sha256(tar.read_bytes()).hexdigest()}"\n[[source]]\npath = "extra.cnf"\n'
         "[build]\npackage = 'test -f \"$S/config\"; install -Dm644 \"$SRCDIR/extra.cnf\" \"$DESTDIR/etc/p.cnf\"'\n")
     syp("build", tmp_path / "SYPBUILD.toml", "-o", tmp_path / "out", env=dict(os.environ, HOME=str(tmp_path)))
+
+
+def test_build_merges_legacy_dirs_into_usr(tmp_path):
+    """/lib, /bin, /sbin aus dem Paketinhalt landen unter /usr; /var/run fällt weg (usr-merge)."""
+    rec = tmp_path / "SYPBUILD.toml"
+    rec.write_text('[package]\nname = "u"\nversion = "1-1"\narch = "any"\n[build]\n'
+                   "package = '''\ninstall -Dm644 /dev/null \"$DESTDIR/lib/tmpfiles.d/u.conf\"\n"
+                   "install -Dm755 /dev/null \"$DESTDIR/sbin/u-helper\"\n"
+                   "install -d \"$DESTDIR/var/run/u\" \"$DESTDIR/usr/lib\"\n'''\n")
+    out = syp("build", rec, "-o", tmp_path / "out", env=dict(os.environ, HOME=str(tmp_path))).stdout
+    assert "usr-merge" in out
+    with tarfile.open(tmp_path / "out/u-1-1-any.syp") as tf:
+        files = json.loads(tf.extractfile(".FILES.json").read())
+    paths = {f["path"] for f in (files if isinstance(files, list) else files["files"])}
+    assert "usr/lib/tmpfiles.d/u.conf" in paths and "usr/sbin/u-helper" in paths
+    assert not any(p == "lib" or p.startswith(("lib/", "sbin/", "var/run")) for p in paths)
+
+
+def test_buildall_rebuilds_legacy_layout_but_not_filesystem(tmp_path):
+    recs = tmp_path / "recipes"
+    for name, pkg in (("fs", 'install -d "$DESTDIR/usr/lib" "$DESTDIR/run"; ln -s usr/lib "$DESTDIR/lib"; '
+                             'install -d "$DESTDIR/var"; ln -s ../run "$DESTDIR/var/run"'),
+                      ("alt", 'install -Dm644 /dev/null "$DESTDIR/usr/share/alt/x"')):
+        (recs / name).mkdir(parents=True)
+        (recs / name / "SYPBUILD.toml").write_text(
+            f'[package]\nname = "{name}"\nversion = "1-1"\narch = "any"\n[build]\npackage = \'{pkg}\'\n')
+    key, _ = keygen(tmp_path)
+    repo = tmp_path / "repo"
+    syp("buildall", recs, "--repo", repo, "-k", key, "--name", "t")
+    # "alt" nachträglich durch ein Paket im alten Layout ersetzen (wie vor dem usr-merge gebaut)
+    tree = tmp_path / "tree"
+    (tree / "lib/alt").mkdir(parents=True)
+    (tree / "lib/alt/x").write_text("x")
+    info = tmp_path / "info.json"
+    info.write_text(json.dumps({"name": "alt", "version": "1-1", "arch": "any", "summary": "s"}))
+    target = next((repo / "pool/a").glob("alt-*.syp"))
+    target.unlink()
+    syp("pack", tree, info, "-o", target.parent, "-k", key)
+    out = syp("buildall", recs, "--repo", repo, "-k", key, "--name", "t").stdout
+    assert "alt-1-1-any.syp: Dateien außerhalb von /usr" in out and "gebaut 1" in out and "vorhanden 1" in out

@@ -258,6 +258,29 @@ static int is_elf(const char *p) {
     return n == 4 && !memcmp(m, "\x7f" "ELF", 4);
 }
 
+/* Paketinhalt an das Dateisystem-Layout anpassen (wie Fedora/Arch): /bin, /sbin, /lib, /lib64 sind
+ * Symlinks nach /usr, /var/run und /var/lock zeigen nach /run. Rezepte, die dorthin installieren,
+ * würden sonst mit dem Paket filesystem kollidieren. Laufzeitverzeichnisse legt systemd-tmpfiles an. */
+static int usr_merge(const char *dest) {
+    char *argv[] = {"sh", "-c",
+                    "cd \"$1\" || exit 1\n"
+                    "for d in bin sbin lib lib64; do\n"
+                    "  [ -d \"$d\" ] && [ ! -L \"$d\" ] || continue\n"
+                    "  t=usr/$d; [ \"$d\" = lib64 ] && t=usr/lib\n"
+                    "  mkdir -p \"$t\" && cp -a \"$d/.\" \"$t/\" && rm -rf \"$d\" || exit 1\n"
+                    "  echo \"    /$d -> /$t verschoben (usr-merge)\"\n"
+                    "done\n"
+                    "for d in var/run var/lock; do\n"
+                    "  if [ -d \"$d\" ] && [ ! -L \"$d\" ]; then rm -rf \"$d\"; echo \"    /$d entfernt (Laufzeitverzeichnis)\"; fi\n"
+                    "done\n",
+                    "usr-merge", (char *)dest, NULL};
+    if (run_cmd(argv, NULL, NULL)) {
+        set_error("usr-merge im Paketinhalt fehlgeschlagen");
+        return -1;
+    }
+    return 0;
+}
+
 static void post_process(const char *dir, int strip) {
     struct dirent **list;
     int n = scandir(dir, &list, NULL, alphasort);
@@ -633,6 +656,7 @@ char *build_recipe(const char *recipe, const char *outdir, const seckey *signer,
     }
     if (!fail) {
         jval *opts = jget(r, "options");
+        if (usr_merge(dest)) fail = 1;
         post_process(dest, jgetb(opts, "strip", 1));
         harden_report hr;
         const char *mode = jgets(opts, "hardening", "strict");

@@ -82,6 +82,23 @@ static int sh(const char *fmt, ...) {
     return rc;
 }
 
+/* Paket aus der Zeit vor dem usr-merge in syp build? (Einträge unter /bin, /lib … oder /var/run) */
+static int legacy_layout(const jval *files) {
+    static const char *bad[] = {"bin", "sbin", "lib", "lib64", "var/run", "var/lock", NULL};
+    const jval *list = files && files->t == J_ARR ? files : (files ? jget(files, "files") : NULL);
+    for (size_t i = 0; list && i < list->n; i++) {
+        const char *p = jgets(list->items[i], "path", "");
+        if (!strcmp(jgets(list->items[i], "type", ""), "link") && !strchr(p, '/')) continue; /* filesystem: /lib -> usr/lib */
+        if (!strcmp(jgets(list->items[i], "type", ""), "link") && !strcmp(p, "var/run")) continue;
+        if (!strcmp(jgets(list->items[i], "type", ""), "link") && !strcmp(p, "var/lock")) continue;
+        for (const char **b = bad; *b; b++) {
+            size_t l = strlen(*b);
+            if (!strncmp(p, *b, l) && (p[l] == 0 || p[l] == '/')) return 1;
+        }
+    }
+    return 0;
+}
+
 /* Pfad dieses Programms: buildall ruft sich selbst für sync/install auf, unabhängig vom PATH
  * (in der CI und im Bootstrap liegt syp nicht in einem Standardverzeichnis). */
 static const char *self_exe(void) {
@@ -296,6 +313,9 @@ int cmd_buildall(int argc, char **argv, const char *root) {
                 if (strcmp(kid, k->id)) {
                     printf("   %s: mit fremdem Schlüssel %s signiert – wird neu gebaut\n", r->pkgfile, *kid ? kid : "?");
                     unlink(target);
+                } else if (legacy_layout(sf.files)) {
+                    printf("   %s: Dateien außerhalb von /usr bzw. in /var/run – wird neu gebaut (usr-merge)\n", r->pkgfile);
+                    unlink(target);
                 }
                 syp_close(&sf);
             }
@@ -342,8 +362,9 @@ int cmd_buildall(int argc, char **argv, const char *root) {
                 res = NULL;
             }
             if (res && broot && install_built &&
+                /* per Dateipfad: ersetzt auch eine installierte Fassung gleicher Version (Neubau) */
                 sh("'%s' -q -r '%s' sync >/dev/null && '%s' -r '%s' -y install --overwrite '/*' '%s' >/dev/null", self_exe(),
-                   broot, self_exe(), broot, r->name)) {
+                   broot, self_exe(), broot, target)) {
                 set_error("Installation von %s in die Bauumgebung fehlgeschlagen", r->name);
                 free(res);
                 res = NULL;
