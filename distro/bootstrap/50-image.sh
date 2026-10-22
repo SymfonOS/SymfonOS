@@ -92,7 +92,8 @@ menuentry "symfonOS Live – sichere Grafik" {
   initrd /boot/initramfs.img
 }
 CONF
-chroot "$SYM" grub-mkrescue -o "/var/tmp/image/out.iso" "/var/tmp/image/iso" -- -volid "$LABEL"
+# Ohne freetype gibt es keine unicode.pf2; das Textmenü braucht weder Schrift noch Theme
+chroot "$SYM" grub-mkrescue --fonts= --locales= --themes= -o "/var/tmp/image/out.iso" "/var/tmp/image/iso" -- -volid "$LABEL"
 mkdir -p "$(dirname "$OUTISO")"
 mv "$WORK/out.iso" "$OUTISO"
 ( cd "$(dirname "$OUTISO")" && sha256sum "$(basename "$OUTISO")" > "$(basename "$OUTISO").sha256" )
