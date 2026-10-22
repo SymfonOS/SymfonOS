@@ -6,7 +6,7 @@ summary = "SELinux Reference Policy (MCS, systemd)"
 license = "GPL-2.0-only"
 url = "https://github.com/SELinuxProject/refpolicy/releases/download/RELEASE_2_20250213/"
 depends = ["policycoreutils"]
-makedepends = ["checkpolicy", "secilc", "python", "m4"]
+makedepends = ["checkpolicy", "secilc", "python", "m4", "policycoreutils", "libsemanage"]
 backup = ["etc/selinux/config"]
 
 [[source]]
@@ -20,12 +20,15 @@ cd "$S"
 sed -i -e 's/^#\?TYPE = .*/TYPE = mcs/' -e 's/^#\?NAME = .*/NAME = refpolicy/' -e 's/^#\?MONOLITHIC = .*/MONOLITHIC = n/' \
   -e 's/^#\?UBAC = .*/UBAC = y/' -e 's/^#\?SYSTEMD = .*/SYSTEMD = y/' -e 's/^#\?DIRECT_INITRC = .*/DIRECT_INITRC = n/' build.conf
 make conf
-make
+T="SEMOD_PKG=$(command -v semodule_package) SEMOD_LNK=$(command -v semodule_link) SEMOD_EXP=$(command -v semodule_expand) CHECKMODULE=$(command -v checkmodule) CHECKPOLICY=$(command -v checkpolicy)"
+for t in semodule_package semodule_link semodule_expand checkmodule checkpolicy; do command -v "$t" >/dev/null || { echo "SELinux-Werkzeug fehlt: $t" >&2; exit 1; }; done
+make $T
 '''
 package = '''
 cd "$S"
-make DESTDIR="$DESTDIR" install
-make DESTDIR="$DESTDIR" install-headers
+T="SEMOD_PKG=$(command -v semodule_package) SEMOD_LNK=$(command -v semodule_link) SEMOD_EXP=$(command -v semodule_expand) CHECKMODULE=$(command -v checkmodule) CHECKPOLICY=$(command -v checkpolicy)"
+make $T DESTDIR="$DESTDIR" install
+make $T DESTDIR="$DESTDIR" install-headers
 install -Dm644 /dev/stdin "$DESTDIR/etc/selinux/config" <<'EOF'
 # SELinux-Modus: enforcing | permissive | disabled
 # symfonOS startet mit "permissive" und protokolliert Verstöße (ausearch -m avc);

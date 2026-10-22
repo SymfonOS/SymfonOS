@@ -6,6 +6,7 @@ summary = "Btrfs-Werkzeuge"
 license = "GPL-2.0-only"
 url = "https://www.kernel.org/pub/linux/kernel/people/kdave/btrfs-progs/"
 depends = ["glibc", "util-linux", "zlib", "zstd", "lzo", "e2fsprogs"]
+makedepends = ["systemd"]
 [[source]]
 url = "https://www.kernel.org/pub/linux/kernel/people/kdave/btrfs-progs/btrfs-progs-v6.16.tar.xz"
 sha256 = "31a930f8737c2618a824ad4bd1fdd83f54103e0eaa15aaadc484ffae33466fc5"
