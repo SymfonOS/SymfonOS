@@ -1,11 +1,13 @@
 # symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
 [package]
 name = "ncurses"
-version = "6.5-2"
+version = "6.5-3"
 summary = "Terminal-Bibliothek"
 license = "MIT"
 url = "https://invisible-mirror.net/archives/ncurses/"
 depends = ["glibc"]
+# ncursesw.pc & Co. entstehen nur, wenn pkg-config beim Bau vorhanden ist (readline.pc verweist darauf)
+makedepends = ["pkgconf"]
 provides = ["so:libncursesw.so.6", "libtinfo"]
 
 [[source]]
@@ -23,6 +25,7 @@ make
 package = '''
 cd "$S"
 make DESTDIR="$DESTDIR" install
+test -f "$DESTDIR/usr/lib/pkgconfig/ncursesw.pc" || { echo "ncursesw.pc fehlt (pkg-config beim Bau nicht gefunden?)" >&2; exit 1; }
 cd "$DESTDIR/usr/lib"
 for lib in ncurses form panel menu; do
   ln -sf lib${lib}w.so lib${lib}.so
