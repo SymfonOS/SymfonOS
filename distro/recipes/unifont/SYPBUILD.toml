@@ -10,7 +10,7 @@ depends = []
 
 [[source]]
 url = "https://ftp.gnu.org/gnu/unifont/unifont-15.1.05/unifont-15.1.05.pcf.gz"
-sha256 = "TODO"
+sha256 = "ce973d6785d7be66bfb574583af000408a63c984bed573e268b645e3160f4dbc"
 extract = false
 
 [build]
