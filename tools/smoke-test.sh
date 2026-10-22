@@ -33,7 +33,8 @@ done
 sleep "${SETTLE:-30}"   # späte Abstürze (z. B. Autologin) noch erfassen
 kill "$qpid" 2>/dev/null || true
 cp "$T/serial.log" "${LOG:-smoke-serial.log}"
-fails=$(grep -E "\[FAILED\]" "$T/serial.log" | sed 's/\x1b\[[0-9;]*m//g' || true)
+# Erst Farbcodes entfernen: systemd schreibt "[\e[0;1;31mFAILED\e[0m]", roh wäre "[FAILED]" nie zu finden
+fails=$(sed 's/\x1b\[[0-9;]*m//g' "$T/serial.log" | grep -a "\[FAILED\]" || true)
 # Abstürze sind immer ein Fehler; nach dem Ziel noch kurz weiterlaufen lassen (Autologin, späte Dienste)
 crashes=$(sed 's/\x1b\[[0-9;]*m//g' "$T/serial.log" | grep -aE "segfault at|general protection fault|Oops|BUG:" || true)
 if ((ok)) && [[ -n $crashes ]]; then

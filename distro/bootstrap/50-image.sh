@@ -67,6 +67,13 @@ if [[ -r $FC ]]; then
   log "SELinux-Kontexte setzen"
   chroot "$IMG" setfiles -F /etc/selinux/refpolicy/contexts/files/file_contexts / \
     -e /proc -e /sys -e /dev -e /run || log "Warnung: setfiles fehlgeschlagen – Live-System läuft permissive ohne Labels"
+  # Stichprobe: tragen die Dateien wirklich ein Label? (sonst erscheinen sie zur Laufzeit als unlabeled_t)
+  for f in usr/bin/bash usr/lib/systemd/systemd etc/passwd; do
+    lbl=$(getfattr --absolute-names -n security.selinux --only-values "$IMG/$f" 2>/dev/null | tr -d '\0')
+    log "SELinux-Label /$f: ${lbl:-FEHLT}"
+  done
+else
+  log "Warnung: keine file_contexts unter $FC – Richtlinie nicht im Store"
 fi
 
 log "SquashFS"
