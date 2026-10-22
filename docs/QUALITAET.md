@@ -38,7 +38,7 @@ Ein Commit auf `main` und jeder Paketbau müssen bestehen:
 | Härtungs- und Rechteprüfung jedes gebauten Pakets | `syp build` | PIE, RELRO, NX, TEXTREL, RPATH, world-writable → Abbruch |
 | Prüfsumme jeder Quelle | `syp build` | keine Quelle ohne sha256 |
 | Abhängigkeitsgraph ohne Zyklen | `recipes.yml` | `syp buildall -n` |
-| Boot-Test in QEMU | `ci.yml` (ISO) | Live-System muss bis zum Login starten |
+| Boot-Test in QEMU | `ci.yml`, `bootstrap.yml` | Live-System muss `multi-user.target` erreichen; Quellcode-ISO: kein Absturz, keine fehlgeschlagene Unit, sonst wird nichts veröffentlicht |
 
 ## Robustheit der Werkzeuge
 
@@ -80,4 +80,5 @@ Ein Release (z. B. 2026.10) ist ein eingefrorener Stand von stable mit Installat
 - Openqa-artige Tests, die Installation und Desktop automatisch in QEMU durchspielen. Bisher gibt es nur den Boot-Test des Live-Systems.
 - Bau ohne Netzzugriff (`unshare -n`) und Vergleich zweier unabhängiger Bauten (reproduzierbare Pakete).
 - Upstream-Signaturen der Quell-Tarballs prüfen (GPG), statt Prüfsummen nur beim ersten Laden festzuhalten.
+- `/usr/bin` und `/usr/sbin` zusammenlegen (wie Fedora 42). Bis dahin legen einzelne Pakete Verweise in `/usr/sbin` an, wo Programme fest dort erwartet werden (z. B. `/sbin/modprobe` durch den Kernel).
 - Ein Lookaside-Cache für Quellen, wie bei Fedora, damit Bauten nicht von der Erreichbarkeit fremder Server abhängen.

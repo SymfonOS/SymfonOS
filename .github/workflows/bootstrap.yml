@@ -139,12 +139,12 @@ jobs:
             exit "$rc"
           fi
       - name: Boot-Test
+        # Gate: ohne bestandenen Boot-Test wird nichts veröffentlicht
         if: steps.build.outputs.rc == '0'
-        continue-on-error: true
         run: |
           sudo apt-get install -y -q qemu-system-x86 xorriso genisoimage
           sudo chmod 666 /dev/kvm 2>/dev/null || true
-          LOG=out/smoke-serial.log tools/smoke-test.sh out/symfonos-base-*.iso
+          LOG=out/smoke-serial.log STRICT=1 SETTLE=45 tools/smoke-test.sh out/symfonos-base-*.iso
       - name: ISO veröffentlichen
         if: steps.build.outputs.rc == '0'
         run: |

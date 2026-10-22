@@ -1,7 +1,7 @@
 # symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
 [package]
 name = "kmod"
-version = "34.2-1"
+version = "34.2-2"
 summary = "Kernelmodul-Werkzeuge"
 license = "LGPL-2.1-or-later AND GPL-2.0-or-later"
 url = "https://www.kernel.org/pub/linux/utils/kernel/kmod/"
@@ -14,3 +14,8 @@ sha256 = "5a5d5073070cc7e0c7a7a3c6ec2a0e1780850c8b47b3e3892226b93ffcb9cb54"
 [build]
 style = "meson"
 configure_flags = "-D manpages=false"
+# Der Kernel ruft fest /sbin/modprobe auf (automatisches Nachladen, z. B. nf_tables für die Firewall)
+post_install = '''
+install -d "$DESTDIR/usr/sbin"
+for t in modprobe depmod insmod rmmod modinfo; do ln -sf ../bin/kmod "$DESTDIR/usr/sbin/$t"; done
+'''

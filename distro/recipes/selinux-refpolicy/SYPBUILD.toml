@@ -1,7 +1,7 @@
 # symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
 [package]
 name = "selinux-refpolicy"
-version = "2.20250213-1"
+version = "2.20250213-2"
 summary = "SELinux Reference Policy (MCS, systemd)"
 license = "GPL-2.0-only"
 url = "https://github.com/SELinuxProject/refpolicy/releases/download/RELEASE_2_20250213/"
@@ -40,3 +40,23 @@ EOF
 
 [options]
 strip = false
+
+[scripts]
+# Module in den Policy-Store übernehmen (erzeugt policy.NN und file_contexts) und Anmeldungen wie bei
+# Fedora unconfined_u zuordnen. Ohne diesen Schritt läuft SELinux ohne Richtlinie (login stürzte ab).
+post_install = '''
+mkdir -p /var/lib/selinux
+semodule -s refpolicy -n -i /usr/share/selinux/refpolicy/*.pp
+st=/var/lib/selinux/refpolicy/active
+if [ ! -e "$st/seusers.local" ]; then
+  printf '__default__:unconfined_u:s0-s0:c0.c1023\nroot:unconfined_u:s0-s0:c0.c1023\n' > "$st/seusers.local"
+fi
+semodule -s refpolicy -n -B
+if selinuxenabled 2>/dev/null; then load_policy || true; fi
+'''
+post_upgrade = '''
+mkdir -p /var/lib/selinux
+semodule -s refpolicy -n -i /usr/share/selinux/refpolicy/*.pp
+semodule -s refpolicy -n -B
+if selinuxenabled 2>/dev/null; then load_policy || true; fi
+'''

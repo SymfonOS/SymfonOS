@@ -1,7 +1,7 @@
 # symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
 [package]
 name = "linux"
-version = "6.16.1-1"
+version = "6.16.1-2"
 summary = "Linux-Kernel (symfonOS-Konfiguration)"
 license = "GPL-2.0-only"
 url = "https://www.kernel.org/pub/linux/kernel/v6.x/"

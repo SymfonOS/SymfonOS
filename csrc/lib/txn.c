@@ -176,7 +176,8 @@ static int run_script(txn *t, const jval *info, const char *hook, const char *ne
             logm(t, "   Hinweis: %s von %s in --root ohne chroot übersprungen", hook, jgets(info, "name", ""));
             return 0;
         }
-        argv[i++] = "chroot";
+        /* fester Pfad: sbin steht nicht in jedem PATH */
+        argv[i++] = access("/usr/sbin/chroot", X_OK) == 0 ? "/usr/sbin/chroot" : "chroot";
         argv[i++] = t->cfg->root;
     }
     argv[i++] = "sh";
