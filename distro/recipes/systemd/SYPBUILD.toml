@@ -23,7 +23,7 @@ sed -e 's/GROUP="render"/GROUP="video"/' -e 's/GROUP="sgx", //' -i rules.d/50-ud
 build = '''
 meson setup "$S/_build" "$S" --prefix=/usr --buildtype=release -D default-dnssec=no -D firstboot=true \
   -D install-tests=false -D ldconfig=false -D sysusers=true -D rpmmacrosdir=no -D homed=disabled -D userdb=false \
-  -D man=disabled -D mode=release -D pamconf=false -D pam=enabled -D selinux=enabled -D audit=enabled \
+  -D man=disabled -D mode=release -D pam=enabled -D selinux=enabled -D audit=enabled \
   -D tpm2=enabled -D libcryptsetup=enabled -D pwquality=enabled -D bootloader=enabled -D efi=true \
   -D dev-kvm-mode=0660 -D nobody-group=nogroup \
   -D sysupdate=disabled -D ukify=disabled -D docdir=/usr/share/doc/systemd-257.8 -D default-locale=C.UTF-8
