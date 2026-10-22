@@ -9,7 +9,7 @@ depends = ["glibc", "libsepol"]
 
 [[source]]
 url = "https://github.com/SELinuxProject/selinux/releases/download/3.8.1/semodule-utils-3.8.1.tar.gz"
-sha256 = "TODO"
+sha256 = "7705b0db059c53a21d6a77c0b50f6c467d91a0ea92ff875f1c93527cd2762395"
 
 [build]
 build = '''
