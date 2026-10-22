@@ -1,6 +1,6 @@
 name: Referenz holen
 
-# Lädt Dateien (z. B. Doku oder Quellen) herunter und stellt sie als Artefakt bereit –
+# Lädt Dateien (z. B. Doku oder Quellen) herunter und legt sie auf dem Branch »ref« ab –
 # für Arbeitsumgebungen ohne direkten Zugriff auf die Quell-Server.
 on:
   workflow_dispatch:
@@ -10,7 +10,7 @@ on:
         required: true
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   fetch:
@@ -25,8 +25,9 @@ jobs:
             curl -fsSL --retry 3 -O "$u" || echo "FEHLER $u" | tee -a ../errors.txt
           done
           ls -la
-      - uses: actions/upload-artifact@v4
-        with:
-          name: fetched
-          path: dl/
-          retention-days: 3
+      - name: Auf Branch »ref« ablegen (nicht main)
+        run: |
+          cd dl
+          git init -q -b ref && git add -A
+          git -c user.name="symfonOS CI" -c user.email=ci@users.noreply.github.com commit -qm "Referenzmaterial"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" ref
