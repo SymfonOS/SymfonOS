@@ -278,6 +278,12 @@ static int usr_merge(const char *dest) {
                     "  mkdir -p \"$t\" && cp -a \"$d/.\" \"$t/\" && rm -rf \"$d\" || exit 1\n"
                     "  echo \"    /$d -> /$t verschoben (usr-merge)\"\n"
                     "done\n"
+                    /* /usr/lib64 (Meson, Nettle u. a. wählen es, wenn es existiert): pkg-config sucht nur in /usr/lib */
+                    "if [ -d usr/lib64 ] && [ ! -L usr/lib64 ]; then\n"
+                    "  mkdir -p usr/lib && cp -a usr/lib64/. usr/lib/ && rm -rf usr/lib64 || exit 1\n"
+                    "  echo \"    /usr/lib64 -> /usr/lib verschoben\"\n"
+                    "  grep -rlZ --include='*.pc' --include='*.cmake' /usr/lib64 usr/lib usr/share 2>/dev/null | xargs -0r sed -i 's#/usr/lib64#/usr/lib#g'\n"
+                    "fi\n"
                     "for d in var/run var/lock; do\n"
                     "  if [ -d \"$d\" ] && [ ! -L \"$d\" ]; then rm -rf \"$d\"; echo \"    /$d entfernt (Laufzeitverzeichnis)\"; fi\n"
                     "done\n",
@@ -329,7 +335,7 @@ static char *style_step(const jval *b, const char *step) {
     if (!strcmp(step, "prepare")) return *pre ? xasprintf("cd \"$S\"\n%s", pre) : NULL;
     if (!strcmp(style, "autotools")) {
         if (!strcmp(step, "build"))
-            return xasprintf("cd \"$S\"\n./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var "
+            return xasprintf("cd \"$S\"\n./configure --prefix=/usr --libdir=/usr/lib --sysconfdir=/etc --localstatedir=/var "
                              "--disable-static %s\nmake %s",
                              cf, mf);
         if (!strcmp(step, "check")) return run_check ? xstrdup("cd \"$S\"\nmake check") : NULL;
@@ -342,7 +348,7 @@ static char *style_step(const jval *b, const char *step) {
             return xasprintf("cd \"$S\"\nmake DESTDIR=\"$DESTDIR\" PREFIX=/usr install %s\n%s", inf, post);
     } else if (!strcmp(style, "meson")) {
         if (!strcmp(step, "build"))
-            return xasprintf("meson setup \"$S/_build\" \"$S\" --prefix=/usr --libexecdir=lib --sbindir=bin "
+            return xasprintf("meson setup \"$S/_build\" \"$S\" --prefix=/usr --libdir=lib --libexecdir=lib --sbindir=bin "
                              "--buildtype=release -Dwrap_mode=nodownload -Db_pie=true %s\nninja -C \"$S/_build\" %s",
                              cf, mf);
         if (!strcmp(step, "check")) return run_check ? xstrdup("meson test -C \"$S/_build\" --print-errorlogs") : NULL;

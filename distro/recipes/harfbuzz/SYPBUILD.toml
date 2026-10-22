@@ -17,3 +17,6 @@ sha256 = "7aafab93115eb56cdc9a931ab7d19ff60d7f2937b599d140f17236f374e32698"
 [build]
 style = "meson"
 configure_flags = "-Dgraphite2=enabled -Dicu=enabled -Dfreetype=enabled -Dglib=enabled -Dgobject=enabled -Dintrospection=disabled -Dtests=disabled -Ddocs=disabled -Dcairo=disabled"
+
+[options]
+cflags = "-O2 -pipe -march=x86-64 -mtune=generic -fno-plt -fstack-protector-strong -fstack-clash-protection -fcf-protection -D_FORTIFY_SOURCE=3"

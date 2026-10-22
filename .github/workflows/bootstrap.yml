@@ -229,6 +229,15 @@ jobs:
             [ -f "$f" ] && sed 's/\x1b\[[0-9;]*m//g' "$f" | xz -T0 -6 > "$d/$f.xz"
           done
           cp out/*.log "$d/" 2>/dev/null || true
+          # Pakete, die gebaut vorliegen, sich aber nicht in die Bauwurzel installieren ließen: Grund festhalten
+          if [ -f build.log ] && [ -x csrc/bin/syp ]; then
+            for n in $(sed -n 's/^!! \([^:]*\): vorhanden, aber nicht.*/\1/p' build.log | sort -u); do
+              echo "== $n" >> "$d/install-errors.txt"
+              sudo csrc/bin/syp -r "$SYM" -y install --overwrite '/*' "$n" >> "$d/install-errors.txt" 2>&1 || true
+            done
+            sudo csrc/bin/syp -r "$SYM" list > "$d/installed.txt" 2>&1 || true
+            sudo ls -la "$SYM/usr/lib64" > "$d/lib64.txt" 2>&1 || true
+          fi
           cp -r out/desktop-test "$d/" 2>/dev/null || true
           echo "Lauf $GITHUB_RUN_ID, $(date -u), rc=${{ steps.build.outputs.rc }}" > "$d/README"
           cd "$d" && git init -q -b ci-diag && git add -A

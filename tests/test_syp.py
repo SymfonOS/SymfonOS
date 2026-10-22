@@ -205,6 +205,27 @@ def test_install_exclude_skips_docs_and_foreign_locales(tmp_path):
     assert not (root / "usr/bin/app").exists()
 
 
+def test_upgrade_from_lib64_through_symlink_keeps_new_file(tmp_path):
+    # Altes Paket lag in /usr/lib64, die Wurzel hat jetzt lib64 -> lib: das Update darf beim Entfernen der
+    # alten Pfade nicht die gerade installierte Datei in /usr/lib löschen
+    key, pub = keygen(tmp_path)
+    repo = tmp_path / "repo"
+    root = setup_root(tmp_path, repo, pub)
+    publish(repo, key, make_pkg(tmp_path, "nettle", "1-1", {"usr/lib64/libnettle.so.8": "alt"}, key=key))
+    syp("-r", root, "sync")
+    syp("-r", root, "-y", "install", "nettle")
+    lib64 = root / "usr/lib64"
+    (root / "usr/lib").mkdir(parents=True, exist_ok=True)
+    for f in lib64.iterdir():
+        f.rename(root / "usr/lib" / f.name)
+    lib64.rmdir()
+    lib64.symlink_to("lib")
+    publish(repo, key, make_pkg(tmp_path, "nettle", "2-1", {"usr/lib/libnettle.so.8": "neu"}, key=key))
+    syp("-r", root, "sync")
+    syp("-r", root, "-y", "upgrade")
+    assert (root / "usr/lib/libnettle.so.8").read_text() == "neu"
+
+
 def test_build_recipe(tmp_path):
     (tmp_path / "hello.sh").write_text("#!/bin/sh\necho Hallo\n")
     (tmp_path / "SYPBUILD.toml").write_text('''

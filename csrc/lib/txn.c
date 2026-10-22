@@ -255,6 +255,30 @@ static int in_list(const jval *arr, const char *s) {
     return 0;
 }
 
+/* Pfad relativ zur Wurzel mit aufgelösten Verzeichnisverweisen (usr/lib64/x -> usr/lib/x), NULL wenn
+ * unverändert oder nicht auflösbar */
+static char *canonical_rel(txn *t, const char *path) {
+    char *full = rp(t, path), *dir = path_dirname(full), *rdir = realpath(dir, NULL);
+    char *root = realpath(t->cfg->root, NULL), *out = NULL;
+    if (rdir && root) {
+        size_t rl = strcmp(root, "/") ? strlen(root) : 0;
+        if (!strncmp(rdir, root, rl) && (rdir[rl] == '/' || rdir[rl] == 0)) {
+            const char *rel = rdir + rl;
+            while (*rel == '/') rel++;
+            out = *rel ? xasprintf("%s/%s", rel, path_basename(path)) : xstrdup(path_basename(path));
+            if (!strcmp(out, path)) {
+                free(out);
+                out = NULL;
+            }
+        }
+    }
+    free(full);
+    free(dir);
+    free(rdir);
+    free(root);
+    return out;
+}
+
 /* keep: Pfade, die bleiben (neue Version) */
 static void remove_files(txn *t, const char *name, hmap *keep, const jval *info) {
     jval *files = db_files_of(t->db, name);
@@ -270,6 +294,19 @@ static void remove_files(txn *t, const char *name, hmap *keep, const jval *info)
             if (strcmp(own.v[i], name)) other = 1;
         sv_free(&own);
         if (other) continue;
+        /* Über einen Verzeichnisverweis kann der alte Pfad dieselbe Datei sein wie ein neuer
+         * (usr/lib64 -> lib): dann nicht löschen, sonst verschwindet die gerade installierte Datei */
+        char *canon = strcmp(jgets(f, "type", ""), "dir") ? canonical_rel(t, path) : NULL;
+        if (canon) {
+            int same = keep && hm_get(keep, canon);
+            strvec o2 = {0};
+            db_owners(t->db, canon, &o2);
+            for (size_t i = 0; i < o2.n; i++)
+                if (strcmp(o2.v[i], name)) same = 1;
+            sv_free(&o2);
+            free(canon);
+            if (same) continue;
+        }
         char *target = rp(t, path);
         if (!strcmp(jgets(f, "type", ""), "dir")) {
             rmdir(target);
@@ -390,9 +427,25 @@ static int do_install(txn *t, hmap *inst, sypfile *f, const char *reason) {
 }
 
 static int check_conflicts(txn *t, sypfile *files, size_t n, strvec *removing) {
-    hmap claimed = {0};
+    hmap claimed = {0}, alias = {0};
     hm_init(&claimed);
-    strvec problems = {0};
+    hm_init(&alias);
+    strvec problems = {0}, aliasv = {0};
+    /* Dateien installierter Versionen, die über Verzeichnisverweise unter anderem Namen liegen
+     * (usr/lib64/x == usr/lib/x): gehören weiter diesem Paket, sind also kein fremder Dateirest */
+    for (size_t k = 0; k < n; k++) {
+        const char *pname = jgets(files[k].info, "name", "");
+        jval *old = db_files_of(t->db, pname);
+        for (size_t i = 0; old && i < old->n; i++) {
+            if (!strcmp(jgets(old->items[i], "type", ""), "dir")) continue;
+            char *c = canonical_rel(t, jgets(old->items[i], "path", ""));
+            if (c) {
+                sv_push_own(&aliasv, c);
+                hm_set(&alias, c, (void *)pname);
+            }
+        }
+        json_free(old);
+    }
     for (size_t k = 0; k < n; k++) {
         const char *pname = jgets(files[k].info, "name", "");
         for (size_t i = 0; i < files[k].files->n; i++) {
@@ -421,6 +474,8 @@ static int check_conflicts(txn *t, sypfile *files, size_t n, strvec *removing) {
                 int ow = 0;
                 for (size_t j = 0; j < t->overwrite.n; j++)
                     if (glob_match(t->overwrite.v[j], abs)) ow = 1;
+                const char *al = hm_get(&alias, path);
+                if (al && (!strcmp(al, pname) || sv_contains(removing, al))) ow = 1;
                 if (path_exists(target) && !is_dir(target) && !ow)
                     sv_push_own(&problems, xasprintf("/%s existiert im Dateisystem (keinem Paket zugeordnet)", path));
                 free(target);
@@ -431,6 +486,8 @@ static int check_conflicts(txn *t, sypfile *files, size_t n, strvec *removing) {
         }
     }
     hm_free(&claimed);
+    hm_free(&alias);
+    sv_free(&aliasv);
     if (problems.n) {
         sbuf b = {0};
         sb_init(&b);

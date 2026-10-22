@@ -16,7 +16,7 @@ sha256 = "2814a7281989f6baa9e57bd33bbc5e148827e2721ccef22aaf28ab2b376068e8"
 
 [build]
 style = "meson"
-configure_flags = "-Dman=false -Dsession_tracking=logind -Dtests=false -Dintrospection=false -Djs_engine=duktape -Dpolkitd_user=polkitd -Dpolkitd_uid=27 -Dexamples=false -Dgtk_doc=false -Dpam_include=system-auth"
+configure_flags = "-Dman=false -Dsession_tracking=logind -Dtests=false -Dintrospection=false -Dpolkitd_user=polkitd -Dpolkitd_uid=27 -Dexamples=false -Dgtk_doc=false -Dpam_include=system-auth"
 post_install = '''
 install -Dm644 /dev/stdin "$DESTDIR/usr/lib/sysusers.d/polkit.conf" <<'SYS'
 u polkitd 27 "PolicyKit Daemon Owner" /etc/polkit-1 /usr/bin/nologin

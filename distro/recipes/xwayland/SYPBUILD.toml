@@ -15,5 +15,5 @@ sha256 = "c8908d57c8ed9ceb8293c16ba7ad5af522efaf1ba7e51f9e4cf3c0774d199907"
 
 [build]
 style = "meson"
-configure_flags = "-Dxkb_output_dir=/var/lib/xkb -Dsecure-rpc=false -Dxvfb=false -Ddocs=false -Ddevel-docs=false -Dxwayland_eglstream=false -Dlibdecor=false"
+configure_flags = "-Dxkb_output_dir=/var/lib/xkb -Dsecure-rpc=false -Dxvfb=false -Ddocs=false -Ddevel-docs=false -Dlibdecor=false"
 pre_configure = "sed -i '/install_man/,$d' meson.build"

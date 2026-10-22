@@ -16,7 +16,7 @@ sha256 = "17599eab9cf1ac98bce41954057b1b66d16c99aef341e16d41dbc7302f4fa960"
 
 [build]
 style = "meson"
-configure_flags = "'-Dsession-managers=[]' -Dtests=disabled -Dexamples=disabled -Ddocs=disabled -Dman=enabled -Dbluez5=disabled -Dgstreamer=disabled -Dlibcamera=disabled -Droc=disabled -Dlv2=disabled -Dlibffado=disabled -Djack=disabled -Dpipewire-jack=enabled -Djack-devel=true -Dpipewire-alsa=enabled -Dlibpulse=disabled -Davahi=disabled -Dx11=disabled -Dx11-xfixes=disabled -Dsdl2=disabled -Dvulkan=disabled -Dselinux=enabled -Decho-cancel-webrtc=disabled"
+configure_flags = "'-Dsession-managers=[]' -Dtests=disabled -Dexamples=disabled -Ddocs=disabled -Dman=disabled -Dbluez5=disabled -Dgstreamer=disabled -Dlibcamera=disabled -Droc=disabled -Dlv2=disabled -Dlibffado=disabled -Djack=disabled -Dpipewire-jack=enabled -Djack-devel=true -Dpipewire-alsa=enabled -Dlibpulse=disabled -Davahi=disabled -Dx11=disabled -Dx11-xfixes=disabled -Dsdl2=disabled -Dvulkan=disabled -Dselinux=enabled -Decho-cancel-webrtc=disabled"
 post_install = '''
 # PipeWire ersetzt PulseAudio und JACK (wie bei Fedora): ALSA-Standardgerät und Benutzerdienste
 install -d "$DESTDIR/etc/alsa/conf.d" "$DESTDIR/usr/lib/systemd/user-preset"

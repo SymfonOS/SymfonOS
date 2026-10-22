@@ -269,6 +269,10 @@ pkg("harfbuzz", "11.4.1", "https://github.com/harfbuzz/harfbuzz/releases/downloa
     "Text-Shaping", "MIT", ["glib2", "graphite2", "icu", "freetype"], ["meson"], style="meson",
     flags="-Dgraphite2=enabled -Dicu=enabled -Dfreetype=enabled -Dglib=enabled -Dgobject=enabled "
           "-Dintrospection=disabled -Dtests=disabled -Ddocs=disabled -Dcairo=disabled",
+    # HarfBuzz baut C++ ohne Ausnahmen und linkt ohne libstdc++: -fexceptions und die libstdc++-Assertions
+    # der Standardschalter erzeugten unaufgelöste Symbole (__gxx_personality_v0)
+    options={"cflags": "-O2 -pipe -march=x86-64 -mtune=generic -fno-plt -fstack-protector-strong "
+                       "-fstack-clash-protection -fcf-protection -D_FORTIFY_SOURCE=3"},
     provides=["so:libharfbuzz.so.0"])
 pkg("fontconfig", "2.17.1", "https://gitlab.freedesktop.org/api/v4/projects/890/packages/generic/fontconfig/2.17.1/fontconfig-2.17.1.tar.xz",
     "Schriftkonfiguration", "HPND AND MIT", ["freetype", "expat", "util-linux"], ["gperf", "python"],
@@ -499,7 +503,7 @@ pkg("xwayland", "24.1.8", XORG + "xserver/xwayland-24.1.8.tar.xz", "X11-Programm
     ["meson", "wayland-protocols", "font-util", "xorgproto", "xtrans", "libxkbfile"], style="meson",
     pre="sed -i '/install_man/,$d' meson.build",
     flags="-Dxkb_output_dir=/var/lib/xkb -Dsecure-rpc=false -Dxvfb=false -Ddocs=false -Ddevel-docs=false "
-          "-Dxwayland_eglstream=false -Dlibdecor=false")
+          "-Dlibdecor=false")
 
 
 # ---------------------------------------------------------------------------------------------------
@@ -570,7 +574,7 @@ pkg("pipewire", "1.4.7", {"url": "https://gitlab.freedesktop.org/pipewire/pipewi
     "Audio- und Videoserver (PipeWire, mit Pulse- und JACK-Ersatz)", "MIT",
     ["alsa-lib", "dbus", "systemd", "libsndfile", "opus", "sbc", "libcanberra", "readline", "ncurses", "libusb",
      "openssl", "libselinux"], ["meson", "python-docutils"], style="meson",
-    flags="'-Dsession-managers=[]' -Dtests=disabled -Dexamples=disabled -Ddocs=disabled -Dman=enabled "
+    flags="'-Dsession-managers=[]' -Dtests=disabled -Dexamples=disabled -Ddocs=disabled -Dman=disabled "
           "-Dbluez5=disabled -Dgstreamer=disabled -Dlibcamera=disabled -Droc=disabled -Dlv2=disabled "
           "-Dlibffado=disabled -Djack=disabled -Dpipewire-jack=enabled -Djack-devel=true "
           "-Dpipewire-alsa=enabled -Dlibpulse=disabled -Davahi=disabled -Dx11=disabled -Dx11-xfixes=disabled "
@@ -648,7 +652,7 @@ make''',
 pkg("polkit", "126", {"url": "https://github.com/polkit-org/polkit/archive/126/polkit-126.tar.gz"},
     "Berechtigungsdienst (polkit)", "LGPL-2.0-or-later", ["duktape", "glib2", "systemd", "linux-pam", "expat"],
     ["meson", "libxslt", "docbook-xsl-nons", "gettext"], style="meson",
-    flags="-Dman=false -Dsession_tracking=logind -Dtests=false -Dintrospection=false -Djs_engine=duktape "
+    flags="-Dman=false -Dsession_tracking=logind -Dtests=false -Dintrospection=false "
           "-Dpolkitd_user=polkitd -Dpolkitd_uid=27 -Dexamples=false -Dgtk_doc=false -Dpam_include=system-auth",
     post='install -Dm644 /dev/stdin "$DESTDIR/usr/lib/sysusers.d/polkit.conf" <<\'SYS\'\n'
          'u polkitd 27 "PolicyKit Daemon Owner" /etc/polkit-1 /usr/bin/nologin\nSYS',
