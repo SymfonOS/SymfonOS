@@ -60,7 +60,7 @@ say "Partitionieren ($( ((UEFI)) && echo UEFI || echo BIOS ))"
 wipefs -af "$DISK" >/dev/null
 sfdisk --quiet "$DISK" <<PARTS
 label: gpt
-size=1MiB, type=21686148-6248-6449-6E6F-744E656564EF, name="bios"
+size=1MiB, type=21686148-6449-6E6F-744E-656564454649, name="bios"
 size=1GiB, type=U, name="EFI"
 type=L, name="symfonOS"
 PARTS
