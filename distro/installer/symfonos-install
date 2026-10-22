@@ -91,7 +91,7 @@ mkdir -p "$MNT/etc/syp/keys"
 cp "$REPO/symfonos-release.pub" "$MNT/etc/syp/keys/"
 printf 'arch = "x86_64"\n[[repo]]\nname = "symfonos"\nurl = "file://%s"\n[snapshots]\nenabled = false\n' "$REPO" > "$MNT/etc/syp/syp.toml"
 syp -r "$MNT" sync
-syp -r "$MNT" -y install symfonos-base
+syp -r "$MNT" -y install --overwrite /etc/syp/syp.toml symfonos-base   # vorläufige Offline-Konfiguration ersetzen
 cp /etc/syp/syp.toml "$MNT/etc/syp/syp.toml"   # Online-Repos für Updates
 
 say "System konfigurieren"

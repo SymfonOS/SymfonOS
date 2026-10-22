@@ -27,7 +27,7 @@ enabled = false
 CONF
 cp "$SYP_PUB" "$IMG/etc/syp/keys/symfonos-release.pub"
 "$SYP" -r "$IMG" sync
-"$SYP" -r "$IMG" -y install symfonos-base symfonos-installer
+"$SYP" -r "$IMG" -y install --overwrite /etc/syp/syp.toml symfonos-base symfonos-installer   # vorläufige Konfiguration ersetzen
 # Für das installierte System zeigt die Konfiguration wieder auf die Online-Repos
 cp "$REPO_ROOT/system/etc/syp/syp.toml" "$IMG/etc/syp/syp.toml"
 
