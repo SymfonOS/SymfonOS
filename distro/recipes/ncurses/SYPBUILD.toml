@@ -1,7 +1,7 @@
 # symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
 [package]
 name = "ncurses"
-version = "6.5-3"
+version = "6.5-4"
 summary = "Terminal-Bibliothek"
 license = "MIT"
 url = "https://invisible-mirror.net/archives/ncurses/"
@@ -33,4 +33,5 @@ for lib in ncurses form panel menu; do
 done
 ln -sf libncursesw.so libcurses.so
 ln -sf libncursesw.so libtinfo.so
+ln -sf ncursesw.pc pkgconfig/tinfo.pc   # readline.pc verlangt tinfo (wie bei Fedora/Arch)
 '''
