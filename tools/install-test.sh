@@ -46,7 +46,7 @@ LOOP=$(losetup -fP --show "$W/disk.img")
 
 log "symfonos-install (unverschlüsselt, GRUB, ohne Firmware-Variablen)"
 chroot "$W/ovl" /usr/bin/env -i PATH=/usr/bin:/usr/sbin HOME=/root TERM=dumb \
-  SYMFONOS_PASSWORD=symfonos-test SYMFONOS_NO_NVRAM=1 \
+  SYMFONOS_PASSWORD=Blauer-Wal-7-Segelt SYMFONOS_NO_NVRAM=1 \
   symfonos-install --disk "$LOOP" --no-encrypt --boot grub --user tester --hostname symfonos-test --yes
 
 log "Installiertes System prüfen"
