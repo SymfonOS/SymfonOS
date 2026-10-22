@@ -1,16 +1,29 @@
 #!/usr/bin/env bash
 # Stufe 5: bootfähiges Live-/Installations-ISO ausschließlich aus dem eigenen syp-Repository.
-#   SYP_PUB=release.pub ./50-image.sh [ausgabe.iso]
+#   SYP_PUB=release.pub [VARIANT=base|desktop] ./50-image.sh [ausgabe.iso]
+# base: Konsole (symfonos-base); desktop: KDE Plasma unter Wayland mit SDDM (symfonos-desktop)
 # shellcheck source-path=SCRIPTDIR source=config.sh
 . "$(dirname "$0")/config.sh"
 : "${SYP_PUB:?SYP_PUB (öffentlicher Release-Schlüssel) setzen}"
-OUTISO=${1:-$REPO_ROOT/out/symfonos-base-$(date +%Y.%m.%d)-x86_64.iso}
+VARIANT=${VARIANT:-base}
+case $VARIANT in
+  base) META=symfonos-base ;;
+  desktop) META=symfonos-desktop ;;
+  *) echo "VARIANT muss base oder desktop sein" >&2; exit 2 ;;
+esac
+OUTISO=${1:-$REPO_ROOT/out/symfonos-$VARIANT-$(date +%Y.%m.%d)-x86_64.iso}
 WORK=$SYM/var/tmp/image            # liegt in der Werkzeugwurzel, damit mksquashfs/grub-mkrescue dort laufen
 IMG=$WORK/rootfs ISO=$WORK/iso
 LABEL=SYMFONOS
-rm -rf "$WORK"; mkdir -p "$IMG/etc/syp/keys" "$ISO"/{boot,LiveOS}
+# Reste eines abgebrochenen Laufs: erst aushängen, dann prüfen, dann löschen (nie rm -rf über /dev-Bindungen)
+if [[ -d $WORK ]]; then
+  findmnt -rn -o TARGET | grep "^$WORK" | sort -r | while read -r m; do umount -l "$m"; done
+  if findmnt -rn -o TARGET | grep -q "^$WORK"; then echo "unter $WORK ist noch etwas eingehängt" >&2; exit 1; fi
+  rm -rf --one-file-system "$WORK"
+fi
+mkdir -p "$IMG/etc/syp/keys" "$ISO"/{boot,LiveOS}
 for m in dev proc sys run; do mkdir -p "$SYM/$m"; mountpoint -q "$SYM/$m" || mount --bind "/$m" "$SYM/$m"; done
-trap 'for m in run sys proc dev; do mountpoint -q "$SYM/$m" && umount -l "$SYM/$m"; done; true' EXIT
+trap 'for m in run sys proc dev; do mountpoint -q "$IMG/$m" && umount -l "$IMG/$m"; mountpoint -q "$SYM/$m" && umount -l "$SYM/$m"; done; true' EXIT
 
 # Der Installer kopiert das Live-System (samt Paketdatenbank); ein zusätzliches Paket-Repository auf dem
 # Medium würde jedes Programm doppelt enthalten. INCLUDE_REPO=1 legt es trotzdem bei (Offline-Paketauswahl).
@@ -31,7 +44,7 @@ enabled = false
 CONF
 cp "$SYP_PUB" "$IMG/etc/syp/keys/symfonos-release.pub"
 "$SYP" -r "$IMG" sync
-"$SYP" -r "$IMG" -y install --overwrite /etc/syp/syp.toml symfonos-base symfonos-installer   # vorläufige Konfiguration ersetzen
+"$SYP" -r "$IMG" -y install --overwrite /etc/syp/syp.toml "$META" symfonos-installer   # vorläufige Konfiguration ersetzen
 # Für das installierte System zeigt die Konfiguration wieder auf die Online-Repos
 cp "$REPO_ROOT/system/etc/syp/syp.toml" "$IMG/etc/syp/syp.toml"
 
@@ -42,22 +55,37 @@ in_img "systemd-sysusers; systemd-tmpfiles --create || true
   useradd -m -G wheel,audio,video,input -s /bin/bash -c 'symfonOS Live' live; passwd -d live
   echo 'live ALL=(ALL:ALL) NOPASSWD: ALL' > /etc/sudoers.d/90-live; chmod 440 /etc/sudoers.d/90-live
   systemctl preset-all >/dev/null 2>&1 || true   # Firewall, Audit, Zeit, DNS wie bei einer Installation
+  systemctl --global preset-all >/dev/null 2>&1 || true   # Benutzerdienste (PipeWire, WirePlumber)
   systemctl enable systemd-networkd systemd-resolved systemd-timesyncd iwd
   : > /etc/machine-id"
-mkdir -p "$IMG/etc/systemd/system/getty@tty1.service.d"
-cat > "$IMG/etc/systemd/system/getty@tty1.service.d/autologin.conf" <<'CONF'
+if [[ $VARIANT == desktop ]]; then
+  # Live-Benutzer meldet sich automatisch in Plasma (Wayland) an; der Installer entfernt das wieder
+  mkdir -p "$IMG/etc/sddm.conf.d"
+  cat > "$IMG/etc/sddm.conf.d/20-live.conf" <<'CONF'
+[Autologin]
+User=live
+Session=plasma
+Relogin=false
+CONF
+else
+  mkdir -p "$IMG/etc/systemd/system/getty@tty1.service.d"
+  cat > "$IMG/etc/systemd/system/getty@tty1.service.d/autologin.conf" <<'CONF'
 [Service]
 ExecStart=
 ExecStart=-/sbin/agetty --autologin live --noclear %I $TERM
 CONF
-cat > "$IMG/etc/motd" <<'CONF'
+fi
+cat > "$IMG/etc/motd" <<CONF
 
-  symfonOS Live (Basissystem)
+  symfonOS Live ($([[ $VARIANT == desktop ]] && echo "Desktop" || echo "Basissystem"))
   Installieren:  sudo symfonos-install
   Netzwerk:      iwctl  (WLAN)  ·  networkctl status
   Hilfe:         man syp  ·  https://github.com/thomasrohm23-bit/symfonOS
 
 CONF
+# Größenübersicht (das ISO muss als eine Datei unter 2 GiB bleiben)
+log "Größe des Live-Systems: $(du -sxm "$IMG" | cut -f1) MiB"
+du -xm --max-depth=3 "$IMG/usr" 2>/dev/null | sort -rn | head -25 | while read -r mb d; do log "Größe: ${mb} MiB ${d#"$IMG"}"; done
 KVER=$(ls "$IMG/usr/lib/modules" | head -1)
 log "Initramfs (dracut, dmsquash-live) für Kernel $KVER"
 in_img "dracut --force --no-hostonly --no-hostonly-cmdline --add 'dmsquash-live' --kver '$KVER' /boot/initramfs-live.img"
@@ -90,7 +118,7 @@ cat > "$ISO/boot/grub/grub.cfg" <<CONF
 set timeout=5
 set default=0
 insmod all_video
-menuentry "symfonOS Live" {
+menuentry "symfonOS Live ($VARIANT)" {
   linux /boot/vmlinuz root=live:CDLABEL=$LABEL rd.live.image quiet
   initrd /boot/initramfs.img
 }

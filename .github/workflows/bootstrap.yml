@@ -175,6 +175,65 @@ jobs:
           gh release edit "$tmp" --repo "$GITHUB_REPOSITORY" --tag source-nightly
           gh api -X DELETE "repos/$GITHUB_REPOSITORY/git/refs/tags/$tmp" || true
           echo "::notice title=ISO veröffentlicht::$iso ($(du -h "$iso" | cut -f1), ${#files[@]} Datei(en))"
+      - name: Desktop-ISO erzeugen
+        id: desktop
+        if: always() && steps.build.outputs.rc == '0'
+        run: |
+          set +e
+          sudo -E env "PATH=$PATH" SYP_PUB="$PWD/keys/release.pub" PKGREPO="$PWD/out/repo/symfonos" VARIANT=desktop \
+            bash distro/bootstrap/50-image.sh "$PWD/out/desktop/symfonos-desktop-$(date +%Y.%m.%d)-x86_64.iso" 2>&1 | tee image-desktop.log
+          rc=${PIPESTATUS[0]}
+          sudo chown -R "$USER" out
+          grep -a "Größe" image-desktop.log | sed 's/\x1b\[[0-9;]*m//g' | paste -sd'|' | sed 's/^/::notice title=Größe Desktop-Image::/' || true
+          if [ "$rc" -ne 0 ]; then
+            echo "::error title=Desktop-ISO (Exit $rc)::$(grep -v '^ *[0-9.]*%' image-desktop.log | tail -c 3500 | sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g')"
+            exit "$rc"
+          fi
+      - name: Desktop-Test (grafisch)
+        if: always() && steps.desktop.outcome == 'success'
+        run: |
+          sudo apt-get install -y -q qemu-system-x86 xorriso genisoimage socat imagemagick
+          sudo chmod 666 /dev/kvm 2>/dev/null || true
+          tools/desktop-test.sh out/desktop/symfonos-desktop-*.iso out/desktop-test
+      - name: Desktop-Installationstest
+        if: always() && steps.desktop.outcome == 'success'
+        run: |
+          set +e
+          sudo -E env "PATH=$PATH" LOG="$PWD/out/desktop-test/install-serial.log" TIMEOUT=1200 \
+            tools/install-test.sh out/desktop/symfonos-desktop-*.iso 2>&1 | tee install-desktop.log
+          rc=${PIPESTATUS[0]}
+          sudo chown -R "$USER" out
+          exit "$rc"
+      - name: Desktop-ISO veröffentlichen
+        if: always() && steps.desktop.outcome == 'success'
+        run: |
+          cd out/desktop
+          iso=$(ls symfonos-desktop-*.iso)
+          if [ "$(stat -c %s "$iso")" -lt 2147483648 ]; then files=("$iso"); note="Direkt herunterladen: $iso"
+          else split -b 1900M -d -a 2 "$iso" "$iso.part"; files=("$iso".part*); note="Zusammensetzen: cat $iso.part* > $iso"; fi
+          tmp="desktop-nightly-run-$GITHUB_RUN_ID"
+          gh release create "$tmp" --repo "$GITHUB_REPOSITORY" --prerelease \
+            --title "symfonOS Desktop (KDE Plasma) aus Quellcode $(date +%Y-%m-%d)" \
+            --notes "$note · Prüfen: sha256sum -c $iso.sha256 · Auf USB: sudo dd if=$iso of=/dev/sdX bs=4M status=progress oflag=sync · Live-Benutzer meldet sich automatisch an; installieren mit »sudo symfonos-install« im Terminal" \
+            "${files[@]}" "$iso.sha256" $(ls ../desktop-test/*.png 2>/dev/null)
+          gh release delete desktop-nightly --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag || true
+          gh release edit "$tmp" --repo "$GITHUB_REPOSITORY" --tag desktop-nightly
+          gh api -X DELETE "repos/$GITHUB_REPOSITORY/git/refs/tags/$tmp" || true
+          echo "::notice title=Desktop-ISO veröffentlicht::$iso ($(du -h "$iso" | cut -f1), ${#files[@]} Datei(en))"
+      - name: Diagnose ablegen (Branch ci-diag)
+        # Vollständige Logs und Bildschirmfotos für die Fehlersuche; enthält keine Geheimnisse
+        if: always()
+        run: |
+          d=$(mktemp -d)
+          for f in build.log image.log image-desktop.log install.log install-desktop.log; do
+            [ -f "$f" ] && sed 's/\x1b\[[0-9;]*m//g' "$f" | xz -T0 -6 > "$d/$f.xz"
+          done
+          cp out/*.log "$d/" 2>/dev/null || true
+          cp -r out/desktop-test "$d/" 2>/dev/null || true
+          echo "Lauf $GITHUB_RUN_ID, $(date -u), rc=${{ steps.build.outputs.rc }}" > "$d/README"
+          cd "$d" && git init -q -b ci-diag && git add -A
+          git -c user.name="symfonOS CI" -c user.email=ci@users.noreply.github.com commit -qm "Diagnose Lauf $GITHUB_RUN_ID"
+          git push -qf "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}" ci-diag || true
       - name: Ergebnis
         if: always()
         run: |

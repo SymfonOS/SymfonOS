@@ -120,6 +120,7 @@ else
   # Nur für das Live-Medium gedachte Einstellungen entfernen
   rm -f "$MNT/etc/sudoers.d/90-live" "$MNT/etc/motd"
   rm -rf "$MNT/etc/systemd/system/getty@tty1.service.d"
+  rm -f "$MNT/etc/sddm.conf.d/20-live.conf"   # automatische Anmeldung des Live-Benutzers (Desktop-Medium)
   if grep -q '^live:' "$MNT/etc/passwd"; then chroot "$MNT" userdel -r live 2>/dev/null || chroot "$MNT" userdel live; fi
   : > "$MNT/etc/machine-id"
   rm -f "$MNT"/etc/ssh/ssh_host_*
