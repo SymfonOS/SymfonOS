@@ -64,7 +64,18 @@ size=1MiB, type=21686148-6248-6449-6E6F-744E656564EF, name="bios"
 size=1GiB, type=U, name="EFI"
 type=L, name="symfonOS"
 PARTS
-udevadm settle 2>/dev/null || sleep 2   # ohne laufendes udev (Chroot/Test) kurz warten
+# Partitionstabelle neu einlesen und auf die Gerätedateien warten (ohne udev dauert das einen Moment)
+blockdev --rereadpt "$DISK" 2>/dev/null || partx -u "$DISK" 2>/dev/null || true
+udevadm settle 2>/dev/null || true
+for _ in $(seq 50); do [[ -b $(part 3) ]] && break; sleep 0.2; done
+if [[ ! -b $(part 3) ]]; then
+  # Ohne udev legt niemand die Knoten an: aus sysfs nachholen
+  for n in 1 2 3; do
+    p=$(part "$n"); s=/sys/class/block/$(basename "$p")/dev
+    [[ -b $p || ! -r $s ]] || mknod "$p" b "$(cut -d: -f1 "$s")" "$(cut -d: -f2 "$s")"
+  done
+fi
+[[ -b $(part 3) ]] || { echo "Partitionen auf $DISK erscheinen nicht" >&2; exit 1; }
 EFI=$(part 2) ROOT=$(part 3) ROOTDEV=$(part 3)
 mkfs.fat -F32 -n EFI "$EFI" >/dev/null
 if ((ENCRYPT)); then
