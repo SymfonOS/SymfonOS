@@ -1,11 +1,13 @@
 # symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
 [package]
 name = "readline"
-version = "8.3-1"
+version = "8.3-2"
 summary = "Zeileneditor-Bibliothek"
 license = "GPL-3.0-or-later"
 url = "https://ftp.gnu.org/gnu/readline/"
 depends = ["glibc", "ncurses"]
+# readline.pc verweist per Requires.private auf ncursesw; ohne pkg-config beim Bau stünde dort "termcap"
+makedepends = ["pkgconf"]
 provides = ["so:libreadline.so.8"]
 
 [[source]]
@@ -27,4 +29,7 @@ make SHLIB_LIBS="-lncursesw"
 package = '''
 cd "$S"
 make SHLIB_LIBS="-lncursesw" DESTDIR="$DESTDIR" install
+if grep -q '^Requires.private:.*termcap' "$DESTDIR/usr/lib/pkgconfig/readline.pc"; then
+  echo "readline.pc verweist auf termcap statt ncursesw" >&2; exit 1
+fi
 '''
