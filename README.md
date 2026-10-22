@@ -57,7 +57,7 @@ flowchart TB
 | 5 | Prüfungsmodus (nftables, Kiosk, Dienste/USB), SEB-Varianten | ✅ Trockenlauf getestet |
 | 6 | Repo-Spiegel aus Arch, CI/CD, Releases | ✅ Workflow, Secret nötig |
 | 7 | Kanäle `testing` → `stable` (`tools/promote.py`: 7 Tage, Sicherheits-Schnellspur, Sperrliste, Abhängigkeitsprüfung) | ✅ getestet, Anbindung an die Bau-CI offen |
-| 8 | Kern in C (`syp`, `syp-convert`), Quellcode-Distribution: LFS-Toolchain, 137 Rezepte, `syp buildall` in der Chroot | ✅ Bau in CI, Boot auf Hardware offen |
+| 8 | Kern in C (`syp`, `syp-convert`), Quellcode-Distribution: LFS-Toolchain, 140 Rezepte, `syp buildall` in der Chroot, Live-/Installations-ISO | ✅ ISO `source-nightly`, Boot-Test in QEMU bestanden (Firewall, Audit, SELinux, WLAN-Dienst laufen); Test auf echter Hardware offen |
 | 8a | Sicherheit auf Fedora-Niveau: SELinux, Krypto-Richtlinien, PAM, Audit, Firewall, Secure Boot (eigene Schlüssel, UKI), TPM2 | ✅ umgesetzt; SELinux zunächst permissive, kein MS-signierter shim |
 | 8b | Desktop aus Quellcode (Mesa, Wayland, Qt 6, KDE Plasma, PipeWire), GnuTLS/NSS in den Krypto-Richtlinien | offen |
 | 9 | Delta-Updates, Software-Center mit Screenshots/AppStream, Flatpak-Integration im Store | offen |
