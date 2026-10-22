@@ -37,6 +37,7 @@ for m in dev proc sys run; do mkdir -p "$IMG/$m"; mount --bind "/$m" "$IMG/$m"; 
 in_img "systemd-sysusers; systemd-tmpfiles --create || true
   useradd -m -G wheel,audio,video,input -s /bin/bash -c 'symfonOS Live' live; passwd -d live
   echo 'live ALL=(ALL:ALL) NOPASSWD: ALL' > /etc/sudoers.d/90-live; chmod 440 /etc/sudoers.d/90-live
+  systemctl preset-all >/dev/null 2>&1 || true   # Firewall, Audit, Zeit, DNS wie bei einer Installation
   systemctl enable systemd-networkd systemd-resolved systemd-timesyncd iwd
   : > /etc/machine-id"
 mkdir -p "$IMG/etc/systemd/system/getty@tty1.service.d"
@@ -59,6 +60,14 @@ in_img "dracut --force --no-hostonly --no-hostonly-cmdline --add 'dmsquash-live'
 cp "$IMG/usr/lib/modules/$KVER/vmlinuz" "$ISO/boot/vmlinuz"
 mv "$IMG/boot/initramfs-live.img" "$ISO/boot/initramfs.img"
 for m in run sys proc dev; do umount -l "$IMG/$m"; done
+
+# SELinux-Dateikontexte setzen (wie Fedora-Live-Medien); SquashFS übernimmt die xattrs
+FC=$IMG/etc/selinux/refpolicy/contexts/files/file_contexts
+if [[ -r $FC ]]; then
+  log "SELinux-Kontexte setzen"
+  chroot "$IMG" setfiles -F /etc/selinux/refpolicy/contexts/files/file_contexts / \
+    -e /proc -e /sys -e /dev -e /run || log "Warnung: setfiles fehlgeschlagen – Live-System läuft permissive ohne Labels"
+fi
 
 log "SquashFS"
 chroot "$SYM" mksquashfs "/var/tmp/image/rootfs" "/var/tmp/image/iso/LiveOS/squashfs.img" \
