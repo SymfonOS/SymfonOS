@@ -150,8 +150,14 @@ jobs:
         # Gate: aus dem ISO auf eine virtuelle Platte installieren und das Ergebnis booten
         if: steps.build.outputs.rc == '0'
         run: |
-          sudo -E env "PATH=$PATH" LOG="$PWD/out/install-serial.log" tools/install-test.sh out/symfonos-base-*.iso
+          set +e
+          sudo -E env "PATH=$PATH" LOG="$PWD/out/install-serial.log" tools/install-test.sh out/symfonos-base-*.iso 2>&1 | tee install.log
+          rc=${PIPESTATUS[0]}
           sudo chown -R "$USER" out
+          if [ "$rc" -ne 0 ] && ! grep -q '::error' install.log; then
+            echo "::error title=Installationstest (Exit $rc)::$(sed 's/\x1b\[[0-9;]*m//g' install.log | tail -c 3500 | sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g')"
+          fi
+          exit "$rc"
       - name: ISO veröffentlichen
         if: steps.build.outputs.rc == '0'
         run: |
