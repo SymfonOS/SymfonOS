@@ -1,14 +1,14 @@
 # symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
 [package]
 name = "linux-pam"
-version = "1.7.1-1"
+version = "1.7.1-2"
 summary = "Pluggable Authentication Modules"
 license = "BSD-3-Clause OR GPL-2.0-or-later"
 url = "https://github.com/linux-pam/linux-pam/releases/download/v1.7.1/"
 depends = ["glibc", "libxcrypt", "libselinux", "audit"]
 makedepends = ["meson"]
 provides = ["so:libpam.so.0", "pam"]
-backup = ["etc/security/limits.conf", "etc/security/faillock.conf", "etc/security/access.conf", "etc/environment"]
+backup = ["etc/security/limits.conf", "etc/security/access.conf", "etc/environment"]
 
 [[source]]
 url = "https://github.com/linux-pam/linux-pam/releases/download/v1.7.1/Linux-PAM-1.7.1.tar.xz"
@@ -17,3 +17,5 @@ sha256 = "21dbcec6e01dd578f14789eac9024a18941e6f2702a05cf91b28c232eeb26ab0"
 [build]
 style = "meson"
 configure_flags = "-D docs=disabled -D examples=false -D xtests=false -D selinux=enabled -D audit=enabled -D logind=disabled"
+# faillock.conf kommt (gehärtet) aus symfonos-security
+post_install = 'rm -f "$DESTDIR/etc/security/faillock.conf"'

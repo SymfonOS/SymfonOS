@@ -5,7 +5,7 @@ version = "1.0-1"
 arch = "any"
 summary = "symfonOS-Sicherheitskonfiguration: PAM, Passwortregeln, Firewall, sysctl-Härtung, Audit, SSH, Krypto-Richtlinie, Secure Boot"
 license = "GPL-3.0-or-later"
-depends = ["linux-pam", "libpwquality", "nftables", "audit", "policycoreutils", "selinux-refpolicy", "openssl", "systemd", "crypto-policies", "python", "bash"]
+depends = ["linux-pam", "libpwquality", "nftables", "audit", "policycoreutils", "selinux-refpolicy", "openssl", "systemd", "crypto-policies", "python", "bash", "shadow"]
 backup = ["etc/nftables.conf", "etc/security/pwquality.conf.d/50-symfonos.conf", "etc/security/faillock.conf", "etc/sudoers.d/00-symfonos"]
 
 [[source]]

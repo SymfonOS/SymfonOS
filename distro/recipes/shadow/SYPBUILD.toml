@@ -1,7 +1,7 @@
 # symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
 [package]
 name = "shadow"
-version = "4.18.0-1"
+version = "4.18.0-2"
 summary = "Benutzer- und Gruppenverwaltung"
 license = "BSD-3-Clause"
 url = "https://github.com/shadow-maint/shadow/releases/download/4.18.0/"
@@ -34,4 +34,6 @@ make DESTDIR="$DESTDIR" exec_prefix=/usr install
 make -C man DESTDIR="$DESTDIR" install-man
 install -d "$DESTDIR/etc/default"
 printf 'GROUP=999\nHOME=/home\nINACTIVE=-1\nEXPIRE=\nSHELL=/bin/bash\nSKEL=/etc/skel\nCREATE_MAIL_SPOOL=no\n' > "$DESTDIR/etc/default/useradd"
+# PAM-Konfiguration liefert symfonos-security (wie bei Fedora nur ein Paket für /etc/pam.d)
+rm -rf "$DESTDIR/etc/pam.d"
 '''
