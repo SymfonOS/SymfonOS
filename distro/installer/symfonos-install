@@ -65,7 +65,8 @@ size=1GiB, type=U, name="EFI"
 type=L, name="symfonOS"
 PARTS
 # Partitionstabelle neu einlesen und auf die Gerätedateien warten (ohne udev dauert das einen Moment)
-blockdev --rereadpt "$DISK" 2>/dev/null || partx -u "$DISK" 2>/dev/null || true
+blockdev --rereadpt "$DISK" 2>/dev/null || true
+partx -u "$DISK" 2>/dev/null || true   # meldet neue Partitionen auch dort, wo --rereadpt still nichts bewirkt
 udevadm settle 2>/dev/null || true
 for _ in $(seq 50); do [[ -b $(part 3) ]] && break; sleep 0.2; done
 if [[ ! -b $(part 3) ]]; then
