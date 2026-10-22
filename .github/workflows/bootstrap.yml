@@ -129,9 +129,15 @@ jobs:
       - name: ISO erzeugen
         if: steps.build.outputs.rc == '0'
         run: |
+          set +e
           sudo -E env "PATH=$PATH" SYP_PUB="$PWD/keys/release.pub" PKGREPO="$PWD/out/repo/symfonos" \
-            bash distro/bootstrap/50-image.sh "$PWD/out/symfonos-base-$(date +%Y.%m.%d)-x86_64.iso"
+            bash distro/bootstrap/50-image.sh "$PWD/out/symfonos-base-$(date +%Y.%m.%d)-x86_64.iso" 2>&1 | tee image.log
+          rc=${PIPESTATUS[0]}
           sudo chown -R "$USER" out
+          if [ "$rc" -ne 0 ]; then
+            echo "::error title=ISO-Erzeugung (Exit $rc)::$(grep -v '^ *[0-9.]*%' image.log | tail -c 3500 | sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g')"
+            exit "$rc"
+          fi
       - name: Boot-Test
         if: steps.build.outputs.rc == '0'
         continue-on-error: true
