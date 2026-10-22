@@ -11,6 +11,15 @@ backup = ["etc/iwd/main.conf"]
 url = "https://www.kernel.org/pub/linux/network/wireless/iwd-3.9.tar.xz"
 sha256 = "0cd7dc9b32b9d6809a4a5e5d063b5c5fd279f5ad3a0bf03d7799da66df5cad45"
 [build]
+pre_configure = '''
+# Diagnose, falls pkg-config readline nicht findet (Ausgabe erscheint in der CI-Zusammenfassung)
+if ! pkg-config --exists readline; then
+  echo "Fehler: pkg-config=$(command -v pkg-config || echo fehlt) PKG_CONFIG_PATH=${PKG_CONFIG_PATH:-leer}"
+  echo "Fehler: $(pkg-config --print-errors --exists readline 2>&1 | tr '\n' ' ')"
+  echo "Fehler: readline.pc: $(tr '\n' ';' < /usr/lib/pkgconfig/readline.pc 2>&1)"
+  echo "Fehler: pkgconfig-Verzeichnis: $(ls /usr/lib/pkgconfig 2>&1 | tr '\n' ' ' | head -c 600)"
+fi
+'''
 style = "autotools"
 configure_flags = "--libexecdir=/usr/lib/iwd --localstatedir=/var --disable-manual-pages --enable-wired=no"
 post_install = '''
