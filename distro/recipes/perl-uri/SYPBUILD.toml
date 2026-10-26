@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "perl-uri"
-version = "5.32-1"
+version = "5.32-2"
 arch = "any"
 summary = "Perl-Modul URI"
 license = "Artistic-1.0-Perl OR GPL-1.0-or-later"

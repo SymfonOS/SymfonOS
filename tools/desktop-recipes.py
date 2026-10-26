@@ -127,7 +127,7 @@ cp -R VERSION assembly common eclipse epub epub3 extensions fo highlighting html
 ln -s VERSION "$d/VERSION.xsl"
 ''', scripts={"post_install": "/usr/lib/syp/xmlcatalog-docbook", "post_upgrade": "/usr/lib/syp/xmlcatalog-docbook"})
 pkg("perl-uri", "5.32", "https://www.cpan.org/authors/id/O/OA/OALDERS/URI-5.32.tar.gz",
-    "Perl-Modul URI", "Artistic-1.0-Perl OR GPL-1.0-or-later", ["perl"], style="perl", arch="any")
+    "Perl-Modul URI", "Artistic-1.0-Perl OR GPL-1.0-or-later", ["perl"], style="perl", arch="any", rel=2)
 pkg("python-mako", "1.3.10", "https://files.pythonhosted.org/packages/source/M/Mako/mako-1.3.10.tar.gz",
     "Mako-Templates (für Mesa)", "MIT", ["python", "python-markupsafe"], ["python-setuptools", "python-wheel"],
     style="python", arch="any")
@@ -287,7 +287,7 @@ pkg("cairo", "1.18.4", "https://www.cairographics.org/releases/cairo-1.18.4.tar.
     flags="-Dtests=disabled -Dxlib-xcb=enabled", provides=["so:libcairo.so.2"])
 pkg("pango", "1.56.4", "https://download.gnome.org/sources/pango/1.56/pango-1.56.4.tar.xz", "Textlayout",
     "LGPL-2.1-or-later", ["fontconfig", "freetype", "harfbuzz", "fribidi", "glib2", "cairo", "libxft"], ["meson"],
-    style="meson", flags="--wrap-mode=nofallback -Dintrospection=disabled -Dbuild-testsuite=false -Dbuild-examples=false")
+    style="meson", flags="-Dintrospection=disabled -Dbuild-testsuite=false -Dbuild-examples=false")
 pkg("gdk-pixbuf", "2.42.12", "https://download.gnome.org/sources/gdk-pixbuf/2.42/gdk-pixbuf-2.42.12.tar.xz",
     "Bildlade-Bibliothek (GdkPixbuf)", "LGPL-2.1-or-later", ["glib2", "libpng", "libjpeg-turbo", "libtiff", "shared-mime-info"],
     ["meson", "python-docutils"], style="meson",
@@ -503,7 +503,9 @@ pkg("xwayland", "24.1.8", XORG + "xserver/xwayland-24.1.8.tar.xz", "X11-Programm
     ["meson", "wayland-protocols", "font-util", "xorgproto", "xtrans", "libxkbfile"], style="meson",
     pre="sed -i '/install_man/,$d' meson.build",
     flags="-Dxkb_output_dir=/var/lib/xkb -Dsecure-rpc=false -Dxvfb=false -Ddocs=false -Ddevel-docs=false "
-          "-Dlibdecor=false")
+          "-Dlibdecor=false",
+    # protocol.txt und Xserver.1 liefert xorg-server (wie bei Arch, sonst Dateikonflikt)
+    post='rm -f "$DESTDIR/usr/lib/xorg/protocol.txt" "$DESTDIR/usr/share/man/man1/Xserver.1"', rel=2)
 
 
 # ---------------------------------------------------------------------------------------------------

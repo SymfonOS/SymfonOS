@@ -377,7 +377,10 @@ static char *style_step(const jval *b, const char *step) {
     } else if (!strcmp(style, "perl")) {
         if (!strcmp(step, "build")) return xasprintf("cd \"$S\"\nperl Makefile.PL INSTALLDIRS=vendor %s\nmake %s", cf, mf);
         if (!strcmp(step, "package"))
-            return xasprintf("cd \"$S\"\nmake DESTDIR=\"$DESTDIR\" install %s\n%s", inf, post);
+            /* perllocal.pod und .packlist gehören keinem Paket allein (Dateikonflikte zwischen Perl-Modulen) */
+            return xasprintf("cd \"$S\"\nmake DESTDIR=\"$DESTDIR\" install %s\n"
+                             "find \"$DESTDIR\" \\( -name perllocal.pod -o -name .packlist \\) -delete\n%s",
+                             inf, post);
     } else if (!strcmp(style, "meta")) {
         if (!strcmp(step, "package")) return xstrdup("mkdir -p \"$DESTDIR/usr/share/symfonos/meta\"\n"
                                                      "echo \"$PKGNAME\" > \"$DESTDIR/usr/share/symfonos/meta/$PKGNAME\"");
