@@ -12,7 +12,7 @@ makedepends = ["meson", "gettext"]
 
 [[source]]
 url = "https://salsa.debian.org/iso-codes-team/iso-codes/-/archive/v4.18.0/iso-codes-v4.18.0.tar.gz"
-sha256 = "eb1c13e28923e52dedb1c56dca134290d6b433ce374c3ad47ba5dab547067772"
+sha256 = "511f67bf4b51aa77f17c45adbff533242b50f1e370fe49a5706b6341902fac87"
 
 [build]
 style = "meson"
