@@ -676,6 +676,19 @@ char *build_recipe(const char *recipe, const char *outdir, const seckey *signer,
         free(sdir);
     }
     if (!fail) {
+        /* DESTDIR doppelt angehängt (Makefile mit $(DESTDIR)$(PREFIX) und PREFIX="$DESTDIR/usr") oder
+         * relativer Installationspfad, den CMake gegen das Arbeitsverzeichnis auflöst: das Paket enthielte
+         * den Bauordner statt /usr */
+        const char *wrel = o->chroot ? work + strlen(o->chroot) : work;
+        while (*wrel == '/') wrel++;
+        char *nested = path_join(dest, wrel);
+        if (path_exists(nested)) {
+            set_error("Paket enthält den Bauordner /%s (DESTDIR doppelt oder relativer Installationspfad)", wrel);
+            fail = 1;
+        }
+        free(nested);
+    }
+    if (!fail) {
         jval *opts = jget(r, "options");
         if (usr_merge(dest)) fail = 1;
         post_process(dest, jgetb(opts, "strip", 1));
@@ -685,7 +698,7 @@ char *build_recipe(const char *recipe, const char *outdir, const seckey *signer,
             printf("    Hinweis: hardening = \"%s\" ohne hardening_reason\n", mode);
         if (harden_check(dest, mode, &hr)) {
             fail = 1;
-        } else {
+        } else if (!fail) { /* usr-merge fehlgeschlagen: nicht packen */
             jval *origin = jget(info, "origin");
             jval *hj = harden_json(&hr);
             jset(hj, "mode", jstr(mode));

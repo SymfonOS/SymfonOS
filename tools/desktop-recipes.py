@@ -171,7 +171,8 @@ pkg("boost", "1.89.0", "https://github.com/boostorg/boost/releases/download/boos
 pkg("duktape", "2.7.0", "https://duktape.org/duktape-2.7.0.tar.xz", "Eingebettete JavaScript-Engine (polkit)",
     "MIT", ["glibc"],
     build='cd "$S"\nsed -i "s/-Os/-O2/" Makefile.sharedlibrary\nmake -f Makefile.sharedlibrary INSTALL_PREFIX=/usr',
-    package='cd "$S"\nmake -f Makefile.sharedlibrary INSTALL_PREFIX="$DESTDIR/usr" install')
+    # Das Makefile installiert nach $(DESTDIR)$(INSTALL_PREFIX); DESTDIR kommt aus der Umgebung
+    package='cd "$S"\nmake -f Makefile.sharedlibrary INSTALL_PREFIX=/usr install', rel=2)
 pkg("libunistring", "1.3", "https://ftp.gnu.org/gnu/libunistring/libunistring-1.3.tar.xz",
     "Unicode-Zeichenketten (GNU)", "LGPL-3.0-or-later OR GPL-2.0-or-later", ["glibc"], style="autotools")
 pkg("libtasn1", "4.20.0", "https://ftp.gnu.org/gnu/libtasn1/libtasn1-4.20.0.tar.gz", "ASN.1-Bibliothek",
@@ -224,8 +225,9 @@ pkg("libpng", "1.6.50", ["https://downloads.sourceforge.net/libpng/libpng-1.6.50
     pre="gzip -cd ../libpng-1.6.47-apng.patch.gz | patch -p1", provides=["so:libpng16.so.16"])
 pkg("libjpeg-turbo", "3.0.1", "https://downloads.sourceforge.net/libjpeg-turbo/libjpeg-turbo-3.0.1.tar.gz",
     "JPEG-Bibliothek", "IJG AND BSD-3-Clause AND Zlib", ["glibc"], ["cmake", "nasm"], style="cmake",
-    flags="-DENABLE_STATIC=FALSE -DCMAKE_INSTALL_DEFAULT_LIBDIR=lib -DCMAKE_SKIP_INSTALL_RPATH=ON",
-    provides=["libjpeg", "so:libjpeg.so.8", "so:libturbojpeg.so.0"])
+    # Eigenes GNUInstallDirs: ein relatives CMAKE_INSTALL_LIBDIR würde gegen das Arbeitsverzeichnis aufgelöst
+    flags="-DENABLE_STATIC=FALSE -DCMAKE_INSTALL_LIBDIR=/usr/lib -DCMAKE_SKIP_INSTALL_RPATH=ON",
+    provides=["libjpeg", "so:libjpeg.so.62", "so:libturbojpeg.so.0"], rel=2)
 pkg("libtiff", "4.7.0", "https://download.osgeo.org/libtiff/tiff-4.7.0.tar.gz", "TIFF-Bibliothek", "libtiff",
     ["zlib", "xz", "zstd", "libjpeg-turbo", "libwebp"], ["cmake"], style="cmake",
     flags="-Dtiff-docs=OFF -Dtiff-tests=OFF -Dtiff-contrib=OFF", provides=["so:libtiff.so.6"])

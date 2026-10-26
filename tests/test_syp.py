@@ -256,6 +256,21 @@ post_install = "echo installiert"
     assert "makedepends" not in info and info["scripts"]["post_install"] == "echo installiert"
 
 
+def test_build_rejects_package_containing_build_dir(tmp_path):
+    # Makefile mit $(DESTDIR)$(PREFIX) und PREFIX="$DESTDIR/usr": das Paket enthielte den Bauordner statt /usr
+    (tmp_path / "SYPBUILD.toml").write_text('''
+[package]
+name = "doppelt"
+version = "1-1"
+arch = "any"
+[build]
+package = 'mkdir -p "$DESTDIR$DESTDIR/usr/include" && touch "$DESTDIR$DESTDIR/usr/include/x.h"'
+''')
+    r = syp("build", tmp_path / "SYPBUILD.toml", "-o", tmp_path / "o", check=False)
+    assert r.returncode != 0 and "Bauordner" in r.stdout + r.stderr
+    assert not (tmp_path / "o/doppelt-1-1-any.syp").exists()
+
+
 def test_buildall_order_and_resume(tmp_path):
     key, pub = keygen(tmp_path)
     rec = tmp_path / "recipes"

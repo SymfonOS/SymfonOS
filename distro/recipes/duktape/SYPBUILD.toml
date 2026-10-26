@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "duktape"
-version = "2.7.0-1"
+version = "2.7.0-2"
 summary = "Eingebettete JavaScript-Engine (polkit)"
 license = "MIT"
 url = "https://duktape.org/"
@@ -20,5 +20,5 @@ make -f Makefile.sharedlibrary INSTALL_PREFIX=/usr
 '''
 package = '''
 cd "$S"
-make -f Makefile.sharedlibrary INSTALL_PREFIX="$DESTDIR/usr" install
+make -f Makefile.sharedlibrary INSTALL_PREFIX=/usr install
 '''
