@@ -229,6 +229,7 @@ jobs:
         # Vollständige Logs und Bildschirmfotos für die Fehlersuche; enthält keine Geheimnisse
         if: always()
         run: |
+          set +e   # Diagnose darf nie an einem fehlenden Log oder ISO scheitern
           d=$(mktemp -d)
           for f in build.log image.log image-desktop.log install.log install-desktop.log; do
             [ -f "$f" ] && sed 's/\x1b\[[0-9;]*m//g' "$f" | xz -T0 -6 > "$d/$f.xz"
@@ -249,8 +250,8 @@ jobs:
             echo "Commit: $GITHUB_SHA"
             echo "ISO: ${{ steps.build.outputs.rc == '0' && 'ja' || 'nein' }} · Desktop-ISO: ${{ steps.desktop.outcome }}"
             grep -E '^:: gebaut' build.log 2>/dev/null | tail -1
-            ls -la out/*.iso out/desktop/*.iso 2>/dev/null
-          } > "$d/README"
+            ls -la out/*.iso out/desktop/*.iso 2>/dev/null || echo "(noch kein ISO)"
+          } > "$d/README" || true
           cd "$d" && git init -q -b ci-diag && git add -A
           git -c user.name="symfonOS CI" -c user.email=ci@users.noreply.github.com commit -qm "Diagnose Lauf $GITHUB_RUN_ID"
           git push -qf "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}" ci-diag || true
