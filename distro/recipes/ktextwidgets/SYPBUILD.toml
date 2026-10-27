@@ -6,7 +6,7 @@ version = "6.17.0-1"
 summary = "Textbearbeitung"
 license = "LGPL-2.1-or-later"
 url = "https://download.kde.org/stable/frameworks/6.17/"
-depends = ["qt6-base", "kcompletion", "kconfig", "kconfigwidgets", "ki18n", "kwidgetsaddons", "sonnet", "kcolorscheme"]
+depends = ["qt6-base", "kcompletion", "kconfig", "kconfigwidgets", "ki18n", "kwidgetsaddons", "sonnet", "kcolorscheme", "qt6-speech"]
 makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", "gettext"]
 
 [[source]]
