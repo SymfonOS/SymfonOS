@@ -101,7 +101,8 @@ cat > "$IMG/etc/motd" <<CONF
 CONF
 # Größenübersicht (das ISO muss als eine Datei unter 2 GiB bleiben)
 log "Größe des Live-Systems: $(du -sxm "$IMG" | cut -f1) MiB"
-du -xm --max-depth=3 "$IMG/usr" 2>/dev/null | sort -rn | head -25 | while read -r mb d; do log "Größe: ${mb} MiB ${d#"$IMG"}"; done
+# head schließt die Pipe vorzeitig; sort bekommt dann SIGPIPE, das darf mit pipefail nicht abbrechen
+{ du -xm --max-depth=3 "$IMG/usr" 2>/dev/null | sort -rn || true; } | head -25 | while read -r mb d; do log "Größe: ${mb} MiB ${d#"$IMG"}"; done
 KVER=$(ls "$IMG/usr/lib/modules" | head -1)
 log "Initramfs (dracut, dmsquash-live) für Kernel $KVER"
 in_img "dracut --force --no-hostonly --no-hostonly-cmdline --add 'dmsquash-live' --kver '$KVER' /boot/initramfs-live.img"
