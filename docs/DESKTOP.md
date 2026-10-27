@@ -57,7 +57,7 @@ Vollständige Logs und die Bildschirmfotos jedes Laufs liegen auf dem Branch `ci
 
 - **NetworkManager und `plasma-nm`:** Das Netzwerk läuft über systemd-networkd und iwd, WLAN wird mit `iwctl` eingerichtet.
 - **Bluetooth** (BlueZ, bluedevil).
-- **Druck** (CUPS).
+- **Druck** (CUPS), deshalb auch kein Druck-Portal in xdg-desktop-portal-kde.
 - **Spectacle** (braucht OpenCV).
 - **Webbrowser:** Firefox braucht Rust und Node.js, Falkon braucht QtWebEngine.
 - **Kreativprogramme** (Krita, Blender, Ardour …) und PySide6 für die symfonOS-Apps folgen als nächste Stufe.
