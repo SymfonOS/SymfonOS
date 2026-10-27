@@ -37,7 +37,13 @@ graphical=0 session=0
 for i in $(seq "${TIMEOUT:-1500}"); do
   log=$(clean)
   ((graphical)) || { grep -aq "Reached target.*Graphical Interface" <<<"$log" && { graphical=1; echo ":: graphical.target nach ${i}s"; }; }
-  if grep -aq "plasmashell" <<<"$log" && grep -aqE "kwin_wayland|KWin" <<<"$log"; then session=1; echo ":: Plasma-Sitzung nach ${i}s"; break; fi
+  # Erst die Benutzerdienste der Sitzung zählen: KWin läuft auch für den Anmeldebildschirm, und »plasmashell«
+  # taucht schon beim Startversuch im Log auf. plasma-plasmashell.service (Type=dbus) gilt erst als gestartet,
+  # wenn plasmashell seinen D-Bus-Namen hält.
+  if grep -aqE "systemd\[[0-9]+\]: Started KDE Plasma Workspace" <<<"$log" &&
+     grep -aqE "systemd\[[0-9]+\]: Started KDE Window Manager" <<<"$log"; then
+    session=1; echo ":: Plasma-Sitzung nach ${i}s"; break
+  fi
   grep -aqE "Kernel panic|emergency mode|Failed to mount" <<<"$log" && break
   kill -0 "$qpid" 2>/dev/null || break
   ((i % 120 == 0)) && shot "zwischenstand-$i"
