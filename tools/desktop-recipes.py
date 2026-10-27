@@ -208,10 +208,13 @@ pkg("hwdata", "0.398", {"url": "https://github.com/vcrhonek/hwdata/archive/v0.39
     "Hardware-Kennungen (PCI, USB, Monitore)", "GPL-2.0-or-later", arch="any",
     build='cd "$S"\n./configure --prefix=/usr --disable-blacklist',
     package='cd "$S"\nmake DESTDIR="$DESTDIR" install')
-# Der Release-Tarball baut mit autotools (wie BLFS), ein meson.build fehlt dort
 pkg("iso-codes", "4.18.0", {"url": "https://deb.debian.org/debian/pool/main/i/iso-codes/iso-codes_4.18.0.orig.tar.xz"},
-    "ISO-Länder-, Sprach- und Währungscodes", "LGPL-2.1-or-later", ["python"], ["gettext"],
-    style="autotools", arch="any")
+    "ISO-Länder-, Sprach- und Währungscodes", "LGPL-2.1-or-later", ["python"], ["meson", "gettext"], arch="any",
+    # Der Debian-Tarball bringt je nach Version Meson oder Autotools mit
+    build='cd "$S"\nif [ -f meson.build ]; then meson setup _build --prefix=/usr && ninja -C _build\n'
+          'else ./configure --prefix=/usr && make; fi',
+    package='cd "$S"\nif [ -f meson.build ]; then DESTDIR="$DESTDIR" ninja -C _build install\n'
+            'else make DESTDIR="$DESTDIR" install; fi')
 pkg("libsigsegv", "2.15", "https://ftp.gnu.org/gnu/libsigsegv/libsigsegv-2.15.tar.gz", "Seitenfehler-Behandlung",
     "GPL-2.0-or-later", ["glibc"], style="autotools", flags="--enable-shared")
 pkg("libqalculate", "5.7.0", "https://github.com/Qalculate/libqalculate/releases/download/v5.7.0/libqalculate-5.7.0.tar.gz",
@@ -227,10 +230,10 @@ pkg("libpng", "1.6.50", ["https://downloads.sourceforge.net/libpng/libpng-1.6.50
     pre="gzip -cd ../libpng-1.6.47-apng.patch.gz | patch -p1", provides=["so:libpng16.so.16"])
 pkg("libjpeg-turbo", "3.0.1", "https://downloads.sourceforge.net/libjpeg-turbo/libjpeg-turbo-3.0.1.tar.gz",
     "JPEG-Bibliothek", "IJG AND BSD-3-Clause AND Zlib", ["glibc"], ["cmake", "nasm"], style="cmake",
-    # Eigenes GNUInstallDirs: ein relatives CMAKE_INSTALL_LIBDIR würde gegen das Arbeitsverzeichnis aufgelöst
-    flags="-DENABLE_STATIC=FALSE -DCMAKE_INSTALL_LIBDIR=/usr/lib -DCMAKE_SKIP_INSTALL_RPATH=ON",
+    flags="-DENABLE_STATIC=FALSE -DCMAKE_INSTALL_DEFAULT_LIBDIR=lib -DCMAKE_INSTALL_LIBDIR=/usr/lib -DCMAKE_SKIP_INSTALL_RPATH=ON",
+    # libjpeg-turbo legt relative LIBDIR unter das Quellverzeichnis (src/lib) – deshalb absolut
     post='ls "$DESTDIR"/usr/lib*/pkgconfig/libjpeg.pc "$DESTDIR/usr/include/jpeglib.h"', rel=2,
-    provides=["libjpeg", "so:libjpeg.so.62", "so:libturbojpeg.so.0"])
+    provides=["libjpeg", "so:libjpeg.so.62", "so:libturbojpeg.so.0"])  # ohne WITH_JPEG8 heißt sie .so.62
 pkg("libtiff", "4.7.0", "https://download.osgeo.org/libtiff/tiff-4.7.0.tar.gz", "TIFF-Bibliothek", "libtiff",
     ["zlib", "xz", "zstd", "libjpeg-turbo", "libwebp"], ["cmake"], style="cmake",
     flags="-Dtiff-docs=OFF -Dtiff-tests=OFF -Dtiff-contrib=OFF", provides=["so:libtiff.so.6"])

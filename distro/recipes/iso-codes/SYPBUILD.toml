@@ -8,11 +8,20 @@ summary = "ISO-Länder-, Sprach- und Währungscodes"
 license = "LGPL-2.1-or-later"
 url = "https://deb.debian.org/debian/pool/main/i/iso-codes/"
 depends = ["python"]
-makedepends = ["gettext"]
+makedepends = ["meson", "gettext"]
 
 [[source]]
 url = "https://deb.debian.org/debian/pool/main/i/iso-codes/iso-codes_4.18.0.orig.tar.xz"
 sha256 = "066bc4df7bf299561856a07119cde01d563c8c4c39906537a39363bb833d466c"
 
 [build]
-style = "autotools"
+build = '''
+cd "$S"
+if [ -f meson.build ]; then meson setup _build --prefix=/usr && ninja -C _build
+else ./configure --prefix=/usr && make; fi
+'''
+package = '''
+cd "$S"
+if [ -f meson.build ]; then DESTDIR="$DESTDIR" ninja -C _build install
+else make DESTDIR="$DESTDIR" install; fi
+'''

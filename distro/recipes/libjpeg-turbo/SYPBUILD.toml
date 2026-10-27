@@ -16,7 +16,7 @@ sha256 = "22429507714ae147b3acacd299e82099fce5d9f456882fc28e252e4579ba2a75"
 
 [build]
 style = "cmake"
-configure_flags = "-DENABLE_STATIC=FALSE -DCMAKE_INSTALL_LIBDIR=/usr/lib -DCMAKE_SKIP_INSTALL_RPATH=ON"
+configure_flags = "-DENABLE_STATIC=FALSE -DCMAKE_INSTALL_DEFAULT_LIBDIR=lib -DCMAKE_INSTALL_LIBDIR=/usr/lib -DCMAKE_SKIP_INSTALL_RPATH=ON"
 post_install = '''
 ls "$DESTDIR"/usr/lib*/pkgconfig/libjpeg.pc "$DESTDIR/usr/include/jpeglib.h"
 '''
