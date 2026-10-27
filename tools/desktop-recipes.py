@@ -580,6 +580,17 @@ pkg("lua", "5.4.8", ["https://www.lua.org/ftp/lua-5.4.8.tar.gz", nox(BLFS_PATCH 
             'TO_LIB="liblua.so liblua.so.5.4 liblua.so.5.4.8" install\n'
             "install -Dm644 /dev/stdin \"$DESTDIR/usr/lib/pkgconfig/lua.pc\" <<'LUAPC'\n" + LUA_PC + "\nLUAPC\n"
             'ln -s lua.pc "$DESTDIR/usr/lib/pkgconfig/lua5.4.pc"')
+# GStreamer nur als Bibliothek (xdg-desktop-portal prüft Töne mit gstreamer-pbutils); keine optionalen Plugins
+GST = "1.26.5"
+pkg("gstreamer", GST, f"https://gstreamer.freedesktop.org/src/gstreamer/gstreamer-{GST}.tar.xz",
+    "Multimedia-Framework (GStreamer)", "LGPL-2.1-or-later", ["glib2"], ["meson", "flex", "bison"], style="meson",
+    flags="-Dauto_features=disabled -Dgst_debug=false -Dtests=disabled -Dexamples=disabled -Ddoc=disabled "
+          "-Dintrospection=disabled -Dtools=enabled")
+pkg("gst-plugins-base", GST, f"https://gstreamer.freedesktop.org/src/gst-plugins-base/gst-plugins-base-{GST}.tar.xz",
+    "GStreamer-Grundbibliotheken (pbutils, audio, video)", "LGPL-2.1-or-later", ["gstreamer", "glib2", "zlib"],
+    ["meson"], style="meson",
+    flags="-Dauto_features=disabled -Dtests=disabled -Dexamples=disabled -Ddoc=disabled -Dintrospection=disabled "
+          "-Dtools=enabled")
 pkg("pipewire", "1.4.7", {"url": "https://gitlab.freedesktop.org/pipewire/pipewire/-/archive/1.4.7/pipewire-1.4.7.tar.bz2"},
     "Audio- und Videoserver (PipeWire, mit Pulse- und JACK-Ersatz)", "MIT",
     ["alsa-lib", "dbus", "systemd", "libsndfile", "opus", "sbc", "libcanberra", "readline", "ncurses", "libusb",
@@ -673,6 +684,8 @@ pkg("upower", "1.90.9", {"url": "https://gitlab.freedesktop.org/upower/upower/-/
 pkg("accountsservice", "23.13.9", "https://www.freedesktop.org/software/accountsservice/accountsservice-23.13.9.tar.xz",
     "Benutzerkonten über D-Bus (Anmeldebild, Benutzer-KCM)", "GPL-3.0-or-later", ["polkit", "glib2", "systemd", "shadow"],
     ["meson", "gettext"], style="meson",
+    # tests/ bindet das Hilfsprojekt mocklibc ein, das mit GCC 15 nicht kompiliert
+    pre="sed -i \"/subdir('tests')/d\" meson.build",
     flags="-Dadmin_group=wheel -Dintrospection=false -Dvapi=false -Ddocbook=false -Dgtk_doc=false")
 pkg("xdg-user-dirs", "0.18", "https://user-dirs.freedesktop.org/releases/xdg-user-dirs-0.18.tar.gz",
     "Standardordner (Dokumente, Bilder, Musik …)", "GPL-2.0-or-later", ["glibc"], style="autotools",
@@ -681,7 +694,7 @@ pkg("hicolor-icon-theme", "0.18", "https://icon-theme.freedesktop.org/releases/h
     "Grundgerüst für Symbolthemen", "GPL-2.0-only", [], ["meson"], style="meson", arch="any")
 pkg("xdg-desktop-portal", "1.20.3", "https://github.com/flatpak/xdg-desktop-portal/releases/download/1.20.3/xdg-desktop-portal-1.20.3.tar.xz",
     "Portale für Desktop-Programme (Dateidialog, Bildschirmfreigabe)", "LGPL-2.1-or-later",
-    ["fuse3", "gdk-pixbuf", "json-glib", "pipewire", "dbus", "glib2", "bubblewrap", "systemd"],
+    ["fuse3", "gdk-pixbuf", "json-glib", "pipewire", "dbus", "glib2", "bubblewrap", "systemd", "gst-plugins-base"],
     ["meson", "python-docutils"], style="meson",
     flags="-Dtests=disabled -Ddocumentation=disabled -Dman-pages=disabled -Dflatpak-interfaces=disabled "
           "-Dgeoclue=disabled -Dsystemd=enabled -Dsandboxed-image-validation=enabled -Dsandboxed-sound-validation=disabled")
@@ -691,7 +704,7 @@ pkg("xdg-desktop-portal", "1.20.3", "https://github.com/flatpak/xdg-desktop-port
 # ---------------------------------------------------------------------------------------------------
 QT_URL = f"https://download.qt.io/archive/qt/{QT.rsplit('.', 1)[0]}/{QT}/submodules/"
 QT_LINKS = ('cd "$DESTDIR"\ninstall -d usr/bin\n'
-            '[ -f "$S/_build/user_facing_tool_links.txt" ] && while read -r l; do ln -sf $l; done '
+            '[ -f "$S/_build/user_facing_tool_links.txt" ] && while read -r l; do [ -z "$l" ] || ln -sf $l; done '
             '< "$S/_build/user_facing_tool_links.txt"\ntrue')
 QTBASE_FLAGS = ("-DINSTALL_BINDIR=lib/qt6/bin -DINSTALL_PUBLICBINDIR=usr/bin -DINSTALL_LIBEXECDIR=lib/qt6 "
                 "-DINSTALL_DOCDIR=share/doc/qt6 -DINSTALL_ARCHDATADIR=lib/qt6 -DINSTALL_DATADIR=share/qt6 "
@@ -869,7 +882,7 @@ pkg("polkit-qt6", "0.200.0", "https://download.kde.org/stable/polkit-qt-1/polkit
     "Qt-Anbindung für polkit", "LGPL-2.1-or-later", ["polkit", QB], ["cmake", "ninja"], style="cmake",
     flags="-DQT_MAJOR_VERSION=6 -Wno-dev")
 pkg("qca", "2.3.10", "https://download.kde.org/stable/qca/2.3.10/qca-2.3.10.tar.xz", "Qt-Kryptographie (QCA)",
-    "LGPL-2.1-or-later", [QB, "openssl", "libgcrypt", "ca-certificates"], ["cmake", "ninja"], style="cmake",
+    "LGPL-2.1-or-later", [QB, "qt6-5compat", "openssl", "libgcrypt", "ca-certificates"], ["cmake", "ninja"], style="cmake",
     pre="sed -i 's@cert.pem@certs/ca-bundle.crt@' CMakeLists.txt",
     flags="-DQT6=ON -DBUILD_WITH_QT6=ON -DQCA_INSTALL_IN_QT_PREFIX=ON -DQCA_MAN_INSTALL_DIR:PATH=/usr/share/man "
           "-DBUILD_TESTS=OFF -DQCA_FEATURE_INSTALL_DIR=/usr/lib/qt6/mkspecs/features")

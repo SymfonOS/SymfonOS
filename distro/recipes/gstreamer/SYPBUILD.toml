@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "gstreamer"
+version = "1.26.5-1"
+summary = "Multimedia-Framework (GStreamer)"
+license = "LGPL-2.1-or-later"
+url = "https://gstreamer.freedesktop.org/src/gstreamer/"
+depends = ["glib2"]
+makedepends = ["meson", "flex", "bison"]
+
+[[source]]
+url = "https://gstreamer.freedesktop.org/src/gstreamer/gstreamer-1.26.5.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Dauto_features=disabled -Dgst_debug=false -Dtests=disabled -Dexamples=disabled -Ddoc=disabled -Dintrospection=disabled -Dtools=enabled"
