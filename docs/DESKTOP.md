@@ -40,7 +40,7 @@ tools/desktop-recipes.py --check    # weichen Rezepte vom Generator ab? (Test in
 `VARIANT=desktop distro/bootstrap/50-image.sh` baut das Desktop-ISO.
 
 - **Anmeldung:** Der Live-Benutzer meldet sich über SDDM automatisch in Plasma an. Der Installer entfernt diese automatische Anmeldung wieder.
-- **Größe:** Damit das ISO als eine Datei unter 2 GiB bleibt, packt syp auf dem Medium Doku, Übersetzungen außer Deutsch und Englisch sowie Firmware reiner Server- und ARM-Hardware nicht aus. Dafür sorgt `[install] exclude`.
+- **Größe:** Das ISO ist rund 2,5 GiB groß. Um es klein zu halten, packt syp auf dem Medium Doku, Übersetzungen außer Deutsch und Englisch sowie Firmware reiner Server- und ARM-Hardware nicht aus. Dafür sorgt `[install] exclude`. GitHub nimmt je Datei höchstens 2 GiB an, deshalb veröffentlicht die CI das ISO in Teilen; `cat symfonos-desktop-*.iso.part* > symfonos-desktop.iso` setzt es wieder zusammen.
 - **Installiertes System:** Die ausgelassenen Dateien bleiben den Paketen zugeordnet. Das installierte System hat die normale Konfiguration. `syp reinstall <paket>` holt Ausgelassenes nach.
 
 ## Tests

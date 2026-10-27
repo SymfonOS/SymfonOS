@@ -30,7 +30,8 @@ shot() {   # Bildschirmfoto über den QEMU-Monitor (PPM, dann PNG falls möglich
   if command -v convert >/dev/null; then convert "$T/$1.ppm" "$OUT/$1.png" 2>/dev/null || cp "$T/$1.ppm" "$OUT/"
   else cp "$T/$1.ppm" "$OUT/"; fi
 }
-clean() { sed 's/\x1b\[[0-9;]*m//g' "$T/serial.log" 2>/dev/null; }
+# serial.log entsteht erst, wenn QEMU läuft: fehlende Datei darf mit set -e nicht abbrechen
+clean() { sed 's/\x1b\[[0-9;]*m//g' "$T/serial.log" 2>/dev/null || true; }
 
 graphical=0 session=0
 for i in $(seq "${TIMEOUT:-1500}"); do

@@ -195,12 +195,14 @@ jobs:
             exit "$rc"
           fi
       - name: Desktop-Test (grafisch)
+        id: desktop_test
         if: always() && steps.desktop.outcome == 'success'
         run: |
           sudo apt-get install -y -q qemu-system-x86 xorriso genisoimage socat imagemagick
           sudo chmod 666 /dev/kvm 2>/dev/null || true
           tools/desktop-test.sh out/desktop/symfonos-desktop-*.iso out/desktop-test
       - name: Desktop-Installationstest
+        id: desktop_install
         if: always() && steps.desktop.outcome == 'success'
         run: |
           set +e
@@ -210,7 +212,8 @@ jobs:
           sudo chown -R "$USER" out
           exit "$rc"
       - name: Desktop-ISO veröffentlichen
-        if: always() && steps.desktop.outcome == 'success'
+        # nur wenn beide Tests bestanden sind (always() hebt die implizite Erfolgsbedingung auf)
+        if: always() && steps.desktop.outcome == 'success' && steps.desktop_test.outcome == 'success' && steps.desktop_install.outcome == 'success'
         run: |
           cd out/desktop
           iso=$(ls symfonos-desktop-*.iso)
