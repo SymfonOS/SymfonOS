@@ -377,7 +377,7 @@ static char *style_step(const jval *b, const char *step) {
     } else if (!strcmp(style, "perl")) {
         if (!strcmp(step, "build")) return xasprintf("cd \"$S\"\nperl Makefile.PL INSTALLDIRS=vendor %s\nmake %s", cf, mf);
         if (!strcmp(step, "package"))
-            /* perllocal.pod und .packlist gehören keinem Paket allein (Dateikonflikte zwischen Perl-Modulen) */
+            /* perllocal.pod und .packlist sind lokale Protokolle von CPAN, kein Paketinhalt (Dateikonflikte) */
             return xasprintf("cd \"$S\"\nmake DESTDIR=\"$DESTDIR\" install %s\n"
                              "find \"$DESTDIR\" \\( -name perllocal.pod -o -name .packlist \\) -delete\n%s",
                              inf, post);

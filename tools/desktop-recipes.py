@@ -171,8 +171,9 @@ pkg("boost", "1.89.0", "https://github.com/boostorg/boost/releases/download/boos
 pkg("duktape", "2.7.0", "https://duktape.org/duktape-2.7.0.tar.xz", "Eingebettete JavaScript-Engine (polkit)",
     "MIT", ["glibc"],
     build='cd "$S"\nsed -i "s/-Os/-O2/" Makefile.sharedlibrary\nmake -f Makefile.sharedlibrary INSTALL_PREFIX=/usr',
-    # Das Makefile installiert nach $(DESTDIR)$(INSTALL_PREFIX); DESTDIR kommt aus der Umgebung
-    package='cd "$S"\nmake -f Makefile.sharedlibrary INSTALL_PREFIX=/usr install', rel=2)
+    # Das Makefile wertet DESTDIR selbst aus (aus der Umgebung); INSTALL_PREFIX bleibt /usr
+    package='cd "$S"\nmake -f Makefile.sharedlibrary INSTALL_PREFIX=/usr DESTDIR="$DESTDIR" install\n'
+            'test -f "$DESTDIR/usr/include/duktape.h"', rel=2)
 pkg("libunistring", "1.3", "https://ftp.gnu.org/gnu/libunistring/libunistring-1.3.tar.xz",
     "Unicode-Zeichenketten (GNU)", "LGPL-3.0-or-later OR GPL-2.0-or-later", ["glibc"], style="autotools")
 pkg("libtasn1", "4.20.0", "https://ftp.gnu.org/gnu/libtasn1/libtasn1-4.20.0.tar.gz", "ASN.1-Bibliothek",
@@ -207,9 +208,10 @@ pkg("hwdata", "0.398", {"url": "https://github.com/vcrhonek/hwdata/archive/v0.39
     "Hardware-Kennungen (PCI, USB, Monitore)", "GPL-2.0-or-later", arch="any",
     build='cd "$S"\n./configure --prefix=/usr --disable-blacklist',
     package='cd "$S"\nmake DESTDIR="$DESTDIR" install')
-pkg("iso-codes", "4.18.0", {"url": "https://salsa.debian.org/iso-codes-team/iso-codes/-/archive/v4.18.0/iso-codes-v4.18.0.tar.gz"},
-    "ISO-Länder-, Sprach- und Währungscodes", "LGPL-2.1-or-later", ["python"], ["meson", "gettext"],
-    style="meson", arch="any")
+# Der Release-Tarball baut mit autotools (wie BLFS), ein meson.build fehlt dort
+pkg("iso-codes", "4.18.0", {"url": "https://deb.debian.org/debian/pool/main/i/iso-codes/iso-codes_4.18.0.orig.tar.xz"},
+    "ISO-Länder-, Sprach- und Währungscodes", "LGPL-2.1-or-later", ["python"], ["gettext"],
+    style="autotools", arch="any")
 pkg("libsigsegv", "2.15", "https://ftp.gnu.org/gnu/libsigsegv/libsigsegv-2.15.tar.gz", "Seitenfehler-Behandlung",
     "GPL-2.0-or-later", ["glibc"], style="autotools", flags="--enable-shared")
 pkg("libqalculate", "5.7.0", "https://github.com/Qalculate/libqalculate/releases/download/v5.7.0/libqalculate-5.7.0.tar.gz",
@@ -227,7 +229,8 @@ pkg("libjpeg-turbo", "3.0.1", "https://downloads.sourceforge.net/libjpeg-turbo/l
     "JPEG-Bibliothek", "IJG AND BSD-3-Clause AND Zlib", ["glibc"], ["cmake", "nasm"], style="cmake",
     # Eigenes GNUInstallDirs: ein relatives CMAKE_INSTALL_LIBDIR würde gegen das Arbeitsverzeichnis aufgelöst
     flags="-DENABLE_STATIC=FALSE -DCMAKE_INSTALL_LIBDIR=/usr/lib -DCMAKE_SKIP_INSTALL_RPATH=ON",
-    provides=["libjpeg", "so:libjpeg.so.62", "so:libturbojpeg.so.0"], rel=2)
+    post='ls "$DESTDIR"/usr/lib*/pkgconfig/libjpeg.pc "$DESTDIR/usr/include/jpeglib.h"', rel=2,
+    provides=["libjpeg", "so:libjpeg.so.62", "so:libturbojpeg.so.0"])
 pkg("libtiff", "4.7.0", "https://download.osgeo.org/libtiff/tiff-4.7.0.tar.gz", "TIFF-Bibliothek", "libtiff",
     ["zlib", "xz", "zstd", "libjpeg-turbo", "libwebp"], ["cmake"], style="cmake",
     flags="-Dtiff-docs=OFF -Dtiff-tests=OFF -Dtiff-contrib=OFF", provides=["so:libtiff.so.6"])
@@ -506,7 +509,7 @@ pkg("xwayland", "24.1.8", XORG + "xserver/xwayland-24.1.8.tar.xz", "X11-Programm
     pre="sed -i '/install_man/,$d' meson.build",
     flags="-Dxkb_output_dir=/var/lib/xkb -Dsecure-rpc=false -Dxvfb=false -Ddocs=false -Ddevel-docs=false "
           "-Dlibdecor=false",
-    # protocol.txt und Xserver.1 liefert xorg-server (wie bei Arch, sonst Dateikonflikt)
+    # protocol.txt und Xserver.1 liefert auch xorg-server
     post='rm -f "$DESTDIR/usr/lib/xorg/protocol.txt" "$DESTDIR/usr/share/man/man1/Xserver.1"', rel=2)
 
 
@@ -667,7 +670,7 @@ pkg("upower", "1.90.9", {"url": "https://gitlab.freedesktop.org/upower/upower/-/
 pkg("accountsservice", "23.13.9", "https://www.freedesktop.org/software/accountsservice/accountsservice-23.13.9.tar.xz",
     "Benutzerkonten über D-Bus (Anmeldebild, Benutzer-KCM)", "GPL-3.0-or-later", ["polkit", "glib2", "systemd", "shadow"],
     ["meson", "gettext"], style="meson",
-    flags="-Dadmin_group=wheel -Dintrospection=false -Dvapi=false -Ddocbook=false -Dgtk_doc=false -Dtests=false")
+    flags="-Dadmin_group=wheel -Dintrospection=false -Dvapi=false -Ddocbook=false -Dgtk_doc=false")
 pkg("xdg-user-dirs", "0.18", "https://user-dirs.freedesktop.org/releases/xdg-user-dirs-0.18.tar.gz",
     "Standardordner (Dokumente, Bilder, Musik …)", "GPL-2.0-or-later", ["glibc"], style="autotools",
     flags="--disable-documentation", backup=["etc/xdg/user-dirs.conf", "etc/xdg/user-dirs.defaults"])

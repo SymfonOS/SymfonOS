@@ -20,5 +20,6 @@ make -f Makefile.sharedlibrary INSTALL_PREFIX=/usr
 '''
 package = '''
 cd "$S"
-make -f Makefile.sharedlibrary INSTALL_PREFIX=/usr install
+make -f Makefile.sharedlibrary INSTALL_PREFIX=/usr DESTDIR="$DESTDIR" install
+test -f "$DESTDIR/usr/include/duktape.h"
 '''

@@ -6,13 +6,13 @@ version = "4.18.0-1"
 arch = "any"
 summary = "ISO-Länder-, Sprach- und Währungscodes"
 license = "LGPL-2.1-or-later"
-url = "https://salsa.debian.org/iso-codes-team/iso-codes/-/archive/v4.18.0/"
+url = "https://deb.debian.org/debian/pool/main/i/iso-codes/"
 depends = ["python"]
-makedepends = ["meson", "gettext"]
+makedepends = ["gettext"]
 
 [[source]]
-url = "https://salsa.debian.org/iso-codes-team/iso-codes/-/archive/v4.18.0/iso-codes-v4.18.0.tar.gz"
-sha256 = "511f67bf4b51aa77f17c45adbff533242b50f1e370fe49a5706b6341902fac87"
+url = "https://deb.debian.org/debian/pool/main/i/iso-codes/iso-codes_4.18.0.orig.tar.xz"
+sha256 = "066bc4df7bf299561856a07119cde01d563c8c4c39906537a39363bb833d466c"
 
 [build]
-style = "meson"
+style = "autotools"
