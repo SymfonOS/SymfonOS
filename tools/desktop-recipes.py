@@ -968,7 +968,8 @@ pl("kwin", KF_GUI + ["kdecoration", "kwayland", "libplasma", "kscreenlocker", "b
                      "qt6-5compat", "qt6-shadertools", "wayland", "libxcb", "xcb-util-keysyms", "xcb-util-wm",
                      "xcb-util-cursor", "libxi", "libx11", "systemd", "libcap", "qt6-tools"],
    "Fenstermanager und Wayland-Compositor (KWin)", mk=["plasma-wayland-protocols", "wayland-protocols", "kdoctools"],
-   flags="-DKWIN_BUILD_X11=OFF", rel=2)
+   # KWIN_BUILD_X11 schaltet auch Xwayland ab; plasma-kwin_wayland.service startet kwin_wayland_wrapper --xwayland
+   rel=3)
 pl("plasma5support", ["kconfig", "kcoreaddons", "ki18n", "kio", "kguiaddons", "kservice", "knotifications", "solid",
                       "kidletime", "libksysguard", "plasma-activities", "kholidays", "libplasma"],
    "Kompatibilität für ältere Plasma-Datenquellen")

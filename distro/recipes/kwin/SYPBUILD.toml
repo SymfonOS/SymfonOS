@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "kwin"
-version = "6.4.4-2"
+version = "6.4.4-3"
 summary = "Fenstermanager und Wayland-Compositor (KWin)"
 license = "GPL-2.0-or-later"
 url = "https://download.kde.org/stable/plasma/6.4.4/"
@@ -15,4 +15,4 @@ sha256 = "b0742a12133b052519cb5af09132114ebf4d96b44e320015cc0d2d0bf055dae6"
 
 [build]
 style = "cmake"
-configure_flags = "-DKDE_INSTALL_LIBEXECDIR=lib -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF -Wno-dev -DKWIN_BUILD_X11=OFF"
+configure_flags = "-DKDE_INSTALL_LIBEXECDIR=lib -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF -Wno-dev"
