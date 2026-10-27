@@ -8,7 +8,7 @@ license = "IJG AND BSD-3-Clause AND Zlib"
 url = "https://downloads.sourceforge.net/libjpeg-turbo/"
 depends = ["glibc"]
 makedepends = ["cmake", "nasm"]
-provides = ["libjpeg", "so:libjpeg.so.8", "so:libturbojpeg.so.0"]
+provides = ["libjpeg", "so:libjpeg.so.62", "so:libturbojpeg.so.0"]
 
 [[source]]
 url = "https://downloads.sourceforge.net/libjpeg-turbo/libjpeg-turbo-3.0.1.tar.gz"

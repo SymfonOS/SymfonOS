@@ -233,7 +233,7 @@ pkg("libjpeg-turbo", "3.0.1", "https://downloads.sourceforge.net/libjpeg-turbo/l
     flags="-DENABLE_STATIC=FALSE -DCMAKE_INSTALL_DEFAULT_LIBDIR=lib -DCMAKE_INSTALL_LIBDIR=/usr/lib -DCMAKE_SKIP_INSTALL_RPATH=ON",
     # libjpeg-turbo legt relative LIBDIR unter das Quellverzeichnis (src/lib) – deshalb absolut
     post='ls "$DESTDIR"/usr/lib*/pkgconfig/libjpeg.pc "$DESTDIR/usr/include/jpeglib.h"', rel=2,
-    provides=["libjpeg", "so:libjpeg.so.8", "so:libturbojpeg.so.0"])
+    provides=["libjpeg", "so:libjpeg.so.62", "so:libturbojpeg.so.0"])  # ohne WITH_JPEG8 heißt sie .so.62
 pkg("libtiff", "4.7.0", "https://download.osgeo.org/libtiff/tiff-4.7.0.tar.gz", "TIFF-Bibliothek", "libtiff",
     ["zlib", "xz", "zstd", "libjpeg-turbo", "libwebp"], ["cmake"], style="cmake",
     flags="-Dtiff-docs=OFF -Dtiff-tests=OFF -Dtiff-contrib=OFF", provides=["so:libtiff.so.6"])

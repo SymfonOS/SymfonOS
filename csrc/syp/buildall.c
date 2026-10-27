@@ -82,9 +82,10 @@ static int sh(const char *fmt, ...) {
     return rc;
 }
 
-/* Paket aus der Zeit vor dem usr-merge in syp build? (Einträge unter /bin, /lib, /usr/lib64 … oder /var/run) */
+/* Paket aus der Zeit vor dem usr-merge in syp build? (Einträge unter /bin, /lib, /usr/lib64 … oder /var/run)
+ * Ebenso Pakete, die versehentlich den Bauordner enthalten (var/tmp/syp-build/…) */
 static int legacy_layout(const jval *files) {
-    static const char *bad[] = {"bin", "sbin", "lib", "lib64", "usr/lib64", "var/run", "var/lock", NULL};
+    static const char *bad[] = {"bin", "sbin", "lib", "lib64", "usr/lib64", "var/run", "var/lock", "var/tmp/syp-build", NULL};
     const jval *list = files && files->t == J_ARR ? files : (files ? jget(files, "files") : NULL);
     for (size_t i = 0; list && i < list->n; i++) {
         const char *p = jgets(list->items[i], "path", "");

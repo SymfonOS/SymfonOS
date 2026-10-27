@@ -150,6 +150,7 @@ int fetch_url(const char *url, const char *dest) {
         const char *re = getenv("SYP_FETCH_RETRIES");
         int tries = re && *re ? atoi(re) : 3;
         if (tries < 1) tries = 1;
+        int http1 = 0;
         for (int attempt = 1;; attempt++) {
             FILE *f = fopen(part, "wb");
             if (!f) {
@@ -171,6 +172,8 @@ int fetch_url(const char *url, const char *dest) {
             curl_easy_setopt(h, CURLOPT_LOW_SPEED_LIMIT, 1L);
             curl_easy_setopt(h, CURLOPT_LOW_SPEED_TIME, 60L);
             curl_easy_setopt(h, CURLOPT_ERRORBUFFER, err);
+            /* Manche Server (z. B. salsa.debian.org) brechen HTTP/2-Streams ab: Wiederholungen über HTTP/1.1 */
+            if (http1) curl_easy_setopt(h, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_1_1);
             CURLcode r = curl_easy_perform(h);
             curl_easy_getinfo(h, CURLINFO_RESPONSE_CODE, &code);
             curl_easy_cleanup(h);
@@ -183,6 +186,7 @@ int fetch_url(const char *url, const char *dest) {
             rc = -1;
             int permanent = r == CURLE_HTTP_RETURNED_ERROR && code >= 400 && code < 500 && code != 408 && code != 429;
             if (permanent || attempt >= tries) break;
+            if (r == CURLE_HTTP2 || r == CURLE_HTTP2_STREAM) http1 = 1;
             fprintf(stderr, "  Versuch %d/%d fehlgeschlagen (%s), neuer Versuch …\n", attempt, tries, last_error());
             sleep((unsigned)(2 * attempt));
         }
