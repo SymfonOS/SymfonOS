@@ -2,11 +2,11 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "ktexteditor"
-version = "6.17.0-1"
+version = "6.17.0-2"
 summary = "Texteditor-Komponente"
 license = "LGPL-2.1-or-later"
 url = "https://download.kde.org/stable/frameworks/6.17/"
-depends = ["qt6-base", "karchive", "kconfig", "kguiaddons", "ki18n", "kio", "kparts", "sonnet", "syntax-highlighting", "kauth", "kcolorscheme", "qt6-declarative", "editorconfig"]
+depends = ["qt6-base", "karchive", "kconfig", "kguiaddons", "ki18n", "kio", "kparts", "sonnet", "syntax-highlighting", "kauth", "kcolorscheme", "qt6-declarative", "editorconfig", "qt6-speech"]
 makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", "gettext"]
 
 [[source]]

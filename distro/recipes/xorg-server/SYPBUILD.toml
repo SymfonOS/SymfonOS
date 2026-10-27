@@ -2,11 +2,11 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "xorg-server"
-version = "21.1.18-1"
+version = "21.1.18-2"
 summary = "X.Org-Server (für X11-Eingabetreiber; die Sitzung läuft unter Wayland)"
 license = "MIT"
 url = "https://www.x.org/pub/individual/xserver/"
-depends = ["libxcvt", "pixman", "libxfont2", "xkeyboard-config", "xkbcomp", "libepoxy", "mesa", "libdrm", "libxshmfence", "systemd", "libpciaccess", "libxau", "libxdmcp", "libxkbfile", "libxcb", "xcb-util", "xcb-util-image", "xcb-util-keysyms", "xcb-util-renderutil", "xcb-util-wm"]
+depends = ["libxcvt", "pixman", "libxfont2", "xkeyboard-config", "xkbcomp", "libepoxy", "mesa", "libdrm", "libxshmfence", "systemd", "libpciaccess", "libxau", "libxdmcp", "libxkbfile", "libxcb", "xcb-util", "xcb-util-image", "xcb-util-keysyms", "xcb-util-renderutil", "xcb-util-wm", "nettle"]
 makedepends = ["meson", "font-util", "xorgproto", "xtrans", "xbitmaps", "libxext", "libxrender", "libx11"]
 
 [[source]]

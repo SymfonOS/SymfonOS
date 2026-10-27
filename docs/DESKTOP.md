@@ -49,6 +49,7 @@ tools/desktop-recipes.py --check    # weichen Rezepte vom Generator ab? (Test in
 |---|---|
 | `tools/desktop-test.sh` | ISO bootet in QEMU mit virtio-GPU bis `graphical.target`, KWin (Wayland) und `plasmashell` laufen, kein Absturz; Bildschirmfotos über den QEMU-Monitor |
 | `tools/install-test.sh` | Installation aus dem Desktop-ISO auf eine virtuelle Platte, das installierte System startet bis zur Anmeldung |
+| `tools/check-libs.py` | Beim Bau des Live-Systems: Jede ELF-Datei findet ihre Bibliotheken (fehlende Laufzeitabhängigkeiten erscheinen als Warnung) |
 
 Die CI veröffentlicht das ISO erst, wenn beide Tests bestanden sind, als Release `desktop-nightly`.
 Vollständige Logs und die Bildschirmfotos jedes Laufs liegen auf dem Branch `ci-diag`.

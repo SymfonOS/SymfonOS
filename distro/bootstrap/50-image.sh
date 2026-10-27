@@ -63,6 +63,11 @@ cp "$SYP_PUB" "$IMG/etc/syp/keys/symfonos-release.pub"
 "$SYP" -r "$IMG" -y install --overwrite /etc/syp/syp.toml "$META" symfonos-installer   # vorläufige Konfiguration ersetzen
 # Für das installierte System zeigt die Konfiguration wieder auf die Online-Repos
 cp "$REPO_ROOT/system/etc/syp/syp.toml" "$IMG/etc/syp/syp.toml"
+# Fehlende Laufzeitabhängigkeiten (Bibliothek nicht installiert) zeigen sich sonst erst beim Programmstart
+if ! libs=$(python3 -I "$REPO_ROOT/tools/check-libs.py" "$IMG"); then
+  log "Warnung: Bibliotheken fehlen im Live-System"
+  while read -r l; do log "  $l"; echo "::warning title=Fehlende Bibliothek ($VARIANT)::$l"; done <<<"$libs"
+fi
 
 log "Live-Konfiguration"
 in_img() { chroot "$IMG" /usr/bin/env -i PATH=/usr/bin:/usr/sbin HOME=/root /bin/bash -euo pipefail -c "$1"; }

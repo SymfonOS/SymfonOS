@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "prison"
-version = "6.17.0-1"
+version = "6.17.0-2"
 summary = "Strich- und QR-Codes"
 license = "LGPL-2.1-or-later"
 url = "https://download.kde.org/stable/frameworks/6.17/"

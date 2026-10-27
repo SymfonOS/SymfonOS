@@ -2,11 +2,11 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "ffmpeg"
-version = "7.1.1-1"
+version = "7.1.1-2"
 summary = "Audio- und Video-Werkzeugkasten (FFmpeg)"
 license = "GPL-3.0-or-later"
 url = "https://ffmpeg.org/releases/"
-depends = ["libaom", "dav1d", "libass", "freetype", "lame", "libvpx", "opus", "libvorbis", "x264", "x265", "alsa-lib", "libva", "libdrm", "libwebp", "openssl", "zlib", "bzip2", "xz", "pulseaudio", "libxcb", "vulkan-loader", "openjpeg", "speexdsp"]
+depends = ["libaom", "dav1d", "libass", "freetype", "lame", "libvpx", "opus", "libvorbis", "x264", "x265", "alsa-lib", "libva", "libdrm", "libwebp", "openssl", "zlib", "bzip2", "xz", "pulseaudio", "libxcb", "vulkan-loader", "openjpeg", "speexdsp", "libxv"]
 makedepends = ["nasm", "vulkan-headers", "glslang"]
 provides = ["so:libavcodec.so.61", "so:libavformat.so.61", "so:libavutil.so.59", "so:libswscale.so.8"]
 

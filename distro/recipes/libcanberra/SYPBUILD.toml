@@ -2,11 +2,11 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "libcanberra"
-version = "0.30-1"
+version = "0.30-2"
 summary = "Ereignisklänge"
 license = "LGPL-2.1-or-later"
 url = "https://0pointer.de/lennart/projects/libcanberra/"
-depends = ["libvorbis", "alsa-lib", "sound-theme-freedesktop", "systemd"]
+depends = ["libvorbis", "alsa-lib", "sound-theme-freedesktop", "systemd", "libtool"]
 
 [[source]]
 url = "https://0pointer.de/lennart/projects/libcanberra/libcanberra-0.30.tar.xz"

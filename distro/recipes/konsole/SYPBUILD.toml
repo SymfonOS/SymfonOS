@@ -2,11 +2,11 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "konsole"
-version = "25.08.0-1"
+version = "25.08.0-2"
 summary = "Terminal"
 license = "GPL-2.0-or-later"
 url = "https://download.kde.org/stable/release-service/25.08.0/src/"
-depends = ["qt6-base", "kconfig", "kcoreaddons", "ki18n", "kwidgetsaddons", "kiconthemes", "kxmlgui", "kio", "kdbusaddons", "kcrash", "knotifications", "kwindowsystem", "kservice", "kglobalaccel", "kcmutils", "kirigami", "qt6-declarative", "kbookmarks", "kconfigwidgets", "kguiaddons", "knewstuff", "knotifyconfig", "kparts", "kpty", "ktextwidgets", "icu", "qt6-5compat"]
+depends = ["qt6-base", "kconfig", "kcoreaddons", "ki18n", "kwidgetsaddons", "kiconthemes", "kxmlgui", "kio", "kdbusaddons", "kcrash", "knotifications", "kwindowsystem", "kservice", "kglobalaccel", "kcmutils", "kirigami", "qt6-declarative", "kbookmarks", "kconfigwidgets", "kguiaddons", "knewstuff", "knotifyconfig", "kparts", "kpty", "ktextwidgets", "icu", "qt6-5compat", "qt6-multimedia"]
 makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", "gettext", "kdoctools"]
 
 [[source]]
