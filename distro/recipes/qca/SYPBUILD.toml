@@ -6,7 +6,7 @@ version = "2.3.10-1"
 summary = "Qt-Kryptographie (QCA)"
 license = "LGPL-2.1-or-later"
 url = "https://download.kde.org/stable/qca/2.3.10/"
-depends = ["qt6-base", "openssl", "libgcrypt", "ca-certificates"]
+depends = ["qt6-base", "qt6-5compat", "openssl", "libgcrypt", "ca-certificates"]
 makedepends = ["cmake", "ninja"]
 
 [[source]]
