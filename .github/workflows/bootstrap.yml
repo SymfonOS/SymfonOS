@@ -243,6 +243,8 @@ jobs:
             done
             sudo csrc/bin/syp -r "$SYM" list > "$d/installed.txt" 2>&1 || true
             sudo ls -la "$SYM/usr/lib64" > "$d/lib64.txt" 2>&1 || true
+            sudo ls "$SYM/usr/lib/pkgconfig" "$SYM/usr/share/pkgconfig" > "$d/pkgconfig.txt" 2>&1 || true
+            for n in libjpeg-turbo duktape; do echo "== $n"; sudo csrc/bin/syp -r "$SYM" files "$n" 2>&1 | head -40; done > "$d/files.txt" || true
           fi
           cp -r out/desktop-test "$d/" 2>/dev/null || true
           {

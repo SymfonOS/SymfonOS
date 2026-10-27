@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "libjpeg-turbo"
-version = "3.0.1-1"
+version = "3.0.1-2"
 summary = "JPEG-Bibliothek"
 license = "IJG AND BSD-3-Clause AND Zlib"
 url = "https://downloads.sourceforge.net/libjpeg-turbo/"
@@ -17,3 +17,6 @@ sha256 = "22429507714ae147b3acacd299e82099fce5d9f456882fc28e252e4579ba2a75"
 [build]
 style = "cmake"
 configure_flags = "-DENABLE_STATIC=FALSE -DCMAKE_INSTALL_DEFAULT_LIBDIR=lib -DCMAKE_SKIP_INSTALL_RPATH=ON"
+post_install = '''
+ls "$DESTDIR"/usr/lib*/pkgconfig/libjpeg.pc "$DESTDIR/usr/include/jpeglib.h"
+'''

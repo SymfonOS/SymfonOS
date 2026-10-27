@@ -127,7 +127,7 @@ cp -R VERSION assembly common eclipse epub epub3 extensions fo highlighting html
 ln -s VERSION "$d/VERSION.xsl"
 ''', scripts={"post_install": "/usr/lib/syp/xmlcatalog-docbook", "post_upgrade": "/usr/lib/syp/xmlcatalog-docbook"})
 pkg("perl-uri", "5.32", "https://www.cpan.org/authors/id/O/OA/OALDERS/URI-5.32.tar.gz",
-    "Perl-Modul URI", "Artistic-1.0-Perl OR GPL-1.0-or-later", ["perl"], style="perl", arch="any")
+    "Perl-Modul URI", "Artistic-1.0-Perl OR GPL-1.0-or-later", ["perl"], style="perl", arch="any", rel=2)
 pkg("python-mako", "1.3.10", "https://files.pythonhosted.org/packages/source/M/Mako/mako-1.3.10.tar.gz",
     "Mako-Templates (für Mesa)", "MIT", ["python", "python-markupsafe"], ["python-setuptools", "python-wheel"],
     style="python", arch="any")
@@ -171,7 +171,9 @@ pkg("boost", "1.89.0", "https://github.com/boostorg/boost/releases/download/boos
 pkg("duktape", "2.7.0", "https://duktape.org/duktape-2.7.0.tar.xz", "Eingebettete JavaScript-Engine (polkit)",
     "MIT", ["glibc"],
     build='cd "$S"\nsed -i "s/-Os/-O2/" Makefile.sharedlibrary\nmake -f Makefile.sharedlibrary INSTALL_PREFIX=/usr',
-    package='cd "$S"\nmake -f Makefile.sharedlibrary INSTALL_PREFIX="$DESTDIR/usr" install')
+    # Das Makefile wertet DESTDIR selbst aus (aus der Umgebung); INSTALL_PREFIX bleibt /usr
+    package='cd "$S"\nmake -f Makefile.sharedlibrary INSTALL_PREFIX=/usr DESTDIR="$DESTDIR" install\n'
+            'test -f "$DESTDIR/usr/include/duktape.h"', rel=2)
 pkg("libunistring", "1.3", "https://ftp.gnu.org/gnu/libunistring/libunistring-1.3.tar.xz",
     "Unicode-Zeichenketten (GNU)", "LGPL-3.0-or-later OR GPL-2.0-or-later", ["glibc"], style="autotools")
 pkg("libtasn1", "4.20.0", "https://ftp.gnu.org/gnu/libtasn1/libtasn1-4.20.0.tar.gz", "ASN.1-Bibliothek",
@@ -206,7 +208,7 @@ pkg("hwdata", "0.398", {"url": "https://github.com/vcrhonek/hwdata/archive/v0.39
     "Hardware-Kennungen (PCI, USB, Monitore)", "GPL-2.0-or-later", arch="any",
     build='cd "$S"\n./configure --prefix=/usr --disable-blacklist',
     package='cd "$S"\nmake DESTDIR="$DESTDIR" install')
-pkg("iso-codes", "4.18.0", {"url": "https://salsa.debian.org/iso-codes-team/iso-codes/-/archive/v4.18.0/iso-codes-v4.18.0.tar.gz"},
+pkg("iso-codes", "4.18.0", {"url": "https://deb.debian.org/debian/pool/main/i/iso-codes/iso-codes_4.18.0.orig.tar.xz"},
     "ISO-Länder-, Sprach- und Währungscodes", "LGPL-2.1-or-later", ["python"], ["meson", "gettext"],
     style="meson", arch="any")
 pkg("libsigsegv", "2.15", "https://ftp.gnu.org/gnu/libsigsegv/libsigsegv-2.15.tar.gz", "Seitenfehler-Behandlung",
@@ -225,6 +227,7 @@ pkg("libpng", "1.6.50", ["https://downloads.sourceforge.net/libpng/libpng-1.6.50
 pkg("libjpeg-turbo", "3.0.1", "https://downloads.sourceforge.net/libjpeg-turbo/libjpeg-turbo-3.0.1.tar.gz",
     "JPEG-Bibliothek", "IJG AND BSD-3-Clause AND Zlib", ["glibc"], ["cmake", "nasm"], style="cmake",
     flags="-DENABLE_STATIC=FALSE -DCMAKE_INSTALL_DEFAULT_LIBDIR=lib -DCMAKE_SKIP_INSTALL_RPATH=ON",
+    post='ls "$DESTDIR"/usr/lib*/pkgconfig/libjpeg.pc "$DESTDIR/usr/include/jpeglib.h"', rel=2,
     provides=["libjpeg", "so:libjpeg.so.8", "so:libturbojpeg.so.0"])
 pkg("libtiff", "4.7.0", "https://download.osgeo.org/libtiff/tiff-4.7.0.tar.gz", "TIFF-Bibliothek", "libtiff",
     ["zlib", "xz", "zstd", "libjpeg-turbo", "libwebp"], ["cmake"], style="cmake",
@@ -287,7 +290,7 @@ pkg("cairo", "1.18.4", "https://www.cairographics.org/releases/cairo-1.18.4.tar.
     flags="-Dtests=disabled -Dxlib-xcb=enabled", provides=["so:libcairo.so.2"])
 pkg("pango", "1.56.4", "https://download.gnome.org/sources/pango/1.56/pango-1.56.4.tar.xz", "Textlayout",
     "LGPL-2.1-or-later", ["fontconfig", "freetype", "harfbuzz", "fribidi", "glib2", "cairo", "libxft"], ["meson"],
-    style="meson", flags="--wrap-mode=nofallback -Dintrospection=disabled -Dbuild-testsuite=false -Dbuild-examples=false")
+    style="meson", flags="-Dintrospection=disabled -Dbuild-testsuite=false -Dbuild-examples=false")
 pkg("gdk-pixbuf", "2.42.12", "https://download.gnome.org/sources/gdk-pixbuf/2.42/gdk-pixbuf-2.42.12.tar.xz",
     "Bildlade-Bibliothek (GdkPixbuf)", "LGPL-2.1-or-later", ["glib2", "libpng", "libjpeg-turbo", "libtiff", "shared-mime-info"],
     ["meson", "python-docutils"], style="meson",
@@ -503,7 +506,9 @@ pkg("xwayland", "24.1.8", XORG + "xserver/xwayland-24.1.8.tar.xz", "X11-Programm
     ["meson", "wayland-protocols", "font-util", "xorgproto", "xtrans", "libxkbfile"], style="meson",
     pre="sed -i '/install_man/,$d' meson.build",
     flags="-Dxkb_output_dir=/var/lib/xkb -Dsecure-rpc=false -Dxvfb=false -Ddocs=false -Ddevel-docs=false "
-          "-Dlibdecor=false")
+          "-Dlibdecor=false",
+    # protocol.txt und Xserver.1 liefert auch xorg-server
+    post='rm -f "$DESTDIR/usr/lib/xorg/protocol.txt" "$DESTDIR/usr/share/man/man1/Xserver.1"', rel=2)
 
 
 # ---------------------------------------------------------------------------------------------------
