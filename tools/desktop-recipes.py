@@ -747,6 +747,7 @@ qt("qttools", ["qt6-base", "qt6-declarative"], "Qt 6 Werkzeuge (Designer, Lingui
    "-DFEATURE_clang=OFF -DFEATURE_clangcpp=OFF -DFEATURE_assistant=OFF")
 qt("qttranslations", ["qt6-base"], "Qt 6 Übersetzungen", mk=["qt6-tools"])
 qt("qtpositioning", ["qt6-base", "qt6-declarative"], "Qt 6 Ortung")
+qt("qtlocation", ["qt6-base", "qt6-declarative", "qt6-positioning"], "Qt 6 Karten (Location)", mk=["qt6-shadertools"])
 qt("qtsensors", ["qt6-base", "qt6-declarative"], "Qt 6 Sensoren (Bildschirmdrehung)")
 qt("qtwebsockets", ["qt6-base", "qt6-declarative"], "Qt 6 WebSockets")
 qt("qtwebchannel", ["qt6-base", "qt6-declarative", "qt6-websockets"], "Qt 6 WebChannel")
@@ -977,7 +978,7 @@ pl("plasma-workspace", KF_GUI + ["libplasma", "kscreenlocker", "kwin", "layer-sh
                                  "krunner", "ktexteditor", "baloo", "kfilemetadata", "kholidays", "prison",
                                  "kuserfeedback", "kpeople", "knewstuff", "kparts", "kstatusnotifieritem",
                                  "kunitconversion", "kidletime", "kdeclarative", "knotifyconfig", "kquickcharts",
-                                 "ksvg", "kwallet", "phonon", "qt6-5compat", "qt6-positioning", "qt6-svg",
+                                 "ksvg", "kwallet", "phonon", "qt6-5compat", "qt6-positioning", "qt6-location", "qt6-svg",
                                  "libcanberra", "libxcursor", "libxtst", "libsm", "libice", "libxft", "libxrender",
                                  "xrdb", "xprop", "xset", "iso-codes", "icu", "zlib", "qcoro", "kirigami-addons",
                                  "accountsservice"],
@@ -1022,7 +1023,12 @@ pl("xdg-desktop-portal-kde", ["kwayland", "kio", "kirigami", "kglobalaccel", "kn
                               "kwindowsystem", "libplasma", QW, "libxkbcommon", "xdg-desktop-portal", "kiconthemes",
                               "kcoreaddons", "ki18n", "kservice", "kwidgetsaddons"],
    "Portale für Plasma (Dateidialog, Bildschirmfreigabe)", mk=["plasma-wayland-protocols", "wayland-protocols"],
-   license="LGPL-2.0-or-later")
+   license="LGPL-2.0-or-later",
+   # Das Druck-Portal braucht Qt mit CUPS (qcups_p.h); Druck ist noch nicht enthalten, also ohne Druck-Portal
+   pre="sed -i '/^    print\\.cpp$/d;/^    print\\.h$/d' src/CMakeLists.txt\n"
+       "sed -i '/#include \"print.h\"/d;/m_print(new PrintPortal(this))/d' src/desktopportal.cpp\n"
+       "sed -i '/^class PrintPortal;/d;/PrintPortal \\*const m_print;/d' src/desktopportal.h\n"
+       "sed -i 's/org.freedesktop.impl.portal.Print;//' data/kde.portal")
 pl("kde-cli-tools", ["kcmutils", "kconfig", "kdesu", "ki18n", "kiconthemes", "kio", "kservice", "kwindowsystem",
                      "plasma-activities", "plasma-workspace", "kparts"], "Kommandozeilenwerkzeuge (kde-open …)",
    mk=["kdoctools"])

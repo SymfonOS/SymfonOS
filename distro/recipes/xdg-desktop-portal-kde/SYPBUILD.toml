@@ -16,3 +16,9 @@ sha256 = "dcd501b11a785c0b0f0b30bf1d09ba120d83885276841c47feed51d77e1440a5"
 [build]
 style = "cmake"
 configure_flags = "-DKDE_INSTALL_LIBEXECDIR=lib -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF -Wno-dev"
+pre_configure = '''
+sed -i '/^    print\.cpp$/d;/^    print\.h$/d' src/CMakeLists.txt
+sed -i '/#include "print.h"/d;/m_print(new PrintPortal(this))/d' src/desktopportal.cpp
+sed -i '/^class PrintPortal;/d;/PrintPortal \*const m_print;/d' src/desktopportal.h
+sed -i 's/org.freedesktop.impl.portal.Print;//' data/kde.portal
+'''
