@@ -2,11 +2,11 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "gwenview"
-version = "25.08.0-1"
+version = "25.08.0-2"
 summary = "Bildbetrachter"
 license = "GPL-2.0-or-later"
 url = "https://download.kde.org/stable/release-service/25.08.0/src/"
-depends = ["qt6-base", "kconfig", "kcoreaddons", "ki18n", "kwidgetsaddons", "kiconthemes", "kxmlgui", "kio", "kdbusaddons", "kcrash", "knotifications", "kwindowsystem", "kservice", "kglobalaccel", "kcmutils", "kirigami", "qt6-declarative", "exiv2", "kimageannotator", "lcms2", "baloo", "kparts", "purpose", "libtiff", "libpng", "libjpeg-turbo", "plasma-activities", "kimageformats", "qt6-imageformats", "wayland", "qt6-wayland"]
+depends = ["qt6-base", "kconfig", "kcoreaddons", "ki18n", "kwidgetsaddons", "kiconthemes", "kxmlgui", "kio", "kdbusaddons", "kcrash", "knotifications", "kwindowsystem", "kservice", "kglobalaccel", "kcmutils", "kirigami", "qt6-declarative", "exiv2", "kimageannotator", "lcms2", "baloo", "kparts", "purpose", "libtiff", "libpng", "libjpeg-turbo", "plasma-activities", "kimageformats", "qt6-imageformats", "wayland", "qt6-wayland", "qt6-multimedia"]
 makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", "gettext", "kdoctools", "wayland-protocols", "plasma-wayland-protocols"]
 
 [[source]]

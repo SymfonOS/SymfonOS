@@ -499,25 +499,25 @@ pkg("xorg-server", "21.1.18", [XORG + "xserver/xorg-server-21.1.18.tar.xz",
     "X.Org-Server (für X11-Eingabetreiber; die Sitzung läuft unter Wayland)", "MIT",
     ["libxcvt", "pixman", "libxfont2", "xkeyboard-config", "xkbcomp", "libepoxy", "mesa", "libdrm", "libxshmfence",
      "systemd", "libpciaccess", "libxau", "libxdmcp", "libxkbfile", "libxcb", "xcb-util", "xcb-util-image",
-     "xcb-util-keysyms", "xcb-util-renderutil", "xcb-util-wm"],
+     "xcb-util-keysyms", "xcb-util-renderutil", "xcb-util-wm", "nettle"],
     ["meson", "font-util", "xorgproto", "xtrans", "xbitmaps", "libxext", "libxrender", "libx11"], style="meson",
     pre="patch -Np1 -i ../xorg-server-21.1.18-tearfree_backport-1.patch",
     flags="-Dglamor=true -Dxkb_output_dir=/var/lib/xkb -Dsecure-rpc=false -Dsystemd_logind=true -Dsuid_wrapper=false "
           "-Dxephyr=false -Dxvfb=false -Dxnest=false -Ddocs=false -Ddevel-docs=false",
-    post='install -d "$DESTDIR/etc/X11/xorg.conf.d"')
+    post='install -d "$DESTDIR/etc/X11/xorg.conf.d"', rel=2)
 pkg("xf86-input-libinput", "1.5.0", XORG + "driver/xf86-input-libinput-1.5.0.tar.xz", "X11-Eingabetreiber (libinput)",
     "MIT", ["libinput", "xorg-server"], ["util-macros"], style="autotools")
 pkg("xf86-input-evdev", "2.11.0", XORG + "driver/xf86-input-evdev-2.11.0.tar.xz", "X11-Eingabetreiber (evdev)",
     "MIT", ["libevdev", "mtdev", "xorg-server"], ["util-macros"], style="autotools")
 pkg("xwayland", "24.1.8", XORG + "xserver/xwayland-24.1.8.tar.xz", "X11-Programme unter Wayland", "MIT",
     ["libxcvt", "pixman", "libxfont2", "libepoxy", "mesa", "wayland", "libdrm", "libxshmfence", "xkbcomp",
-     "libxau", "libxdmcp", "libxcb", "openssl"],
+     "libxau", "libxdmcp", "libxcb", "openssl", "nettle"],
     ["meson", "wayland-protocols", "font-util", "xorgproto", "xtrans", "libxkbfile"], style="meson",
     pre="sed -i '/install_man/,$d' meson.build",
     flags="-Dxkb_output_dir=/var/lib/xkb -Dsecure-rpc=false -Dxvfb=false -Ddocs=false -Ddevel-docs=false "
           "-Dlibdecor=false",
     # protocol.txt und Xserver.1 liefert auch xorg-server
-    post='rm -f "$DESTDIR/usr/lib/xorg/protocol.txt" "$DESTDIR/usr/share/man/man1/Xserver.1"', rel=2)
+    post='rm -f "$DESTDIR/usr/lib/xorg/protocol.txt" "$DESTDIR/usr/share/man/man1/Xserver.1"', rel=3)
 
 
 # ---------------------------------------------------------------------------------------------------
@@ -624,9 +624,10 @@ pkg("sound-theme-freedesktop", "0.8", "https://people.freedesktop.org/~mccann/di
     "Systemklänge (freedesktop)", "GPL-2.0-or-later", [], ["intltool", "perl-xml-parser"], style="autotools", arch="any")
 pkg("libcanberra", "0.30", ["https://0pointer.de/lennart/projects/libcanberra/libcanberra-0.30.tar.xz",
                             nox(BLFS_PATCH + "libcanberra-0.30-wayland-1.patch")],
-    "Ereignisklänge", "LGPL-2.1-or-later", ["libvorbis", "alsa-lib", "sound-theme-freedesktop", "systemd"],
+    "Ereignisklänge", "LGPL-2.1-or-later", ["libvorbis", "alsa-lib", "sound-theme-freedesktop", "systemd", "libtool"],
     style="autotools", dir="libcanberra-0.30", pre="patch -Np1 -i ../libcanberra-0.30-wayland-1.patch",
-    flags="--disable-oss --disable-gtk --disable-gtk3 --disable-pulse --disable-gstreamer --disable-lynx")
+    flags="--disable-oss --disable-gtk --disable-gtk3 --disable-pulse --disable-gstreamer --disable-lynx",
+    rel=2)  # libtool: libcanberra lädt seine Treiber mit libltdl
 pkg("libvpx", "1.15.2", {"url": "https://github.com/webmproject/libvpx/archive/v1.15.2/libvpx-1.15.2.tar.gz"},
     "VP8/VP9-Video", "BSD-3-Clause", ["glibc"], ["nasm", "which", "perl"],
     pre="find -type f | xargs touch\nsed -i 's/cp -p/cp/' build/make/Makefile",
@@ -658,7 +659,7 @@ pkg("ffmpeg", "7.1.1", ["https://ffmpeg.org/releases/ffmpeg-7.1.1.tar.xz",
     "Audio- und Video-Werkzeugkasten (FFmpeg)", "GPL-3.0-or-later",
     ["libaom", "dav1d", "libass", "freetype", "lame", "libvpx", "opus", "libvorbis", "x264", "x265", "alsa-lib",
      "libva", "libdrm", "libwebp", "openssl", "zlib", "bzip2", "xz", "pulseaudio", "libxcb",
-     "vulkan-loader", "openjpeg", "speexdsp"],
+     "vulkan-loader", "openjpeg", "speexdsp", "libxv"],
     ["nasm", "vulkan-headers", "glslang"], dir="ffmpeg-7.1.1",
     pre="patch -Np1 -i ../ffmpeg-7.1.1-chromium_method-1.patch",
     build=r'''cd "$S"
@@ -669,7 +670,7 @@ pkg("ffmpeg", "7.1.1", ["https://ffmpeg.org/releases/ffmpeg-7.1.1.tar.xz",
   --disable-doc --ignore-tests=enhanced-flv-av1
 make''',
     package='cd "$S"\nmake DESTDIR="$DESTDIR" install',
-    provides=["so:libavcodec.so.61", "so:libavformat.so.61", "so:libavutil.so.59", "so:libswscale.so.8"])
+    provides=["so:libavcodec.so.61", "so:libavformat.so.61", "so:libavutil.so.59", "so:libswscale.so.8"], rel=2)
 
 # ---------------------------------------------------------------------------------------------------
 # Systemdienste für den Desktop
@@ -801,7 +802,8 @@ kf("kdbusaddons", [], "D-Bus-Hilfen")
 kf("kdnssd", [], "Netzwerkdienste finden (DNS-SD)")
 kf("kguiaddons", [QW, "wayland"], "GUI-Hilfen", mk=["plasma-wayland-protocols", "wayland-protocols"])
 kf("ki18n", [QD, "iso-codes"], "Übersetzungen (gettext)", mk=["python"])
-kf("kidletime", [QW, "wayland", "libxcb", "libxext"], "Leerlauferkennung", mk=["plasma-wayland-protocols", "wayland-protocols"])
+kf("kidletime", [QW, "wayland", "libxcb", "libxext", "libxscrnsaver"], "Leerlauferkennung",
+   mk=["plasma-wayland-protocols", "wayland-protocols"], rel=2)
 kf("kimageformats", ["karchive", "libraw", "libavif", "libjxl"], "Zusätzliche Bildformate (PSD, XCF, RAW, EXR …)",
    "-DKIMAGEFORMATS_HEIF=OFF")
 kf("kitemmodels", [QD], "Datenmodelle")
@@ -833,7 +835,7 @@ kf("knotifications", ["kconfig", "libcanberra", QD], "Benachrichtigungen")
 kf("kjobwidgets", ["kcoreaddons", "kwidgetsaddons", "knotifications"], "Fortschrittsanzeigen")
 kf("ktextwidgets", ["kcompletion", "kconfig", "kconfigwidgets", "ki18n", "kwidgetsaddons", "sonnet", "kcolorscheme",
                     "qt6-speech"],
-   "Textbearbeitung")
+   "Textbearbeitung", rel=2)
 kf("kxmlgui", ["kconfig", "kconfigwidgets", "kcoreaddons", "kglobalaccel", "kguiaddons", "ki18n", "kiconthemes",
                "kitemviews", "kwidgetsaddons"], "Menüs und Werkzeugleisten")
 kf("kbookmarks", ["kconfig", "kconfigwidgets", "kcoreaddons", "kwidgetsaddons", "kxmlgui"], "Lesezeichen")
@@ -843,7 +845,7 @@ kf("kded", ["kconfig", "kcoreaddons", "kcrash", "kdbusaddons", "kservice"], "KDE
 kf("kio", ["karchive", "kauth", "kbookmarks", "kcompletion", "kconfig", "kcoreaddons", "kcrash", "kdbusaddons",
            "kguiaddons", "ki18n", "kiconthemes", "kitemviews", "kjobwidgets", "knotifications", "kservice",
            "ktextwidgets", "kwidgetsaddons", "kwindowsystem", "solid", "kded", "kwallet", "libxml2", "libxslt",
-           "acl", "util-linux"], "Netzwerk- und Dateizugriff (KIO)", mk=["kdoctools"])
+           "acl", "util-linux", "kdoctools"], "Netzwerk- und Dateizugriff (KIO)", mk=["kdoctools"], rel=2)
 kf("kdeclarative", ["kconfig", "kglobalaccel", "kguiaddons", "ki18n", "kwidgetsaddons", QD], "QML-Erweiterungen")
 kf("kcmutils", ["kconfigwidgets", "kcoreaddons", "kguiaddons", "ki18n", "kio", "kitemviews", "kxmlgui", "kdeclarative"],
    "Einstellungsmodule (KCM)")
@@ -857,7 +859,7 @@ kf("kparts", ["kio", "kxmlgui", "kconfig", "kcoreaddons", "ki18n", "kiconthemes"
               "ktextwidgets", "kwidgetsaddons"], "Eingebettete Komponenten")
 kf("syntax-highlighting", [QD], "Syntaxhervorhebung", mk=["perl"])
 kf("ktexteditor", ["karchive", "kconfig", "kguiaddons", "ki18n", "kio", "kparts", "sonnet", "syntax-highlighting",
-                   "kauth", "kcolorscheme", QD, "editorconfig"], "Texteditor-Komponente")
+                   "kauth", "kcolorscheme", QD, "editorconfig", "qt6-speech"], "Texteditor-Komponente", rel=2)
 kf("kcontacts", ["kcoreaddons", "ki18n", "kconfig", "kcodecs", "iso-codes"], "Kontakte (vCard)")
 kf("kpeople", ["kcoreaddons", "kwidgetsaddons", "ki18n", "kitemviews", "kcontacts", QD], "Personen-Metakontakte")
 kf("kfilemetadata", ["karchive", "kcoreaddons", "kconfig", "ki18n", "kcodecs", "taglib", "exiv2", "ffmpeg", "attr"],
@@ -865,7 +867,7 @@ kf("kfilemetadata", ["karchive", "kcoreaddons", "kconfig", "ki18n", "kcodecs", "
 kf("baloo", ["kfilemetadata", "kcoreaddons", "kconfig", "kdbusaddons", "ki18n", "kidletime", "solid", "kcrash", "kio",
              "lmdb", QD], "Dateisuche (Baloo)")
 kf("krunner", ["kconfig", "kcoreaddons", "ki18n", "kitemmodels", "kwindowsystem"], "Schnellstart-Suche (KRunner)")
-kf("prison", [QD, "qt6-multimedia", "libqrencode", "zxing-cpp"], "Strich- und QR-Codes")
+kf("prison", [QD, "qt6-multimedia", "libqrencode", "zxing-cpp"], "Strich- und QR-Codes", rel=2)
 kf("qqc2-desktop-style", ["kirigami", "kcolorscheme", "kconfig", "kiconthemes", "sonnet", QD], "Qt-Quick-Stil des Desktops")
 kf("kholidays", [QD], "Feiertage")
 kf("purpose", ["kconfig", "kcoreaddons", "ki18n", "kio", "kirigami", "knotifications", "kservice", "prison"],
@@ -964,9 +966,9 @@ pl("kwin", KF_GUI + ["kdecoration", "kwayland", "libplasma", "kscreenlocker", "b
                      "kglobalacceld", "libdisplay-info", "libinput", "libxkbcommon", "mesa", "libdrm", "lcms2",
                      "libepoxy", "pipewire", "libcanberra", "xwayland", "libxcvt", "hwdata", "qt6-sensors",
                      "qt6-5compat", "qt6-shadertools", "wayland", "libxcb", "xcb-util-keysyms", "xcb-util-wm",
-                     "xcb-util-cursor", "libxi", "libx11", "systemd", "libcap"],
+                     "xcb-util-cursor", "libxi", "libx11", "systemd", "libcap", "qt6-tools"],
    "Fenstermanager und Wayland-Compositor (KWin)", mk=["plasma-wayland-protocols", "wayland-protocols", "kdoctools"],
-   flags="-DKWIN_BUILD_X11=OFF")
+   flags="-DKWIN_BUILD_X11=OFF", rel=2)
 pl("plasma5support", ["kconfig", "kcoreaddons", "ki18n", "kio", "kguiaddons", "kservice", "knotifications", "solid",
                       "kidletime", "libksysguard", "plasma-activities", "kholidays", "libplasma"],
    "Kompatibilität für ältere Plasma-Datenquellen")
@@ -1110,7 +1112,7 @@ def gear(name, deps, summary, flags="", mk=(), license="GPL-2.0-or-later", **kw)
 
 
 gear("konsole", KF_GUI + ["kbookmarks", "kconfigwidgets", "kguiaddons", "knewstuff", "knotifyconfig", "kparts", "kpty",
-                          "ktextwidgets", "icu", "qt6-5compat"], "Terminal", mk=["kdoctools"])
+                          "ktextwidgets", "icu", "qt6-5compat", "qt6-multimedia"], "Terminal", mk=["kdoctools"], rel=2)
 gear("dolphin", KF_GUI + ["kbookmarks", "kcompletion", "kfilemetadata", "baloo", "kparts", "knewstuff", "kuserfeedback",
                           "solid", "phonon", "plasma-activities", "ktextwidgets", "kcolorscheme"], "Dateiverwaltung",
      mk=["kdoctools"])
@@ -1122,8 +1124,8 @@ gear("ark", KF_GUI + ["libarchive", "kparts", "kpty", "kfilemetadata", "libzip",
 gear("kcalc", KF_GUI + ["gmp", "mpfr", "kguiaddons", "knotifications"], "Taschenrechner", mk=["kdoctools"])
 gear("gwenview", KF_GUI + ["exiv2", "kimageannotator", "lcms2", "baloo", "kparts", "purpose", "libtiff", "libpng",
                            "libjpeg-turbo", "plasma-activities", "kimageformats", "qt6-imageformats", "wayland",
-                           "qt6-wayland"],
-     "Bildbetrachter", mk=["kdoctools", "wayland-protocols", "plasma-wayland-protocols"])
+                           "qt6-wayland", "qt6-multimedia"],
+     "Bildbetrachter", mk=["kdoctools", "wayland-protocols", "plasma-wayland-protocols"], rel=2)
 gear("kcharselect", KF_GUI + ["kbookmarks"], "Sonderzeichen auswählen", mk=["kdoctools"])
 pkg("libzip", "1.11.4", "https://libzip.org/download/libzip-1.11.4.tar.xz", "ZIP-Bibliothek", "BSD-3-Clause",
     ["zlib", "bzip2", "xz", "zstd", "openssl"], ["cmake", "ninja"], style="cmake",

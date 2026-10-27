@@ -2,11 +2,11 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "kidletime"
-version = "6.17.0-1"
+version = "6.17.0-2"
 summary = "Leerlauferkennung"
 license = "LGPL-2.1-or-later"
 url = "https://download.kde.org/stable/frameworks/6.17/"
-depends = ["qt6-base", "qt6-wayland", "wayland", "libxcb", "libxext"]
+depends = ["qt6-base", "qt6-wayland", "wayland", "libxcb", "libxext", "libxscrnsaver"]
 makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", "gettext", "plasma-wayland-protocols", "wayland-protocols"]
 
 [[source]]

@@ -2,12 +2,12 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "kio"
-version = "6.17.0-1"
+version = "6.17.0-2"
 summary = "Netzwerk- und Dateizugriff (KIO)"
 license = "LGPL-2.1-or-later"
 url = "https://download.kde.org/stable/frameworks/6.17/"
-depends = ["qt6-base", "karchive", "kauth", "kbookmarks", "kcompletion", "kconfig", "kcoreaddons", "kcrash", "kdbusaddons", "kguiaddons", "ki18n", "kiconthemes", "kitemviews", "kjobwidgets", "knotifications", "kservice", "ktextwidgets", "kwidgetsaddons", "kwindowsystem", "solid", "kded", "kwallet", "libxml2", "libxslt", "acl", "util-linux"]
-makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", "gettext", "kdoctools"]
+depends = ["qt6-base", "karchive", "kauth", "kbookmarks", "kcompletion", "kconfig", "kcoreaddons", "kcrash", "kdbusaddons", "kguiaddons", "ki18n", "kiconthemes", "kitemviews", "kjobwidgets", "knotifications", "kservice", "ktextwidgets", "kwidgetsaddons", "kwindowsystem", "solid", "kded", "kwallet", "libxml2", "libxslt", "acl", "util-linux", "kdoctools"]
+makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", "gettext"]
 
 [[source]]
 url = "https://download.kde.org/stable/frameworks/6.17/kio-6.17.0.tar.xz"

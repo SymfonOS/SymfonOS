@@ -2,11 +2,11 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "xwayland"
-version = "24.1.8-2"
+version = "24.1.8-3"
 summary = "X11-Programme unter Wayland"
 license = "MIT"
 url = "https://www.x.org/pub/individual/xserver/"
-depends = ["libxcvt", "pixman", "libxfont2", "libepoxy", "mesa", "wayland", "libdrm", "libxshmfence", "xkbcomp", "libxau", "libxdmcp", "libxcb", "openssl"]
+depends = ["libxcvt", "pixman", "libxfont2", "libepoxy", "mesa", "wayland", "libdrm", "libxshmfence", "xkbcomp", "libxau", "libxdmcp", "libxcb", "openssl", "nettle"]
 makedepends = ["meson", "wayland-protocols", "font-util", "xorgproto", "xtrans", "libxkbfile"]
 
 [[source]]
