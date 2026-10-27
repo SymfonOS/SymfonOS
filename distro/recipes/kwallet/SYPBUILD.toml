@@ -6,7 +6,7 @@ version = "6.17.0-1"
 summary = "Passwortspeicher (KWallet)"
 license = "LGPL-2.1-or-later"
 url = "https://download.kde.org/stable/frameworks/6.17/"
-depends = ["qt6-base", "kconfig", "kcoreaddons", "kdbusaddons", "ki18n", "knotifications", "kwidgetsaddons", "kwindowsystem", "kcolorscheme", "kcrash", "libgcrypt", "qca"]
+depends = ["qt6-base", "kconfig", "kcoreaddons", "kdbusaddons", "ki18n", "knotifications", "kwidgetsaddons", "kwindowsystem", "kcolorscheme", "kcrash", "libgcrypt", "libsecret", "qca"]
 makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", "gettext", "kdoctools"]
 
 [[source]]

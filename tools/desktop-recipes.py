@@ -296,6 +296,10 @@ pkg("cairo", "1.18.4", "https://www.cairographics.org/releases/cairo-1.18.4.tar.
 pkg("pango", "1.56.4", "https://download.gnome.org/sources/pango/1.56/pango-1.56.4.tar.xz", "Textlayout",
     "LGPL-2.1-or-later", ["fontconfig", "freetype", "harfbuzz", "fribidi", "glib2", "cairo", "libxft"], ["meson"],
     style="meson", flags="-Dintrospection=disabled -Dbuild-testsuite=false -Dbuild-examples=false")
+pkg("libsecret", "0.21.7", "https://download.gnome.org/sources/libsecret/0.21/libsecret-0.21.7.tar.xz",
+    "Secret-Service-Bibliothek (KWallet)", "LGPL-2.1-or-later", ["glib2", "libgcrypt"], ["meson"], style="meson",
+    flags="-Dgtk_doc=false -Dmanpage=false -Dvapi=false -Dintrospection=false -Dcrypto=libgcrypt "
+          "-Dbash_completion=disabled")
 pkg("gdk-pixbuf", "2.42.12", "https://download.gnome.org/sources/gdk-pixbuf/2.42/gdk-pixbuf-2.42.12.tar.xz",
     "Bildlade-Bibliothek (GdkPixbuf)", "LGPL-2.1-or-later", ["glib2", "libpng", "libjpeg-turbo", "libtiff", "shared-mime-info"],
     ["meson", "python-docutils"], style="meson",
@@ -826,13 +830,14 @@ kf("kiconthemes", ["karchive", "kcolorscheme", "kconfigwidgets", "ki18n", "kwidg
    "Symbolthemen")
 kf("knotifications", ["kconfig", "libcanberra", QD], "Benachrichtigungen")
 kf("kjobwidgets", ["kcoreaddons", "kwidgetsaddons", "knotifications"], "Fortschrittsanzeigen")
-kf("ktextwidgets", ["kcompletion", "kconfig", "kconfigwidgets", "ki18n", "kwidgetsaddons", "sonnet", "kcolorscheme"],
+kf("ktextwidgets", ["kcompletion", "kconfig", "kconfigwidgets", "ki18n", "kwidgetsaddons", "sonnet", "kcolorscheme",
+                    "qt6-speech"],
    "Textbearbeitung")
 kf("kxmlgui", ["kconfig", "kconfigwidgets", "kcoreaddons", "kglobalaccel", "kguiaddons", "ki18n", "kiconthemes",
                "kitemviews", "kwidgetsaddons"], "Menüs und Werkzeugleisten")
 kf("kbookmarks", ["kconfig", "kconfigwidgets", "kcoreaddons", "kwidgetsaddons", "kxmlgui"], "Lesezeichen")
 kf("kwallet", ["kconfig", "kcoreaddons", "kdbusaddons", "ki18n", "knotifications", "kwidgetsaddons", "kwindowsystem",
-               "kcolorscheme", "kcrash", "libgcrypt", "qca"], "Passwortspeicher (KWallet)", mk=["kdoctools"])
+               "kcolorscheme", "kcrash", "libgcrypt", "libsecret", "qca"], "Passwortspeicher (KWallet)", mk=["kdoctools"])
 kf("kded", ["kconfig", "kcoreaddons", "kcrash", "kdbusaddons", "kservice"], "KDE-Hintergrunddienst", mk=["kdoctools"])
 kf("kio", ["karchive", "kauth", "kbookmarks", "kcompletion", "kconfig", "kcoreaddons", "kcrash", "kdbusaddons",
            "kguiaddons", "ki18n", "kiconthemes", "kitemviews", "kjobwidgets", "knotifications", "kservice",
@@ -859,7 +864,7 @@ kf("kfilemetadata", ["karchive", "kcoreaddons", "kconfig", "ki18n", "kcodecs", "
 kf("baloo", ["kfilemetadata", "kcoreaddons", "kconfig", "kdbusaddons", "ki18n", "kidletime", "solid", "kcrash", "kio",
              "lmdb", QD], "Dateisuche (Baloo)")
 kf("krunner", ["kconfig", "kcoreaddons", "ki18n", "kitemmodels", "kwindowsystem"], "Schnellstart-Suche (KRunner)")
-kf("prison", [QD, "libqrencode", "zxing-cpp"], "Strich- und QR-Codes")
+kf("prison", [QD, "qt6-multimedia", "libqrencode", "zxing-cpp"], "Strich- und QR-Codes")
 kf("qqc2-desktop-style", ["kirigami", "kcolorscheme", "kconfig", "kiconthemes", "sonnet", QD], "Qt-Quick-Stil des Desktops")
 kf("kholidays", [QD], "Feiertage")
 kf("purpose", ["kconfig", "kcoreaddons", "ki18n", "kio", "kirigami", "knotifications", "kservice", "prison"],

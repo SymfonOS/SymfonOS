@@ -6,7 +6,7 @@ version = "6.17.0-1"
 summary = "Strich- und QR-Codes"
 license = "LGPL-2.1-or-later"
 url = "https://download.kde.org/stable/frameworks/6.17/"
-depends = ["qt6-base", "qt6-declarative", "libqrencode", "zxing-cpp"]
+depends = ["qt6-base", "qt6-declarative", "qt6-multimedia", "libqrencode", "zxing-cpp"]
 makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", "gettext"]
 
 [[source]]
