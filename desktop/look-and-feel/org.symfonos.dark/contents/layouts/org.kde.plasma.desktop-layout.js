@@ -23,12 +23,11 @@ dock.floating = true;
 dock.hiding = "dodgewindows";
 var tasks = dock.addWidget("org.kde.plasma.icontasks");
 tasks.currentConfigGroup = ["General"];
+// Nur Programme, die das Desktop-ISO mitbringt: ein Starter ohne .desktop-Datei erscheint als leeres Symbol.
+// Firefox, Krita, Inkscape, GIMP, Blender, Kdenlive, Ardour und die symfonOS-Apps folgen mit ihren Paketen.
 tasks.writeConfig("launchers", [
-  "applications:org.kde.dolphin.desktop", "applications:firefox.desktop",
-  "applications:org.kde.krita.desktop", "applications:org.inkscape.Inkscape.desktop",
-  "applications:gimp.desktop", "applications:blender.desktop",
-  "applications:org.kde.kdenlive.desktop", "applications:ardour8.desktop",
-  "applications:org.symfonos.Store.desktop", "applications:org.symfonos.Assist.desktop",
-  "applications:org.kde.konsole.desktop"
-].join(","));
+  "applications:org.kde.dolphin.desktop", "applications:org.kde.konsole.desktop",
+  "applications:org.kde.kate.desktop", "applications:org.kde.gwenview.desktop",
+  "applications:systemsettings.desktop"
+]);
 dock.addWidget("org.kde.plasma.trash");
