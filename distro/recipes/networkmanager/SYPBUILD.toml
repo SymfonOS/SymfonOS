@@ -5,13 +5,13 @@ name = "networkmanager"
 version = "1.54.0-1"
 summary = "Netzwerkverwaltung (NetworkManager)"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
-url = "https://download.gnome.org/sources/NetworkManager/1.54/"
+url = "https://gitlab.freedesktop.org/NetworkManager/NetworkManager/-/releases/1.54.0/downloads/"
 depends = ["glib2", "dbus", "systemd", "util-linux", "libndp", "curl", "gnutls", "polkit", "libselinux", "readline", "iwd", "nftables"]
 makedepends = ["meson", "python", "libxslt"]
 provides = ["NetworkManager", "so:libnm.so.0"]
 
 [[source]]
-url = "https://download.gnome.org/sources/NetworkManager/1.54/NetworkManager-1.54.0.tar.xz"
+url = "https://gitlab.freedesktop.org/NetworkManager/NetworkManager/-/releases/1.54.0/downloads/NetworkManager-1.54.0.tar.xz"
 sha256 = "TODO"
 
 [build]
