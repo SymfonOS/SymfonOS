@@ -5,12 +5,12 @@ name = "modemmanager"
 version = "1.24.2-1"
 summary = "Mobilfunkmodems (ModemManager; für plasma-nm)"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
-url = "https://gitlab.freedesktop.org/mobile-broadband/ModemManager/-/releases/1.24.2/downloads/"
+url = "https://gitlab.freedesktop.org/mobile-broadband/ModemManager/-/archive/1.24.2/"
 depends = ["glib2", "libgudev", "dbus", "systemd", "polkit"]
 makedepends = ["meson"]
 
 [[source]]
-url = "https://gitlab.freedesktop.org/mobile-broadband/ModemManager/-/releases/1.24.2/downloads/ModemManager-1.24.2.tar.xz"
+url = "https://gitlab.freedesktop.org/mobile-broadband/ModemManager/-/archive/1.24.2/ModemManager-1.24.2.tar.gz"
 sha256 = "TODO"
 
 [build]

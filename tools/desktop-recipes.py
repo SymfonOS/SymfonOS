@@ -692,7 +692,7 @@ pkg("accountsservice", "23.13.9", "https://www.freedesktop.org/software/accounts
     # tests/ bindet das Hilfsprojekt mocklibc ein, das mit GCC 15 nicht kompiliert
     pre="sed -i \"/subdir('tests')/d\" meson.build",
     flags="-Dadmin_group=wheel -Dintrospection=false -Dvapi=false -Ddocbook=false -Dgtk_doc=false")
-# NetworkManager und ModemManager veröffentlichen ihre Tarballs als GitLab-Release-Dateien.
+# NetworkManager veröffentlicht seine Tarballs als GitLab-Release-Dateien.
 # NetworkManager für das Desktop-Netz (WLAN über iwd, DNS über systemd-resolved); das Basissystem bleibt bei
 # systemd-networkd. Ohne PPP, Modem, OVS, Cloud-Setup und nmtui (newt).
 pkg("libndp", "1.9", "http://libndp.org/files/libndp-1.9.tar.gz", "IPv6-Neighbor-Discovery (NetworkManager)",
@@ -717,7 +717,8 @@ wifi.backend=iwd
 dns=systemd-resolved
 CONF''',
     provides=["NetworkManager", "so:libnm.so.0"])
-pkg("modemmanager", "1.24.2", "https://gitlab.freedesktop.org/mobile-broadband/ModemManager/-/releases/1.24.2/downloads/ModemManager-1.24.2.tar.xz",
+# ModemManager veröffentlicht keine Tarballs mehr, nur das Archiv des Git-Tags
+pkg("modemmanager", "1.24.2", {"url": "https://gitlab.freedesktop.org/mobile-broadband/ModemManager/-/archive/1.24.2/ModemManager-1.24.2.tar.gz"},
     "Mobilfunkmodems (ModemManager; für plasma-nm)", "GPL-2.0-or-later AND LGPL-2.1-or-later",
     ["glib2", "libgudev", "dbus", "systemd", "polkit"], ["meson"], style="meson",
     flags="-Dmbim=false -Dqmi=false -Dqrtr=false -Dintrospection=false -Dvapi=false -Dman=false "
