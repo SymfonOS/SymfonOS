@@ -1,7 +1,7 @@
 # symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
 [package]
 name = "grub"
-version = "2.12-3"
+version = "2.12-4"
 summary = "GRUB-Bootloader (BIOS und UEFI)"
 license = "GPL-3.0-or-later"
 url = "https://ftp.gnu.org/gnu/grub/"
@@ -25,8 +25,9 @@ cd "$S"
 unset CFLAGS CXXFLAGS LDFLAGS
 for t in i386-pc x86_64-efi; do
   mkdir -p "build-$t"; cd "build-$t"
+  # grub-mount (FUSE) wird nicht gebraucht; ohne Schalter hinge es davon ab, ob fuse3 in der Bauwurzel liegt
   ../configure --prefix=/usr --sysconfdir=/etc --disable-efiemu --disable-werror \
-    --with-platform=${t#*-} --target=${t%%-*} --enable-grub-mkfont
+    --with-platform=${t#*-} --target=${t%%-*} --enable-grub-mkfont --disable-grub-mount
   make; cd ..
 done
 '''
