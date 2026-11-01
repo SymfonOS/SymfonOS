@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "symfonos-desktop-config"
-version = "1.0-3"
+version = "1.0-4"
 arch = "any"
 summary = "symfonOS-Desktop: Farbschemata, globales Design, SDDM (Wayland), PAM, Voreinstellungen"
 license = "GPL-3.0-or-later"
@@ -28,6 +28,10 @@ install -Dm644 /dev/stdin "$DESTDIR/usr/lib/systemd/system-preset/40-symfonos-de
 enable sddm.service
 enable accounts-daemon.service
 enable upower.service
+# Desktop-Netz über NetworkManager (WLAN über iwd); systemd-networkd darf dieselben Schnittstellen nicht verwalten
+enable NetworkManager.service
+disable systemd-networkd.service
+disable systemd-networkd-wait-online.service
 PRE
 install -d "$DESTDIR/etc/systemd/system"
 ln -s /usr/lib/systemd/system/graphical.target "$DESTDIR/etc/systemd/system/default.target"

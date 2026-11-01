@@ -1,0 +1,28 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "networkmanager"
+version = "1.54.0-1"
+summary = "Netzwerkverwaltung (NetworkManager)"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
+url = "https://download.gnome.org/sources/NetworkManager/1.54/"
+depends = ["glib2", "dbus", "systemd", "util-linux", "libndp", "curl", "gnutls", "polkit", "libselinux", "readline", "iwd", "nftables"]
+makedepends = ["meson", "python", "libxslt"]
+provides = ["NetworkManager", "so:libnm.so.0"]
+
+[[source]]
+url = "https://download.gnome.org/sources/NetworkManager/1.54/NetworkManager-1.54.0.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Dsession_tracking=systemd -Dsession_tracking_consolekit=false -Dsuspend_resume=systemd -Dpolkit=true -Dselinux=true -Dlibaudit=no -Dwext=false -Dwifi=true -Diwd=true -Dconfig_wifi_backend_default=iwd -Dppp=false -Dmodem_manager=false -Dovs=false -Dnmtui=false -Dnm_cloud_setup=false -Dbluez5_dun=false -Debpf=false -Dnbft=false -Difupdown=false -Dteamdctl=false -Dfirewalld_zone=false -Dlibpsl=false -Dconfig_dns_rc_manager_default=symlink -Dconfig_plugins_default=keyfile -Ddhcpcd=no -Dintrospection=false -Dvapi=false -Ddocs=false -Dtests=no -Dqt=false -Dcrypto=gnutls -Dreadline=libreadline -Dsystemdsystemunitdir=/usr/lib/systemd/system -Dsystem_ca_path=/etc/ssl/certs -Dkernel_firmware_dir=/usr/lib/firmware -Dnft=/usr/bin/nft -Dmodprobe=/usr/bin/modprobe"
+post_install = '''
+install -Dm644 /dev/stdin "$DESTDIR/usr/lib/NetworkManager/conf.d/50-symfonos.conf" <<'CONF'
+# symfonOS: WLAN über iwd, Namensauflösung über systemd-resolved
+[device]
+wifi.backend=iwd
+[main]
+dns=systemd-resolved
+CONF
+'''

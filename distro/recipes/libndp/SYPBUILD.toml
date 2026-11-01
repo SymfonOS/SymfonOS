@@ -1,0 +1,16 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libndp"
+version = "1.9-1"
+summary = "IPv6-Neighbor-Discovery (NetworkManager)"
+license = "LGPL-2.1-or-later"
+url = "http://libndp.org/files/"
+depends = ["glibc"]
+
+[[source]]
+url = "http://libndp.org/files/libndp-1.9.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

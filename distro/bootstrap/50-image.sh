@@ -77,7 +77,9 @@ in_img "systemd-sysusers; systemd-tmpfiles --create || true
   echo 'live ALL=(ALL:ALL) NOPASSWD: ALL' > /etc/sudoers.d/90-live; chmod 440 /etc/sudoers.d/90-live
   systemctl preset-all >/dev/null 2>&1 || true   # Firewall, Audit, Zeit, DNS wie bei einer Installation
   systemctl --global preset-all >/dev/null 2>&1 || true   # Benutzerdienste (PipeWire, WirePlumber)
-  systemctl enable systemd-networkd systemd-resolved systemd-timesyncd iwd
+  # Desktop: NetworkManager (WLAN über iwd) statt systemd-networkd; beide dürfen nicht dieselben Schnittstellen verwalten
+  net=systemd-networkd; [ -e /usr/lib/systemd/system/NetworkManager.service ] && net=NetworkManager
+  systemctl enable \$net systemd-resolved systemd-timesyncd iwd
   : > /etc/machine-id"
 if [[ $VARIANT == desktop ]]; then
   # Live-Benutzer meldet sich automatisch in Plasma (Wayland) an; der Installer entfernt das wieder

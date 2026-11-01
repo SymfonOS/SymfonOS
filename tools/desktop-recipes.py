@@ -692,6 +692,37 @@ pkg("accountsservice", "23.13.9", "https://www.freedesktop.org/software/accounts
     # tests/ bindet das Hilfsprojekt mocklibc ein, das mit GCC 15 nicht kompiliert
     pre="sed -i \"/subdir('tests')/d\" meson.build",
     flags="-Dadmin_group=wheel -Dintrospection=false -Dvapi=false -Ddocbook=false -Dgtk_doc=false")
+# NetworkManager für das Desktop-Netz (WLAN über iwd, DNS über systemd-resolved); das Basissystem bleibt bei
+# systemd-networkd. Ohne PPP, Modem, OVS, Cloud-Setup und nmtui (newt).
+pkg("libndp", "1.9", "http://libndp.org/files/libndp-1.9.tar.gz", "IPv6-Neighbor-Discovery (NetworkManager)",
+    "LGPL-2.1-or-later", ["glibc"], style="autotools")
+pkg("networkmanager", "1.54.0", "https://download.gnome.org/sources/NetworkManager/1.54/NetworkManager-1.54.0.tar.xz",
+    "Netzwerkverwaltung (NetworkManager)", "GPL-2.0-or-later AND LGPL-2.1-or-later",
+    ["glib2", "dbus", "systemd", "util-linux", "libndp", "curl", "gnutls", "polkit", "libselinux", "readline", "iwd",
+     "nftables"], ["meson", "python", "libxslt"], style="meson",  # xsltproc: Pflicht in meson.build
+    flags="-Dsession_tracking=systemd -Dsession_tracking_consolekit=false -Dsuspend_resume=systemd -Dpolkit=true "
+          "-Dselinux=true -Dlibaudit=no -Dwext=false -Dwifi=true -Diwd=true -Dconfig_wifi_backend_default=iwd "
+          "-Dppp=false -Dmodem_manager=false -Dovs=false -Dnmtui=false -Dnm_cloud_setup=false -Dbluez5_dun=false "
+          "-Debpf=false -Dnbft=false -Difupdown=false -Dteamdctl=false -Dfirewalld_zone=false -Dlibpsl=false "
+          "-Dconfig_dns_rc_manager_default=symlink -Dconfig_plugins_default=keyfile -Ddhcpcd=no "
+          "-Dintrospection=false -Dvapi=false -Ddocs=false -Dtests=no -Dqt=false -Dcrypto=gnutls "
+          "-Dreadline=libreadline -Dsystemdsystemunitdir=/usr/lib/systemd/system -Dsystem_ca_path=/etc/ssl/certs "
+          "-Dkernel_firmware_dir=/usr/lib/firmware -Dnft=/usr/bin/nft -Dmodprobe=/usr/bin/modprobe",
+    post='''install -Dm644 /dev/stdin "$DESTDIR/usr/lib/NetworkManager/conf.d/50-symfonos.conf" <<'CONF'
+# symfonOS: WLAN über iwd, Namensauflösung über systemd-resolved
+[device]
+wifi.backend=iwd
+[main]
+dns=systemd-resolved
+CONF''',
+    provides=["NetworkManager", "so:libnm.so.0"])
+pkg("modemmanager", "1.24.2", "https://www.freedesktop.org/software/ModemManager/ModemManager-1.24.2.tar.xz",
+    "Mobilfunkmodems (ModemManager; für plasma-nm)", "GPL-2.0-or-later AND LGPL-2.1-or-later",
+    ["glib2", "libgudev", "dbus", "systemd", "polkit"], ["meson"], style="meson",
+    flags="-Dmbim=false -Dqmi=false -Dqrtr=false -Dintrospection=false -Dvapi=false -Dman=false "
+          "-Dbash_completion=false -Dtests=false -Dexamples=false -Dpolkit=permissive "
+          "-Dsystemdsystemunitdir=/usr/lib/systemd/system -Dudevdir=/usr/lib/udev "
+          "-Ddbus_policy_dir=/usr/share/dbus-1/system.d")
 pkg("xdg-user-dirs", "0.18", "https://user-dirs.freedesktop.org/releases/xdg-user-dirs-0.18.tar.gz",
     "Standardordner (Dokumente, Bilder, Musik …)", "GPL-2.0-or-later", ["glibc"], style="autotools",
     flags="--disable-documentation", backup=["etc/xdg/user-dirs.conf", "etc/xdg/user-dirs.defaults"])
@@ -813,6 +844,8 @@ kf("kwidgetsaddons", [], "Zusätzliche Bedienelemente")
 kf("kwindowsystem", [QD, QW, "libx11", "libxfixes", "xcb-util-keysyms"], "Fensterverwaltung",
    mk=["plasma-wayland-protocols", "wayland-protocols"])
 kf("solid", [QD, "systemd", "upower", "util-linux"], "Hardware-Erkennung", mk=["flex", "bison"])
+kf("networkmanager-qt", ["networkmanager"], "Qt-Anbindung an NetworkManager")
+kf("modemmanager-qt", ["modemmanager"], "Qt-Anbindung an ModemManager")
 kf("sonnet", [QD, "hunspell"], "Rechtschreibprüfung")
 kf("threadweaver", [], "Nebenläufigkeit")
 kf("kauth", ["kcoreaddons", "kwindowsystem", "polkit-qt6"], "Rechteverwaltung (polkit)")
@@ -998,6 +1031,11 @@ pl("milou", ["krunner", "libplasma", "kitemmodels", "ki18n", QD], "Suchoberfläc
 pl("plasma-pa", ["pulseaudio-qt", "kcoreaddons", "kdeclarative", "kglobalaccel", "ki18n", "knotifications",
                  "kstatusnotifieritem", "libcanberra", "libplasma", "pulseaudio", "ksvg", "kcmutils", "kdbusaddons"],
    "Lautstärkeregelung", mk=["kdoctools"])
+pl("plasma-nm", ["networkmanager-qt", "modemmanager-qt", "kcolorscheme", "kcompletion", "kcoreaddons",
+                 "kdbusaddons", "kio", "ki18n", "knotifications", "kservice", "solid", "kwallet", "kwidgetsaddons",
+                 "kwindowsystem", "kcmutils", "ksvg", "libplasma", "kirigami", "qca", "qcoro", "prison",
+                 "networkmanager"],
+   "Netzwerk-Applet und Einstellungen (WLAN, VPN)")
 pl("polkit-kde-agent-1", ["polkit-qt6", "kcoreaddons", "kcrash", "kdbusaddons", "ki18n", "kwidgetsaddons",
                           "kwindowsystem", "kiconthemes", "knotifications", QD], "Passwortabfrage für polkit")
 pl("powerdevil", ["plasma-workspace", "kauth", "kcmutils", "kidletime", "knotifyconfig", "solid", "libkscreen", "upower",
@@ -1180,10 +1218,14 @@ install -Dm644 /dev/stdin "$DESTDIR/usr/lib/systemd/system-preset/40-symfonos-de
 enable sddm.service
 enable accounts-daemon.service
 enable upower.service
+# Desktop-Netz über NetworkManager (WLAN über iwd); systemd-networkd darf dieselben Schnittstellen nicht verwalten
+enable NetworkManager.service
+disable systemd-networkd.service
+disable systemd-networkd-wait-online.service
 PRE
 install -d "$DESTDIR/etc/systemd/system"
 ln -s /usr/lib/systemd/system/graphical.target "$DESTDIR/etc/systemd/system/default.target"
-''', backup=["etc/xdg/kdeglobals", "etc/xdg/kwinrc", "etc/pam.d/kde"], rel=3)
+''', backup=["etc/xdg/kdeglobals", "etc/xdg/kwinrc", "etc/pam.d/kde"], rel=4)
 
 DESKTOP = ["symfonos-base", "symfonos-desktop-config", "plasma-desktop", "plasma-workspace", "kwin", "xwayland",
            "sddm", "sddm-kcm", "breeze", "breeze-icons", "qqc2-breeze-style", "qqc2-desktop-style",
@@ -1192,11 +1234,11 @@ DESKTOP = ["symfonos-base", "symfonos-desktop-config", "plasma-desktop", "plasma
            "polkit-kde-agent-1", "plasma-systemmonitor", "ksystemstats", "kdeplasma-addons", "ocean-sound-theme",
            "kactivitymanagerd", "kglobalacceld", "kimageformats", "qt6-imageformats", "qt6-translations",
            "qt6-wayland", "mesa", "vulkan-loader", "libva", "pipewire", "wireplumber", "alsa-utils", "ffmpeg",
-           "xdg-user-dirs", "konsole", "dolphin", "kate", "ark", "gwenview", "kcalc", "kcharselect",
+           "xdg-user-dirs", "networkmanager", "plasma-nm", "konsole", "dolphin", "kate", "ark", "gwenview", "kcalc", "kcharselect",
            "inter-font", "jetbrains-mono-font", "dejavu-fonts", "noto-color-emoji", "hunspell", "upower",
            "accountsservice", "polkit"]
 pkg("symfonos-desktop", "2025.10", [], "symfonOS-Desktop (KDE Plasma 6, Wayland, PipeWire)", "GPL-3.0-or-later",
-    DESKTOP, arch="any", style="meta")
+    DESKTOP, arch="any", style="meta", rel=2)
 
 # ---------------------------------------------------------------------------------------------------
 # Rezepte schreiben

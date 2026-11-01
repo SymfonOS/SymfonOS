@@ -10,6 +10,7 @@ Version für Version zur Basis und sind von den BLFS-Autoren gemeinsam getestet.
 |---|---|
 | Grafik | LLVM 20 mit Clang, Mesa 25.1 (radeonsi, r600, iris, crocus, i915, nouveau, virgl, llvmpipe, zink; Vulkan: AMD, Intel, lavapipe, virtio), libdrm, libva, Vulkan-Loader, glslang, SPIR-V |
 | Anzeige | Wayland 1.24, wayland-protocols, Xwayland 24.1 für X11-Programme, libxkbcommon, X11-Bibliotheken |
+| Netzwerk | NetworkManager 1.54 mit `plasma-nm` (WLAN über iwd, DNS über systemd-resolved), ModemManager für Mobilfunk; das Basissystem bleibt bei systemd-networkd |
 | Eingabe | libinput mit libwacom (Grafiktabletts von Wacom, Huion und XP-Pen), libevdev, mtdev |
 | Audio und Video | PipeWire 1.4 mit WirePlumber als Ersatz für PulseAudio und JACK (niedrige Latenz), ALSA, FFmpeg 7.1 mit AV1, VP9, H.264, H.265, Opus, VA-API und Vulkan; GStreamer 1.26 nur als Bibliothek für die Desktop-Portale |
 | Qt | Qt 6.9.2, jedes Modul ein eigenes Paket (`qt6-base`, `qt6-declarative`, `qt6-wayland` …), Verzeichnisse wie bei Fedora und Arch |
@@ -56,10 +57,10 @@ Vollständige Logs und die Bildschirmfotos jedes Laufs liegen auf dem Branch `ci
 
 ## Noch nicht enthalten
 
-- **NetworkManager und `plasma-nm`:** Das Netzwerk läuft über systemd-networkd und iwd, WLAN wird mit `iwctl` eingerichtet.
 - **Bluetooth** (BlueZ, bluedevil).
 - **SELinux im Modus enforcing für die grafische Anmeldung:** Die Richtlinie (refpolicy) kennt für SDDM noch keinen Anmeldekontext, `pam_selinux` meldet »Unable to get valid context«. Im Standardmodus permissive ist das ohne Folgen.
 - **Druck** (CUPS), deshalb auch kein Druck-Portal in xdg-desktop-portal-kde.
 - **Spectacle** (braucht OpenCV).
+- **VPN-Erweiterungen und PPP** für NetworkManager (OpenVPN, OpenConnect, DSL); WireGuard kann NetworkManager selbst.
 - **Webbrowser:** Firefox braucht Rust und Node.js, Falkon braucht QtWebEngine.
 - **Kreativprogramme** (Krita, Blender, Ardour …) und PySide6 für die symfonOS-Apps folgen als nächste Stufe.
