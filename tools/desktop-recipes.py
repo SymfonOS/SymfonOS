@@ -692,11 +692,12 @@ pkg("accountsservice", "23.13.9", "https://www.freedesktop.org/software/accounts
     # tests/ bindet das Hilfsprojekt mocklibc ein, das mit GCC 15 nicht kompiliert
     pre="sed -i \"/subdir('tests')/d\" meson.build",
     flags="-Dadmin_group=wheel -Dintrospection=false -Dvapi=false -Ddocbook=false -Dgtk_doc=false")
+# NetworkManager und ModemManager veröffentlichen ihre Tarballs als GitLab-Release-Dateien.
 # NetworkManager für das Desktop-Netz (WLAN über iwd, DNS über systemd-resolved); das Basissystem bleibt bei
 # systemd-networkd. Ohne PPP, Modem, OVS, Cloud-Setup und nmtui (newt).
 pkg("libndp", "1.9", "http://libndp.org/files/libndp-1.9.tar.gz", "IPv6-Neighbor-Discovery (NetworkManager)",
     "LGPL-2.1-or-later", ["glibc"], style="autotools")
-pkg("networkmanager", "1.54.0", "https://download.gnome.org/sources/NetworkManager/1.54/NetworkManager-1.54.0.tar.xz",
+pkg("networkmanager", "1.54.0", "https://gitlab.freedesktop.org/NetworkManager/NetworkManager/-/releases/1.54.0/downloads/NetworkManager-1.54.0.tar.xz",
     "Netzwerkverwaltung (NetworkManager)", "GPL-2.0-or-later AND LGPL-2.1-or-later",
     ["glib2", "dbus", "systemd", "util-linux", "libndp", "curl", "gnutls", "polkit", "libselinux", "readline", "iwd",
      "nftables"], ["meson", "python", "libxslt"], style="meson",  # xsltproc: Pflicht in meson.build
@@ -716,7 +717,7 @@ wifi.backend=iwd
 dns=systemd-resolved
 CONF''',
     provides=["NetworkManager", "so:libnm.so.0"])
-pkg("modemmanager", "1.24.2", "https://www.freedesktop.org/software/ModemManager/ModemManager-1.24.2.tar.xz",
+pkg("modemmanager", "1.24.2", "https://gitlab.freedesktop.org/mobile-broadband/ModemManager/-/releases/1.24.2/downloads/ModemManager-1.24.2.tar.xz",
     "Mobilfunkmodems (ModemManager; für plasma-nm)", "GPL-2.0-or-later AND LGPL-2.1-or-later",
     ["glib2", "libgudev", "dbus", "systemd", "polkit"], ["meson"], style="meson",
     flags="-Dmbim=false -Dqmi=false -Dqrtr=false -Dintrospection=false -Dvapi=false -Dman=false "
