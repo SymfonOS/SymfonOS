@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "symfonos-desktop-config"
-version = "1.0-1"
+version = "1.0-2"
 arch = "any"
 summary = "symfonOS-Desktop: Farbschemata, globales Design, SDDM (Wayland), PAM, Voreinstellungen"
 license = "GPL-3.0-or-later"

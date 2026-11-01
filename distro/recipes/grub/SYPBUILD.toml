@@ -1,11 +1,12 @@
 # symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
 [package]
 name = "grub"
-version = "2.12-2"
+version = "2.12-3"
 summary = "GRUB-Bootloader (BIOS und UEFI)"
 license = "GPL-3.0-or-later"
 url = "https://ftp.gnu.org/gnu/grub/"
-depends = ["glibc", "xz", "gettext", "efibootmgr", "dosfstools"]
+# freetype: grub-mkfont linkt dagegen
+depends = ["glibc", "xz", "gettext", "efibootmgr", "dosfstools", "freetype"]
 # freetype + unifont: GRUB erzeugt daraus unicode.pf2 (Pflicht für grub-mkrescue, Umlaute im Menü)
 makedepends = ["bison", "flex", "python", "freetype", "unifont"]
 backup = ["etc/default/grub"]
