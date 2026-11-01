@@ -58,6 +58,7 @@ Vollständige Logs und die Bildschirmfotos jedes Laufs liegen auf dem Branch `ci
 
 - **NetworkManager und `plasma-nm`:** Das Netzwerk läuft über systemd-networkd und iwd, WLAN wird mit `iwctl` eingerichtet.
 - **Bluetooth** (BlueZ, bluedevil).
+- **SELinux im Modus enforcing für die grafische Anmeldung:** Die Richtlinie (refpolicy) kennt für SDDM noch keinen Anmeldekontext, `pam_selinux` meldet »Unable to get valid context«. Im Standardmodus permissive ist das ohne Folgen.
 - **Druck** (CUPS), deshalb auch kein Druck-Portal in xdg-desktop-portal-kde.
 - **Spectacle** (braucht OpenCV).
 - **Webbrowser:** Firefox braucht Rust und Node.js, Falkon braucht QtWebEngine.
