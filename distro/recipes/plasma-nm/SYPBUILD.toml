@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "plasma-nm"
+version = "6.4.4-1"
+summary = "Netzwerk-Applet und Einstellungen (WLAN, VPN)"
+license = "GPL-2.0-or-later"
+url = "https://download.kde.org/stable/plasma/6.4.4/"
+depends = ["qt6-base", "networkmanager-qt", "modemmanager-qt", "kcolorscheme", "kcompletion", "kcoreaddons", "kdbusaddons", "kio", "ki18n", "knotifications", "kservice", "solid", "kwallet", "kwidgetsaddons", "kwindowsystem", "kcmutils", "ksvg", "libplasma", "kirigami", "qca", "qcoro", "prison", "networkmanager"]
+makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", "gettext"]
+
+[[source]]
+url = "https://download.kde.org/stable/plasma/6.4.4/plasma-nm-6.4.4.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "cmake"
+configure_flags = "-DKDE_INSTALL_LIBEXECDIR=lib -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF -Wno-dev"
