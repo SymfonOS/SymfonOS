@@ -35,6 +35,7 @@ tools/desktop-recipes.py --check    # weichen Rezepte vom Generator ab? (Test in
 
 - **Neue Quellen** bekommen `sha256 = "TODO"`. Die CI trägt die Summe ein (Workflow »Rezepte«), sobald die Änderung auf `main` liegt.
 - **Von Hand gepflegte Rezepte** haben keine `GENERATED`-Kopfzeile. Der Generator überschreibt sie nie.
+- **Quellen aus diesem Repository** (`path = "@/…"`, z. B. Installer, syp, Desktop-Voreinstellungen): Nach einer Änderung braucht das Paket eine neue Version, sonst bleibt das alte im Pool. `tools/local-sources.py` hält Version und Inhalt in `distro/recipes/local-sources.lock` fest; ein Test meldet geänderte Quellen bei gleicher Version.
 
 ## Live-Medium
 
