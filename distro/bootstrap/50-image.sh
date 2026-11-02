@@ -80,6 +80,8 @@ in_img "systemd-sysusers; systemd-tmpfiles --create || true
   # Desktop: NetworkManager (WLAN über iwd) statt systemd-networkd; beide dürfen nicht dieselben Schnittstellen verwalten
   net=systemd-networkd; [ -e /usr/lib/systemd/system/NetworkManager.service ] && net=NetworkManager
   systemctl enable \$net systemd-resolved systemd-timesyncd iwd
+  # networkd startet sonst über seinen Netlink-Socket trotzdem
+  if [ \$net = NetworkManager ]; then for u in systemd-networkd.service systemd-networkd.socket systemd-networkd-varlink.socket; do systemctl disable \$u >/dev/null 2>&1 || true; done; fi
   : > /etc/machine-id"
 if [[ $VARIANT == desktop ]]; then
   # Live-Benutzer meldet sich automatisch in Plasma (Wayland) an; der Installer entfernt das wieder

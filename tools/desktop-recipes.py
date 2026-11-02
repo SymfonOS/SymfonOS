@@ -1223,11 +1223,13 @@ enable upower.service
 # Desktop-Netz über NetworkManager (WLAN über iwd); systemd-networkd darf dieselben Schnittstellen nicht verwalten
 enable NetworkManager.service
 disable systemd-networkd.service
+disable systemd-networkd.socket
+disable systemd-networkd-varlink.socket
 disable systemd-networkd-wait-online.service
 PRE
 install -d "$DESTDIR/etc/systemd/system"
 ln -s /usr/lib/systemd/system/graphical.target "$DESTDIR/etc/systemd/system/default.target"
-''', backup=["etc/xdg/kdeglobals", "etc/xdg/kwinrc", "etc/pam.d/kde"], rel=4)
+''', backup=["etc/xdg/kdeglobals", "etc/xdg/kwinrc", "etc/pam.d/kde"], rel=5)
 
 DESKTOP = ["symfonos-base", "symfonos-desktop-config", "plasma-desktop", "plasma-workspace", "kwin", "xwayland",
            "sddm", "sddm-kcm", "breeze", "breeze-icons", "qqc2-breeze-style", "qqc2-desktop-style",

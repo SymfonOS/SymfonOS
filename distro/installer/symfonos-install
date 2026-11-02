@@ -170,6 +170,8 @@ in_target "systemd-machine-id-setup >/dev/null; systemd-sysusers; systemd-tmpfil
   # Desktop: NetworkManager (WLAN über iwd) statt systemd-networkd; beide dürfen nicht dieselben Schnittstellen verwalten
   net=systemd-networkd; [ -e /usr/lib/systemd/system/NetworkManager.service ] && net=NetworkManager
   systemctl enable \$net systemd-resolved systemd-timesyncd nftables auditd symfonos-security-check.timer >/dev/null
+  # networkd startet sonst über seinen Netlink-Socket trotzdem
+  if [ \$net = NetworkManager ]; then for u in systemd-networkd.service systemd-networkd.socket systemd-networkd-varlink.socket; do systemctl disable \$u >/dev/null 2>&1 || true; done; fi
   for u in iwd.service fstrim.timer; do systemctl enable \"\$u\" >/dev/null 2>&1 || echo \"Hinweis: \$u nicht vorhanden\"; done
   # SELinux: Anmeldungen wie bei Fedora unconfined_u zuordnen (Desktop, QEMU/KVM, Browser-Sandboxen)
   if command -v semanage >/dev/null; then semanage login -m -s unconfined_u -r s0-s0:c0.c1023 __default__ 2>/dev/null || true; fi"
