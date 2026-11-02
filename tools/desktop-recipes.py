@@ -585,6 +585,10 @@ pkg("lua", "5.4.8", ["https://www.lua.org/ftp/lua-5.4.8.tar.gz", nox(BLFS_PATCH 
             "install -Dm644 /dev/stdin \"$DESTDIR/usr/lib/pkgconfig/lua.pc\" <<'LUAPC'\n" + LUA_PC + "\nLUAPC\n"
             'ln -s lua.pc "$DESTDIR/usr/lib/pkgconfig/lua5.4.pc"')
 # GStreamer nur als Bibliothek (xdg-desktop-portal prüft Töne mit gstreamer-pbutils); keine optionalen Plugins
+# Bluetooth: BlueZ-Daemon und libbluetooth (bluez.pc für PipeWire); ohne Mesh, MIDI und Handbuchseiten
+pkg("bluez", "5.83", "https://www.kernel.org/pub/linux/bluetooth/bluez-5.83.tar.xz", "Bluetooth (BlueZ)",
+    "GPL-2.0-or-later AND LGPL-2.1-or-later", ["glib2", "dbus", "systemd", "libical", "readline"], style="autotools",
+    flags="--disable-manpages --enable-library", provides=["so:libbluetooth.so.3"])
 GST = "1.26.5"
 pkg("gstreamer", GST, f"https://gstreamer.freedesktop.org/src/gstreamer/gstreamer-{GST}.tar.xz",
     "Multimedia-Framework (GStreamer)", "LGPL-2.1-or-later", ["glib2"], ["meson", "flex", "bison"], style="meson",
@@ -598,9 +602,13 @@ pkg("gst-plugins-base", GST, f"https://gstreamer.freedesktop.org/src/gst-plugins
 pkg("pipewire", "1.4.7", {"url": "https://gitlab.freedesktop.org/pipewire/pipewire/-/archive/1.4.7/pipewire-1.4.7.tar.bz2"},
     "Audio- und Videoserver (PipeWire, mit Pulse- und JACK-Ersatz)", "MIT",
     ["alsa-lib", "dbus", "systemd", "libsndfile", "opus", "sbc", "libcanberra", "readline", "ncurses", "libusb",
-     "openssl", "libselinux"], ["meson", "python-docutils"], style="meson",
+     "openssl", "libselinux", "bluez"], ["meson", "python-docutils"], style="meson",
     flags="'-Dsession-managers=[]' -Dtests=disabled -Dexamples=disabled -Ddocs=disabled -Dman=disabled "
-          "-Dbluez5=disabled -Dgstreamer=disabled -Dlibcamera=disabled -Droc=disabled -Dlv2=disabled "
+          # Bluetooth-Audio mit SBC und Opus; AAC, aptX, LDAC und LC3 bräuchten weitere Bibliotheken
+          "-Dbluez5=enabled -Dbluez5-codec-opus=enabled -Dbluez5-codec-aac=disabled -Dbluez5-codec-aptx=disabled "
+          "-Dbluez5-codec-ldac=disabled -Dbluez5-codec-lc3=disabled -Dbluez5-codec-lc3plus=disabled "
+          "-Dbluez5-backend-ofono=disabled -Dbluez5-backend-hsphfpd=disabled -Dbluez5-backend-native-mm=disabled "
+          "-Dgstreamer=disabled -Dlibcamera=disabled -Droc=disabled -Dlv2=disabled "
           "-Dlibffado=disabled -Djack=disabled -Dpipewire-jack=enabled -Djack-devel=true "
           "-Dpipewire-alsa=enabled -Dlibpulse=disabled -Davahi=disabled -Dx11=disabled -Dx11-xfixes=disabled "
           "-Dsdl2=disabled -Dvulkan=disabled -Dselinux=enabled -Decho-cancel-webrtc=disabled",
@@ -610,7 +618,7 @@ ln -s /usr/share/alsa/alsa.conf.d/50-pipewire.conf "$DESTDIR/etc/alsa/conf.d/50-
 ln -s /usr/share/alsa/alsa.conf.d/99-pipewire-default.conf "$DESTDIR/etc/alsa/conf.d/99-pipewire-default.conf"
 printf 'enable pipewire.socket\nenable pipewire-pulse.socket\nenable wireplumber.service\n' \
   > "$DESTDIR/usr/lib/systemd/user-preset/50-pipewire.preset"''',
-    provides=["pulseaudio-server", "jack", "so:libpipewire-0.3.so.0", "so:libjack.so.0"])
+    provides=["pulseaudio-server", "jack", "so:libpipewire-0.3.so.0", "so:libjack.so.0"], rel=2)
 pkg("wireplumber", "0.5.10", {"url": "https://gitlab.freedesktop.org/pipewire/wireplumber/-/archive/0.5.10/wireplumber-0.5.10.tar.bz2"},
     "Sitzungsverwaltung für PipeWire", "MIT", ["pipewire", "glib2", "systemd", "lua"], ["meson"], style="meson",
     flags="-Dsystem-lua=true -Dintrospection=disabled -Ddoc=disabled -Dtests=false")
@@ -847,6 +855,7 @@ kf("kwindowsystem", [QD, QW, "libx11", "libxfixes", "xcb-util-keysyms"], "Fenste
    mk=["plasma-wayland-protocols", "wayland-protocols"])
 kf("solid", [QD, "systemd", "upower", "util-linux"], "Hardware-Erkennung", mk=["flex", "bison"])
 kf("networkmanager-qt", ["networkmanager"], "Qt-Anbindung an NetworkManager")
+kf("bluez-qt", [QD], "Qt-Anbindung an BlueZ")
 kf("modemmanager-qt", ["modemmanager"], "Qt-Anbindung an ModemManager")
 kf("sonnet", [QD, "hunspell"], "Rechtschreibprüfung")
 kf("threadweaver", [], "Nebenläufigkeit")
@@ -1038,6 +1047,10 @@ pl("plasma-nm", ["networkmanager-qt", "modemmanager-qt", "kcolorscheme", "kcompl
                  "kwindowsystem", "kcmutils", "ksvg", "libplasma", "kirigami", "qca", "qcoro", "prison",
                  "networkmanager"],
    "Netzwerk-Applet und Einstellungen (WLAN, VPN)")
+pl("bluedevil", ["bluez-qt", "bluez", "kcoreaddons", "kdbusaddons", "ki18n", "kjobwidgets", "kcmutils", "kio",
+                 "knotifications", "kservice", "ksvg", "kwidgetsaddons", "kwindowsystem", "libplasma", "kirigami",
+                 "shared-mime-info"],
+   "Bluetooth-Applet und Einstellungen", mk=["kdoctools"])
 pl("polkit-kde-agent-1", ["polkit-qt6", "kcoreaddons", "kcrash", "kdbusaddons", "ki18n", "kwidgetsaddons",
                           "kwindowsystem", "kiconthemes", "knotifications", QD], "Passwortabfrage für polkit")
 pl("powerdevil", ["plasma-workspace", "kauth", "kcmutils", "kidletime", "knotifyconfig", "solid", "libkscreen", "upower",
@@ -1220,6 +1233,7 @@ install -Dm644 /dev/stdin "$DESTDIR/usr/lib/systemd/system-preset/40-symfonos-de
 enable sddm.service
 enable accounts-daemon.service
 enable upower.service
+enable bluetooth.service
 # Desktop-Netz über NetworkManager (WLAN über iwd); systemd-networkd darf dieselben Schnittstellen nicht verwalten
 enable NetworkManager.service
 disable systemd-networkd.service
@@ -1229,7 +1243,7 @@ disable systemd-networkd-wait-online.service
 PRE
 install -d "$DESTDIR/etc/systemd/system"
 ln -s /usr/lib/systemd/system/graphical.target "$DESTDIR/etc/systemd/system/default.target"
-''', backup=["etc/xdg/kdeglobals", "etc/xdg/kwinrc", "etc/pam.d/kde"], rel=5)
+''', backup=["etc/xdg/kdeglobals", "etc/xdg/kwinrc", "etc/pam.d/kde"], rel=6)
 
 DESKTOP = ["symfonos-base", "symfonos-desktop-config", "plasma-desktop", "plasma-workspace", "kwin", "xwayland",
            "sddm", "sddm-kcm", "breeze", "breeze-icons", "qqc2-breeze-style", "qqc2-desktop-style",
@@ -1238,11 +1252,11 @@ DESKTOP = ["symfonos-base", "symfonos-desktop-config", "plasma-desktop", "plasma
            "polkit-kde-agent-1", "plasma-systemmonitor", "ksystemstats", "kdeplasma-addons", "ocean-sound-theme",
            "kactivitymanagerd", "kglobalacceld", "kimageformats", "qt6-imageformats", "qt6-translations",
            "qt6-wayland", "mesa", "vulkan-loader", "libva", "pipewire", "wireplumber", "alsa-utils", "ffmpeg",
-           "xdg-user-dirs", "networkmanager", "plasma-nm", "konsole", "dolphin", "kate", "ark", "gwenview", "kcalc", "kcharselect",
+           "xdg-user-dirs", "networkmanager", "plasma-nm", "bluez", "bluedevil", "konsole", "dolphin", "kate", "ark", "gwenview", "kcalc", "kcharselect",
            "inter-font", "jetbrains-mono-font", "dejavu-fonts", "noto-color-emoji", "hunspell", "upower",
            "accountsservice", "polkit"]
 pkg("symfonos-desktop", "2025.10", [], "symfonOS-Desktop (KDE Plasma 6, Wayland, PipeWire)", "GPL-3.0-or-later",
-    DESKTOP, arch="any", style="meta", rel=2)
+    DESKTOP, arch="any", style="meta", rel=3)
 
 # ---------------------------------------------------------------------------------------------------
 # Rezepte schreiben
