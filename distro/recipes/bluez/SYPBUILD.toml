@@ -11,7 +11,7 @@ provides = ["so:libbluetooth.so.3"]
 
 [[source]]
 url = "https://www.kernel.org/pub/linux/bluetooth/bluez-5.83.tar.xz"
-sha256 = "TODO"
+sha256 = "108522d909d220581399bfec93daab62035539ceef3dda3e79970785c63bd24c"
 
 [build]
 style = "autotools"
