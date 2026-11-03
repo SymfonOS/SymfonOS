@@ -408,11 +408,12 @@ int syp_extract(const sypfile *f, const char *dest) {
                     set_error("Entpacken %s: %s", name, archive_error_string(a));
                     rc = -1;
                 }
-                fchmod(fd, mode);
+                /* erst chown, dann chmod: chown löscht unter Linux auch für root setuid/setgid */
                 if (geteuid() == 0 && fchown(fd, archive_entry_uid(e), archive_entry_gid(e))) {
                     set_error("chown %s: %s", name, strerror(errno));
                     rc = -1;
                 }
+                fchmod(fd, mode);
                 close(fd);
             }
         }
