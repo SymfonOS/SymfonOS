@@ -12,7 +12,7 @@ backup = ["etc/libblockdev/3/conf.d/00-default.cfg"]
 
 [[source]]
 url = "https://github.com/storaged-project/libblockdev/releases/download/3.3.1/libblockdev-3.3.1.tar.gz"
-sha256 = "TODO"
+sha256 = "a2e2e448a19d420480b8cce5e0752197482a65cb62a9ed55d88b237da36600d1"
 
 [build]
 style = "autotools"

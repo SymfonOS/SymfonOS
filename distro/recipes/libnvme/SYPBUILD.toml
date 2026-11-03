@@ -11,7 +11,7 @@ makedepends = ["meson"]
 
 [[source]]
 url = "https://github.com/linux-nvme/libnvme/archive/v1.15/libnvme-1.15.tar.gz"
-sha256 = "TODO"
+sha256 = "c21cd9379390bdc52c9d9569a241274f8115fc247b76a5d922d639f48c8174a2"
 filename = "libnvme-1.15.tar.gz"
 
 [build]
