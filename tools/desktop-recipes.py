@@ -841,7 +841,8 @@ pkg("libppd", "2.1.1", "https://github.com/OpenPrinting/libppd/releases/download
     "PPD-Bibliothek (OpenPrinting)", "Apache-2.0", ["libcupsfilters", "cups", "zlib", "ghostscript"],
     style="autotools",
     flags="--disable-static --disable-pdftops --with-pdftops=gs --disable-pdftocairo --disable-acroread "
-          "--disable-mutool --with-gs-path=/usr/bin/gs --with-ippfind-path=/usr/bin/ippfind --enable-ppdc-utils")
+          "--disable-mutool --with-gs-path=/usr/bin/gs --with-ippfind-path=/usr/bin/ippfind --disable-ppdc-utils",
+    rel=2)  # ppdc, ppdhtml, ppdi, ppdmerge, ppdpo liefert schon CUPS 2.4
 pkg("cups-filters", "2.0.1", "https://github.com/OpenPrinting/cups-filters/releases/download/2.0.1/cups-filters-2.0.1.tar.xz",
     "Druckfilter für CUPS (PDF, Raster, driverlos)", "Apache-2.0", ["libcupsfilters", "libppd", "cups", "ghostscript"],
     style="autotools",

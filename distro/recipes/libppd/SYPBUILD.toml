@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "libppd"
-version = "2.1.1-1"
+version = "2.1.1-2"
 summary = "PPD-Bibliothek (OpenPrinting)"
 license = "Apache-2.0"
 url = "https://github.com/OpenPrinting/libppd/releases/download/2.1.1/"
@@ -14,4 +14,4 @@ sha256 = "3fa341cc03964046d2bf6b161d80c1b4b2e20609f38d860bcaa11cb70c1285e4"
 
 [build]
 style = "autotools"
-configure_flags = "--disable-static --disable-pdftops --with-pdftops=gs --disable-pdftocairo --disable-acroread --disable-mutool --with-gs-path=/usr/bin/gs --with-ippfind-path=/usr/bin/ippfind --enable-ppdc-utils"
+configure_flags = "--disable-static --disable-pdftops --with-pdftops=gs --disable-pdftocairo --disable-acroread --disable-mutool --with-gs-path=/usr/bin/gs --with-ippfind-path=/usr/bin/ippfind --disable-ppdc-utils"
