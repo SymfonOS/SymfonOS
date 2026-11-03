@@ -742,7 +742,8 @@ CONF''',
 pkg("libcap-ng", "0.8.5", "https://people.redhat.com/sgrubb/libcap-ng/libcap-ng-0.8.5.tar.gz",
     "POSIX-Capabilities (OpenVPN)", "LGPL-2.1-or-later", ["glibc"], style="autotools",
     flags="--disable-static --without-python3")
-pkg("openvpn", "2.6.14", "https://github.com/OpenVPN/openvpn/releases/download/v2.6.14/openvpn-2.6.14.tar.gz",
+# ab 2.6.15 verträgt sich die mitgelieferte DCO-Schnittstelle mit den Kernel-Headern ab 6.16 (ovpn)
+pkg("openvpn", "2.6.16", "https://github.com/OpenVPN/openvpn/releases/download/v2.6.16/openvpn-2.6.16.tar.gz",
     "VPN (OpenVPN)", "GPL-2.0-only WITH openvpn-openssl-exception", ["openssl", "lzo", "lz4", "libcap-ng", "libnl",
                                                                     "systemd", "linux-pam"],
     ["python-docutils"], style="autotools",
