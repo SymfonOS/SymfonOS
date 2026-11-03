@@ -738,6 +738,22 @@ wifi.backend=iwd
 dns=systemd-resolved
 CONF''',
     provides=["NetworkManager", "so:libnm.so.0"])
+# OpenVPN für NetworkManager (Oberfläche bringt plasma-nm mit); WireGuard kann NetworkManager selbst
+pkg("libcap-ng", "0.8.5", "https://people.redhat.com/sgrubb/libcap-ng/libcap-ng-0.8.5.tar.gz",
+    "POSIX-Capabilities (OpenVPN)", "LGPL-2.1-or-later", ["glibc"], style="autotools",
+    flags="--disable-static --without-python3")
+pkg("openvpn", "2.6.14", "https://github.com/OpenVPN/openvpn/releases/download/v2.6.14/openvpn-2.6.14.tar.gz",
+    "VPN (OpenVPN)", "GPL-2.0-only WITH openvpn-openssl-exception", ["openssl", "lzo", "lz4", "libcap-ng", "libnl",
+                                                                    "systemd", "linux-pam"],
+    ["python-docutils"], style="autotools",
+    flags="--enable-systemd --enable-x509-alt-username --disable-plugin-auth-pam --with-crypto-library=openssl")
+pkg("networkmanager-openvpn", "1.12.0",
+    "https://download.gnome.org/sources/NetworkManager-openvpn/1.12/NetworkManager-openvpn-1.12.0.tar.xz",
+    "OpenVPN-Verbindungen in NetworkManager", "GPL-2.0-or-later", ["networkmanager", "openvpn", "glib2"],
+    ["gettext", "libxml2"], style="autotools", flags="--disable-static --without-gnome --without-gtk4",
+    post='''install -Dm644 /dev/stdin "$DESTDIR/usr/lib/sysusers.d/nm-openvpn.conf" <<'SYS'
+u nm-openvpn - "NetworkManager OpenVPN" /var/lib/openvpn
+SYS''')
 # ModemManager veröffentlicht keine Tarballs mehr, nur das Archiv des Git-Tags
 pkg("modemmanager", "1.24.2", {"url": "https://gitlab.freedesktop.org/mobile-broadband/ModemManager/-/archive/1.24.2/ModemManager-1.24.2.tar.gz"},
     "Mobilfunkmodems (ModemManager; für plasma-nm)", "GPL-2.0-or-later AND LGPL-2.1-or-later",
@@ -1379,11 +1395,11 @@ DESKTOP = ["symfonos-base", "symfonos-desktop-config", "plasma-desktop", "plasma
            "polkit-kde-agent-1", "plasma-systemmonitor", "ksystemstats", "kdeplasma-addons", "ocean-sound-theme",
            "kactivitymanagerd", "kglobalacceld", "kimageformats", "qt6-imageformats", "qt6-translations",
            "qt6-wayland", "mesa", "vulkan-loader", "libva", "pipewire", "wireplumber", "alsa-utils", "ffmpeg",
-           "xdg-user-dirs", "networkmanager", "plasma-nm", "bluez", "bluedevil", "udisks2", "cups", "cups-filters", "nss-mdns", "print-manager", "konsole", "dolphin", "kate", "ark", "gwenview", "spectacle", "kcalc", "kcharselect",
+           "xdg-user-dirs", "networkmanager", "networkmanager-openvpn", "plasma-nm", "bluez", "bluedevil", "udisks2", "cups", "cups-filters", "nss-mdns", "print-manager", "konsole", "dolphin", "kate", "ark", "gwenview", "spectacle", "kcalc", "kcharselect",
            "inter-font", "jetbrains-mono-font", "dejavu-fonts", "noto-color-emoji", "hunspell", "upower",
            "accountsservice", "polkit"]
 pkg("symfonos-desktop", "2025.10", [], "symfonOS-Desktop (KDE Plasma 6, Wayland, PipeWire)", "GPL-3.0-or-later",
-    DESKTOP, arch="any", style="meta", rel=7)
+    DESKTOP, arch="any", style="meta", rel=8)
 
 # ---------------------------------------------------------------------------------------------------
 # Rezepte schreiben
