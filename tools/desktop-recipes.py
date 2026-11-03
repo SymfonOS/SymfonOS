@@ -795,6 +795,10 @@ pkg("avahi", "0.8", "https://github.com/avahi/avahi/releases/download/v0.8/avahi
     post='''install -Dm644 /dev/stdin "$DESTDIR/usr/lib/sysusers.d/avahi.conf" <<'SYS'
 u avahi - "Avahi mDNS/DNS-SD" /run/avahi-daemon
 SYS''', backup=["etc/avahi/avahi-daemon.conf"], rel=2)
+# Namen wie drucker.local über Avahi auflösen (nsswitch: mdns_minimal vor resolve; ohne das Modul übersprungen)
+pkg("nss-mdns", "0.15.1", "https://github.com/lathiat/nss-mdns/releases/download/v0.15.1/nss-mdns-0.15.1.tar.gz",
+    "mDNS-Namensauflösung (.local) über Avahi", "LGPL-2.1-or-later", ["glibc", "avahi"], style="autotools",
+    flags="--disable-tests")
 pkg("cups", "2.4.14", "https://github.com/OpenPrinting/cups/releases/download/v2.4.14/cups-2.4.14-source.tar.gz",
     "Drucksystem (CUPS)", "Apache-2.0", ["gnutls", "dbus", "avahi", "linux-pam", "libusb", "systemd", "zlib", "acl"],
     style="autotools", dir="cups-2.4.14",
@@ -1375,11 +1379,11 @@ DESKTOP = ["symfonos-base", "symfonos-desktop-config", "plasma-desktop", "plasma
            "polkit-kde-agent-1", "plasma-systemmonitor", "ksystemstats", "kdeplasma-addons", "ocean-sound-theme",
            "kactivitymanagerd", "kglobalacceld", "kimageformats", "qt6-imageformats", "qt6-translations",
            "qt6-wayland", "mesa", "vulkan-loader", "libva", "pipewire", "wireplumber", "alsa-utils", "ffmpeg",
-           "xdg-user-dirs", "networkmanager", "plasma-nm", "bluez", "bluedevil", "udisks2", "cups", "cups-filters", "print-manager", "konsole", "dolphin", "kate", "ark", "gwenview", "spectacle", "kcalc", "kcharselect",
+           "xdg-user-dirs", "networkmanager", "plasma-nm", "bluez", "bluedevil", "udisks2", "cups", "cups-filters", "nss-mdns", "print-manager", "konsole", "dolphin", "kate", "ark", "gwenview", "spectacle", "kcalc", "kcharselect",
            "inter-font", "jetbrains-mono-font", "dejavu-fonts", "noto-color-emoji", "hunspell", "upower",
            "accountsservice", "polkit"]
 pkg("symfonos-desktop", "2025.10", [], "symfonOS-Desktop (KDE Plasma 6, Wayland, PipeWire)", "GPL-3.0-or-later",
-    DESKTOP, arch="any", style="meta", rel=6)
+    DESKTOP, arch="any", style="meta", rel=7)
 
 # ---------------------------------------------------------------------------------------------------
 # Rezepte schreiben

@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "nss-mdns"
+version = "0.15.1-1"
+summary = "mDNS-Namensauflösung (.local) über Avahi"
+license = "LGPL-2.1-or-later"
+url = "https://github.com/lathiat/nss-mdns/releases/download/v0.15.1/"
+depends = ["glibc", "avahi"]
+
+[[source]]
+url = "https://github.com/lathiat/nss-mdns/releases/download/v0.15.1/nss-mdns-0.15.1.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--disable-tests"
