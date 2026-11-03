@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "poppler"
+version = "25.08.0-1"
+summary = "PDF-Bibliothek (Poppler)"
+license = "GPL-2.0-or-later"
+url = "https://poppler.freedesktop.org/"
+depends = ["fontconfig", "freetype", "libjpeg-turbo", "libpng", "libtiff", "openjpeg", "lcms2", "curl", "zlib", "qt6-base", "poppler-data"]
+makedepends = ["cmake", "ninja", "pkgconf"]
+
+[[source]]
+url = "https://poppler.freedesktop.org/poppler-25.08.0.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "cmake"
+configure_flags = "-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_LIBDIR=lib -DENABLE_QT5=OFF -DENABLE_QT6=ON -DENABLE_GLIB=OFF -DENABLE_GOBJECT_INTROSPECTION=OFF -DENABLE_BOOST=OFF -DENABLE_NSS3=OFF -DENABLE_GPGME=OFF -DENABLE_LIBCURL=ON -DENABLE_LCMS=ON -DENABLE_LIBOPENJPEG=openjpeg2 -DENABLE_DCTDECODER=libjpeg -DENABLE_UNSTABLE_API_ABI_HEADERS=ON -DBUILD_GTK_TESTS=OFF -DBUILD_QT5_TESTS=OFF -DBUILD_QT6_TESTS=OFF -DBUILD_CPP_TESTS=OFF -DBUILD_MANUAL_TESTS=OFF -DENABLE_UTILS=ON"
