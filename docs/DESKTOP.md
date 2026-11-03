@@ -53,6 +53,7 @@ tools/desktop-recipes.py --check    # weichen Rezepte vom Generator ab? (Test in
 |---|---|
 | `tools/desktop-test.sh` | ISO bootet in QEMU mit virtio-GPU bis `graphical.target`, KWin (Wayland) und `plasmashell` laufen, kein Absturz; Bildschirmfotos über den QEMU-Monitor |
 | `tools/install-test.sh` | Installation aus dem Desktop-ISO auf eine virtuelle Platte, das installierte System startet bis zur Anmeldung |
+| `tools/avc-summary.py` | Fasst die SELinux-Verweigerungen des Desktop-Tests je Regel zusammen (`avc.txt` auf `ci-diag`); ein zweiter, informativer Desktop-Test bootet mit `enforcing=1` (`desktop-test/enforcing/`) |
 | `tools/check-libs.py` | Beim Bau des Live-Systems: Jede ELF-Datei findet ihre Bibliotheken (fehlende Laufzeitabhängigkeiten erscheinen als Warnung) |
 
 Die CI veröffentlicht das ISO erst, wenn beide Tests bestanden sind, als Release `desktop-nightly`.
@@ -60,7 +61,7 @@ Vollständige Logs und die Bildschirmfotos jedes Laufs liegen auf dem Branch `ci
 
 ## Noch nicht enthalten
 
-- **SELinux im Modus enforcing für die grafische Anmeldung:** Die Richtlinie (refpolicy) kennt für SDDM noch keinen Anmeldekontext, `pam_selinux` meldet »Unable to get valid context«. Im Standardmodus permissive ist das ohne Folgen.
+- **SELinux im Modus enforcing für die grafische Anmeldung:** Im Live-System fehlten die Labels (Kernel ohne `CONFIG_SQUASHFS_XATTR`), deshalb lief dort alles als `kernel_t` und `pam_selinux` fand keinen Anmeldekontext. Mit Labels laufen SDDM als `xdm_t` und die Sitzung als `unconfined_t`; die verbleibenden Verweigerungen sammelt der Desktop-Test, daraus entsteht ein eigenes Richtlinienmodul. Bis dahin bleibt der Standardmodus permissive.
 - **Weitere VPN-Erweiterungen und PPP** für NetworkManager (OpenConnect, L2TP/IPsec, DSL).
 - **Webbrowser:** Firefox braucht Rust und Node.js, Falkon braucht QtWebEngine.
 - **Kreativprogramme** (Krita, Blender, Ardour …) und PySide6 für die symfonOS-Apps folgen als nächste Stufe.

@@ -2,6 +2,7 @@
 # Grafischer Boot-Test des Desktop-ISO (wie openQA bei Fedora, vereinfacht): bootet in QEMU mit
 # virtio-GPU, wartet auf SDDM, KWin und die Plasma-Sitzung des Live-Benutzers und hält Bildschirmfotos fest.
 #   tools/desktop-test.sh out/symfonos-desktop-*.iso [ausgabeverzeichnis]
+#   APPEND="enforcing=1" …     zusätzliche Kernel-Parameter (z. B. SELinux erzwingen)
 # Erfolg: graphical.target erreicht, kwin_wayland und plasmashell laufen, kein Absturz (Coredump/Segfault).
 set -euo pipefail
 ISO=$(realpath "$1")
@@ -18,7 +19,7 @@ accel=tcg; [[ -w /dev/kvm ]] && accel=kvm
 echo ":: Boote $ISO grafisch (Label $label, $accel)"
 timeout "${TIMEOUT:-1500}" qemu-system-x86_64 -machine q35,accel=$accel -m 6144 -smp 4 \
   -cdrom "$ISO" -kernel "$T/vmlinuz" -initrd "$T/initrd" \
-  -append "root=live:CDLABEL=$label rd.live.image console=ttyS0,115200 systemd.journald.forward_to_console=1" \
+  -append "root=live:CDLABEL=$label rd.live.image console=ttyS0,115200 systemd.journald.forward_to_console=1 ${APPEND:-}" \
   -device virtio-vga -display none -device virtio-tablet-pci -device virtio-keyboard-pci \
   -audiodev none,id=snd0 -device ich9-intel-hda -device hda-output,audiodev=snd0 \
   -serial file:"$T/serial.log" -monitor unix:"$T/mon.sock",server,nowait -no-reboot &
@@ -55,6 +56,9 @@ kill "$qpid" 2>/dev/null || true
 qpid=""
 clean > "$OUT/serial.log"
 log=$(cat "$OUT/serial.log")
+# SELinux-Verweigerungen je Regel (vollständig, wenn APPEND auditd maskiert und das printk-Ratenlimit abschaltet)
+python3 "$(dirname "$0")/avc-summary.py" "$OUT/serial.log" > "$OUT/avc.txt" 2>&1 || true
+echo ":: SELinux: $(tail -1 "$OUT/avc.txt")"
 crashes=$(grep -aE "segfault at|general protection fault|Oops|BUG:|dumped core|Process [0-9]+ \(.*\) of user [0-9]+ dumped core" <<<"$log" | awk '!s[$0]++' | head -15 || true)
 fails=$(grep -a "\[FAILED\]" <<<"$log" | awk '!s[$0]++' | head -15 || true)
 echo ":: graphical=$graphical session=$session"
