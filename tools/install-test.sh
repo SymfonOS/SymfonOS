@@ -70,7 +70,7 @@ accel=tcg; [[ -w /dev/kvm ]] && accel=kvm
 timeout "${TIMEOUT:-900}" qemu-system-x86_64 -machine q35,accel=$accel -m 4096 -smp 2 \
   -drive file="$W/disk.img",format=raw,if=virtio \
   -kernel "$W/vmlinuz" -initrd "$W/initrd" \
-  -append "root=UUID=$RUUID rootflags=subvol=@ rw console=ttyS0,115200 systemd.journald.forward_to_console=1" \
+  -append "root=UUID=$RUUID rootflags=subvol=@ rw console=ttyS0,115200 systemd.journald.forward_to_console=1 ${APPEND:-}" \
   -nographic -no-reboot -serial file:"$W/serial.log" -monitor none &
 qpid=$!
 ok=0
@@ -85,6 +85,9 @@ kill "$qpid" 2>/dev/null || true
 wait "$qpid" 2>/dev/null || true
 clean=$(sed 's/\x1b\[[0-9;]*m//g' "$W/serial.log")
 cp "$W/serial.log" "${LOG:-install-serial.log}"
+L=${LOG:-install-serial.log}
+python3 "$(dirname "$0")/avc-summary.py" "$L" > "${L%.log}-avc.txt" 2>&1 || true
+log "SELinux: $(tail -1 "${L%.log}-avc.txt")"
 fails=$(echo "$clean" | grep -a "\[FAILED\]" || true)
 crashes=$(echo "$clean" | grep -aE "segfault at|general protection fault|Oops|BUG:" || true)
 if ((ok)) && [[ -z $fails && -z $crashes ]]; then
