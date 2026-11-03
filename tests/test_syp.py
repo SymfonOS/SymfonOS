@@ -471,6 +471,10 @@ def test_hardening_file_modes(tmp_path):
     with tarfile.open(tmp_path / "ok/m-1-1-any.syp") as tf:
         h = json.loads(tf.extractfile(".SYPINFO.json").read())["origin"]["hardening"]
     assert h["setuid"] == ["/usr/bin/helper (setuid)"] and h["world_writable"] == 0
+    if os.geteuid() == 0:  # chown beim Installieren darf das setuid-Bit nicht löschen (sudo, su, unix_chkpwd)
+        root = tmp_path / "root"
+        syp("-r", root, "-y", "install", "--allow-unsigned", tmp_path / "ok/m-1-1-any.syp")
+        assert (root / "usr/bin/helper").stat().st_mode & 0o7777 == 0o4755
     recipe('install -Dm666 /dev/null "$DESTDIR/etc/offen.conf"\ninstall -d -m777 "$DESTDIR/var/spool/x"')
     r = syp("build", rec / "SYPBUILD.toml", "-o", tmp_path / "bad", check=False)
     assert r.returncode == 1 and "Härtungsprüfung fehlgeschlagen (2 kritische" in r.stderr

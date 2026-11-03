@@ -233,7 +233,10 @@ static int place(txn *t, const char *src, const char *dst, const jval *e) {
         rc = symlink(jgets(e, "target", ""), tmp);
     } else if (rename(src, tmp)) {
         rc = copy_file(src, tmp); /* z. B. EXDEV über Btrfs-Subvolumes */
-        if (!rc && geteuid() == 0 && lstat(src, &st) == 0 && chown(tmp, st.st_uid, st.st_gid)) rc = -1;
+        /* chown löscht unter Linux auch für root setuid/setgid – Rechte danach erneut setzen */
+        if (!rc && geteuid() == 0 && lstat(src, &st) == 0 &&
+            (chown(tmp, st.st_uid, st.st_gid) || chmod(tmp, st.st_mode & 07777)))
+            rc = -1;
     }
     if (!rc && rename(tmp, dst)) rc = -1;
     if (rc) {

@@ -68,6 +68,13 @@ if ! libs=$(python3 -I "$REPO_ROOT/tools/check-libs.py" "$IMG"); then
   log "Warnung: Bibliotheken fehlen im Live-System"
   while read -r l; do log "  $l"; echo "::warning title=Fehlende Bibliothek ($VARIANT)::$l"; done <<<"$libs"
 fi
+# Ohne setuid gehen sudo/su, das Entsperren des Bildschirms (unix_chkpwd) und KAuth-Helfer nicht
+log "setuid/setgid: $(cd "$IMG" && find usr -xdev -type f -perm /6000 | sort | tr '\n' ' ')"
+for f in usr/bin/sudo usr/bin/su usr/bin/passwd usr/bin/unix_chkpwd usr/lib/dbus-daemon-launch-helper; do
+  if [ -e "$IMG/$f" ] && [ ! -u "$IMG/$f" ]; then
+    log "Warnung: /$f ist nicht setuid"; echo "::warning title=setuid fehlt ($VARIANT)::/$f"
+  fi
+done
 
 log "Live-Konfiguration"
 in_img() { chroot "$IMG" /usr/bin/env -i PATH=/usr/bin:/usr/sbin HOME=/root /bin/bash -euo pipefail -c "$1"; }

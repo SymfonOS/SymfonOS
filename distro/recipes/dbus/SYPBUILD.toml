@@ -1,7 +1,7 @@
 # symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
 [package]
 name = "dbus"
-version = "1.16.2-1"
+version = "1.16.2-2"
 summary = "D-Bus-Nachrichtenbus"
 license = "AFL-2.1 OR GPL-2.0-or-later"
 url = "https://dbus.freedesktop.org/releases/dbus/"
@@ -16,4 +16,13 @@ style = "meson"
 configure_flags = "-D systemd=enabled -D selinux=enabled -D libaudit=disabled -D systemd_system_unitdir=/usr/lib/systemd/system -D systemd_user_unitdir=/usr/lib/systemd/user"
 post_install = '''
 ln -sf /etc/machine-id "$DESTDIR/var/lib/dbus/machine-id" 2>/dev/null || true
+# Der Launch-Helper startet Systemdienste ohne systemd-Unit (KAuth-Helfer von powerdevil, kscreenlocker …).
+# Er muss setuid root und für messagebus ausführbar sein (4750 root:messagebus); Pakete tragen nur root:root.
+chmod 4750 "$DESTDIR/usr/lib/dbus-daemon-launch-helper"
+install -Dm644 /dev/stdin "$DESTDIR/usr/lib/tmpfiles.d/dbus-launch-helper.conf" <<'TMP'
+z /usr/lib/dbus-daemon-launch-helper 4750 root messagebus -
+TMP
 '''
+[scripts]
+post_install = "systemd-tmpfiles --create dbus-launch-helper.conf 2>/dev/null || true"
+post_upgrade = "systemd-tmpfiles --create dbus-launch-helper.conf 2>/dev/null || true"
