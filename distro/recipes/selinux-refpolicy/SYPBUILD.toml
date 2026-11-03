@@ -1,7 +1,7 @@
 # symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
 [package]
 name = "selinux-refpolicy"
-version = "2.20250213-2"
+version = "2.20250213-3"
 summary = "SELinux Reference Policy (MCS, systemd)"
 license = "GPL-2.0-only"
 url = "https://github.com/SELinuxProject/refpolicy/releases/download/RELEASE_2_20250213/"
@@ -31,9 +31,9 @@ make $T DESTDIR="$DESTDIR" install
 make $T DESTDIR="$DESTDIR" install-headers
 install -Dm644 /dev/stdin "$DESTDIR/etc/selinux/config" <<'EOF'
 # SELinux-Modus: enforcing | permissive | disabled
-# symfonOS startet mit "permissive" und protokolliert Verstöße (ausearch -m avc);
-# Umschalten: sudo symfonos-security selinux enforcing
-SELINUX=permissive
+# symfonOS erzwingt die Richtlinie (Verstöße: sudo symfonos-security selinux denials);
+# zur Fehlersuche vorübergehend: sudo symfonos-security selinux permissive
+SELINUX=enforcing
 SELINUXTYPE=refpolicy
 EOF
 '''

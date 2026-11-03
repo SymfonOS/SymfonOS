@@ -153,6 +153,8 @@ ConditionSecurity=selinux
 Type=oneshot
 ExecStart=/usr/sbin/setfiles -e /proc -e /sys -e /dev -e /run -F /etc/selinux/refpolicy/contexts/files/file_contexts /
 ExecStart=/usr/bin/rm -f /.autorelabel
+# der Installer startet ein ungelabeltes Ziel einmal permissive; danach gilt wieder enforcing
+ExecStart=/bin/sh -c 'if [ -e /.autorelabel-enforcing ]; then sed -i "s/^SELINUX=.*/SELINUX=enforcing/" /etc/selinux/config; rm -f /.autorelabel-enforcing; fi'
 ExecStart=/usr/bin/systemctl --no-block reboot
 StandardOutput=journal+console
 

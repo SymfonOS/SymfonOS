@@ -132,15 +132,17 @@ for m in run sys proc dev; do umount -l "$IMG/$m"; done
 FC=$IMG/etc/selinux/refpolicy/contexts/files/file_contexts
 if [[ -r $FC ]]; then
   log "SELinux-Kontexte setzen"
+  # Das Live-System startet im Modus enforcing: ohne Labels käme es nicht über den Start von journald hinaus
   chroot "$IMG" setfiles -F /etc/selinux/refpolicy/contexts/files/file_contexts / \
-    -e /proc -e /sys -e /dev -e /run || log "Warnung: setfiles fehlgeschlagen – Live-System läuft permissive ohne Labels"
+    -e /proc -e /sys -e /dev -e /run || { log "Fehler: setfiles fehlgeschlagen"; exit 1; }
   # Stichprobe: tragen die Dateien wirklich ein Label? (sonst erscheinen sie zur Laufzeit als unlabeled_t)
   for f in usr/bin/bash usr/lib/systemd/systemd etc/passwd; do
     lbl=$(getfattr --absolute-names -n security.selinux --only-values "$IMG/$f" 2>/dev/null | tr -d '\0')
     log "SELinux-Label /$f: ${lbl:-FEHLT}"
+    [[ -n $lbl ]] || { log "Fehler: /$f ohne SELinux-Label"; exit 1; }
   done
 else
-  log "Warnung: keine file_contexts unter $FC – Richtlinie nicht im Store"
+  log "Fehler: keine file_contexts unter $FC – Richtlinie nicht im Store"; exit 1
 fi
 
 log "SquashFS"
