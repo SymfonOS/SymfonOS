@@ -228,6 +228,19 @@ pkg("libpng", "1.6.50", ["https://downloads.sourceforge.net/libpng/libpng-1.6.50
                          nox("https://downloads.sourceforge.net/sourceforge/libpng-apng/libpng-1.6.47-apng.patch.gz")],
     "PNG-Bibliothek (mit APNG)", "libpng-2.0", ["zlib"], style="autotools",
     pre="gzip -cd ../libpng-1.6.47-apng.patch.gz | patch -p1", provides=["so:libpng16.so.16"])
+pkg("opencv", "4.12.0", {"url": "https://github.com/opencv/opencv/archive/4.12.0/opencv-4.12.0.tar.gz",
+                          "filename": "opencv-4.12.0.tar.gz"},
+    "Bildverarbeitung (OpenCV, nur core und imgproc)", "Apache-2.0", ["zlib", "gcc"], ["cmake"], style="cmake",
+    # keine Downloads beim Konfigurieren (IPP, ADE …), keine Codecs, Oberflächen oder Bindungen
+    flags="-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_LIBDIR=lib -DBUILD_LIST=core,imgproc -DBUILD_TESTS=OFF "
+          "-DBUILD_PERF_TESTS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_DOCS=OFF -DBUILD_opencv_apps=OFF -DBUILD_JAVA=OFF "
+          "-DBUILD_opencv_python3=OFF -DBUILD_ZLIB=OFF -DWITH_IPP=OFF -DWITH_ITT=OFF -DWITH_OPENCL=OFF -DWITH_CUDA=OFF "
+          "-DWITH_GTK=OFF -DWITH_QT=OFF -DWITH_FFMPEG=OFF -DWITH_GSTREAMER=OFF -DWITH_V4L=OFF -DWITH_1394=OFF "
+          "-DWITH_PROTOBUF=OFF -DWITH_ADE=OFF -DWITH_EIGEN=OFF -DWITH_LAPACK=OFF -DWITH_OPENEXR=OFF -DWITH_JPEG=OFF "
+          "-DWITH_PNG=OFF -DWITH_TIFF=OFF -DWITH_WEBP=OFF -DWITH_OPENJPEG=OFF -DWITH_JASPER=OFF -DWITH_AVIF=OFF "
+          "-DWITH_VA=OFF -DWITH_VA_INTEL=OFF -DWITH_OPENVX=OFF -DWITH_FLATBUFFERS=OFF -DWITH_TBB=OFF "
+          "-DOPENCV_GENERATE_PKGCONFIG=ON -DENABLE_PRECOMPILED_HEADERS=OFF -DOPENCV_ENABLE_NONFREE=OFF",
+    post='test -f "$DESTDIR/usr/lib/libopencv_imgproc.so"')
 pkg("libjpeg-turbo", "3.0.1", "https://downloads.sourceforge.net/libjpeg-turbo/libjpeg-turbo-3.0.1.tar.gz",
     "JPEG-Bibliothek", "IJG AND BSD-3-Clause AND Zlib", ["glibc"], ["cmake", "nasm"], style="cmake",
     flags="-DENABLE_STATIC=FALSE -DCMAKE_INSTALL_DEFAULT_LIBDIR=lib -DCMAKE_INSTALL_LIBDIR=/usr/lib -DCMAKE_SKIP_INSTALL_RPATH=ON",
@@ -1127,6 +1140,10 @@ pl("qqc2-breeze-style", ["kirigami", "kcolorscheme", "kconfig", "kguiaddons", "k
    "Breeze-Stil für Qt Quick", license="LGPL-2.1-or-later")
 pl("ksystemstats", ["libksysguard", "kcoreaddons", "ki18n", "kio", "solid", "libnl", "lm-sensors", "kdbusaddons",
                     "kcrash"], "Systemstatistik-Dienst")
+# Spectacle (Bildschirmfotos und -aufnahmen); OpenCV nur mit core und imgproc für die Anmerkungswerkzeuge
+pl("spectacle", KF_GUI + ["kguiaddons", "kstatusnotifieritem", "prison", "layer-shell-qt", "kpipewire", "opencv",
+                          "qt6-multimedia", "wayland", "libxcb", "xcb-util", "xcb-util-image", "xcb-util-cursor",
+                          "purpose"], "Bildschirmfotos", mk=["plasma-wayland-protocols", "wayland-protocols", "kdoctools"])
 pl("kdeplasma-addons", ["plasma-workspace", "libplasma", "kholidays", "knewstuff", "kunitconversion", "krunner",
                         "libqalculate", "kirigami-addons", "purpose", "icu", "qt6-5compat"],
    "Zusätzliche Plasma-Miniprogramme")
@@ -1283,11 +1300,11 @@ DESKTOP = ["symfonos-base", "symfonos-desktop-config", "plasma-desktop", "plasma
            "polkit-kde-agent-1", "plasma-systemmonitor", "ksystemstats", "kdeplasma-addons", "ocean-sound-theme",
            "kactivitymanagerd", "kglobalacceld", "kimageformats", "qt6-imageformats", "qt6-translations",
            "qt6-wayland", "mesa", "vulkan-loader", "libva", "pipewire", "wireplumber", "alsa-utils", "ffmpeg",
-           "xdg-user-dirs", "networkmanager", "plasma-nm", "bluez", "bluedevil", "udisks2", "konsole", "dolphin", "kate", "ark", "gwenview", "kcalc", "kcharselect",
+           "xdg-user-dirs", "networkmanager", "plasma-nm", "bluez", "bluedevil", "udisks2", "konsole", "dolphin", "kate", "ark", "gwenview", "spectacle", "kcalc", "kcharselect",
            "inter-font", "jetbrains-mono-font", "dejavu-fonts", "noto-color-emoji", "hunspell", "upower",
            "accountsservice", "polkit"]
 pkg("symfonos-desktop", "2025.10", [], "symfonOS-Desktop (KDE Plasma 6, Wayland, PipeWire)", "GPL-3.0-or-later",
-    DESKTOP, arch="any", style="meta", rel=4)
+    DESKTOP, arch="any", style="meta", rel=5)
 
 # ---------------------------------------------------------------------------------------------------
 # Rezepte schreiben
