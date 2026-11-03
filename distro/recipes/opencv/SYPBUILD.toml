@@ -1,0 +1,22 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "opencv"
+version = "4.12.0-1"
+summary = "Bildverarbeitung (OpenCV, nur core und imgproc)"
+license = "Apache-2.0"
+url = "https://github.com/opencv/opencv/archive/4.12.0/"
+depends = ["zlib", "gcc"]
+makedepends = ["cmake"]
+
+[[source]]
+url = "https://github.com/opencv/opencv/archive/4.12.0/opencv-4.12.0.tar.gz"
+sha256 = "TODO"
+filename = "opencv-4.12.0.tar.gz"
+
+[build]
+style = "cmake"
+configure_flags = "-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_LIBDIR=lib -DBUILD_LIST=core,imgproc -DBUILD_TESTS=OFF -DBUILD_PERF_TESTS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_DOCS=OFF -DBUILD_opencv_apps=OFF -DBUILD_JAVA=OFF -DBUILD_opencv_python3=OFF -DBUILD_ZLIB=OFF -DWITH_IPP=OFF -DWITH_ITT=OFF -DWITH_OPENCL=OFF -DWITH_CUDA=OFF -DWITH_GTK=OFF -DWITH_QT=OFF -DWITH_FFMPEG=OFF -DWITH_GSTREAMER=OFF -DWITH_V4L=OFF -DWITH_1394=OFF -DWITH_PROTOBUF=OFF -DWITH_ADE=OFF -DWITH_EIGEN=OFF -DWITH_LAPACK=OFF -DWITH_OPENEXR=OFF -DWITH_JPEG=OFF -DWITH_PNG=OFF -DWITH_TIFF=OFF -DWITH_WEBP=OFF -DWITH_OPENJPEG=OFF -DWITH_JASPER=OFF -DWITH_AVIF=OFF -DWITH_VA=OFF -DWITH_VA_INTEL=OFF -DWITH_OPENVX=OFF -DWITH_FLATBUFFERS=OFF -DWITH_TBB=OFF -DOPENCV_GENERATE_PKGCONFIG=ON -DENABLE_PRECOMPILED_HEADERS=OFF -DOPENCV_ENABLE_NONFREE=OFF"
+post_install = '''
+test -f "$DESTDIR/usr/lib/libopencv_imgproc.so"
+'''

@@ -16,7 +16,7 @@ Version für Version zur Basis und sind von den BLFS-Autoren gemeinsam getestet.
 | Audio und Video | PipeWire 1.4 mit WirePlumber als Ersatz für PulseAudio und JACK (niedrige Latenz), ALSA, FFmpeg 7.1 mit AV1, VP9, H.264, H.265, Opus, VA-API und Vulkan; GStreamer 1.26 nur als Bibliothek für die Desktop-Portale |
 | Qt | Qt 6.9.2, jedes Modul ein eigenes Paket (`qt6-base`, `qt6-declarative`, `qt6-wayland` …), Verzeichnisse wie bei Fedora und Arch |
 | KDE | KDE Frameworks 6.17, Plasma 6.4.4 (KWin nur Wayland), SDDM 0.21 mit Wayland-Anmeldebildschirm über KWin |
-| Programme | Konsole, Dolphin, Kate, Ark, Gwenview, KCalc, KCharSelect, Systemmonitor, Systemeinstellungen |
+| Programme | Konsole, Dolphin, Kate, Ark, Gwenview, Spectacle (Bildschirmfotos, Taste „Druck“), KCalc, KCharSelect, Systemmonitor, Systemeinstellungen |
 | Schriften | Inter (Oberfläche), JetBrains Mono (Terminal), DejaVu, Noto Color Emoji |
 
 Das Metapaket `symfonos-desktop` fasst alles zusammen. `symfonos-desktop-config` enthält die
@@ -61,7 +61,6 @@ Vollständige Logs und die Bildschirmfotos jedes Laufs liegen auf dem Branch `ci
 
 - **SELinux im Modus enforcing für die grafische Anmeldung:** Die Richtlinie (refpolicy) kennt für SDDM noch keinen Anmeldekontext, `pam_selinux` meldet »Unable to get valid context«. Im Standardmodus permissive ist das ohne Folgen.
 - **Druck** (CUPS), deshalb auch kein Druck-Portal in xdg-desktop-portal-kde.
-- **Spectacle** (braucht OpenCV).
 - **VPN-Erweiterungen und PPP** für NetworkManager (OpenVPN, OpenConnect, DSL); WireGuard kann NetworkManager selbst.
 - **Webbrowser:** Firefox braucht Rust und Node.js, Falkon braucht QtWebEngine.
 - **Kreativprogramme** (Krita, Blender, Ardour …) und PySide6 für die symfonOS-Apps folgen als nächste Stufe.
