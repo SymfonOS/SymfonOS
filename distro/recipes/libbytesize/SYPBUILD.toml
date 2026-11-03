@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libbytesize"
+version = "2.11-1"
+summary = "Größenangaben in Bytes (libblockdev)"
+license = "LGPL-2.1-or-later"
+url = "https://github.com/storaged-project/libbytesize/releases/download/2.11/"
+depends = ["pcre2", "gmp", "mpfr"]
+makedepends = ["python", "gettext"]
+
+[[source]]
+url = "https://github.com/storaged-project/libbytesize/releases/download/2.11/libbytesize-2.11.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--without-python3 --without-gtk-doc --without-tools"

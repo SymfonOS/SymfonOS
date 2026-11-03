@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libatasmart"
+version = "0.19-1"
+summary = "S.M.A.R.T. von ATA-Laufwerken"
+license = "LGPL-2.1-or-later"
+url = "http://0pointer.de/public/"
+depends = ["systemd"]
+
+[[source]]
+url = "http://0pointer.de/public/libatasmart-0.19.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--disable-static"

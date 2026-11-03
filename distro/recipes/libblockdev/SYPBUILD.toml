@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libblockdev"
+version = "3.3.1-1"
+summary = "Blockgeräte-Bibliothek (udisks)"
+license = "LGPL-2.1-or-later"
+url = "https://github.com/storaged-project/libblockdev/releases/download/3.3.1/"
+depends = ["glib2", "systemd", "kmod", "cryptsetup", "keyutils", "util-linux", "e2fsprogs", "libbytesize", "libnvme"]
+makedepends = ["python"]
+backup = ["etc/libblockdev/3/conf.d/00-default.cfg"]
+
+[[source]]
+url = "https://github.com/storaged-project/libblockdev/releases/download/3.3.1/libblockdev-3.3.1.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--sysconfdir=/etc --without-python3 --without-gtk-doc --disable-introspection --without-escrow --without-btrfs --without-dm --without-lvm --without-lvm_dbus --without-mpath --without-nvdimm --without-smart --without-smartmontools --without-tools --without-s390"

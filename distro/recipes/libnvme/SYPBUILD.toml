@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libnvme"
+version = "1.15-1"
+summary = "NVMe-Verwaltung (libblockdev)"
+license = "LGPL-2.1-or-later"
+url = "https://github.com/linux-nvme/libnvme/archive/v1.15/"
+depends = ["json-c", "openssl", "keyutils"]
+makedepends = ["meson"]
+
+[[source]]
+url = "https://github.com/linux-nvme/libnvme/archive/v1.15/libnvme-1.15.tar.gz"
+sha256 = "TODO"
+filename = "libnvme-1.15.tar.gz"
+
+[build]
+style = "meson"
+configure_flags = "-Dpython=disabled -Dtests=false -Dexamples=false -Ddocs=false -Dlibdbus=disabled -Dliburing=disabled"

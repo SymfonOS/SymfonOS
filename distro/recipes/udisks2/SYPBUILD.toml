@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "udisks2"
+version = "2.10.1-1"
+summary = "Laufwerksverwaltung (UDisks2)"
+license = "GPL-2.0-or-later AND LGPL-2.0-or-later"
+url = "https://github.com/storaged-project/udisks/releases/download/udisks-2.10.1/"
+depends = ["glib2", "polkit", "libgudev", "systemd", "libblockdev", "libatasmart", "util-linux", "acl", "dosfstools", "e2fsprogs"]
+makedepends = ["gettext", "libxslt"]
+backup = ["etc/udisks2/udisks2.conf", "etc/udisks2/mount_options.conf"]
+
+[[source]]
+url = "https://github.com/storaged-project/udisks/releases/download/udisks-2.10.1/udisks-2.10.1.tar.bz2"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--sysconfdir=/etc --localstatedir=/var --disable-static --disable-man --disable-gtk-doc --disable-introspection --with-systemdsystemunitdir=/usr/lib/systemd/system --with-udevdir=/usr/lib/udev"

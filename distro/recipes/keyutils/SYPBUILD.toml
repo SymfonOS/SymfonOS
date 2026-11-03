@@ -1,0 +1,24 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "keyutils"
+version = "1.6.3-1"
+summary = "Kernel-Schlüsselring (libkeyutils)"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
+url = "https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/keyutils.git/snapshot/"
+depends = ["glibc"]
+backup = ["etc/request-key.conf"]
+
+[[source]]
+url = "https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/keyutils.git/snapshot/keyutils-1.6.3.tar.gz"
+sha256 = "TODO"
+
+[build]
+build = '''
+cd "$S"
+make
+'''
+package = '''
+cd "$S"
+make NO_ARLIB=1 LIBDIR=/usr/lib USRLIBDIR=/usr/lib BINDIR=/usr/bin SBINDIR=/usr/bin DESTDIR="$DESTDIR" install
+'''
