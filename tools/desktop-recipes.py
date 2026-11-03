@@ -819,6 +819,8 @@ pkg("ghostscript", "10.05.1", "https://github.com/ArtifexSoftware/ghostpdl-downl
     # mitgelieferte Kopien durch die Systembibliotheken ersetzen (wie BLFS); lcms2mt und jbig2dec bleiben gebündelt
     build='''cd "$S"
 rm -rf freetype jpeg libpng zlib tiff
+# GCC 15 übersetzt standardmäßig als C23; stdpre.h definiert bool noch selbst
+export CFLAGS="$CFLAGS -std=gnu17"
 ./configure --prefix=/usr --disable-compile-inits --with-system-libtiff --without-x --disable-gtk --without-tesseract \\
   --without-libpaper --without-ijs
 make
@@ -828,7 +830,7 @@ make DESTDIR="$DESTDIR" install
 make DESTDIR="$DESTDIR" soinstall
 install -d "$DESTDIR/usr/include/ghostscript"
 install -m644 base/*.h "$DESTDIR/usr/include/ghostscript"
-ln -sfn ghostscript "$DESTDIR/usr/include/ps"''')
+ln -sfn ghostscript "$DESTDIR/usr/include/ps"''', rel=2)
 pkg("libcupsfilters", "2.1.1", "https://github.com/OpenPrinting/libcupsfilters/releases/download/2.1.1/libcupsfilters-2.1.1.tar.xz",
     "Druckfilter-Bibliothek (OpenPrinting)", "Apache-2.0",
     ["cups", "qpdf", "fontconfig", "freetype", "lcms2", "libjpeg-turbo", "libpng", "libtiff", "dbus", "ghostscript"],

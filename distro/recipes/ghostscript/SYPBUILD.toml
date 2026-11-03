@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "ghostscript"
-version = "10.05.1-1"
+version = "10.05.1-2"
 summary = "PostScript- und PDF-Interpreter (Rasterung für Drucker)"
 license = "AGPL-3.0-or-later"
 url = "https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs10051/"
@@ -16,6 +16,8 @@ sha256 = "22f2bdca15c28830c9715cddc5c296ea66898bfdab0b604a4e0bcfeb03af6cad"
 build = '''
 cd "$S"
 rm -rf freetype jpeg libpng zlib tiff
+# GCC 15 übersetzt standardmäßig als C23; stdpre.h definiert bool noch selbst
+export CFLAGS="$CFLAGS -std=gnu17"
 ./configure --prefix=/usr --disable-compile-inits --with-system-libtiff --without-x --disable-gtk --without-tesseract \
   --without-libpaper --without-ijs
 make
