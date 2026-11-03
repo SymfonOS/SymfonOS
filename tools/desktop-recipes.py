@@ -241,6 +241,18 @@ pkg("opencv", "4.12.0", {"url": "https://github.com/opencv/opencv/archive/4.12.0
           "-DWITH_VA=OFF -DWITH_VA_INTEL=OFF -DWITH_OPENVX=OFF -DWITH_FLATBUFFERS=OFF -DWITH_TBB=OFF "
           "-DOPENCV_GENERATE_PKGCONFIG=ON -DENABLE_PRECOMPILED_HEADERS=OFF -DOPENCV_ENABLE_NONFREE=OFF",
     post='test -f "$DESTDIR/usr/lib/libopencv_imgproc.so"')
+# Poppler: PDF-Darstellung (Okular), Qt-6- und C++-Anbindung; ohne GLib/Cairo, ohne Signaturprüfung (NSS/GPGME)
+pkg("poppler-data", "0.4.12", "https://poppler.freedesktop.org/poppler-data-0.4.12.tar.gz",
+    "Zeichensatz-Tabellen für Poppler (CJK, kyrillisch)", "BSD-3-Clause AND GPL-2.0-only", [], arch="any",
+    build=":", package='cd "$S"\nmake prefix=/usr DESTDIR="$DESTDIR" install')
+pkg("poppler", "25.08.0", "https://poppler.freedesktop.org/poppler-25.08.0.tar.xz", "PDF-Bibliothek (Poppler)",
+    "GPL-2.0-or-later", ["fontconfig", "freetype", "libjpeg-turbo", "libpng", "libtiff", "openjpeg", "lcms2", "curl",
+                         "zlib", "qt6-base", "poppler-data"], ["cmake", "ninja", "pkgconf"], style="cmake",
+    flags="-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_LIBDIR=lib -DENABLE_QT5=OFF -DENABLE_QT6=ON -DENABLE_GLIB=OFF "
+          "-DENABLE_GOBJECT_INTROSPECTION=OFF -DENABLE_BOOST=OFF -DENABLE_NSS3=OFF -DENABLE_GPGME=OFF "
+          "-DENABLE_LIBCURL=ON -DENABLE_LCMS=ON -DENABLE_LIBOPENJPEG=openjpeg2 -DENABLE_DCTDECODER=libjpeg "
+          "-DENABLE_UNSTABLE_API_ABI_HEADERS=ON -DBUILD_GTK_TESTS=OFF -DBUILD_QT5_TESTS=OFF -DBUILD_QT6_TESTS=OFF "
+          "-DBUILD_CPP_TESTS=OFF -DBUILD_MANUAL_TESTS=OFF -DENABLE_UTILS=ON")
 pkg("libjpeg-turbo", "3.0.1", "https://downloads.sourceforge.net/libjpeg-turbo/libjpeg-turbo-3.0.1.tar.gz",
     "JPEG-Bibliothek", "IJG AND BSD-3-Clause AND Zlib", ["glibc"], ["cmake", "nasm"], style="cmake",
     flags="-DENABLE_STATIC=FALSE -DCMAKE_INSTALL_DEFAULT_LIBDIR=lib -DCMAKE_INSTALL_LIBDIR=/usr/lib -DCMAKE_SKIP_INSTALL_RPATH=ON",
@@ -1315,6 +1327,12 @@ gear("kate", KF_GUI + ["ktexteditor", "kitemmodels", "knewstuff", "kuserfeedback
 gear("ark", KF_GUI + ["libarchive", "kparts", "kpty", "kfilemetadata", "libzip", "xz", "zstd"], "Archivverwaltung",
      mk=["kdoctools"])
 gear("kcalc", KF_GUI + ["gmp", "mpfr", "kguiaddons", "knotifications"], "Taschenrechner", mk=["kdoctools"])
+gear("okular", KF_GUI + ["karchive", "kbookmarks", "kcompletion", "kconfigwidgets", "threadweaver", "kparts",
+                         "kcolorscheme", "ktextwidgets", "kitemviews", "purpose", "kwallet", "plasma-activities",
+                         "phonon", "qt6-speech", "qt6-svg", "poppler", "freetype", "libtiff", "zlib"],
+     "Dokumentbetrachter (PDF, Bilder, Comics)", mk=["kdoctools"],
+     # seltene Formate (DjVu, EPub, Mobipocket, Markdown, PostScript) und EXIF-Drehung vorerst ohne
+     flags="-DFORCE_NOT_REQUIRED_DEPENDENCIES='LibSpectre;KExiv2Qt6;DjVuLibre;EPub;QMobipocket6;QMobiPocket6;Discount'")
 gear("gwenview", KF_GUI + ["exiv2", "kimageannotator", "lcms2", "baloo", "kparts", "purpose", "libtiff", "libpng",
                            "libjpeg-turbo", "plasma-activities", "kimageformats", "qt6-imageformats", "wayland",
                            "qt6-wayland", "qt6-multimedia"],
@@ -1396,11 +1414,11 @@ DESKTOP = ["symfonos-base", "symfonos-desktop-config", "plasma-desktop", "plasma
            "polkit-kde-agent-1", "plasma-systemmonitor", "ksystemstats", "kdeplasma-addons", "ocean-sound-theme",
            "kactivitymanagerd", "kglobalacceld", "kimageformats", "qt6-imageformats", "qt6-translations",
            "qt6-wayland", "mesa", "vulkan-loader", "libva", "pipewire", "wireplumber", "alsa-utils", "ffmpeg",
-           "xdg-user-dirs", "networkmanager", "networkmanager-openvpn", "plasma-nm", "bluez", "bluedevil", "udisks2", "cups", "cups-filters", "nss-mdns", "print-manager", "konsole", "dolphin", "kate", "ark", "gwenview", "spectacle", "kcalc", "kcharselect",
+           "xdg-user-dirs", "networkmanager", "networkmanager-openvpn", "plasma-nm", "bluez", "bluedevil", "udisks2", "cups", "cups-filters", "nss-mdns", "print-manager", "konsole", "dolphin", "kate", "ark", "gwenview", "okular", "spectacle", "kcalc", "kcharselect",
            "inter-font", "jetbrains-mono-font", "dejavu-fonts", "noto-color-emoji", "hunspell", "upower",
            "accountsservice", "polkit"]
 pkg("symfonos-desktop", "2025.10", [], "symfonOS-Desktop (KDE Plasma 6, Wayland, PipeWire)", "GPL-3.0-or-later",
-    DESKTOP, arch="any", style="meta", rel=8)
+    DESKTOP, arch="any", style="meta", rel=9)
 
 # ---------------------------------------------------------------------------------------------------
 # Rezepte schreiben

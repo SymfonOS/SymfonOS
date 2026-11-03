@@ -1,0 +1,20 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "poppler-data"
+version = "0.4.12-1"
+arch = "any"
+summary = "Zeichensatz-Tabellen für Poppler (CJK, kyrillisch)"
+license = "BSD-3-Clause AND GPL-2.0-only"
+url = "https://poppler.freedesktop.org/"
+
+[[source]]
+url = "https://poppler.freedesktop.org/poppler-data-0.4.12.tar.gz"
+sha256 = "TODO"
+
+[build]
+build = ":"
+package = '''
+cd "$S"
+make prefix=/usr DESTDIR="$DESTDIR" install
+'''
