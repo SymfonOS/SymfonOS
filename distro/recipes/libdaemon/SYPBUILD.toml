@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libdaemon"
+version = "0.14-1"
+summary = "Hilfsbibliothek für Dienste (Avahi)"
+license = "LGPL-2.1-or-later"
+url = "http://0pointer.de/lennart/projects/libdaemon/"
+depends = ["glibc"]
+
+[[source]]
+url = "http://0pointer.de/lennart/projects/libdaemon/libdaemon-0.14.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--disable-static --disable-lynx --disable-examples"

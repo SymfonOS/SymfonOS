@@ -777,6 +777,74 @@ pkg("udisks2", "2.10.1", "https://github.com/storaged-project/udisks/releases/do
     flags="--sysconfdir=/etc --localstatedir=/var --disable-static --disable-man --disable-gtk-doc "
           "--disable-introspection --with-systemdsystemunitdir=/usr/lib/systemd/system --with-udevdir=/usr/lib/udev",
     backup=["etc/udisks2/udisks2.conf"], rel=2)
+# Drucken: CUPS mit driverlosem Drucken (IPP Everywhere, AirPrint), Druckersuche über Avahi (mDNS/DNS-SD),
+# Filter aus cups-filters/libcupsfilters (PDF über qpdf, Rasterung über Ghostscript)
+pkg("libdaemon", "0.14", "http://0pointer.de/lennart/projects/libdaemon/libdaemon-0.14.tar.gz",
+    "Hilfsbibliothek für Dienste (Avahi)", "LGPL-2.1-or-later", ["glibc"], style="autotools",
+    flags="--disable-static --disable-lynx --disable-examples")
+pkg("avahi", "0.8", "https://github.com/avahi/avahi/releases/download/v0.8/avahi-0.8.tar.gz",
+    "mDNS/DNS-SD (Drucker und Dienste im lokalen Netz finden)", "LGPL-2.1-or-later",
+    ["glib2", "dbus", "expat", "libdaemon", "systemd"], ["gettext", "intltool", "perl-xml-parser"], style="autotools",
+    flags="--sysconfdir=/etc --localstatedir=/var --runstatedir=/run --disable-static --disable-libevent "
+          "--disable-mono --disable-monodoc --disable-python --disable-qt3 --disable-qt4 --disable-qt5 --disable-gtk "
+          "--disable-gtk3 --disable-core-docs --disable-manpages --disable-xmltoman --disable-dbm --disable-gdbm "
+          "--disable-autoipd --disable-tests --enable-compat-libdns_sd --with-distro=none "
+          "--with-systemdsystemunitdir=/usr/lib/systemd/system",
+    post='''install -Dm644 /dev/stdin "$DESTDIR/usr/lib/sysusers.d/avahi.conf" <<'SYS'
+u avahi - "Avahi mDNS/DNS-SD" /run/avahi-daemon
+SYS''', backup=["etc/avahi/avahi-daemon.conf"])
+pkg("cups", "2.4.14", "https://github.com/OpenPrinting/cups/releases/download/v2.4.14/cups-2.4.14-source.tar.gz",
+    "Drucksystem (CUPS)", "Apache-2.0", ["gnutls", "dbus", "avahi", "linux-pam", "libusb", "systemd", "zlib", "acl"],
+    style="autotools", dir="cups-2.4.14",
+    # Verwaltung von Druckern für Mitglieder von wheel (wie sudo), ohne root-Passwort
+    flags="--libdir=/usr/lib --with-rundir=/run/cups --with-system-groups='lpadmin wheel' --with-cups-user=lp "
+          "--with-cups-group=lp --with-tls=gnutls --with-dnssd=avahi --enable-libusb --with-systemd=/usr/lib/systemd/system "
+          "--with-docdir=/usr/share/cups/doc --disable-static",
+    package='''cd "$S"
+make BUILDROOT="$DESTDIR" install
+rm -rf "$DESTDIR/etc/rc.d" "$DESTDIR/etc/init.d" "$DESTDIR/run"
+install -Dm644 /dev/stdin "$DESTDIR/usr/lib/sysusers.d/cups.conf" <<'SYS'
+g lp - -
+u lp - "Drucksystem" /var/spool/cups
+g lpadmin - -
+SYS''',
+    backup=["etc/cups/cupsd.conf", "etc/cups/cups-files.conf", "etc/cups/snmp.conf", "etc/pam.d/cups"],
+    provides=["so:libcups.so.2", "so:libcupsimage.so.2"])
+pkg("qpdf", "12.2.0", "https://github.com/qpdf/qpdf/releases/download/v12.2.0/qpdf-12.2.0.tar.gz",
+    "PDF-Umwandlung (qpdf; Druckfilter)", "Apache-2.0", ["zlib", "libjpeg-turbo", "gnutls"], ["cmake"], style="cmake",
+    flags="-DCMAKE_BUILD_TYPE=Release -DBUILD_STATIC_LIBS=OFF -DCMAKE_INSTALL_LIBDIR=lib -DBUILD_DOC=OFF")
+pkg("ghostscript", "10.05.1", "https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs10051/ghostscript-10.05.1.tar.xz",
+    "PostScript- und PDF-Interpreter (Rasterung für Drucker)", "AGPL-3.0-or-later",
+    ["fontconfig", "freetype", "libjpeg-turbo", "libpng", "libtiff", "zlib", "cups", "dejavu-fonts"],
+    # mitgelieferte Kopien durch die Systembibliotheken ersetzen (wie BLFS); lcms2mt und jbig2dec bleiben gebündelt
+    build='''cd "$S"
+rm -rf freetype jpeg libpng zlib tiff
+./configure --prefix=/usr --disable-compile-inits --with-system-libtiff --without-x --disable-gtk --without-tesseract \\
+  --without-libpaper --without-ijs
+make
+make so''',
+    package='''cd "$S"
+make DESTDIR="$DESTDIR" install
+make DESTDIR="$DESTDIR" soinstall
+install -d "$DESTDIR/usr/include/ghostscript"
+install -m644 base/*.h "$DESTDIR/usr/include/ghostscript"
+ln -sfn ghostscript "$DESTDIR/usr/include/ps"''')
+pkg("libcupsfilters", "2.1.1", "https://github.com/OpenPrinting/libcupsfilters/releases/download/2.1.1/libcupsfilters-2.1.1.tar.xz",
+    "Druckfilter-Bibliothek (OpenPrinting)", "Apache-2.0",
+    ["cups", "qpdf", "fontconfig", "freetype", "lcms2", "libjpeg-turbo", "libpng", "libtiff", "dbus", "ghostscript"],
+    style="autotools",
+    flags="--disable-static --disable-poppler --disable-mutool --disable-exif --enable-dbus --with-gs-path=/usr/bin/gs "
+          "--with-ippfind-path=/usr/bin/ippfind --with-test-font-path=/usr/share/fonts/dejavu/DejaVuSans.ttf")
+pkg("libppd", "2.1.1", "https://github.com/OpenPrinting/libppd/releases/download/2.1.1/libppd-2.1.1.tar.xz",
+    "PPD-Bibliothek (OpenPrinting)", "Apache-2.0", ["libcupsfilters", "cups", "zlib", "ghostscript"],
+    style="autotools",
+    flags="--disable-static --disable-pdftops --with-pdftops=gs --disable-pdftocairo --disable-acroread "
+          "--disable-mutool --with-gs-path=/usr/bin/gs --with-ippfind-path=/usr/bin/ippfind --enable-ppdc-utils")
+pkg("cups-filters", "2.0.1", "https://github.com/OpenPrinting/cups-filters/releases/download/2.0.1/cups-filters-2.0.1.tar.xz",
+    "Druckfilter für CUPS (PDF, Raster, driverlos)", "Apache-2.0", ["libcupsfilters", "libppd", "cups", "ghostscript"],
+    style="autotools",
+    flags="--disable-static --disable-poppler --disable-mutool --with-gs-path=/usr/bin/gs "
+          "--with-ippfind-path=/usr/bin/ippfind --disable-foomatic")
 pkg("xdg-user-dirs", "0.18", "https://user-dirs.freedesktop.org/releases/xdg-user-dirs-0.18.tar.gz",
     "Standardordner (Dokumente, Bilder, Musik …)", "GPL-2.0-or-later", ["glibc"], style="autotools",
     flags="--disable-documentation", backup=["etc/xdg/user-dirs.conf", "etc/xdg/user-dirs.defaults"])
@@ -802,26 +870,26 @@ QTBASE_FLAGS = ("-DINSTALL_BINDIR=lib/qt6/bin -DINSTALL_PUBLICBINDIR=usr/bin -DI
                 "-DINSTALL_EXAMPLESDIR=share/doc/qt6/examples -DINSTALL_SYSCONFDIR=/etc/xdg "
                 "-DFEATURE_journald=ON -DFEATURE_openssl_linked=ON -DFEATURE_system_sqlite=ON "
                 "-DFEATURE_system_xcb_xinput=ON -DFEATURE_no_direct_extern_access=ON -DFEATURE_dbus_linked=ON "
-                "-DFEATURE_cups=OFF -DFEATURE_libproxy=OFF -DFEATURE_vulkan=ON -DFEATURE_xcb=ON "
+                "-DFEATURE_cups=ON -DFEATURE_libproxy=OFF -DFEATURE_vulkan=ON -DFEATURE_xcb=ON "
                 "-DFEATURE_system_harfbuzz=ON -DFEATURE_system_freetype=ON -DFEATURE_system_pcre2=ON "
                 "-DFEATURE_system_zlib=ON -DFEATURE_system_png=ON -DFEATURE_system_jpeg=ON -DFEATURE_icu=ON "
                 "-DQT_BUILD_TESTS=OFF -DQT_BUILD_EXAMPLES=OFF")
 
 
-def qt(mod, deps, summary, flags="", mk=(), provides=()):
+def qt(mod, deps, summary, flags="", mk=(), provides=(), rel=1):
     pkg(f"qt6-{mod.removeprefix('qt')}", QT, f"{QT_URL}{mod}-everywhere-src-{QT}.tar.xz", summary,
         "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only", deps, ["cmake", "ninja", "pkgconf"] + list(mk),
         style="cmake", flags=("-DQT_BUILD_TESTS=OFF -DQT_BUILD_EXAMPLES=OFF " + flags).strip(), post=QT_LINKS,
-        provides=provides)
+        provides=provides, rel=rel)
 
 
 qt("qtbase", ["glibc", "gcc", "zlib", "zstd", "pcre2", "icu", "glib2", "dbus", "openssl", "sqlite", "systemd",
               "harfbuzz", "freetype", "fontconfig", "libpng", "libjpeg-turbo", "brotli", "double-conversion",
               "md4c", "libb2", "mesa", "libdrm", "libinput", "mtdev", "libxkbcommon", "libx11", "libxcb",
               "xcb-util-wm", "xcb-util-image", "xcb-util-keysyms", "xcb-util-renderutil", "xcb-util-cursor",
-              "libxi", "libxrender", "libxext", "libxkbcommon", "vulkan-loader"],
+              "libxi", "libxrender", "libxext", "libxkbcommon", "vulkan-loader", "cups"],
    "Qt 6 Basis (Core, Gui, Widgets, Network, DBus, Sql …)", QTBASE_FLAGS, mk=["vulkan-headers", "perl", "python"],
-   provides=["qt6-base", "so:libQt6Core.so.6", "so:libQt6Gui.so.6", "so:libQt6Widgets.so.6"])
+   provides=["qt6-base", "so:libQt6Core.so.6", "so:libQt6Gui.so.6", "so:libQt6Widgets.so.6"], rel=2)
 PKGS[-1]["flags"] = QTBASE_FLAGS  # qtbase legt die Verzeichnisse fest, die anderen Module erben sie
 qt("qtshadertools", ["qt6-base"], "Qt 6 Shader-Werkzeuge")
 qt("qtsvg", ["qt6-base"], "Qt 6 SVG")
@@ -1123,12 +1191,9 @@ pl("xdg-desktop-portal-kde", ["kwayland", "kio", "kirigami", "kglobalaccel", "kn
                               "kwindowsystem", "libplasma", QW, "libxkbcommon", "xdg-desktop-portal", "kiconthemes",
                               "kcoreaddons", "ki18n", "kservice", "kwidgetsaddons"],
    "Portale für Plasma (Dateidialog, Bildschirmfreigabe)", mk=["plasma-wayland-protocols", "wayland-protocols"],
-   license="LGPL-2.0-or-later",
-   # Das Druck-Portal braucht Qt mit CUPS (qcups_p.h); Druck ist noch nicht enthalten, also ohne Druck-Portal
-   pre="sed -i '/^    print\\.cpp$/d;/^    print\\.h$/d' src/CMakeLists.txt\n"
-       "sed -i '/#include \"print.h\"/d;/m_print(new PrintPortal(this))/d' src/desktopportal.cpp\n"
-       "sed -i '/^class PrintPortal;/d;/PrintPortal \\*const m_print;/d' src/desktopportal.h\n"
-       "sed -i 's/org.freedesktop.impl.portal.Print;//' data/kde.portal")
+   license="LGPL-2.0-or-later", rel=2)
+pl("print-manager", KF_GUI + ["libplasma", "cups", "kitemmodels", "kconfigwidgets"],
+   "Druckerverwaltung (Systemeinstellungen und Infobereich)")
 pl("kde-cli-tools", ["kcmutils", "kconfig", "kdesu", "ki18n", "kiconthemes", "kio", "kservice", "kwindowsystem",
                      "plasma-activities", "plasma-workspace", "kparts"], "Kommandozeilenwerkzeuge (kde-open …)",
    mk=["kdoctools"])
@@ -1282,6 +1347,11 @@ enable sddm.service
 enable accounts-daemon.service
 enable upower.service
 enable bluetooth.service
+# Drucken: CUPS startet bei Bedarf über den Socket, Avahi findet Netzwerkdrucker
+enable cups.socket
+enable cups.path
+enable avahi-daemon.service
+enable avahi-daemon.socket
 # Desktop-Netz über NetworkManager (WLAN über iwd); systemd-networkd darf dieselben Schnittstellen nicht verwalten
 enable NetworkManager.service
 disable systemd-networkd.service
@@ -1291,7 +1361,7 @@ disable systemd-networkd-wait-online.service
 PRE
 install -d "$DESTDIR/etc/systemd/system"
 ln -s /usr/lib/systemd/system/graphical.target "$DESTDIR/etc/systemd/system/default.target"
-''', backup=["etc/xdg/kdeglobals", "etc/xdg/kwinrc", "etc/pam.d/kde"], rel=6)
+''', backup=["etc/xdg/kdeglobals", "etc/xdg/kwinrc", "etc/pam.d/kde"], rel=7)
 
 DESKTOP = ["symfonos-base", "symfonos-desktop-config", "plasma-desktop", "plasma-workspace", "kwin", "xwayland",
            "sddm", "sddm-kcm", "breeze", "breeze-icons", "qqc2-breeze-style", "qqc2-desktop-style",
@@ -1300,11 +1370,11 @@ DESKTOP = ["symfonos-base", "symfonos-desktop-config", "plasma-desktop", "plasma
            "polkit-kde-agent-1", "plasma-systemmonitor", "ksystemstats", "kdeplasma-addons", "ocean-sound-theme",
            "kactivitymanagerd", "kglobalacceld", "kimageformats", "qt6-imageformats", "qt6-translations",
            "qt6-wayland", "mesa", "vulkan-loader", "libva", "pipewire", "wireplumber", "alsa-utils", "ffmpeg",
-           "xdg-user-dirs", "networkmanager", "plasma-nm", "bluez", "bluedevil", "udisks2", "konsole", "dolphin", "kate", "ark", "gwenview", "spectacle", "kcalc", "kcharselect",
+           "xdg-user-dirs", "networkmanager", "plasma-nm", "bluez", "bluedevil", "udisks2", "cups", "cups-filters", "print-manager", "konsole", "dolphin", "kate", "ark", "gwenview", "spectacle", "kcalc", "kcharselect",
            "inter-font", "jetbrains-mono-font", "dejavu-fonts", "noto-color-emoji", "hunspell", "upower",
            "accountsservice", "polkit"]
 pkg("symfonos-desktop", "2025.10", [], "symfonOS-Desktop (KDE Plasma 6, Wayland, PipeWire)", "GPL-3.0-or-later",
-    DESKTOP, arch="any", style="meta", rel=5)
+    DESKTOP, arch="any", style="meta", rel=6)
 
 # ---------------------------------------------------------------------------------------------------
 # Rezepte schreiben
