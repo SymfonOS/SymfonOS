@@ -6,6 +6,7 @@ import os
 import subprocess
 import json
 import tarfile
+from pathlib import Path
 
 import pytest
 
@@ -697,3 +698,27 @@ def test_buildall_rebuilds_legacy_layout_but_not_filesystem(tmp_path):
     syp("pack", tree, info, "-o", target.parent, "-k", key)
     out = syp("buildall", recs, "--repo", repo, "-k", key, "--name", "t").stdout
     assert "alt-1-1-any.syp: Dateien außerhalb von /usr" in out and "gebaut 1" in out and "vorhanden 1" in out
+
+
+@pytest.mark.skipif(os.geteuid() != 0, reason="Skripte laufen in --root nur über chroot (root)")
+def test_post_scripts_run_after_whole_transaction(tmp_path):
+    # Beim Aufbau einer neuen Wurzel braucht ein post_install oft Programme aus Paketen, die nach ihm an der Reihe
+    # sind (docbook-xml → tail aus coreutils); post-Skripte laufen deshalb erst nach dem Entpacken aller Pakete
+    key, pub = keygen(tmp_path)
+    repo = tmp_path / "repo"
+    root = setup_root(tmp_path, repo, pub)
+    sh = Path(os.path.realpath("/bin/sh"))
+    for f in [sh] + [Path(x) for x in subprocess.run(["ldd", sh], capture_output=True, text=True).stdout.split()
+                     if x.startswith("/")]:
+        dst = root / str(f).lstrip("/")
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        dst.write_bytes(Path(os.path.realpath(f)).read_bytes())
+        dst.chmod(0o755)
+    if not (root / "bin/sh").exists():
+        (root / "bin").mkdir(exist_ok=True)
+        (root / "bin/sh").symlink_to(sh)
+    a = make_pkg(tmp_path, "a", "1-1", key=key, scripts={"post_install": "[ -f /usr/share/b/VERSION ] && : > /a-ok"})
+    publish(repo, key, a, make_pkg(tmp_path, "b", "1-1", key=key))
+    syp("-r", root, "sync")
+    out = syp("-r", root, "-y", "install", "a", "b").stdout
+    assert (root / "a-ok").exists(), out

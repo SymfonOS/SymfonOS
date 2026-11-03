@@ -28,7 +28,7 @@ Beim Entpacken werden abgelehnt: absolute Pfade, `..`, Pfade hinter Symlinks, Ge
 ```
 - **Versionen**: `epoch:version-release`, Vergleich wie rpm/pacman (`1.0rc1 < 1.0 < 1.0.1`, `~` aus deb/rpm wird zu Vorabversion).
 - **Abhängigkeiten**: `name`, `name<op>version` (`= >= <= < >`), Alternativen mit `|`, virtuelle Namen über `provides` (inkl. `so:<soname>`).
-- **Skripte**: `pre/post_install`, `pre/post_upgrade`, `pre/post_remove` (sh). Umgebung: `SYP_NEW_VERSION`, `SYP_OLD_VERSION`. Skripte konvertierter Pakete laufen nur, wenn `scripts_reviewed` gesetzt ist oder `--trust-scripts` angegeben wird.
+- **Skripte**: `pre/post_install`, `pre/post_upgrade`, `pre/post_remove` (sh). Umgebung: `SYP_NEW_VERSION`, `SYP_OLD_VERSION`. Skripte konvertierter Pakete laufen nur, wenn `scripts_reviewed` gesetzt ist oder `--trust-scripts` angegeben wird. `post_install`/`post_upgrade` laufen erst, wenn alle Pakete der Transaktion entpackt sind (danach die Trigger).
 
 ## Repository
 ```

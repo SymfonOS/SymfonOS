@@ -60,6 +60,8 @@ include = ["/usr/share/locale/de/*", "/usr/share/locale/de_*", "/usr/share/local
 CONF
 cp "$SYP_PUB" "$IMG/etc/syp/keys/symfonos-release.pub"
 "$SYP" -r "$IMG" sync
+# Paketskripte und Trigger laufen per chroot; systemd-tmpfiles braucht /proc
+mkdir -p "$IMG/proc"; mountpoint -q "$IMG/proc" || mount -t proc proc "$IMG/proc"
 "$SYP" -r "$IMG" -y install --overwrite /etc/syp/syp.toml "$META" symfonos-installer   # vorläufige Konfiguration ersetzen
 # Für das installierte System zeigt die Konfiguration wieder auf die Online-Repos
 cp "$REPO_ROOT/system/etc/syp/syp.toml" "$IMG/etc/syp/syp.toml"
@@ -78,7 +80,7 @@ done
 
 log "Live-Konfiguration"
 in_img() { chroot "$IMG" /usr/bin/env -i PATH=/usr/bin:/usr/sbin HOME=/root /bin/bash -euo pipefail -c "$1"; }
-for m in dev proc sys run; do mkdir -p "$IMG/$m"; mount --bind "/$m" "$IMG/$m"; done
+for m in dev proc sys run; do mkdir -p "$IMG/$m"; mountpoint -q "$IMG/$m" || mount --bind "/$m" "$IMG/$m"; done
 in_img "systemd-sysusers; systemd-tmpfiles --create || true
   useradd -m -G wheel,audio,video,input -s /bin/bash -c 'symfonOS Live' live; passwd -d live
   echo 'live ALL=(ALL:ALL) NOPASSWD: ALL' > /etc/sudoers.d/90-live; chmod 440 /etc/sudoers.d/90-live
