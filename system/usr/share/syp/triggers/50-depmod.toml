@@ -1,3 +1,4 @@
 description = "Kernelmodule indizieren"
 paths = ["usr/lib/modules/*"]
-exec = ["depmod", "-a"]
+# je installiertem Kernel; »depmod -a« allein nähme die Version des laufenden Kernels (beim Image-Bau die des Hosts)
+exec = ["sh", "-c", "for d in /usr/lib/modules/*/kernel; do [ -d \"$d\" ] || continue; v=${d%/kernel}; depmod -a \"${v##*/}\" || exit 1; done"]

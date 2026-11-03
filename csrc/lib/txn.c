@@ -341,7 +341,9 @@ static int do_remove(txn *t, hmap *inst, const char *name) {
     return 0;
 }
 
-static int do_install(txn *t, hmap *inst, sypfile *f, const char *reason) {
+/* post_install/post_upgrade laufen erst, wenn alle Pakete der Transaktion entpackt sind: Skripte brauchen oft
+ * Programme aus Paketen, die keine Abhängigkeit sind (tail aus coreutils beim Aufbau einer neuen Wurzel). */
+static int do_install(txn *t, hmap *inst, sypfile *f, const char *reason, char **post_hook, char **post_old) {
     const char *name = jgets(f->info, "name", ""), *ver = jgets(f->info, "version", "");
     pkg *old = hm_get(inst, name);
     const char *hook = old ? "upgrade" : "install";
@@ -419,7 +421,10 @@ static int do_install(txn *t, hmap *inst, sypfile *f, const char *reason) {
         json_free(dbfiles);
     }
     rm_rf(staging);
-    if (!rc) run_script(t, f->info, post, ver, old ? old->version : NULL);
+    if (!rc) {
+        *post_hook = xstrdup(post);
+        *post_old = old ? xstrdup(old->version) : NULL;
+    }
     json_free(oldfiles);
     hm_free(&oldhash);
     hm_free(&keep);
@@ -608,11 +613,21 @@ long long txn_execute(txn *t, plan *p, const char *cmdline) {
     db_installed(t->db, &inst);
     int rc = 0;
     for (size_t i = 0; !rc && i < p->remove.n; i++) rc = do_remove(t, &inst, p->remove.v[i]);
+    char **post_hook = xcalloc(no + 1, sizeof(char *)), **post_old = xcalloc(no + 1, sizeof(char *));
     for (size_t k = 0; !rc && k < no; k++) {
         sypfile *f = &files[order[k]];
         const char *reason = hm_get(&p->reasons, jgets(f->info, "name", ""));
-        rc = do_install(t, &inst, f, reason ? reason : "explicit");
+        rc = do_install(t, &inst, f, reason ? reason : "explicit", &post_hook[k], &post_old[k]);
     }
+    for (size_t k = 0; k < no; k++) {
+        sypfile *f = &files[order[k]];
+        if (!rc && post_hook[k])
+            run_script(t, f->info, post_hook[k], jgets(f->info, "version", ""), post_old[k]);
+        free(post_hook[k]);
+        free(post_old[k]);
+    }
+    free(post_hook);
+    free(post_old);
     if (!rc) run_triggers(t->cfg, &t->changed, t->quiet);
     if (rc) {
         db_tx_end(t->db, tx, "failed", NULL);
