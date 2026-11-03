@@ -733,6 +733,37 @@ pkg("modemmanager", "1.24.2", {"url": "https://gitlab.freedesktop.org/mobile-bro
           "-Dbash_completion=false -Dtests=false -Dexamples=false -Dpolkit=permissive "
           "-Dsystemdsystemunitdir=/usr/lib/systemd/system -Dudevdir=/usr/lib/udev "
           "-Ddbus_policy_dir=/usr/share/dbus-1/system.d")
+# UDisks2: Laufwerke und USB-Sticks in Dolphin/Plasma anzeigen und als Benutzer einhängen (Solid spricht es über
+# D-Bus an). libblockdev nur mit den Modulen, die udisks verlangt; ohne LVM, Btrfs, Multipath, Escrow und Werkzeuge.
+pkg("keyutils", "1.6.3", "https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/keyutils.git/snapshot/keyutils-1.6.3.tar.gz",
+    "Kernel-Schlüsselring (libkeyutils)", "GPL-2.0-or-later AND LGPL-2.1-or-later", ["glibc"],
+    build='cd "$S"\nmake',
+    package='cd "$S"\nmake NO_ARLIB=1 LIBDIR=/usr/lib USRLIBDIR=/usr/lib BINDIR=/usr/bin SBINDIR=/usr/bin '
+            'DESTDIR="$DESTDIR" install', backup=["etc/request-key.conf"])
+pkg("libbytesize", "2.11", "https://github.com/storaged-project/libbytesize/releases/download/2.11/libbytesize-2.11.tar.gz",
+    "Größenangaben in Bytes (libblockdev)", "LGPL-2.1-or-later", ["pcre2", "gmp", "mpfr"], ["python", "gettext"],
+    style="autotools", flags="--without-python3 --without-gtk-doc --without-tools")
+pkg("libnvme", "1.15", {"url": "https://github.com/linux-nvme/libnvme/archive/v1.15/libnvme-1.15.tar.gz",
+                        "filename": "libnvme-1.15.tar.gz"},
+    "NVMe-Verwaltung (libblockdev)", "LGPL-2.1-or-later", ["json-c", "openssl", "keyutils"], ["meson"], style="meson",
+    flags="-Dpython=disabled -Dtests=false -Dexamples=false -Ddocs=false -Dlibdbus=disabled -Dliburing=disabled")
+pkg("libatasmart", "0.19", "http://0pointer.de/public/libatasmart-0.19.tar.xz", "S.M.A.R.T. von ATA-Laufwerken",
+    "LGPL-2.1-or-later", ["systemd"], style="autotools", flags="--disable-static")
+pkg("libblockdev", "3.3.1", "https://github.com/storaged-project/libblockdev/releases/download/3.3.1/libblockdev-3.3.1.tar.gz",
+    "Blockgeräte-Bibliothek (udisks)", "LGPL-2.1-or-later",
+    ["glib2", "systemd", "kmod", "cryptsetup", "keyutils", "util-linux", "e2fsprogs", "libbytesize", "libnvme"],
+    ["python"], style="autotools",
+    flags="--sysconfdir=/etc --without-python3 --without-gtk-doc --disable-introspection --without-escrow "
+          "--without-btrfs --without-dm --without-lvm --without-lvm_dbus --without-mpath --without-nvdimm "
+          "--without-smart --without-smartmontools --without-tools --without-s390",
+    backup=["etc/libblockdev/3/conf.d/00-default.cfg"])
+pkg("udisks2", "2.10.1", "https://github.com/storaged-project/udisks/releases/download/udisks-2.10.1/udisks-2.10.1.tar.bz2",
+    "Laufwerksverwaltung (UDisks2)", "GPL-2.0-or-later AND LGPL-2.0-or-later",
+    ["glib2", "polkit", "libgudev", "systemd", "libblockdev", "libatasmart", "util-linux", "acl", "dosfstools",
+     "e2fsprogs"], ["gettext", "libxslt"], style="autotools",
+    flags="--sysconfdir=/etc --localstatedir=/var --disable-static --disable-man --disable-gtk-doc "
+          "--disable-introspection --with-systemdsystemunitdir=/usr/lib/systemd/system --with-udevdir=/usr/lib/udev",
+    backup=["etc/udisks2/udisks2.conf", "etc/udisks2/mount_options.conf"])
 pkg("xdg-user-dirs", "0.18", "https://user-dirs.freedesktop.org/releases/xdg-user-dirs-0.18.tar.gz",
     "Standardordner (Dokumente, Bilder, Musik …)", "GPL-2.0-or-later", ["glibc"], style="autotools",
     flags="--disable-documentation", backup=["etc/xdg/user-dirs.conf", "etc/xdg/user-dirs.defaults"])
@@ -1252,11 +1283,11 @@ DESKTOP = ["symfonos-base", "symfonos-desktop-config", "plasma-desktop", "plasma
            "polkit-kde-agent-1", "plasma-systemmonitor", "ksystemstats", "kdeplasma-addons", "ocean-sound-theme",
            "kactivitymanagerd", "kglobalacceld", "kimageformats", "qt6-imageformats", "qt6-translations",
            "qt6-wayland", "mesa", "vulkan-loader", "libva", "pipewire", "wireplumber", "alsa-utils", "ffmpeg",
-           "xdg-user-dirs", "networkmanager", "plasma-nm", "bluez", "bluedevil", "konsole", "dolphin", "kate", "ark", "gwenview", "kcalc", "kcharselect",
+           "xdg-user-dirs", "networkmanager", "plasma-nm", "bluez", "bluedevil", "udisks2", "konsole", "dolphin", "kate", "ark", "gwenview", "kcalc", "kcharselect",
            "inter-font", "jetbrains-mono-font", "dejavu-fonts", "noto-color-emoji", "hunspell", "upower",
            "accountsservice", "polkit"]
 pkg("symfonos-desktop", "2025.10", [], "symfonOS-Desktop (KDE Plasma 6, Wayland, PipeWire)", "GPL-3.0-or-later",
-    DESKTOP, arch="any", style="meta", rel=3)
+    DESKTOP, arch="any", style="meta", rel=4)
 
 # ---------------------------------------------------------------------------------------------------
 # Rezepte schreiben
