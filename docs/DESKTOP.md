@@ -10,7 +10,7 @@ Version für Version zur Basis und sind von den BLFS-Autoren gemeinsam getestet.
 |---|---|
 | Grafik | LLVM 20 mit Clang, Mesa 25.1 (radeonsi, r600, iris, crocus, i915, nouveau, virgl, llvmpipe, zink; Vulkan: AMD, Intel, lavapipe, virtio), libdrm, libva, Vulkan-Loader, glslang, SPIR-V |
 | Anzeige | Wayland 1.24, wayland-protocols, Xwayland 24.1 für X11-Programme, libxkbcommon, X11-Bibliotheken |
-| Netzwerk | NetworkManager 1.54 mit `plasma-nm` (WLAN über iwd, DNS über systemd-resolved), ModemManager für Mobilfunk; das Basissystem bleibt bei systemd-networkd. Bluetooth mit BlueZ 5.83 und `bluedevil`, Audio über PipeWire (SBC, Opus) |
+| Netzwerk | NetworkManager 1.54 mit `plasma-nm` (WLAN über iwd, DNS über systemd-resolved), ModemManager für Mobilfunk, VPN mit WireGuard und OpenVPN 2.6; das Basissystem bleibt bei systemd-networkd. Bluetooth mit BlueZ 5.83 und `bluedevil`, Audio über PipeWire (SBC, Opus) |
 | Laufwerke | UDisks2 2.10 mit libblockdev 3.3 (Partitionen, Dateisysteme, LUKS, NVMe): USB-Sticks und Platten erscheinen in Dolphin und im Infobereich und lassen sich ohne root einhängen (unter `/run/media/$USER`) |
 | Drucken | CUPS 2.4 mit driverlosem Drucken (IPP Everywhere, AirPrint), Druckersuche über Avahi (Namen wie `drucker.local` über nss-mdns), cups-filters 2 (PDF über qpdf, Rasterung über Ghostscript), `print-manager` in den Systemeinstellungen, Qt-Druckdialog mit CUPS und Druck-Portal; Drucker verwalten dürfen Mitglieder von `wheel` |
 | Eingabe | libinput mit libwacom (Grafiktabletts von Wacom, Huion und XP-Pen), libevdev, mtdev |
@@ -61,6 +61,6 @@ Vollständige Logs und die Bildschirmfotos jedes Laufs liegen auf dem Branch `ci
 ## Noch nicht enthalten
 
 - **SELinux im Modus enforcing für die grafische Anmeldung:** Die Richtlinie (refpolicy) kennt für SDDM noch keinen Anmeldekontext, `pam_selinux` meldet »Unable to get valid context«. Im Standardmodus permissive ist das ohne Folgen.
-- **VPN-Erweiterungen und PPP** für NetworkManager (OpenVPN, OpenConnect, DSL); WireGuard kann NetworkManager selbst.
+- **Weitere VPN-Erweiterungen und PPP** für NetworkManager (OpenConnect, L2TP/IPsec, DSL).
 - **Webbrowser:** Firefox braucht Rust und Node.js, Falkon braucht QtWebEngine.
 - **Kreativprogramme** (Krita, Blender, Ardour …) und PySide6 für die symfonOS-Apps folgen als nächste Stufe.
