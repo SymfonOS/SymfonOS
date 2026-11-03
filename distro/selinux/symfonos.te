@@ -1,0 +1,78 @@
+policy_module(symfonos, 1.1)
+
+# Ergänzungen zur Reference Policy 2025.02 für symfonOS (systemd 257, Plasma 6, SDDM, CUPS, Live-Medium).
+# Entstanden aus den Verweigerungen des Desktop-Tests (tools/avc-summary.py, Branch ci-diag: avc.txt).
+# Ziel: Live-System und installierter Desktop ohne Verweigerungen im Modus enforcing.
+
+gen_require(`
+	attribute domain;
+	type kernel_t, tmpfs_t, cgroup_t, nsfs_t, usr_t, bin_t, lib_t, etc_t, boot_t, debugfs_t;
+	type devlog_t, syslogd_runtime_t, user_home_dir_t, ssh_home_t, user_tmpfs_t;
+	type syslogd_t, systemd_nsresourced_t, systemd_resolved_t, systemd_logind_t, systemd_hw_t;
+	type systemd_hostnamed_t, systemd_tmpfiles_t, auditctl_t, auditd_log_t, policykit_t;
+	type systemd_user_manager_unit_t, xdm_t, xdm_var_lib_t, unconfined_t, system_dbusd_t;
+	type cupsd_t, cupsd_rw_etc_t;
+	class dir { getattr search open read watch add_name write relabelfrom relabelto };
+	class file { getattr open read write execmod relabelfrom relabelto };
+	class lnk_file getattr;
+	class fd use;
+	class process { execmem execstack };
+	class capability { dac_override net_admin };
+	class capability2 perfmon;
+	class unix_dgram_socket { create connect getopt setopt write sendto };
+	class sock_file write;
+	class service status;
+')
+
+########################################
+# Live-Medium: dracut hängt das Overlay ein, bevor die Richtlinie geladen ist. Die Wurzel »/« trägt deshalb das
+# Label der tmpfs-Oberschicht (tmpfs_t), und Dateien aus dem Overlay gehören zu Deskriptoren von kernel_t.
+# Ohne diese Regeln starten im Modus enforcing weder journald noch udev. Im installierten System ist »/« root_t.
+allow domain tmpfs_t:dir { getattr search open read watch };
+allow domain kernel_t:fd use;
+
+########################################
+# systemd ≥ 254: Dienste lesen den Speicherdruck ihrer cgroup (memory.pressure)
+allow { syslogd_t systemd_nsresourced_t systemd_resolved_t systemd_logind_t } cgroup_t:file { getattr open read write };
+
+# systemd-nsresourced (neu in systemd 256) lädt BPF-Programme
+allow systemd_nsresourced_t self:capability2 perfmon;
+
+# systemd-resolved liest die Krypto-Richtlinie (/usr/share/crypto-policies, OpenSSL-Konfiguration)
+allow systemd_resolved_t usr_t:file { getattr open read };
+
+# systemd-hwdb protokolliert ins Journal und prüft seinen Namensraum
+allow systemd_hw_t self:unix_dgram_socket { create connect getopt setopt write };
+allow systemd_hw_t kernel_t:unix_dgram_socket sendto;
+allow systemd_hw_t devlog_t:sock_file write;
+allow systemd_hw_t syslogd_runtime_t:dir search;
+allow systemd_hw_t self:capability { dac_override net_admin };
+allow { systemd_hw_t systemd_hostnamed_t } nsfs_t:file getattr;
+
+# systemd-tmpfiles setzt Labels nach (Z/z-Zeilen: /root, ~/.ssh, /var/lib/sddm, dbus-daemon-launch-helper)
+allow systemd_tmpfiles_t bin_t:dir search;
+allow systemd_tmpfiles_t bin_t:lnk_file getattr;
+allow systemd_tmpfiles_t { user_home_dir_t ssh_home_t xdm_var_lib_t }:dir { relabelfrom relabelto };
+allow systemd_tmpfiles_t lib_t:file { relabelfrom relabelto };
+
+# auditctl liest beim Laden der Regeln /var/log/audit
+allow auditctl_t auditd_log_t:dir { getattr search open read };
+
+# systemd-logind prüft /boot (Neustart in die Firmware, Bootloader-Einträge)
+allow systemd_logind_t boot_t:dir { getattr search };
+
+########################################
+# Desktop: Qt/QML erzeugen Code zur Laufzeit (JIT) – Anmeldebildschirm, Sitzung, KAuth-Helfer von powerdevil
+allow xdm_t self:process execmem;
+allow unconfined_t self:process { execmem execstack };
+allow unconfined_t user_tmpfs_t:file execmod;
+allow system_dbusd_t self:process execmem;
+# discretegpuhelper sucht in debugfs nach GPUs; ohne Zugriff kein Unterschied
+dontaudit system_dbusd_t debugfs_t:dir search;
+
+# polkit fragt den Zustand der Benutzerdienste (user@.service) ab
+allow policykit_t systemd_user_manager_unit_t:service status;
+
+# CUPS legt /etc/printcap an
+type_transition cupsd_t etc_t:file cupsd_rw_etc_t "printcap";
+allow cupsd_t etc_t:dir { add_name write };

@@ -1,0 +1,36 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "symfonos-selinux"
+version = "1.0-1"
+summary = "symfonOS-Ergänzungen zur SELinux Reference Policy (Desktop ohne Verweigerungen)"
+license = "GPL-3.0-or-later"
+depends = ["selinux-refpolicy", "policycoreutils"]
+makedepends = ["selinux-refpolicy", "checkpolicy", "semodule-utils", "policycoreutils", "m4", "python"]
+
+[[source]]
+path = "@/distro/selinux"
+
+[build]
+build = '''
+cd "$SRCDIR/selinux"
+make -f /usr/share/selinux/refpolicy/include/Makefile NAME=refpolicy symfonos.pp
+'''
+package = '''
+cd "$SRCDIR/selinux"
+install -Dm644 symfonos.pp "$DESTDIR/usr/share/selinux/refpolicy/symfonos.pp"
+'''
+
+[options]
+strip = false
+
+[scripts]
+# selinux-refpolicy übernimmt beim Installieren alle Module unter /usr/share/selinux/refpolicy; bei einem
+# Update dieses Pakets allein muss das Modul selbst in den Store
+post_install = '''
+semodule -s refpolicy -n -i /usr/share/selinux/refpolicy/symfonos.pp && semodule -s refpolicy -n -B
+if selinuxenabled 2>/dev/null; then load_policy || true; fi
+'''
+post_upgrade = '''
+semodule -s refpolicy -n -i /usr/share/selinux/refpolicy/symfonos.pp && semodule -s refpolicy -n -B
+if selinuxenabled 2>/dev/null; then load_policy || true; fi
+'''

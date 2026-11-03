@@ -1,0 +1,2 @@
+# SDDM startet die Sitzung über diese Skripte; als usr_t sind sie kein Einstiegspunkt für unconfined_t
+/usr/share/sddm/scripts(/.*)?	gen_context(system_u:object_r:bin_t,s0)
