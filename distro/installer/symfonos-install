@@ -204,12 +204,21 @@ if ((TPM)); then
 fi
 
 say "SELinux-Dateikontexte setzen"
+# Ohne Labels startet ein System im Modus enforcing nicht: einmal permissive starten, beim ersten Start
+# Labels setzen (symfonos-autorelabel.service), danach wieder enforcing
+relabel_on_boot() {
+  touch "$MNT/.autorelabel"
+  if grep -q '^SELINUX=enforcing' "$MNT/etc/selinux/config" 2>/dev/null; then
+    sed -i 's/^SELINUX=.*/SELINUX=permissive/' "$MNT/etc/selinux/config"
+    touch "$MNT/.autorelabel-enforcing"
+  fi
+}
 FC=$MNT/etc/selinux/refpolicy/contexts/files/file_contexts
 if [[ -r $FC ]] && command -v setfiles >/dev/null; then
   setfiles -r "$MNT" -e "$MNT/proc" -e "$MNT/sys" -e "$MNT/dev" -e "$MNT/run" -e "$MNT$ESPDIR" -F "$FC" "$MNT" \
-    || { echo "setfiles fehlgeschlagen – Kontexte werden beim ersten Start gesetzt"; touch "$MNT/.autorelabel"; }
+    || { echo "setfiles fehlgeschlagen – Kontexte werden beim ersten Start gesetzt"; relabel_on_boot; }
 else
-  touch "$MNT/.autorelabel"
+  relabel_on_boot
 fi
 cleanup
 umount -R "$MNT"

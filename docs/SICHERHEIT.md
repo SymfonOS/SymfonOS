@@ -44,7 +44,7 @@ Jedes Paket wird nach dem Bauen geprüft, vergleichbar mit Fedoras *annocheck* u
 - Selten genutzte Netzprotokolle und Dateisysteme werden nicht automatisch geladen (`modprobe.d`). KVM, FUSE und UDF bleiben bewusst nutzbar (Prüfungs-VM, AppImages, optische Medien).
 
 ### 4. Zugriffskontrolle
-- **SELinux** mit Reference Policy (MCS, systemd). Anmeldungen werden wie bei Fedora `unconfined_u` zugeordnet, Systemdienste sind eingeschränkt.
+- **SELinux** mit Reference Policy (MCS, systemd). Modus *enforcing*. Anmeldungen werden wie bei Fedora `unconfined_u` zugeordnet, Systemdienste sind eingeschränkt.
 - **PAM** wie Fedoras `authselect local`: `pam_faillock` (5 Fehlversuche in 15 min → 10 min Sperre), `pam_pwquality` (mindestens 12 Zeichen, Wörterbuchprüfung, gilt auch für root), Passwort-Hashes mit **yescrypt**, kein `nullok`, SELinux-Kontext und `loginuid` bei der Anmeldung
 - **root** ist gesperrt, die Verwaltung läuft über `sudo` (Gruppe `wheel`): `use_pty`, 5 min Gültigkeit, Protokoll in `/var/log/sudo.log`
 - Home-Verzeichnisse `0700`, Standard-umask `022`
@@ -82,7 +82,7 @@ Umschalten: `sudo update-crypto-policies --set FUTURE` (oder `symfonos-security 
 
 | Bereich | Fedora | symfonOS | Bewertung |
 |---|---|---|---|
-| MAC | SELinux *targeted*, **enforcing** | SELinux refpolicy, **permissive** zum Start | ⚠ Lücke (siehe unten) |
+| MAC | SELinux *targeted*, **enforcing** | SELinux refpolicy mit eigenem Modul, **enforcing** | ◐ gleicher Modus, Richtlinie weniger breit getestet (siehe unten) |
 | Compiler-Härtung | `redhat-rpm-config`, annocheck | gleichwertige Flags, Prüfung bricht Bau ab | ✓ gleichwertig, strenger beim Abbruch |
 | Kernel-Härtung | Fedora-Konfiguration | KSPP-nah, strengere Vorgaben (`INIT_ON_ALLOC`, `MODULE_SIG_FORCE`) | ✓ strenger |
 | Paketsignaturen | GPG je RPM, signierte Repo-Metadaten (optional) | Ed25519 je Paket **und** signierter Index mit Ablauf/Rollback-Schutz | ✓ strenger |
@@ -97,7 +97,7 @@ Umschalten: `sudo update-crypto-policies --set FUTURE` (oder `symfonos-security 
 
 ## Bekannte Lücken (offen benannt)
 
-1. **SELinux startet permissive.** Die Reference Policy deckt Desktop-Programme weniger gut ab als Fedoras *targeted*-Richtlinie. Vor dem Umschalten auf *enforcing* braucht es eigene Richtlinienmodule, die aus den AVC-Meldungen realer Installationen entstehen (`symfonos-security selinux denials`). Ziel: *enforcing* als Standard, sobald die Testmatrix (Installation, Desktop, Audio, Prüfungsmodus) ohne Verweigerungen läuft. Stand: Das eigene Modul `symfonos-selinux` (`distro/selinux/symfonos.te`, jede Regel mit Anlass) schließt die Lücken der Reference Policy für systemd 257, SDDM, Plasma, CUPS und das Live-Medium; Live-Desktop (bis in die Plasma-Sitzung) und installierter Desktop starten in der CI mit `enforcing=1` ohne Verweigerungen. Offen sind Audio im Betrieb, der Prüfungsmodus und echte Hardware. Einzelne Systeme können schon jetzt mit `sudo symfonos-security selinux enforcing` umschalten. Das Werkzeug verweigert den Wechsel, solange es Verweigerungen seit dem Start gibt.
+1. **SELinux-Richtlinie weniger breit erprobt als Fedoras.** symfonOS startet im Modus *enforcing* (wie Fedora). Die Reference Policy deckt Desktop-Programme aber weniger gut ab als Fedoras *targeted*-Richtlinie; die Lücken schließt das eigene Modul `symfonos-selinux` (`distro/selinux/symfonos.te`, jede Regel mit Anlass) für systemd 257, SDDM, Plasma, CUPS und das Live-Medium. In der CI starten Basis-ISO, Live-Desktop (bis in die Plasma-Sitzung) und installierter Desktop im Modus *enforcing*; ein zusätzlicher Lauf im Modus permissive sammelt alle Verweigerungen (`avc.txt`). Noch nicht im Test: Audio im Betrieb, der Prüfungsmodus und echte Hardware. Verweigerungen zeigt `sudo symfonos-security selinux denials`; zur Fehlersuche lässt sich mit `sudo symfonos-security selinux permissive` vorübergehend umschalten (Rückweg: `… selinux enforcing`, verweigert, solange es Verweigerungen seit dem Start gibt). Scheitert beim Installieren das Setzen der Labels, startet das System einmal permissive, setzt sie und kehrt zu *enforcing* zurück.
 2. **Kein von Microsoft signierter shim.** Dafür ist ein Review durch das shim-review-Board und eine Signatur durch Microsoft nötig, was eine Organisation mit Sicherheitsprozess voraussetzt. Bis dahin gilt: Secure Boot mit eigenen Schlüsseln, oder Secure Boot aus.
 3. **Echtheit der Quellen.** Prüfsummen werden beim ersten Laden festgehalten (Trust on first use). Die Prüfung upstream-signierter Tarballs (GPG-Signaturen von GNU, kernel.org und anderen) fehlt noch.
 4. **Reproduzierbarkeit.** `SOURCE_DATE_EPOCH` wird gesetzt, ein unabhängiger Zweitbau mit Bit-Vergleich läuft aber noch nicht in der CI.

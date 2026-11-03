@@ -10,7 +10,7 @@ Version für Version zur Basis und sind von den BLFS-Autoren gemeinsam getestet.
 |---|---|
 | Grafik | LLVM 20 mit Clang, Mesa 25.1 (radeonsi, r600, iris, crocus, i915, nouveau, virgl, llvmpipe, zink; Vulkan: AMD, Intel, lavapipe, virtio), libdrm, libva, Vulkan-Loader, glslang, SPIR-V |
 | Anzeige | Wayland 1.24, wayland-protocols, Xwayland 24.1 für X11-Programme, libxkbcommon, X11-Bibliotheken |
-| SELinux | Reference Policy 2025.02 mit eigenem Modul `symfonos-selinux` (`distro/selinux/`): SDDM läuft als `xdm_t`, die Sitzung als `unconfined_t`. Live-System und installierter Desktop laufen im Test ohne Verweigerungen auch im Modus *enforcing*; Standard bleibt *permissive* (siehe [SICHERHEIT.md](SICHERHEIT.md)) |
+| SELinux | Reference Policy 2025.02 mit eigenem Modul `symfonos-selinux` (`distro/selinux/`): SDDM läuft als `xdm_t`, die Sitzung als `unconfined_t`. Live-System und installierter Desktop laufen im Modus *enforcing* (Standard, wie Fedora) ohne Verweigerungen (siehe [SICHERHEIT.md](SICHERHEIT.md)) |
 | Netzwerk | NetworkManager 1.54 mit `plasma-nm` (WLAN über iwd, DNS über systemd-resolved), ModemManager für Mobilfunk, VPN mit WireGuard und OpenVPN 2.6; das Basissystem bleibt bei systemd-networkd. Bluetooth mit BlueZ 5.83 und `bluedevil`, Audio über PipeWire (SBC, Opus) |
 | Laufwerke | UDisks2 2.10 mit libblockdev 3.3 (Partitionen, Dateisysteme, LUKS, NVMe): USB-Sticks und Platten erscheinen in Dolphin und im Infobereich und lassen sich ohne root einhängen (unter `/run/media/$USER`) |
 | Drucken | CUPS 2.4 mit driverlosem Drucken (IPP Everywhere, AirPrint), Druckersuche über Avahi (Namen wie `drucker.local` über nss-mdns), cups-filters 2 (PDF über qpdf, Rasterung über Ghostscript), `print-manager` in den Systemeinstellungen, Qt-Druckdialog mit CUPS und Druck-Portal; Drucker verwalten dürfen Mitglieder von `wheel` |
@@ -54,7 +54,7 @@ tools/desktop-recipes.py --check    # weichen Rezepte vom Generator ab? (Test in
 |---|---|
 | `tools/desktop-test.sh` | ISO bootet in QEMU mit virtio-GPU bis `graphical.target`, KWin (Wayland) und `plasmashell` laufen, kein Absturz; Bildschirmfotos über den QEMU-Monitor |
 | `tools/install-test.sh` | Installation aus dem Desktop-ISO auf eine virtuelle Platte, das installierte System startet bis zur Anmeldung |
-| `tools/avc-summary.py` | Fasst die SELinux-Verweigerungen je Regel zusammen (`avc.txt` auf `ci-diag`). Ein zweiter Desktop-Test bootet das Live-System mit `enforcing=1` bis in die Plasma-Sitzung, der Desktop-Installationstest startet das installierte System mit `enforcing=1`; beide sind Bedingung für die Veröffentlichung |
+| `tools/avc-summary.py` | Fasst die SELinux-Verweigerungen je Regel zusammen (`avc.txt` auf `ci-diag`). Der Haupt-Desktop-Test bootet dafür mit `enforcing=0`; ein zweiter Desktop-Test bootet das Live-System mit `enforcing=1` bis in die Plasma-Sitzung, der Desktop-Installationstest startet das installierte System mit `enforcing=1`; beide sind Bedingung für die Veröffentlichung |
 | `tools/check-libs.py` | Beim Bau des Live-Systems: Jede ELF-Datei findet ihre Bibliotheken (fehlende Laufzeitabhängigkeiten erscheinen als Warnung) |
 
 Die CI veröffentlicht das ISO erst, wenn beide Tests bestanden sind, als Release `desktop-nightly`.
