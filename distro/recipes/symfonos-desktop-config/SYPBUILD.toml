@@ -2,12 +2,12 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "symfonos-desktop-config"
-version = "1.0-7"
+version = "1.0-8"
 arch = "any"
 summary = "symfonOS-Desktop: Farbschemata, globales Design, SDDM (Wayland), PAM, Voreinstellungen"
 license = "GPL-3.0-or-later"
 depends = ["plasma-workspace", "sddm", "inter-font", "jetbrains-mono-font", "breeze-icons"]
-backup = ["etc/xdg/kdeglobals", "etc/xdg/kwinrc", "etc/pam.d/kde"]
+backup = ["etc/xdg/kdeglobals", "etc/xdg/kwinrc", "etc/pam.d/kde", "etc/nftables.d/50-mdns.nft"]
 
 [[source]]
 path = "@/desktop"
@@ -43,4 +43,9 @@ disable systemd-networkd-wait-online.service
 PRE
 install -d "$DESTDIR/etc/systemd/system"
 ln -s /usr/lib/systemd/system/graphical.target "$DESTDIR/etc/systemd/system/default.target"
+# Firewall: mDNS/DNS-SD aus dem lokalen Netz (Avahi findet Drucker und Dienste; wie Fedoras Workstation-Zone)
+install -Dm644 /dev/stdin "$DESTDIR/etc/nftables.d/50-mdns.nft" <<'NFT'
+ip daddr 224.0.0.251 udp dport 5353 accept comment "mDNS (Avahi)"
+ip6 daddr ff02::fb udp dport 5353 accept comment "mDNS (Avahi)"
+NFT
 '''
