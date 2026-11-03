@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/plasma/6.4.4/spectacle-6.4.4.tar.xz"
-sha256 = "TODO"
+sha256 = "9108a739c1acc43b23e0a6aa17ba4194a564ab1548c6887328c76a073bf3d373"
 
 [build]
 style = "cmake"
