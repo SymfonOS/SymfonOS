@@ -10,7 +10,7 @@ depends = ["fontconfig", "freetype", "libjpeg-turbo", "libpng", "libtiff", "zlib
 
 [[source]]
 url = "https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs10051/ghostscript-10.05.1.tar.xz"
-sha256 = "TODO"
+sha256 = "22f2bdca15c28830c9715cddc5c296ea66898bfdab0b604a4e0bcfeb03af6cad"
 
 [build]
 build = '''

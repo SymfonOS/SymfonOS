@@ -12,7 +12,7 @@ backup = ["etc/cups/cupsd.conf", "etc/cups/cups-files.conf", "etc/cups/snmp.conf
 
 [[source]]
 url = "https://github.com/OpenPrinting/cups/releases/download/v2.4.14/cups-2.4.14-source.tar.gz"
-sha256 = "TODO"
+sha256 = "660288020dd6f79caf799811c4c1a3207a48689899ac2093959d70a3bdcb7699"
 
 [build]
 dir = "cups-2.4.14"

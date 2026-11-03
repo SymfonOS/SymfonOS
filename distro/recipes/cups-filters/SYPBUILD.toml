@@ -10,7 +10,7 @@ depends = ["libcupsfilters", "libppd", "cups", "ghostscript"]
 
 [[source]]
 url = "https://github.com/OpenPrinting/cups-filters/releases/download/2.0.1/cups-filters-2.0.1.tar.xz"
-sha256 = "TODO"
+sha256 = "39e71de3ce06762b342749f1dc7cba6817738f7bf4d322c1bb9ab10b8569ab80"
 
 [build]
 style = "autotools"

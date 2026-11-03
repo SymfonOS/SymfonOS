@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/plasma/6.4.4/print-manager-6.4.4.tar.xz"
-sha256 = "TODO"
+sha256 = "23daaa8a939bdb89047576f9e24461a3d16efd8a4556e4d1f0ece576dc2ef79f"
 
 [build]
 style = "cmake"

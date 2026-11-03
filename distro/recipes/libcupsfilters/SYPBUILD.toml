@@ -10,7 +10,7 @@ depends = ["cups", "qpdf", "fontconfig", "freetype", "lcms2", "libjpeg-turbo", "
 
 [[source]]
 url = "https://github.com/OpenPrinting/libcupsfilters/releases/download/2.1.1/libcupsfilters-2.1.1.tar.xz"
-sha256 = "TODO"
+sha256 = "6c303e36cfde05a6c88fb940c62b6a18e7cdbfb91f077733ebc98f104925ce36"
 
 [build]
 style = "autotools"
