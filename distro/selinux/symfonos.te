@@ -1,4 +1,4 @@
-policy_module(symfonos, 1.1)
+policy_module(symfonos, 1.2)
 
 # Ergänzungen zur Reference Policy 2025.02 für symfonOS (systemd 257, Plasma 6, SDDM, CUPS, Live-Medium).
 # Entstanden aus den Verweigerungen des Desktop-Tests (tools/avc-summary.py, Branch ci-diag: avc.txt).
@@ -12,9 +12,12 @@ gen_require(`
 	type systemd_hostnamed_t, systemd_tmpfiles_t, auditctl_t, auditd_log_t, policykit_t;
 	type systemd_user_manager_unit_t, xdm_t, xdm_var_lib_t, unconfined_t, system_dbusd_t;
 	type cupsd_t, cupsd_rw_etc_t;
+	type ntpd_t, udev_t, iso9660_t, systemd_networkd_var_lib_t, NetworkManager_t;
+	type systemd_sessions_runtime_t, systemd_logind_runtime_t, systemd_machined_runtime_t;
+	type devicekit_disk_t, mount_runtime_t, systemd_locale_t;
 	class dir { getattr search open read watch add_name write relabelfrom relabelto };
 	class file { getattr open read write execmod relabelfrom relabelto };
-	class lnk_file getattr;
+	class lnk_file { getattr read };
 	class fd use;
 	class process { execmem execstack };
 	class capability { dac_override net_admin };
@@ -22,6 +25,7 @@ gen_require(`
 	class unix_dgram_socket { create connect getopt setopt write sendto };
 	class sock_file write;
 	class service status;
+	class dbus { acquire_svc send_msg };
 ')
 
 ########################################
@@ -30,10 +34,12 @@ gen_require(`
 # Ohne diese Regeln starten im Modus enforcing weder journald noch udev. Im installierten System ist »/« root_t.
 allow domain tmpfs_t:dir { getattr search open read watch };
 allow domain kernel_t:fd use;
+# udev prüft das Abbild des Live-Mediums auf der CD
+allow udev_t iso9660_t:file getattr;
 
 ########################################
 # systemd ≥ 254: Dienste lesen den Speicherdruck ihrer cgroup (memory.pressure)
-allow { syslogd_t systemd_nsresourced_t systemd_resolved_t systemd_logind_t } cgroup_t:file { getattr open read write };
+allow { syslogd_t systemd_nsresourced_t systemd_resolved_t systemd_logind_t ntpd_t } cgroup_t:file { getattr open read write };
 
 # systemd-nsresourced (neu in systemd 256) lädt BPF-Programme
 allow systemd_nsresourced_t self:capability2 perfmon;
@@ -51,8 +57,8 @@ allow { systemd_hw_t systemd_hostnamed_t } nsfs_t:file getattr;
 
 # systemd-tmpfiles setzt Labels nach (Z/z-Zeilen: /root, ~/.ssh, /var/lib/sddm, dbus-daemon-launch-helper)
 allow systemd_tmpfiles_t bin_t:dir search;
-allow systemd_tmpfiles_t bin_t:lnk_file getattr;
-allow systemd_tmpfiles_t { user_home_dir_t ssh_home_t xdm_var_lib_t }:dir { relabelfrom relabelto };
+allow systemd_tmpfiles_t bin_t:lnk_file { getattr read };
+allow systemd_tmpfiles_t { user_home_dir_t ssh_home_t xdm_var_lib_t auditd_log_t systemd_networkd_var_lib_t }:dir { relabelfrom relabelto };
 allow systemd_tmpfiles_t lib_t:file { relabelfrom relabelto };
 
 # auditctl liest beim Laden der Regeln /var/log/audit
@@ -76,3 +82,18 @@ allow policykit_t systemd_user_manager_unit_t:service status;
 # CUPS legt /etc/printcap an
 type_transition cupsd_t etc_t:file cupsd_rw_etc_t "printcap";
 allow cupsd_t etc_t:dir { add_name write };
+
+########################################
+# Anmeldung: logind (systemd ≥ 256) übernimmt den pidfd des Anmeldeprozesses; die Reference Policy erlaubt das
+# nur für sshd und login, nicht für den Anmeldebildschirm. Ohne Regel trennt sd-bus logind beim Empfang des
+# Deskriptors vom Bus (pam_systemd: »Message recipient disconnected«) und die Plasma-Sitzung startet nicht.
+allow { systemd_logind_t system_dbusd_t } xdm_t:fd use;
+
+# NetworkManager beobachtet Sitzungen und Benutzer über /run/systemd (sonst »logind monitor: -13«)
+allow NetworkManager_t { systemd_sessions_runtime_t systemd_logind_runtime_t systemd_machined_runtime_t }:dir watch;
+
+# udisks beobachtet /run/mount (Einhängepunkte)
+allow devicekit_disk_t mount_runtime_t:dir watch;
+
+# systemd-localed antwortet der Sitzung (Tastaturbelegung)
+allow systemd_locale_t unconfined_t:dbus send_msg;

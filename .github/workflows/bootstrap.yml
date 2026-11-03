@@ -201,13 +201,13 @@ jobs:
           sudo apt-get install -y -q qemu-system-x86 xorriso genisoimage socat imagemagick
           sudo chmod 666 /dev/kvm 2>/dev/null || true
           # ohne auditd und printk-Ratenlimit landen alle SELinux-Verweigerungen auf der Konsole (→ avc.txt)
-          APPEND="systemd.mask=auditd.service sysctl.kernel.printk_ratelimit=0 audit_backlog_limit=8192" \
+          APPEND="systemd.mask=auditd.service systemd.mask=audit-rules.service sysctl.kernel.printk_ratelimit=0 audit_backlog_limit=8192" \
             tools/desktop-test.sh out/desktop/symfonos-desktop-*.iso out/desktop-test
       - name: Desktop-Test mit SELinux enforcing (informativ)
         if: always() && steps.desktop.outcome == 'success'
         continue-on-error: true
         run: |
-          APPEND="enforcing=1 systemd.mask=auditd.service sysctl.kernel.printk_ratelimit=0 audit_backlog_limit=8192" \
+          APPEND="enforcing=1 systemd.mask=auditd.service systemd.mask=audit-rules.service sysctl.kernel.printk_ratelimit=0 audit_backlog_limit=8192" \
             TIMEOUT=600 tools/desktop-test.sh out/desktop/symfonos-desktop-*.iso out/desktop-test/enforcing
       - name: Desktop-Installationstest
         id: desktop_install
