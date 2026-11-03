@@ -1,0 +1,24 @@
+policy_module(symfonos, 1.0)
+
+# Ergänzungen zur Reference Policy für den symfonOS-Desktop (systemd 257, Plasma 6, SDDM).
+# Entstanden aus den Verweigerungen des Desktop-Tests (tools/avc-summary.py, Branch ci-diag: avc.txt).
+# Jede Regel trägt den Anlass; Ziel ist ein Desktop ohne Verweigerungen im Modus enforcing.
+
+gen_require(`
+	type syslogd_t, systemd_modules_load_t, systemd_locale_t, xdm_t, unconfined_t;
+	type tmpfs_t, cgroup_t;
+	class dir { read search };
+	class file { getattr read write };
+	class dbus { acquire_svc send_msg };
+')
+
+# journald liest seine Zugangsdaten unter /run/credentials und den Speicherdruck seiner cgroup
+allow syslogd_t tmpfs_t:dir search;
+allow syslogd_t cgroup_t:file { getattr read write };
+
+# systemd-modules-load liest /run/modprobe.d
+allow systemd_modules_load_t tmpfs_t:dir read;
+
+# Anmeldebildschirm (SDDM, KWin): Barrierefreiheits-Bus und Tastaturbelegung über systemd-localed
+allow xdm_t unconfined_t:dbus acquire_svc;
+allow systemd_locale_t xdm_t:dbus send_msg;
