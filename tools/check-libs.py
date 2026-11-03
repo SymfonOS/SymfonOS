@@ -4,6 +4,7 @@
     tools/check-libs.py WURZEL
 
 Ausgabe: je fehlender Bibliothek eine Zeile mit den ersten Nutzern; Exit 1, wenn etwas fehlt.
+Außerdem gemeldet: Verlinkung gegen libssp (avahi-daemon hing darin in __vsnprintf_chk).
 Fehlende Laufzeitabhängigkeiten eines Pakets (z. B. libcanberra ohne libtool → libltdl.so.7)
 fallen sonst erst auf, wenn ein Programm startet.
 """
@@ -60,6 +61,8 @@ def main(root):
                 except OSError:
                     continue
                 needed, runpath = dynamic(path)
+                if "libssp.so.0" in needed:  # glibc bringt den Stack-Schutz mit; libssp hängt in __vsnprintf_chk
+                    missing["!libssp.so.0"].append(os.path.relpath(path, root))
                 for so in needed:
                     if so in have or so.startswith("ld-linux"):
                         continue
@@ -71,7 +74,8 @@ def main(root):
                     if not any(os.path.exists(os.path.join(d, so)) for d in dirs):
                         missing[so].append(os.path.relpath(path, root))
     for so, users in sorted(missing.items()):
-        print(f"{so} fehlt für {', '.join(users[:3])}{' …' if len(users) > 3 else ''}")
+        what = f"{so[1:]} verlinkt (überflüssig, hängt unter glibc) in" if so.startswith("!") else f"{so} fehlt für"
+        print(f"{what} {', '.join(users[:3])}{' …' if len(users) > 3 else ''}")
     return 1 if missing else 0
 
 
