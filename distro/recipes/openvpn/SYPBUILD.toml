@@ -2,16 +2,16 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "openvpn"
-version = "2.6.14-1"
+version = "2.6.16-1"
 summary = "VPN (OpenVPN)"
 license = "GPL-2.0-only WITH openvpn-openssl-exception"
-url = "https://github.com/OpenVPN/openvpn/releases/download/v2.6.14/"
+url = "https://github.com/OpenVPN/openvpn/releases/download/v2.6.16/"
 depends = ["openssl", "lzo", "lz4", "libcap-ng", "libnl", "systemd", "linux-pam"]
 makedepends = ["python-docutils"]
 
 [[source]]
-url = "https://github.com/OpenVPN/openvpn/releases/download/v2.6.14/openvpn-2.6.14.tar.gz"
-sha256 = "9eb6a6618352f9e7b771a9d38ae1631b5edfeed6d40233e243e602ddf2195e7a"
+url = "https://github.com/OpenVPN/openvpn/releases/download/v2.6.16/openvpn-2.6.16.tar.gz"
+sha256 = "TODO"
 
 [build]
 style = "autotools"
