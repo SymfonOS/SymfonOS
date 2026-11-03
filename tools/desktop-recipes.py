@@ -782,17 +782,19 @@ pkg("udisks2", "2.10.1", "https://github.com/storaged-project/udisks/releases/do
 pkg("libdaemon", "0.14", "http://0pointer.de/lennart/projects/libdaemon/libdaemon-0.14.tar.gz",
     "Hilfsbibliothek für Dienste (Avahi)", "LGPL-2.1-or-later", ["glibc"], style="autotools",
     flags="--disable-static --disable-lynx --disable-examples")
+# --disable-stack-protector: sonst linkt configure libssp dazu, dessen __vsnprintf_chk unter glibc endlos läuft –
+# avahi-daemon hing beim ersten Logeintrag (Stack-Schutz kommt ohnehin über die CFLAGS und glibc)
 pkg("avahi", "0.8", "https://github.com/avahi/avahi/releases/download/v0.8/avahi-0.8.tar.gz",
     "mDNS/DNS-SD (Drucker und Dienste im lokalen Netz finden)", "LGPL-2.1-or-later",
     ["glib2", "dbus", "expat", "libdaemon", "systemd"], ["gettext", "intltool", "perl-xml-parser"], style="autotools",
     flags="--sysconfdir=/etc --localstatedir=/var --runstatedir=/run --disable-static --disable-libevent "
           "--disable-mono --disable-monodoc --disable-python --disable-qt3 --disable-qt4 --disable-qt5 --disable-gtk "
           "--disable-gtk3 --disable-core-docs --disable-manpages --disable-xmltoman --disable-dbm --disable-gdbm "
-          "--disable-autoipd --disable-tests --enable-compat-libdns_sd --with-distro=none "
+          "--disable-autoipd --disable-tests --enable-compat-libdns_sd --with-distro=none --disable-stack-protector "
           "--with-systemdsystemunitdir=/usr/lib/systemd/system",
     post='''install -Dm644 /dev/stdin "$DESTDIR/usr/lib/sysusers.d/avahi.conf" <<'SYS'
 u avahi - "Avahi mDNS/DNS-SD" /run/avahi-daemon
-SYS''', backup=["etc/avahi/avahi-daemon.conf"])
+SYS''', backup=["etc/avahi/avahi-daemon.conf"], rel=2)
 pkg("cups", "2.4.14", "https://github.com/OpenPrinting/cups/releases/download/v2.4.14/cups-2.4.14-source.tar.gz",
     "Drucksystem (CUPS)", "Apache-2.0", ["gnutls", "dbus", "avahi", "linux-pam", "libusb", "systemd", "zlib", "acl"],
     style="autotools", dir="cups-2.4.14",

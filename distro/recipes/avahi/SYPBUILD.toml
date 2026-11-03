@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "avahi"
-version = "0.8-1"
+version = "0.8-2"
 summary = "mDNS/DNS-SD (Drucker und Dienste im lokalen Netz finden)"
 license = "LGPL-2.1-or-later"
 url = "https://github.com/avahi/avahi/releases/download/v0.8/"
@@ -16,7 +16,7 @@ sha256 = "060309d7a333d38d951bc27598c677af1796934dbd98e1024e7ad8de798fedda"
 
 [build]
 style = "autotools"
-configure_flags = "--sysconfdir=/etc --localstatedir=/var --runstatedir=/run --disable-static --disable-libevent --disable-mono --disable-monodoc --disable-python --disable-qt3 --disable-qt4 --disable-qt5 --disable-gtk --disable-gtk3 --disable-core-docs --disable-manpages --disable-xmltoman --disable-dbm --disable-gdbm --disable-autoipd --disable-tests --enable-compat-libdns_sd --with-distro=none --with-systemdsystemunitdir=/usr/lib/systemd/system"
+configure_flags = "--sysconfdir=/etc --localstatedir=/var --runstatedir=/run --disable-static --disable-libevent --disable-mono --disable-monodoc --disable-python --disable-qt3 --disable-qt4 --disable-qt5 --disable-gtk --disable-gtk3 --disable-core-docs --disable-manpages --disable-xmltoman --disable-dbm --disable-gdbm --disable-autoipd --disable-tests --enable-compat-libdns_sd --with-distro=none --disable-stack-protector --with-systemdsystemunitdir=/usr/lib/systemd/system"
 post_install = '''
 install -Dm644 /dev/stdin "$DESTDIR/usr/lib/sysusers.d/avahi.conf" <<'SYS'
 u avahi - "Avahi mDNS/DNS-SD" /run/avahi-daemon
