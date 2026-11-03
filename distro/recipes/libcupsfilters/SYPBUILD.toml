@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libcupsfilters"
+version = "2.1.1-1"
+summary = "Druckfilter-Bibliothek (OpenPrinting)"
+license = "Apache-2.0"
+url = "https://github.com/OpenPrinting/libcupsfilters/releases/download/2.1.1/"
+depends = ["cups", "qpdf", "fontconfig", "freetype", "lcms2", "libjpeg-turbo", "libpng", "libtiff", "dbus", "ghostscript"]
+
+[[source]]
+url = "https://github.com/OpenPrinting/libcupsfilters/releases/download/2.1.1/libcupsfilters-2.1.1.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--disable-static --disable-poppler --disable-mutool --disable-exif --enable-dbus --with-gs-path=/usr/bin/gs --with-ippfind-path=/usr/bin/ippfind --with-test-font-path=/usr/share/fonts/dejavu/DejaVuSans.ttf"

@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "qpdf"
+version = "12.2.0-1"
+summary = "PDF-Umwandlung (qpdf; Druckfilter)"
+license = "Apache-2.0"
+url = "https://github.com/qpdf/qpdf/releases/download/v12.2.0/"
+depends = ["zlib", "libjpeg-turbo", "gnutls"]
+makedepends = ["cmake"]
+
+[[source]]
+url = "https://github.com/qpdf/qpdf/releases/download/v12.2.0/qpdf-12.2.0.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "cmake"
+configure_flags = "-DCMAKE_BUILD_TYPE=Release -DBUILD_STATIC_LIBS=OFF -DCMAKE_INSTALL_LIBDIR=lib -DBUILD_DOC=OFF"

@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "symfonos-desktop-config"
-version = "1.0-6"
+version = "1.0-7"
 arch = "any"
 summary = "symfonOS-Desktop: Farbschemata, globales Design, SDDM (Wayland), PAM, Voreinstellungen"
 license = "GPL-3.0-or-later"
@@ -29,6 +29,11 @@ enable sddm.service
 enable accounts-daemon.service
 enable upower.service
 enable bluetooth.service
+# Drucken: CUPS startet bei Bedarf über den Socket, Avahi findet Netzwerkdrucker
+enable cups.socket
+enable cups.path
+enable avahi-daemon.service
+enable avahi-daemon.socket
 # Desktop-Netz über NetworkManager (WLAN über iwd); systemd-networkd darf dieselben Schnittstellen nicht verwalten
 enable NetworkManager.service
 disable systemd-networkd.service

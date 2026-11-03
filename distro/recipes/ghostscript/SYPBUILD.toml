@@ -1,0 +1,31 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "ghostscript"
+version = "10.05.1-1"
+summary = "PostScript- und PDF-Interpreter (Rasterung für Drucker)"
+license = "AGPL-3.0-or-later"
+url = "https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs10051/"
+depends = ["fontconfig", "freetype", "libjpeg-turbo", "libpng", "libtiff", "zlib", "cups", "dejavu-fonts"]
+
+[[source]]
+url = "https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs10051/ghostscript-10.05.1.tar.xz"
+sha256 = "TODO"
+
+[build]
+build = '''
+cd "$S"
+rm -rf freetype jpeg libpng zlib tiff
+./configure --prefix=/usr --disable-compile-inits --with-system-libtiff --without-x --disable-gtk --without-tesseract \
+  --without-libpaper --without-ijs
+make
+make so
+'''
+package = '''
+cd "$S"
+make DESTDIR="$DESTDIR" install
+make DESTDIR="$DESTDIR" soinstall
+install -d "$DESTDIR/usr/include/ghostscript"
+install -m644 base/*.h "$DESTDIR/usr/include/ghostscript"
+ln -sfn ghostscript "$DESTDIR/usr/include/ps"
+'''

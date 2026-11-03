@@ -1,0 +1,24 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "avahi"
+version = "0.8-1"
+summary = "mDNS/DNS-SD (Drucker und Dienste im lokalen Netz finden)"
+license = "LGPL-2.1-or-later"
+url = "https://github.com/avahi/avahi/releases/download/v0.8/"
+depends = ["glib2", "dbus", "expat", "libdaemon", "systemd"]
+makedepends = ["gettext", "intltool", "perl-xml-parser"]
+backup = ["etc/avahi/avahi-daemon.conf"]
+
+[[source]]
+url = "https://github.com/avahi/avahi/releases/download/v0.8/avahi-0.8.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--sysconfdir=/etc --localstatedir=/var --runstatedir=/run --disable-static --disable-libevent --disable-mono --disable-monodoc --disable-python --disable-qt3 --disable-qt4 --disable-qt5 --disable-gtk --disable-gtk3 --disable-core-docs --disable-manpages --disable-xmltoman --disable-dbm --disable-gdbm --disable-autoipd --disable-tests --enable-compat-libdns_sd --with-distro=none --with-systemdsystemunitdir=/usr/lib/systemd/system"
+post_install = '''
+install -Dm644 /dev/stdin "$DESTDIR/usr/lib/sysusers.d/avahi.conf" <<'SYS'
+u avahi - "Avahi mDNS/DNS-SD" /run/avahi-daemon
+SYS
+'''

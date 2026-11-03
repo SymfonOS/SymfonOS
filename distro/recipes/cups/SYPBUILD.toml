@@ -1,0 +1,30 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "cups"
+version = "2.4.14-1"
+summary = "Drucksystem (CUPS)"
+license = "Apache-2.0"
+url = "https://github.com/OpenPrinting/cups/releases/download/v2.4.14/"
+depends = ["gnutls", "dbus", "avahi", "linux-pam", "libusb", "systemd", "zlib", "acl"]
+provides = ["so:libcups.so.2", "so:libcupsimage.so.2"]
+backup = ["etc/cups/cupsd.conf", "etc/cups/cups-files.conf", "etc/cups/snmp.conf", "etc/pam.d/cups"]
+
+[[source]]
+url = "https://github.com/OpenPrinting/cups/releases/download/v2.4.14/cups-2.4.14-source.tar.gz"
+sha256 = "TODO"
+
+[build]
+dir = "cups-2.4.14"
+style = "autotools"
+configure_flags = "--libdir=/usr/lib --with-rundir=/run/cups --with-system-groups='lpadmin wheel' --with-cups-user=lp --with-cups-group=lp --with-tls=gnutls --with-dnssd=avahi --enable-libusb --with-systemd=/usr/lib/systemd/system --with-docdir=/usr/share/cups/doc --disable-static"
+package = '''
+cd "$S"
+make BUILDROOT="$DESTDIR" install
+rm -rf "$DESTDIR/etc/rc.d" "$DESTDIR/etc/init.d" "$DESTDIR/run"
+install -Dm644 /dev/stdin "$DESTDIR/usr/lib/sysusers.d/cups.conf" <<'SYS'
+g lp - -
+u lp - "Drucksystem" /var/spool/cups
+g lpadmin - -
+SYS
+'''
