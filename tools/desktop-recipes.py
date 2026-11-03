@@ -1327,6 +1327,12 @@ gear("kate", KF_GUI + ["ktexteditor", "kitemmodels", "knewstuff", "kuserfeedback
 gear("ark", KF_GUI + ["libarchive", "kparts", "kpty", "kfilemetadata", "libzip", "xz", "zstd"], "Archivverwaltung",
      mk=["kdoctools"])
 gear("kcalc", KF_GUI + ["gmp", "mpfr", "kguiaddons", "knotifications"], "Taschenrechner", mk=["kdoctools"])
+# Medien über Qt Multimedia (FFmpeg-Backend): Videos mit Dragon Player, Musik mit Elisa (ohne libVLC)
+gear("dragon", ["kcoreaddons", "kcrash", "ki18n", "kio", "kwindowsystem", "kirigami", "kconfig", "qt6-multimedia",
+                QD, "ffmpeg"], "Videoplayer (Dragon Player)")
+gear("elisa", ["kcoreaddons", "kcrash", "ki18n", "kio", "kiconthemes", "kfilemetadata", "baloo", "kxmlgui", "kconfig",
+               "kcolorscheme", "kcodecs", "kdbusaddons", "kirigami", "kirigami-addons", "qqc2-desktop-style",
+               "qt6-multimedia", "qt6-svg", QD], "Musikplayer (Elisa)", license="LGPL-3.0-or-later")
 gear("okular", KF_GUI + ["karchive", "kbookmarks", "kcompletion", "kconfigwidgets", "threadweaver", "kparts",
                          "kcolorscheme", "ktextwidgets", "kitemviews", "purpose", "kwallet", "plasma-activities",
                          "phonon", "qt6-speech", "qt6-svg", "poppler", "freetype", "libtiff", "zlib"],
@@ -1419,11 +1425,11 @@ DESKTOP = ["symfonos-base", "symfonos-desktop-config", "plasma-desktop", "plasma
            "polkit-kde-agent-1", "plasma-systemmonitor", "ksystemstats", "kdeplasma-addons", "ocean-sound-theme",
            "kactivitymanagerd", "kglobalacceld", "kimageformats", "qt6-imageformats", "qt6-translations",
            "qt6-wayland", "mesa", "vulkan-loader", "libva", "pipewire", "wireplumber", "alsa-utils", "ffmpeg",
-           "xdg-user-dirs", "networkmanager", "networkmanager-openvpn", "plasma-nm", "bluez", "bluedevil", "udisks2", "cups", "cups-filters", "nss-mdns", "print-manager", "konsole", "dolphin", "kate", "ark", "gwenview", "okular", "spectacle", "kcalc", "kcharselect",
+           "xdg-user-dirs", "networkmanager", "networkmanager-openvpn", "plasma-nm", "bluez", "bluedevil", "udisks2", "cups", "cups-filters", "nss-mdns", "print-manager", "konsole", "dolphin", "kate", "ark", "gwenview", "okular", "dragon", "elisa", "spectacle", "kcalc", "kcharselect",
            "inter-font", "jetbrains-mono-font", "dejavu-fonts", "noto-color-emoji", "hunspell", "upower",
            "accountsservice", "polkit"]
 pkg("symfonos-desktop", "2025.10", [], "symfonOS-Desktop (KDE Plasma 6, Wayland, PipeWire)", "GPL-3.0-or-later",
-    DESKTOP, arch="any", style="meta", rel=9)
+    DESKTOP, arch="any", style="meta", rel=10)
 
 # ---------------------------------------------------------------------------------------------------
 # Rezepte schreiben
