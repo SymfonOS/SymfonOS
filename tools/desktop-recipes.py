@@ -763,7 +763,7 @@ pkg("udisks2", "2.10.1", "https://github.com/storaged-project/udisks/releases/do
      "e2fsprogs"], ["gettext", "libxslt"], style="autotools",
     flags="--sysconfdir=/etc --localstatedir=/var --disable-static --disable-man --disable-gtk-doc "
           "--disable-introspection --with-systemdsystemunitdir=/usr/lib/systemd/system --with-udevdir=/usr/lib/udev",
-    backup=["etc/udisks2/udisks2.conf", "etc/udisks2/mount_options.conf"])
+    backup=["etc/udisks2/udisks2.conf"], rel=2)
 pkg("xdg-user-dirs", "0.18", "https://user-dirs.freedesktop.org/releases/xdg-user-dirs-0.18.tar.gz",
     "Standardordner (Dokumente, Bilder, Musik …)", "GPL-2.0-or-later", ["glibc"], style="autotools",
     flags="--disable-documentation", backup=["etc/xdg/user-dirs.conf", "etc/xdg/user-dirs.defaults"])
