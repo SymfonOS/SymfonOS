@@ -247,12 +247,12 @@ pkg("poppler-data", "0.4.12", "https://poppler.freedesktop.org/poppler-data-0.4.
     build=":", package='cd "$S"\nmake prefix=/usr DESTDIR="$DESTDIR" install')
 pkg("poppler", "25.08.0", "https://poppler.freedesktop.org/poppler-25.08.0.tar.xz", "PDF-Bibliothek (Poppler)",
     "GPL-2.0-or-later", ["fontconfig", "freetype", "libjpeg-turbo", "libpng", "libtiff", "openjpeg", "lcms2", "curl",
-                         "zlib", "qt6-base", "poppler-data"], ["cmake", "ninja", "pkgconf"], style="cmake",
+                         "zlib", "qt6-base", "poppler-data", "cairo"], ["cmake", "ninja", "pkgconf"], style="cmake",
     flags="-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_LIBDIR=lib -DENABLE_QT5=OFF -DENABLE_QT6=ON -DENABLE_GLIB=OFF "
           "-DENABLE_GOBJECT_INTROSPECTION=OFF -DENABLE_BOOST=OFF -DENABLE_NSS3=OFF -DENABLE_GPGME=OFF "
           "-DENABLE_LIBCURL=ON -DENABLE_LCMS=ON -DENABLE_LIBOPENJPEG=openjpeg2 -DENABLE_DCTDECODER=libjpeg "
           "-DENABLE_UNSTABLE_API_ABI_HEADERS=ON -DBUILD_GTK_TESTS=OFF -DBUILD_QT5_TESTS=OFF -DBUILD_QT6_TESTS=OFF "
-          "-DBUILD_CPP_TESTS=OFF -DBUILD_MANUAL_TESTS=OFF -DENABLE_UTILS=ON")
+          "-DBUILD_CPP_TESTS=OFF -DBUILD_MANUAL_TESTS=OFF -DENABLE_UTILS=ON", rel=2)  # cairo: pdftocairo
 pkg("libjpeg-turbo", "3.0.1", "https://downloads.sourceforge.net/libjpeg-turbo/libjpeg-turbo-3.0.1.tar.gz",
     "JPEG-Bibliothek", "IJG AND BSD-3-Clause AND Zlib", ["glibc"], ["cmake", "nasm"], style="cmake",
     flags="-DENABLE_STATIC=FALSE -DCMAKE_INSTALL_DEFAULT_LIBDIR=lib -DCMAKE_INSTALL_LIBDIR=/usr/lib -DCMAKE_SKIP_INSTALL_RPATH=ON",
