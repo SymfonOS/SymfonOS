@@ -11,7 +11,7 @@ makedepends = ["python-docutils"]
 
 [[source]]
 url = "https://github.com/OpenVPN/openvpn/releases/download/v2.6.14/openvpn-2.6.14.tar.gz"
-sha256 = "TODO"
+sha256 = "9eb6a6618352f9e7b771a9d38ae1631b5edfeed6d40233e243e602ddf2195e7a"
 
 [build]
 style = "autotools"
