@@ -2,13 +2,13 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "udisks2"
-version = "2.10.1-1"
+version = "2.10.1-2"
 summary = "Laufwerksverwaltung (UDisks2)"
 license = "GPL-2.0-or-later AND LGPL-2.0-or-later"
 url = "https://github.com/storaged-project/udisks/releases/download/udisks-2.10.1/"
 depends = ["glib2", "polkit", "libgudev", "systemd", "libblockdev", "libatasmart", "util-linux", "acl", "dosfstools", "e2fsprogs"]
 makedepends = ["gettext", "libxslt"]
-backup = ["etc/udisks2/udisks2.conf", "etc/udisks2/mount_options.conf"]
+backup = ["etc/udisks2/udisks2.conf"]
 
 [[source]]
 url = "https://github.com/storaged-project/udisks/releases/download/udisks-2.10.1/udisks-2.10.1.tar.bz2"
