@@ -794,8 +794,10 @@ PC''', makedepends=["perl", "pkgconf"])
 pkg("xl2tpd", "1.3.18", {"url": "https://github.com/xelerance/xl2tpd/archive/v1.3.18/xl2tpd-1.3.18.tar.gz",
                          "filename": "xl2tpd-1.3.18.tar.gz"},
     "L2TP-Dienst", "GPL-2.0-or-later", ["libpcap"],
-    build='cd "$S"\nmake PREFIX=/usr',
-    package='cd "$S"\nmake PREFIX=/usr SBINDIR="$DESTDIR/usr/sbin" BINDIR="$DESTDIR/usr/bin" MANDIR="$DESTDIR/usr/share/man" install')
+    # GCC 15 übersetzt als C23 (leere Prototypen); das Makefile hängt mit CFLAGS+= an die Umgebung an
+    build='cd "$S"\nCFLAGS="$CFLAGS -std=gnu17" make PREFIX=/usr',
+    package='cd "$S"\nmake PREFIX=/usr SBINDIR="$DESTDIR/usr/sbin" BINDIR="$DESTDIR/usr/bin" MANDIR="$DESTDIR/usr/share/man" install',
+    rel=2)
 pkg("strongswan", "6.0.2", "https://download.strongswan.org/strongswan-6.0.2.tar.bz2", "IPsec (strongSwan)",
     "GPL-2.0-or-later", ["openssl", "gmp", "systemd", "curl"], style="autotools",
     flags="--sysconfdir=/etc --enable-stroke --enable-openssl --enable-systemd --enable-swanctl --enable-curl "
