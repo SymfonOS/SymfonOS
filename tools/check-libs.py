@@ -15,6 +15,8 @@ import sys
 
 # Plugins, die nur ein Entwicklungswerkzeug lädt (Qt Designer), und Firmware (keine Linux-ELF-Programme)
 IGNORE = ("usr/lib/qt6/plugins/designer/", "usr/lib/firmware/")
+# Plugins lädt ein Programm, das seine privaten Bibliotheken schon geladen hat (Discover: libDiscoverCommon.so)
+PLUGINS = ("usr/lib/qt6/plugins/",)
 
 
 def libdirs(root):
@@ -44,6 +46,11 @@ def main(root):
         p = os.path.join(root, d)
         if os.path.isdir(p):
             have.update(os.listdir(p))
+    # Bibliotheken in privaten Unterordnern (usr/lib/plasma-discover …): Plugins bekommen sie vom Programm, das sie lädt
+    private = set()
+    for base, _, files in os.walk(os.path.join(root, "usr/lib")):
+        if base != os.path.join(root, "usr/lib"):
+            private.update(f for f in files if ".so" in f)
     missing = collections.defaultdict(list)
     for top in ("usr/bin", "usr/lib"):
         for base, _, files in os.walk(os.path.join(root, top)):
@@ -72,6 +79,8 @@ def main(root):
                     dirs = [base] + [r.replace("$ORIGIN", base) if "$ORIGIN" in r else os.path.join(root, r.lstrip("/"))
                                      for r in runpath]
                     if not any(os.path.exists(os.path.join(d, so)) for d in dirs):
+                        if rel_base.startswith(PLUGINS) and so in private:
+                            continue
                         missing[so].append(os.path.relpath(path, root))
     for so, users in sorted(missing.items()):
         what = f"{so[1:]} verlinkt (überflüssig, hängt unter glibc) in" if so.startswith("!") else f"{so} fehlt für"
