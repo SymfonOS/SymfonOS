@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "gpgme"
+version = "1.24.3-1"
+summary = "GnuPG Made Easy (Signaturprüfung für ostree/Flatpak)"
+license = "LGPL-2.1-or-later"
+url = "https://www.gnupg.org/ftp/gcrypt/gpgme/"
+depends = ["gnupg", "libassuan", "libgpg-error"]
+
+[[source]]
+url = "https://www.gnupg.org/ftp/gcrypt/gpgme/gpgme-1.24.3.tar.bz2"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--disable-static --enable-languages=cpp --disable-gpg-test --disable-gpgsm-test --disable-gpgconf-test --disable-g13-test"

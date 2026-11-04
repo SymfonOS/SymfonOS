@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "appstream"
+version = "1.1.0-1"
+summary = "Programmkatalog-Metadaten (AppStream, mit Qt-Anbindung)"
+license = "LGPL-2.1-or-later"
+url = "https://www.freedesktop.org/software/appstream/releases/"
+depends = ["glib2", "curl", "libxml2", "libfyaml", "libxmlb", "zstd", "systemd", "qt6-base"]
+makedepends = ["meson", "gperf", "gettext"]
+
+[[source]]
+url = "https://www.freedesktop.org/software/appstream/releases/AppStream-1.1.0.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Dstemming=false -Dsystemd=true -Dvapi=false -Dqt=true -Dqt-versions=6 -Dcompose=false -Dgir=false -Dsvg-support=false -Dzstd-support=true -Ddocs=false -Dapidocs=false -Dinstall-docs=false"

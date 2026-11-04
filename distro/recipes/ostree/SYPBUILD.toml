@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "ostree"
+version = "2025.6-1"
+summary = "Versionierte Dateisystembäume (Speicher für Flatpak)"
+license = "LGPL-2.0-or-later"
+url = "https://github.com/ostreedev/ostree/releases/download/v2025.6/"
+depends = ["glib2", "xz", "zlib", "e2fsprogs", "curl", "gpgme", "libarchive", "libselinux", "openssl", "util-linux", "systemd", "fuse3"]
+makedepends = ["bison", "libxslt"]
+
+[[source]]
+url = "https://github.com/ostreedev/ostree/releases/download/v2025.6/libostree-2025.6.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--with-curl --without-soup --without-soup3 --with-gpgme --with-openssl --with-libarchive --with-selinux --without-avahi --without-composefs --without-dracut --with-libsystemd --disable-man --disable-gtk-doc --with-systemdsystemunitdir=/usr/lib/systemd/system"

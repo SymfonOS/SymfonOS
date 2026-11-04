@@ -1,0 +1,26 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "flatpak"
+version = "1.16.1-1"
+summary = "Programme in Sandboxen (Flatpak), mit Flathub als Quelle"
+license = "LGPL-2.1-or-later"
+url = "https://github.com/flatpak/flatpak/releases/download/1.16.1/"
+depends = ["glib2", "libarchive", "curl", "libxml2", "zstd", "systemd", "polkit", "fuse3", "libxau", "ostree", "json-glib", "appstream", "gdk-pixbuf", "libseccomp", "gpgme", "libcap", "bubblewrap", "xdg-dbus-proxy", "wayland", "libselinux"]
+makedepends = ["meson", "python", "wayland-protocols", "libxslt"]
+
+[[source]]
+url = "https://github.com/flatpak/flatpak/releases/download/1.16.1/flatpak-1.16.1.tar.xz"
+sha256 = "TODO"
+
+[[source]]
+url = "https://dl.flathub.org/repo/flathub.flatpakrepo"
+sha256 = "TODO"
+extract = false
+
+[build]
+style = "meson"
+configure_flags = "-Dsystem_bubblewrap=/usr/bin/bwrap -Dsystem_dbus_proxy=/usr/bin/xdg-dbus-proxy -Dhttp_backend=curl -Dgir=disabled -Dgtkdoc=disabled -Ddocbook_docs=disabled -Dman=disabled -Dtests=false -Dinstalled_tests=false -Dmalcontent=disabled -Ddconf=disabled -Dselinux_module=disabled -Dsystem_helper=enabled -Dwayland_security_context=enabled -Dsystemd=enabled"
+post_install = '''
+install -Dm644 "$SRCDIR/flathub.flatpakrepo" "$DESTDIR/etc/flatpak/remotes.d/flathub.flatpakrepo"
+'''

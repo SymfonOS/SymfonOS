@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "gnupg"
+version = "2.4.8-1"
+summary = "GNU Privacy Guard"
+license = "GPL-3.0-or-later"
+url = "https://www.gnupg.org/ftp/gcrypt/gnupg/"
+depends = ["libgpg-error", "libgcrypt", "libassuan", "libksba", "npth", "zlib", "bzip2", "readline", "sqlite", "gnutls"]
+
+[[source]]
+url = "https://www.gnupg.org/ftp/gcrypt/gnupg/gnupg-2.4.8.tar.bz2"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--disable-ldap --disable-doc"

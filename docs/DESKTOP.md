@@ -18,6 +18,7 @@ Version für Version zur Basis und sind von den BLFS-Autoren gemeinsam getestet.
 | Audio und Video | PipeWire 1.4 mit WirePlumber als Ersatz für PulseAudio und JACK (niedrige Latenz), ALSA, FFmpeg 7.1 mit AV1, VP9, H.264, H.265, Opus, VA-API und Vulkan; GStreamer 1.26 nur als Bibliothek für die Desktop-Portale |
 | Qt | Qt 6.9.2, jedes Modul ein eigenes Paket (`qt6-base`, `qt6-declarative`, `qt6-wayland` …), Verzeichnisse wie bei Fedora und Arch |
 | KDE | KDE Frameworks 6.17, Plasma 6.4.4 (KWin nur Wayland), SDDM 0.21 mit Wayland-Anmeldebildschirm über KWin |
+| Programme installieren | Discover mit Flatpak 1.16 und **Flathub** als vorbelegter Quelle (`/etc/flatpak/remotes.d/`), KDE Store über KNewStuff; Berechtigungen der Flatpak-Programme in den Systemeinstellungen (`flatpak-kcm`). Programme von Flathub sind vorgebaut (nicht aus diesem Repository) und laufen in einer bubblewrap-Sandbox; Signaturen prüft ostree mit GnuPG. Systempakete bleiben bei `syp` |
 | Programme | Konsole, Dolphin, Kate, Ark, Gwenview, Okular (PDF mit Poppler), Dragon Player (Video) und Elisa (Musik) über Qt Multimedia, Spectacle (Bildschirmfotos, Taste „Druck“), KCalc, KCharSelect, Systemmonitor, Systemeinstellungen |
 | Schriften | Inter (Oberfläche), JetBrains Mono (Terminal), DejaVu, Noto Color Emoji |
 
@@ -63,5 +64,6 @@ Vollständige Logs und die Bildschirmfotos jedes Laufs liegen auf dem Branch `ci
 ## Noch nicht enthalten
 
 - **Weitere VPN-Erweiterungen und PPP** für NetworkManager (OpenConnect, L2TP/IPsec, DSL).
-- **Webbrowser:** Firefox braucht Rust und Node.js, Falkon braucht QtWebEngine.
+- **Webbrowser aus dem Quellcode:** Firefox braucht Rust und Node.js, Falkon braucht QtWebEngine; beide passen nicht in eine Bauetappe der CI. Bis dahin kommt ein Browser über Flathub (z. B. `flatpak install flathub org.mozilla.firefox` oder in Discover).
+- **SELinux für Flatpak:** Programme laufen als `unconfined_t` in der bubblewrap-Sandbox; der Systemhelfer (`flatpak-system-helper`) hat noch kein eigenes Modul und ist im enforcing-Test noch nicht abgedeckt.
 - **Kreativprogramme** (Krita, Blender, Ardour …) und PySide6 für die symfonOS-Apps folgen als nächste Stufe.
