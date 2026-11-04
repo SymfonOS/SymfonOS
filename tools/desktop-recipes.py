@@ -737,7 +737,8 @@ pkg("libndp", "1.9", "http://libndp.org/files/libndp-1.9.tar.gz", "IPv6-Neighbor
 pkg("ppp", "2.5.2", "https://download.samba.org/pub/ppp/ppp-2.5.2.tar.gz", "Point-to-Point-Protokoll (pppd; DSL, Modems)",
     "BSD-3-Clause AND GPL-2.0-or-later", ["openssl", "libpcap", "linux-pam", "systemd"], style="autotools",
     flags="--with-runtime-dir=/run/ppp --with-logfile-dir=/var/log/ppp --with-system-ca-path=/etc/ssl/certs "
-          "--enable-systemd --enable-multilink --enable-cbcp")
+          # GCC 15 übersetzt als C23; pppdump nutzt noch K&R-Prototypen
+          "--enable-systemd --enable-multilink --enable-cbcp CFLAGS=\"$CFLAGS -std=gnu17\"", rel=2)
 pkg("mobile-broadband-provider-info", "20240407",
     "https://download.gnome.org/sources/mobile-broadband-provider-info/20240407/mobile-broadband-provider-info-20240407.tar.xz",
     "Zugangsdaten der Mobilfunkanbieter (APN)", "CC-PDDC", [], ["meson", "libxslt"], style="meson", arch="any")
