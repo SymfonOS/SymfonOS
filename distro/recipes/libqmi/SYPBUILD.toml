@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libqmi"
+version = "1.36.0-1"
+summary = "QMI-Protokoll (Qualcomm-Modems)"
+license = "LGPL-2.1-or-later AND GPL-2.0-or-later"
+url = "https://gitlab.freedesktop.org/mobile-broadband/libqmi/-/archive/1.36.0/"
+depends = ["glib2", "libgudev", "libmbim", "libqrtr-glib"]
+makedepends = ["meson", "python"]
+
+[[source]]
+url = "https://gitlab.freedesktop.org/mobile-broadband/libqmi/-/archive/1.36.0/libqmi-1.36.0.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Dmbim_qmux=true -Dqrtr=true -Dudev=true -Dintrospection=false -Dgtk_doc=false -Dman=false -Dbash_completion=false"

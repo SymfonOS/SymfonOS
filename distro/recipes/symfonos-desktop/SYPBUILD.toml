@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "symfonos-desktop"
-version = "2025.10-11"
+version = "2025.10-12"
 arch = "any"
 summary = "symfonOS-Desktop (KDE Plasma 6, Wayland, PipeWire)"
 license = "GPL-3.0-or-later"

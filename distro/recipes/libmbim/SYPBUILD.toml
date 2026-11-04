@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libmbim"
+version = "1.32.0-1"
+summary = "MBIM-Protokoll (Mobilfunkmodems)"
+license = "LGPL-2.1-or-later AND GPL-2.0-or-later"
+url = "https://gitlab.freedesktop.org/mobile-broadband/libmbim/-/archive/1.32.0/"
+depends = ["glib2"]
+makedepends = ["meson", "python"]
+
+[[source]]
+url = "https://gitlab.freedesktop.org/mobile-broadband/libmbim/-/archive/1.32.0/libmbim-1.32.0.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Dintrospection=false -Dgtk_doc=false -Dman=false -Dbash_completion=false"

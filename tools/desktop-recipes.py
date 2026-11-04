@@ -730,16 +730,36 @@ pkg("accountsservice", "23.13.9", "https://www.freedesktop.org/software/accounts
     flags="-Dadmin_group=wheel -Dintrospection=false -Dvapi=false -Ddocbook=false -Dgtk_doc=false")
 # NetworkManager veröffentlicht seine Tarballs als GitLab-Release-Dateien.
 # NetworkManager für das Desktop-Netz (WLAN über iwd, DNS über systemd-resolved); das Basissystem bleibt bei
-# systemd-networkd. Ohne PPP, Modem, OVS, Cloud-Setup und nmtui (newt).
+# systemd-networkd. Mit DSL (PPPoE über pppd) und Mobilfunk (ModemManager); ohne OVS, Cloud-Setup und nmtui (newt).
 pkg("libndp", "1.9", "http://libndp.org/files/libndp-1.9.tar.gz", "IPv6-Neighbor-Discovery (NetworkManager)",
     "LGPL-2.1-or-later", ["glibc"], style="autotools")
+# DSL (PPPoE) und Mobilfunk: pppd für NetworkManager; ModemManager spricht moderne LTE/5G-Modems über MBIM und QMI
+pkg("ppp", "2.5.2", "https://download.samba.org/pub/ppp/ppp-2.5.2.tar.gz", "Point-to-Point-Protokoll (pppd; DSL, Modems)",
+    "BSD-3-Clause AND GPL-2.0-or-later", ["openssl", "libpcap", "linux-pam", "systemd"], style="autotools",
+    flags="--with-runtime-dir=/run/ppp --with-logfile-dir=/var/log/ppp --with-system-ca-path=/etc/ssl/certs "
+          "--enable-systemd --enable-multilink --enable-cbcp")
+pkg("mobile-broadband-provider-info", "20240407",
+    "https://download.gnome.org/sources/mobile-broadband-provider-info/20240407/mobile-broadband-provider-info-20240407.tar.xz",
+    "Zugangsdaten der Mobilfunkanbieter (APN)", "CC-PDDC", [], ["meson", "libxslt"], style="meson", arch="any")
+pkg("libmbim", "1.32.0", {"url": "https://gitlab.freedesktop.org/mobile-broadband/libmbim/-/archive/1.32.0/libmbim-1.32.0.tar.gz"},
+    "MBIM-Protokoll (Mobilfunkmodems)", "LGPL-2.1-or-later AND GPL-2.0-or-later", ["glib2"], ["meson", "python"],
+    style="meson", flags="-Dintrospection=false -Dgtk_doc=false -Dman=false -Dbash_completion=false")
+pkg("libqrtr-glib", "1.2.2", {"url": "https://gitlab.freedesktop.org/mobile-broadband/libqrtr-glib/-/archive/1.2.2/libqrtr-glib-1.2.2.tar.gz"},
+    "QRTR-Bus (Qualcomm-Modems)", "LGPL-2.1-or-later", ["glib2"], ["meson"], style="meson",
+    flags="-Dintrospection=false -Dgtk_doc=false")
+pkg("libqmi", "1.36.0", {"url": "https://gitlab.freedesktop.org/mobile-broadband/libqmi/-/archive/1.36.0/libqmi-1.36.0.tar.gz"},
+    "QMI-Protokoll (Qualcomm-Modems)", "LGPL-2.1-or-later AND GPL-2.0-or-later", ["glib2", "libgudev", "libmbim",
+                                                                                 "libqrtr-glib"],
+    ["meson", "python"], style="meson",
+    flags="-Dmbim_qmux=true -Dqrtr=true -Dudev=true -Dintrospection=false -Dgtk_doc=false -Dman=false "
+          "-Dbash_completion=false")
 pkg("networkmanager", "1.54.0", "https://gitlab.freedesktop.org/NetworkManager/NetworkManager/-/releases/1.54.0/downloads/NetworkManager-1.54.0.tar.xz",
     "Netzwerkverwaltung (NetworkManager)", "GPL-2.0-or-later AND LGPL-2.1-or-later",
     ["glib2", "dbus", "systemd", "util-linux", "libndp", "curl", "gnutls", "polkit", "libselinux", "readline", "iwd",
-     "nftables"], ["meson", "python", "libxslt"], style="meson",  # xsltproc: Pflicht in meson.build
+     "nftables", "ppp", "modemmanager", "mobile-broadband-provider-info"], ["meson", "python", "libxslt"], style="meson",  # xsltproc: Pflicht in meson.build
     flags="-Dsession_tracking=systemd -Dsession_tracking_consolekit=false -Dsuspend_resume=systemd -Dpolkit=true "
           "-Dselinux=true -Dlibaudit=no -Dwext=false -Dwifi=true -Diwd=true -Dconfig_wifi_backend_default=iwd "
-          "-Dppp=false -Dmodem_manager=false -Dovs=false -Dnmtui=false -Dnm_cloud_setup=false -Dbluez5_dun=false "
+          "-Dppp=true -Dmodem_manager=true -Dovs=false -Dnmtui=false -Dnm_cloud_setup=false -Dbluez5_dun=false "
           "-Debpf=false -Dnbft=false -Difupdown=false -Dteamdctl=false -Dfirewalld_zone=false -Dlibpsl=false "
           "-Dconfig_dns_rc_manager_default=symlink -Dconfig_plugins_default=keyfile -Ddhcpcd=no "
           "-Dintrospection=false -Dvapi=false -Ddocs=false -Dtests=no -Dqt=false -Dcrypto=gnutls "
@@ -752,7 +772,7 @@ wifi.backend=iwd
 [main]
 dns=systemd-resolved
 CONF''',
-    provides=["NetworkManager", "so:libnm.so.0"])
+    provides=["NetworkManager", "so:libnm.so.0"], rel=2)  # rel 2: DSL (PPPoE) und Mobilfunk
 # OpenVPN für NetworkManager (Oberfläche bringt plasma-nm mit); WireGuard kann NetworkManager selbst
 pkg("libcap-ng", "0.8.5", "https://people.redhat.com/sgrubb/libcap-ng/libcap-ng-0.8.5.tar.gz",
     "POSIX-Capabilities (OpenVPN)", "LGPL-2.1-or-later", ["glibc"], style="autotools",
@@ -773,11 +793,11 @@ SYS''')
 # ModemManager veröffentlicht keine Tarballs mehr, nur das Archiv des Git-Tags
 pkg("modemmanager", "1.24.2", {"url": "https://gitlab.freedesktop.org/mobile-broadband/ModemManager/-/archive/1.24.2/ModemManager-1.24.2.tar.gz"},
     "Mobilfunkmodems (ModemManager; für plasma-nm)", "GPL-2.0-or-later AND LGPL-2.1-or-later",
-    ["glib2", "libgudev", "dbus", "systemd", "polkit"], ["meson"], style="meson",
-    flags="-Dmbim=false -Dqmi=false -Dqrtr=false -Dintrospection=false -Dvapi=false -Dman=false "
+    ["glib2", "libgudev", "dbus", "systemd", "polkit", "libmbim", "libqmi", "libqrtr-glib"], ["meson"], style="meson",
+    flags="-Dmbim=true -Dqmi=true -Dqrtr=true -Dintrospection=false -Dvapi=false -Dman=false "
           "-Dbash_completion=false -Dtests=false -Dexamples=false -Dpolkit=permissive "
           "-Dsystemdsystemunitdir=/usr/lib/systemd/system -Dudevdir=/usr/lib/udev "
-          "-Ddbus_policy_dir=/usr/share/dbus-1/system.d")
+          "-Ddbus_policy_dir=/usr/share/dbus-1/system.d", rel=2)  # rel 2: MBIM/QMI-Modems
 # Flatpak mit Flathub (Discover): Programme wie Webbrowser kommen vorgebaut und in einer Sandbox (bubblewrap).
 # GnuPG/GPGME prüfen die Signaturen der Flathub-Metadaten; ostree speichert die Programme.
 GNUPG = "https://www.gnupg.org/ftp/gcrypt/"
@@ -1475,6 +1495,8 @@ enable avahi-daemon.service
 enable avahi-daemon.socket
 # Desktop-Netz über NetworkManager (WLAN über iwd); systemd-networkd darf dieselben Schnittstellen nicht verwalten
 enable NetworkManager.service
+# Mobilfunkmodems (LTE/5G über MBIM/QMI); startet nur Modems, die es auch gibt
+enable ModemManager.service
 disable systemd-networkd.service
 disable systemd-networkd.socket
 disable systemd-networkd-varlink.socket
@@ -1487,7 +1509,7 @@ install -Dm644 /dev/stdin "$DESTDIR/etc/nftables.d/50-mdns.nft" <<'NFT'
 ip daddr 224.0.0.251 udp dport 5353 accept comment "mDNS (Avahi)"
 ip6 daddr ff02::fb udp dport 5353 accept comment "mDNS (Avahi)"
 NFT
-''', backup=["etc/xdg/kdeglobals", "etc/xdg/kwinrc", "etc/pam.d/kde", "etc/nftables.d/50-mdns.nft"], rel=8)
+''', backup=["etc/xdg/kdeglobals", "etc/xdg/kwinrc", "etc/pam.d/kde", "etc/nftables.d/50-mdns.nft"], rel=9)
 
 DESKTOP = ["symfonos-base", "symfonos-desktop-config", "plasma-desktop", "plasma-workspace", "kwin", "xwayland",
            "sddm", "sddm-kcm", "breeze", "breeze-icons", "qqc2-breeze-style", "qqc2-desktop-style",
@@ -1500,7 +1522,7 @@ DESKTOP = ["symfonos-base", "symfonos-desktop-config", "plasma-desktop", "plasma
            "inter-font", "jetbrains-mono-font", "dejavu-fonts", "noto-color-emoji", "hunspell", "upower",
            "accountsservice", "polkit"]
 pkg("symfonos-desktop", "2025.10", [], "symfonOS-Desktop (KDE Plasma 6, Wayland, PipeWire)", "GPL-3.0-or-later",
-    DESKTOP, arch="any", style="meta", rel=11)
+    DESKTOP, arch="any", style="meta", rel=12)
 
 # ---------------------------------------------------------------------------------------------------
 # Rezepte schreiben

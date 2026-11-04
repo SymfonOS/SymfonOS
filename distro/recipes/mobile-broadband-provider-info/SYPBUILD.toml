@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "mobile-broadband-provider-info"
+version = "20240407-1"
+arch = "any"
+summary = "Zugangsdaten der Mobilfunkanbieter (APN)"
+license = "CC-PDDC"
+url = "https://download.gnome.org/sources/mobile-broadband-provider-info/20240407/"
+makedepends = ["meson", "libxslt"]
+
+[[source]]
+url = "https://download.gnome.org/sources/mobile-broadband-provider-info/20240407/mobile-broadband-provider-info-20240407.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
