@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "mpv"
+version = "0.40.0-1"
+summary = "Videoplayer (mpv und libmpv)"
+license = "GPL-2.0-or-later"
+url = "https://github.com/mpv-player/mpv/archive/v0.40.0/"
+depends = ["ffmpeg", "libass", "libplacebo", "zlib", "alsa-lib", "pipewire", "pulseaudio", "libarchive", "lcms2", "libva", "libdrm", "mesa", "wayland", "libxkbcommon", "vulkan-loader", "libx11", "libxext", "libxpresent", "libxrandr", "libxscrnsaver", "libxinerama", "libjpeg-turbo", "hicolor-icon-theme"]
+makedepends = ["meson", "python", "python-docutils", "wayland-protocols", "vulkan-headers"]
+provides = ["so:libmpv.so.2"]
+
+[[source]]
+url = "https://github.com/mpv-player/mpv/archive/v0.40.0/mpv-0.40.0.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Dlibmpv=true -Dcplayer=true -Dlua=disabled -Djavascript=disabled -Dmanpage-build=enabled -Dbuild-date=false -Dgl=enabled -Degl=enabled -Dwayland=enabled -Dvulkan=enabled -Dpipewire=enabled -Dalsa=enabled -Dvaapi=enabled -Dlibarchive=enabled -Dlcms2=enabled"
