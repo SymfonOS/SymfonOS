@@ -11,7 +11,7 @@ makedepends = ["meson", "gperf", "gettext"]
 
 [[source]]
 url = "https://www.freedesktop.org/software/appstream/releases/AppStream-1.1.0.tar.xz"
-sha256 = "TODO"
+sha256 = "298b4732a2670503328e022d68d6ebbb253c716dad0b6ba127a4065262dd2f2c"
 
 [build]
 style = "meson"

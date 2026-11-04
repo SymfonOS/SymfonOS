@@ -10,7 +10,7 @@ depends = ["glibc"]
 
 [[source]]
 url = "https://github.com/pantoniou/libfyaml/releases/download/v0.9/libfyaml-0.9.tar.gz"
-sha256 = "TODO"
+sha256 = "7731edc5dfcc345d5c5c9f6ce597133991a689dabede393cd77bae89b327cd6d"
 
 [build]
 style = "autotools"

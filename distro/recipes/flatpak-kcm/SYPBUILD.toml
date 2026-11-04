@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://download.kde.org/stable/plasma/6.4.4/flatpak-kcm-6.4.4.tar.xz"
-sha256 = "TODO"
+sha256 = "b4ac5f4c64e2dcd80b610b1cab42f5d1cc96bbcbc14aa3e366b257407387c8f8"
 
 [build]
 style = "cmake"

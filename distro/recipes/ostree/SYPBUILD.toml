@@ -11,7 +11,7 @@ makedepends = ["bison", "libxslt"]
 
 [[source]]
 url = "https://github.com/ostreedev/ostree/releases/download/v2025.6/libostree-2025.6.tar.xz"
-sha256 = "TODO"
+sha256 = "6750627df600f28c8ef2c7f443a9d72aef7061a342cde234162ebdf850a7e575"
 
 [build]
 style = "autotools"

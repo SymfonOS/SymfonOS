@@ -11,11 +11,11 @@ makedepends = ["meson", "python", "wayland-protocols", "libxslt"]
 
 [[source]]
 url = "https://github.com/flatpak/flatpak/releases/download/1.16.1/flatpak-1.16.1.tar.xz"
-sha256 = "TODO"
+sha256 = "2b47e8f2d90d35d29339ed78e1a6eabb36eefa9cfa5a5ca3b0d1f27502c43675"
 
 [[source]]
 url = "https://dl.flathub.org/repo/flathub.flatpakrepo"
-sha256 = "TODO"
+sha256 = "3371dd250e61d9e1633630073fefda153cd4426f72f4afa0c3373ae2e8fea03a"
 extract = false
 
 [build]

@@ -11,7 +11,7 @@ makedepends = ["meson"]
 
 [[source]]
 url = "https://github.com/flatpak/xdg-dbus-proxy/releases/download/0.1.6/xdg-dbus-proxy-0.1.6.tar.xz"
-sha256 = "TODO"
+sha256 = "131bf59fce7c7ee7ecbc5d9106d6750f4f597bfe609966573240f7e4952973a1"
 
 [build]
 style = "meson"
