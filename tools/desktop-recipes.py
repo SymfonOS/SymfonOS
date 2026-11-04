@@ -808,7 +808,19 @@ pkg("appstream", "1.1.0", "https://www.freedesktop.org/software/appstream/releas
     ["glib2", "curl", "libxml2", "libfyaml", "libxmlb", "zstd", "systemd", "qt6-base"], ["meson", "gperf", "gettext"],
     style="meson",
     flags="-Dstemming=false -Dsystemd=true -Dvapi=false -Dqt=true -Dqt-versions=6 -Dcompose=false -Dgir=false "
-          "-Dsvg-support=false -Dzstd-support=true -Ddocs=false -Dapidocs=false -Dinstall-docs=false")
+          "-Dsvg-support=false -Dzstd-support=true -Ddocs=false -Dapidocs=false -Dinstall-docs=false",
+    # itstool (samt Python-libxml2) nur für die Übersetzung der Metainfo von appstreamcli: unübersetzt kopieren
+    pre=r'''python3 - <<'PY'
+import re
+p = "data/meson.build"
+s = open(p).read()
+s, n = re.subn(r"metainfo_i18n = i18n\.itstool_join\(.*?\n\)\n",
+               "metainfo_i18n = custom_target('metainfo-copy', input: metainfo_with_relinfo, "
+               "output: 'org.freedesktop.appstream.cli.metainfo.xml', command: ['cp', '@INPUT@', '@OUTPUT@'], "
+               "install: true, install_dir: metainfo_dir)\n", s, flags=re.S)
+assert n == 1, "itstool_join nicht gefunden"
+open(p, "w").write(s)
+PY''', rel=2)
 pkg("xdg-dbus-proxy", "0.1.6", "https://github.com/flatpak/xdg-dbus-proxy/releases/download/0.1.6/xdg-dbus-proxy-0.1.6.tar.xz",
     "D-Bus-Filter für Sandboxen (Flatpak)", "LGPL-2.1-or-later", ["glib2"], ["meson"], style="meson",
     flags="-Dman=disabled -Dtests=false")
