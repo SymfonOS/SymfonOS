@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libxmlb"
+version = "0.3.23-1"
+summary = "Binäre XML-Zwischenspeicher (AppStream)"
+license = "LGPL-2.1-or-later"
+url = "https://github.com/hughsie/libxmlb/releases/download/0.3.23/"
+depends = ["glib2", "xz", "zstd"]
+makedepends = ["meson"]
+
+[[source]]
+url = "https://github.com/hughsie/libxmlb/releases/download/0.3.23/libxmlb-0.3.23.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Dgtkdoc=false -Dintrospection=false -Dtests=false -Dstemmer=false -Dlzma=enabled -Dzstd=enabled"

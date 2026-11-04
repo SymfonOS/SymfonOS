@@ -775,6 +775,56 @@ pkg("modemmanager", "1.24.2", {"url": "https://gitlab.freedesktop.org/mobile-bro
           "-Dbash_completion=false -Dtests=false -Dexamples=false -Dpolkit=permissive "
           "-Dsystemdsystemunitdir=/usr/lib/systemd/system -Dudevdir=/usr/lib/udev "
           "-Ddbus_policy_dir=/usr/share/dbus-1/system.d")
+# Flatpak mit Flathub (Discover): Programme wie Webbrowser kommen vorgebaut und in einer Sandbox (bubblewrap).
+# GnuPG/GPGME prüfen die Signaturen der Flathub-Metadaten; ostree speichert die Programme.
+GNUPG = "https://www.gnupg.org/ftp/gcrypt/"
+pkg("npth", "1.8", GNUPG + "npth/npth-1.8.tar.bz2", "Threads für GnuPG (nPth)", "LGPL-2.1-or-later", ["glibc"],
+    style="autotools")
+pkg("libksba", "1.6.7", GNUPG + "libksba/libksba-1.6.7.tar.bz2", "X.509/CMS für GnuPG", "LGPL-3.0-or-later OR GPL-2.0-or-later",
+    ["libgpg-error"], style="autotools")
+pkg("libassuan", "3.0.2", GNUPG + "libassuan/libassuan-3.0.2.tar.bz2", "IPC-Bibliothek für GnuPG", "LGPL-2.1-or-later",
+    ["libgpg-error"], style="autotools")
+pkg("gnupg", "2.4.8", GNUPG + "gnupg/gnupg-2.4.8.tar.bz2", "GNU Privacy Guard", "GPL-3.0-or-later",
+    ["libgpg-error", "libgcrypt", "libassuan", "libksba", "npth", "zlib", "bzip2", "readline", "sqlite", "gnutls"],
+    style="autotools", flags="--disable-ldap --disable-doc")
+pkg("gpgme", "1.24.3", GNUPG + "gpgme/gpgme-1.24.3.tar.bz2", "GnuPG Made Easy (Signaturprüfung für ostree/Flatpak)",
+    "LGPL-2.1-or-later", ["gnupg", "libassuan", "libgpg-error"], style="autotools",
+    flags="--disable-static --enable-languages=cpp --disable-gpg-test --disable-gpgsm-test --disable-gpgconf-test "
+          "--disable-g13-test")
+pkg("ostree", "2025.6", "https://github.com/ostreedev/ostree/releases/download/v2025.6/libostree-2025.6.tar.xz",
+    "Versionierte Dateisystembäume (Speicher für Flatpak)", "LGPL-2.0-or-later",
+    ["glib2", "xz", "zlib", "e2fsprogs", "curl", "gpgme", "libarchive", "libselinux", "openssl", "util-linux",
+     "systemd", "fuse3"], ["bison", "libxslt"], style="autotools",
+    flags="--with-curl --without-soup --without-soup3 --with-gpgme --with-openssl --with-libarchive --with-selinux "
+          "--without-avahi --without-composefs --without-dracut --with-libsystemd --disable-man --disable-gtk-doc "
+          "--with-systemdsystemunitdir=/usr/lib/systemd/system")
+pkg("libfyaml", "0.9", "https://github.com/pantoniou/libfyaml/releases/download/v0.9/libfyaml-0.9.tar.gz",
+    "YAML-Bibliothek (AppStream)", "MIT", ["glibc"], style="autotools", flags="--disable-static")
+pkg("libxmlb", "0.3.23", "https://github.com/hughsie/libxmlb/releases/download/0.3.23/libxmlb-0.3.23.tar.xz",
+    "Binäre XML-Zwischenspeicher (AppStream)", "LGPL-2.1-or-later", ["glib2", "xz", "zstd"], ["meson"], style="meson",
+    flags="-Dgtkdoc=false -Dintrospection=false -Dtests=false -Dstemmer=false -Dlzma=enabled -Dzstd=enabled")
+pkg("appstream", "1.1.0", "https://www.freedesktop.org/software/appstream/releases/AppStream-1.1.0.tar.xz",
+    "Programmkatalog-Metadaten (AppStream, mit Qt-Anbindung)", "LGPL-2.1-or-later",
+    ["glib2", "curl", "libxml2", "libfyaml", "libxmlb", "zstd", "systemd", "qt6-base"], ["meson", "gperf", "gettext"],
+    style="meson",
+    flags="-Dstemming=false -Dsystemd=true -Dvapi=false -Dqt=true -Dqt-versions=6 -Dcompose=false -Dgir=false "
+          "-Dsvg-support=false -Dzstd-support=true -Ddocs=false -Dapidocs=false -Dinstall-docs=false")
+pkg("xdg-dbus-proxy", "0.1.6", "https://github.com/flatpak/xdg-dbus-proxy/releases/download/0.1.6/xdg-dbus-proxy-0.1.6.tar.xz",
+    "D-Bus-Filter für Sandboxen (Flatpak)", "LGPL-2.1-or-later", ["glib2"], ["meson"], style="meson",
+    flags="-Dman=disabled -Dtests=false")
+pkg("flatpak", "1.16.1", ["https://github.com/flatpak/flatpak/releases/download/1.16.1/flatpak-1.16.1.tar.xz",
+                          nox("https://dl.flathub.org/repo/flathub.flatpakrepo")],
+    "Programme in Sandboxen (Flatpak), mit Flathub als Quelle", "LGPL-2.1-or-later",
+    ["glib2", "libarchive", "curl", "libxml2", "zstd", "systemd", "polkit", "fuse3", "libxau", "ostree", "json-glib",
+     "appstream", "gdk-pixbuf", "libseccomp", "gpgme", "libcap", "bubblewrap", "xdg-dbus-proxy", "wayland",
+     "libselinux"],
+    ["meson", "python", "wayland-protocols", "libxslt"], style="meson",
+    flags="-Dsystem_bubblewrap=/usr/bin/bwrap -Dsystem_dbus_proxy=/usr/bin/xdg-dbus-proxy -Dhttp_backend=curl "
+          "-Dgir=disabled -Dgtkdoc=disabled -Ddocbook_docs=disabled -Dman=disabled -Dtests=false "
+          "-Dinstalled_tests=false -Dmalcontent=disabled -Ddconf=disabled -Dselinux_module=disabled "
+          "-Dsystem_helper=enabled -Dwayland_security_context=enabled -Dsystemd=enabled",
+    # Flathub systemweit vorbelegen: flatpak legt die Quelle beim ersten Aufruf aus remotes.d an
+    post='install -Dm644 "$SRCDIR/flathub.flatpakrepo" "$DESTDIR/etc/flatpak/remotes.d/flathub.flatpakrepo"')
 # UDisks2: Laufwerke und USB-Sticks in Dolphin/Plasma anzeigen und als Benutzer einhängen (Solid spricht es über
 # D-Bus an). libblockdev nur mit den Modulen, die udisks verlangt; ohne LVM, Btrfs, Multipath, Escrow und Werkzeuge.
 pkg("keyutils", "1.6.3", "https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/keyutils.git/snapshot/keyutils-1.6.3.tar.gz",
@@ -1232,6 +1282,12 @@ pl("xdg-desktop-portal-kde", ["kwayland", "kio", "kirigami", "kglobalaccel", "kn
    license="LGPL-2.0-or-later", rel=2)
 pl("print-manager", KF_GUI + ["libplasma", "cups", "kitemmodels", "kconfigwidgets"],
    "Druckerverwaltung (Systemeinstellungen und Infobereich)")
+pl("discover", ["kirigami", "kcoreaddons", "kconfig", "kcrash", "kdbusaddons", "ki18n", "karchive", "kxmlgui", "kio",
+                "kcmutils", "kidletime", "knotifications", "purpose", "kauth", "kstatusnotifieritem", "kiconthemes",
+                "kuserfeedback", "knewstuff", "kirigami-addons", "appstream", "flatpak", "qcoro", QD],
+   "Programme suchen und installieren (Flathub, KDE Store)", mk=["kdoctools"])
+pl("flatpak-kcm", ["flatpak", "kconfig", "kcoreaddons", "ki18n", "kcmutils", "kitemmodels", "qt6-svg", QD],
+   "Berechtigungen von Flatpak-Programmen (Systemeinstellungen)")
 pl("kde-cli-tools", ["kcmutils", "kconfig", "kdesu", "ki18n", "kiconthemes", "kio", "kservice", "kwindowsystem",
                      "plasma-activities", "plasma-workspace", "kparts"], "Kommandozeilenwerkzeuge (kde-open …)",
    mk=["kdoctools"])
@@ -1425,11 +1481,11 @@ DESKTOP = ["symfonos-base", "symfonos-desktop-config", "plasma-desktop", "plasma
            "polkit-kde-agent-1", "plasma-systemmonitor", "ksystemstats", "kdeplasma-addons", "ocean-sound-theme",
            "kactivitymanagerd", "kglobalacceld", "kimageformats", "qt6-imageformats", "qt6-translations",
            "qt6-wayland", "mesa", "vulkan-loader", "libva", "pipewire", "wireplumber", "alsa-utils", "ffmpeg",
-           "xdg-user-dirs", "networkmanager", "networkmanager-openvpn", "plasma-nm", "bluez", "bluedevil", "udisks2", "cups", "cups-filters", "nss-mdns", "print-manager", "konsole", "dolphin", "kate", "ark", "gwenview", "okular", "dragon", "elisa", "spectacle", "kcalc", "kcharselect",
+           "xdg-user-dirs", "networkmanager", "networkmanager-openvpn", "plasma-nm", "bluez", "bluedevil", "udisks2", "cups", "cups-filters", "nss-mdns", "print-manager", "flatpak", "discover", "flatpak-kcm", "konsole", "dolphin", "kate", "ark", "gwenview", "okular", "dragon", "elisa", "spectacle", "kcalc", "kcharselect",
            "inter-font", "jetbrains-mono-font", "dejavu-fonts", "noto-color-emoji", "hunspell", "upower",
            "accountsservice", "polkit"]
 pkg("symfonos-desktop", "2025.10", [], "symfonOS-Desktop (KDE Plasma 6, Wayland, PipeWire)", "GPL-3.0-or-later",
-    DESKTOP, arch="any", style="meta", rel=10)
+    DESKTOP, arch="any", style="meta", rel=11)
 
 # ---------------------------------------------------------------------------------------------------
 # Rezepte schreiben

@@ -1,0 +1,16 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libassuan"
+version = "3.0.2-1"
+summary = "IPC-Bibliothek für GnuPG"
+license = "LGPL-2.1-or-later"
+url = "https://www.gnupg.org/ftp/gcrypt/libassuan/"
+depends = ["libgpg-error"]
+
+[[source]]
+url = "https://www.gnupg.org/ftp/gcrypt/libassuan/libassuan-3.0.2.tar.bz2"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

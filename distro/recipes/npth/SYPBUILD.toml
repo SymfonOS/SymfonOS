@@ -1,0 +1,16 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "npth"
+version = "1.8-1"
+summary = "Threads für GnuPG (nPth)"
+license = "LGPL-2.1-or-later"
+url = "https://www.gnupg.org/ftp/gcrypt/npth/"
+depends = ["glibc"]
+
+[[source]]
+url = "https://www.gnupg.org/ftp/gcrypt/npth/npth-1.8.tar.bz2"
+sha256 = "TODO"
+
+[build]
+style = "autotools"

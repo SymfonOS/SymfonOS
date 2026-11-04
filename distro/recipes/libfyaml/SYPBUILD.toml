@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libfyaml"
+version = "0.9-1"
+summary = "YAML-Bibliothek (AppStream)"
+license = "MIT"
+url = "https://github.com/pantoniou/libfyaml/releases/download/v0.9/"
+depends = ["glibc"]
+
+[[source]]
+url = "https://github.com/pantoniou/libfyaml/releases/download/v0.9/libfyaml-0.9.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--disable-static"

@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "xdg-dbus-proxy"
+version = "0.1.6-1"
+summary = "D-Bus-Filter für Sandboxen (Flatpak)"
+license = "LGPL-2.1-or-later"
+url = "https://github.com/flatpak/xdg-dbus-proxy/releases/download/0.1.6/"
+depends = ["glib2"]
+makedepends = ["meson"]
+
+[[source]]
+url = "https://github.com/flatpak/xdg-dbus-proxy/releases/download/0.1.6/xdg-dbus-proxy-0.1.6.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Dman=disabled -Dtests=false"
