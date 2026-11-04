@@ -717,9 +717,11 @@ pkg("libplacebo", "7.351.0",
     ["glibc", "gcc", "vulkan-loader", "lcms2", "glslang", "spirv-tools"],
     ["meson", "python", "python-jinja", "vulkan-headers", "glslang"], style="meson", dir="libplacebo-7.351.0",
     pre='rm -rf 3rdparty/fast_float 3rdparty/glad\n'
-        'ln -s "$SRCDIR/fast_float-8.0.2" 3rdparty/fast_float\nln -s "$SRCDIR/glad-2.0.8" 3rdparty/glad',
+        'ln -s "$SRCDIR/fast_float-8.0.2" 3rdparty/fast_float\nln -s "$SRCDIR/glad-2.0.8" 3rdparty/glad\n'
+        # Python 3.13: ElementTree() verlangt ein Element (Upstream-Korrektur nach 7.351)
+        "sed -i 's/VkXML(ET.parse(xmlfile))/VkXML(ET.parse(xmlfile).getroot())/' src/vulkan/utils_gen.py",
     flags="-Dvulkan=enabled -Dopengl=enabled -Dvulkan-registry=/usr/share/vulkan/registry/vk.xml "
-          "-Dlcms=enabled -Ddemos=false -Dtests=false -Dlibdovi=disabled -Dd3d11=disabled")
+          "-Dlcms=enabled -Ddemos=false -Dtests=false -Dlibdovi=disabled -Dd3d11=disabled", rel=2)
 # Lua-Skripte (u. a. yt-dlp-Anbindung) brauchen Lua 5.1/5.2 oder LuaJIT; symfonOS hat Lua 5.4
 pkg("mpv", "0.40.0", {"url": "https://github.com/mpv-player/mpv/archive/v0.40.0/mpv-0.40.0.tar.gz"},
     "Videoplayer (mpv und libmpv)", "GPL-2.0-or-later",
