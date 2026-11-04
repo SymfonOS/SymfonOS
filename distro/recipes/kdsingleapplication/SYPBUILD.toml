@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "kdsingleapplication"
+version = "1.2.0-1"
+summary = "Nur eine Programminstanz (KDAB, Qt 6)"
+license = "MIT"
+url = "https://github.com/KDAB/KDSingleApplication/archive/v1.2.0/"
+depends = ["qt6-base"]
+makedepends = ["cmake", "ninja"]
+
+[[source]]
+url = "https://github.com/KDAB/KDSingleApplication/archive/v1.2.0/KDSingleApplication-1.2.0.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "cmake"
+configure_flags = "-DKDSingleApplication_QT6=ON -DKDSingleApplication_EXAMPLES=OFF -DKDSingleApplication_TESTS=OFF"

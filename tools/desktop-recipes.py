@@ -707,6 +707,30 @@ pkg("ffmpeg", "7.1.1", ["https://ffmpeg.org/releases/ffmpeg-7.1.1.tar.xz",
 make''',
     package='cd "$S"\nmake DESTDIR="$DESTDIR" install',
     provides=["so:libavcodec.so.61", "so:libavformat.so.61", "so:libavutil.so.59", "so:libswscale.so.8"], rel=2)
+# Videoplayer mpv (libmpv für Haruna). libplacebo braucht fast_float (Header) und den GL-Lader-Generator glad 2,
+# die im Git-Archiv als Submodule fehlen; beide werden als eigene Quellen nach 3rdparty/ verlinkt.
+pkg("libplacebo", "7.351.0",
+    [{"url": "https://github.com/haasn/libplacebo/archive/v7.351.0/libplacebo-7.351.0.tar.gz"},
+     {"url": "https://github.com/fastfloat/fast_float/archive/v8.0.2/fast_float-8.0.2.tar.gz"},
+     {"url": "https://github.com/Dav1dde/glad/archive/v2.0.8/glad-2.0.8.tar.gz"}],
+    "GPU-Bildverarbeitung für Videos (Renderer von mpv)", "LGPL-2.1-or-later",
+    ["glibc", "gcc", "vulkan-loader", "lcms2", "glslang", "spirv-tools"],
+    ["meson", "python", "python-jinja", "vulkan-headers", "glslang"], style="meson", dir="libplacebo-7.351.0",
+    pre='rm -rf 3rdparty/fast_float 3rdparty/glad\n'
+        'ln -s "$SRCDIR/fast_float-8.0.2" 3rdparty/fast_float\nln -s "$SRCDIR/glad-2.0.8" 3rdparty/glad',
+    flags="-Dvulkan=enabled -Dopengl=enabled -Dvulkan-registry=/usr/share/vulkan/registry/vk.xml "
+          "-Dlcms=enabled -Ddemos=false -Dtests=false -Dlibdovi=disabled -Dd3d11=disabled")
+# Lua-Skripte (u. a. yt-dlp-Anbindung) brauchen Lua 5.1/5.2 oder LuaJIT; symfonOS hat Lua 5.4
+pkg("mpv", "0.40.0", {"url": "https://github.com/mpv-player/mpv/archive/v0.40.0/mpv-0.40.0.tar.gz"},
+    "Videoplayer (mpv und libmpv)", "GPL-2.0-or-later",
+    ["ffmpeg", "libass", "libplacebo", "zlib", "alsa-lib", "pipewire", "pulseaudio", "libarchive", "lcms2", "libva",
+     "libdrm", "mesa", "wayland", "libxkbcommon", "vulkan-loader", "libx11", "libxext", "libxpresent",
+     "libxrandr", "libxscrnsaver", "libxinerama", "libjpeg-turbo", "hicolor-icon-theme"],
+    ["meson", "python", "python-docutils", "wayland-protocols", "vulkan-headers"], style="meson",
+    flags="-Dlibmpv=true -Dcplayer=true -Dlua=disabled -Djavascript=disabled -Dmanpage-build=enabled "
+          "-Dbuild-date=false -Dgl=enabled -Degl=enabled -Dwayland=enabled -Dvulkan=enabled -Dpipewire=enabled "
+          "-Dalsa=enabled -Dvaapi=enabled -Dlibarchive=enabled -Dlcms2=enabled",
+    provides=["so:libmpv.so.2"])
 
 # ---------------------------------------------------------------------------------------------------
 # Systemdienste für den Desktop
@@ -1480,6 +1504,18 @@ gear("dragon", ["kcoreaddons", "kcrash", "ki18n", "kio", "kwindowsystem", "kirig
 gear("elisa", ["kcoreaddons", "kcrash", "ki18n", "kio", "kiconthemes", "kfilemetadata", "baloo", "kxmlgui", "kconfig",
                "kcolorscheme", "kcodecs", "kdbusaddons", "kirigami", "kirigami-addons", "qqc2-desktop-style",
                "qt6-multimedia", "qt6-svg", QD], "Musikplayer (Elisa)", license="LGPL-3.0-or-later")
+# Haruna: Videoplayer auf Basis von libmpv (Qt Quick, Kirigami)
+pkg("kdsingleapplication", "1.2.0",
+    {"url": "https://github.com/KDAB/KDSingleApplication/archive/v1.2.0/KDSingleApplication-1.2.0.tar.gz"},
+    "Nur eine Programminstanz (KDAB, Qt 6)", "MIT", [QB], ["cmake", "ninja"], style="cmake",
+    flags="-DKDSingleApplication_QT6=ON -DKDSingleApplication_EXAMPLES=OFF -DKDSingleApplication_TESTS=OFF")
+pkg("mpvqt", "1.1.1", {"url": "https://github.com/KDE/mpvqt/archive/v1.1.1/mpvqt-1.1.1.tar.gz"},
+    "libmpv in Qt Quick", "LGPL-2.1-or-later", [QB, QD, "mpv"], KDE_MK, style="cmake", flags=KDE_FLAGS)
+pkg("haruna", "1.7.1", {"url": "https://github.com/KDE/haruna/archive/v1.7.1/haruna-1.7.1.tar.gz"},
+    "Videoplayer (Haruna, libmpv)", "GPL-3.0-or-later",
+    [QB, QD, "qt6-5compat", "mpvqt", "ffmpeg", "breeze", "kcolorscheme", "kconfig", "kcoreaddons", "kfilemetadata",
+     "ki18n", "kiconthemes", "kio", "kirigami", "kwindowsystem", "kcrash", "kdsingleapplication",
+     "qqc2-desktop-style", "hicolor-icon-theme"], KDE_MK, style="cmake", flags=KDE_FLAGS)
 gear("okular", KF_GUI + ["karchive", "kbookmarks", "kcompletion", "kconfigwidgets", "threadweaver", "kparts",
                          "kcolorscheme", "ktextwidgets", "kitemviews", "purpose", "kwallet", "plasma-activities",
                          "phonon", "qt6-speech", "qt6-svg", "poppler", "freetype", "libtiff", "zlib"],
@@ -1574,11 +1610,11 @@ DESKTOP = ["symfonos-base", "symfonos-desktop-config", "plasma-desktop", "plasma
            "polkit-kde-agent-1", "plasma-systemmonitor", "ksystemstats", "kdeplasma-addons", "ocean-sound-theme",
            "kactivitymanagerd", "kglobalacceld", "kimageformats", "qt6-imageformats", "qt6-translations",
            "qt6-wayland", "mesa", "vulkan-loader", "libva", "pipewire", "wireplumber", "alsa-utils", "ffmpeg",
-           "xdg-user-dirs", "networkmanager", "networkmanager-openvpn", "networkmanager-l2tp", "plasma-nm", "bluez", "bluedevil", "udisks2", "cups", "cups-filters", "nss-mdns", "print-manager", "flatpak", "discover", "flatpak-kcm", "konsole", "dolphin", "kate", "ark", "gwenview", "okular", "dragon", "elisa", "spectacle", "kcalc", "kcharselect",
+           "xdg-user-dirs", "networkmanager", "networkmanager-openvpn", "networkmanager-l2tp", "plasma-nm", "bluez", "bluedevil", "udisks2", "cups", "cups-filters", "nss-mdns", "print-manager", "flatpak", "discover", "flatpak-kcm", "konsole", "dolphin", "kate", "ark", "gwenview", "okular", "dragon", "haruna", "elisa", "spectacle", "kcalc", "kcharselect",
            "inter-font", "jetbrains-mono-font", "dejavu-fonts", "noto-color-emoji", "hunspell", "upower",
            "accountsservice", "polkit"]
 pkg("symfonos-desktop", "2025.10", [], "symfonOS-Desktop (KDE Plasma 6, Wayland, PipeWire)", "GPL-3.0-or-later",
-    DESKTOP, arch="any", style="meta", rel=13)
+    DESKTOP, arch="any", style="meta", rel=14)
 
 # ---------------------------------------------------------------------------------------------------
 # Rezepte schreiben
