@@ -1,0 +1,27 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "nspr"
+version = "4.37-1"
+summary = "Netscape Portable Runtime (NSS)"
+license = "MPL-2.0"
+url = "https://archive.mozilla.org/pub/nspr/releases/v4.37/src/"
+depends = ["glibc"]
+
+[[source]]
+url = "https://archive.mozilla.org/pub/nspr/releases/v4.37/src/nspr-4.37.tar.gz"
+sha256 = "TODO"
+
+[build]
+build = '''
+cd "$S/nspr"
+sed -i '/^RELEASE/s|^|#|' pr/src/misc/Makefile.in
+sed -i 's|$(LIBRARY) ||' config/rules.mk
+./configure --prefix=/usr --with-mozilla --with-pthreads --enable-64bit
+make
+'''
+package = '''
+cd "$S/nspr"
+make DESTDIR="$DESTDIR" install
+rm -f "$DESTDIR"/usr/lib/lib*.a "$DESTDIR/usr/bin/compile-et.pl" "$DESTDIR/usr/bin/prerr.properties"
+'''

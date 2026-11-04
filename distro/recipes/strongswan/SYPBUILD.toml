@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "strongswan"
+version = "6.0.2-1"
+summary = "IPsec (strongSwan)"
+license = "GPL-2.0-or-later"
+url = "https://download.strongswan.org/"
+depends = ["openssl", "gmp", "systemd", "curl"]
+backup = ["etc/ipsec.conf", "etc/ipsec.secrets", "etc/strongswan.conf"]
+
+[[source]]
+url = "https://download.strongswan.org/strongswan-6.0.2.tar.bz2"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--sysconfdir=/etc --enable-stroke --enable-openssl --enable-systemd --enable-swanctl --enable-curl --enable-eap-mschapv2 --enable-eap-identity --enable-xauth-generic --disable-static --with-systemdsystemunitdir=/usr/lib/systemd/system"
