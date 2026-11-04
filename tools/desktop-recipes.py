@@ -727,12 +727,14 @@ pkg("mpv", "0.40.0", {"url": "https://github.com/mpv-player/mpv/archive/v0.40.0/
     "Videoplayer (mpv und libmpv)", "GPL-2.0-or-later",
     ["ffmpeg", "libass", "libplacebo", "zlib", "alsa-lib", "pipewire", "pulseaudio", "libarchive", "lcms2", "libva",
      "libdrm", "mesa", "wayland", "libxkbcommon", "vulkan-loader", "libx11", "libxext", "libxpresent",
-     "libxrandr", "libxscrnsaver", "libxinerama", "libjpeg-turbo", "hicolor-icon-theme"],
+     "libxrandr", "libxscrnsaver", "libxinerama", "libxv", "libdisplay-info", "libjpeg-turbo",
+     "hicolor-icon-theme"],
     ["meson", "python", "python-docutils", "wayland-protocols", "vulkan-headers"], style="meson",
     flags="-Dlibmpv=true -Dcplayer=true -Dlua=disabled -Djavascript=disabled -Dmanpage-build=enabled "
           "-Dbuild-date=false -Dgl=enabled -Degl=enabled -Dwayland=enabled -Dvulkan=enabled -Dpipewire=enabled "
-          "-Dalsa=enabled -Dvaapi=enabled -Dlibarchive=enabled -Dlcms2=enabled",
-    provides=["so:libmpv.so.2"])
+          "-Dalsa=enabled -Dvaapi=enabled -Dlibarchive=enabled -Dlcms2=enabled -Djack=disabled",
+    # JACK nicht: libjack (PipeWire) liegt außerhalb des Linkerpfads, Ton läuft über PipeWire direkt
+    provides=["so:libmpv.so.2"], rel=2)
 
 # ---------------------------------------------------------------------------------------------------
 # Systemdienste für den Desktop
