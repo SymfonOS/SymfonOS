@@ -1,4 +1,4 @@
-policy_module(symfonos, 1.3)
+policy_module(symfonos, 1.4)
 
 # Ergänzungen zur Reference Policy 2025.02 für symfonOS (systemd 257, Plasma 6, SDDM, CUPS, Live-Medium).
 # Entstanden aus den Verweigerungen des Desktop-Tests (tools/avc-summary.py, Branch ci-diag: avc.txt).
@@ -100,3 +100,12 @@ allow systemd_locale_t { xdm_t unconfined_t }:dbus send_msg;
 
 # Anmeldebildschirm (KWin für SDDM) startet den Barrierefreiheits-Bus (org.freedesktop.a11y.Manager)
 allow xdm_t unconfined_t:dbus acquire_svc;
+
+########################################
+# Flatpak: der Systemhelfer (flatpak-system-helper, über D-Bus und polkit gestartet) installiert Programme nach
+# /var/lib/flatpak. Wie bei Fedora läuft er in einer eigenen, uneingeschränkten Domäne; die Reference Policy
+# kennt Flatpak nicht. Programme selbst laufen als Benutzerprozesse (unconfined_t) in der bubblewrap-Sandbox.
+type flatpak_helper_t;
+type flatpak_helper_exec_t;
+init_daemon_domain(flatpak_helper_t, flatpak_helper_exec_t)
+unconfined_domain(flatpak_helper_t)

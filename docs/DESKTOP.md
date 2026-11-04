@@ -65,5 +65,5 @@ Vollständige Logs und die Bildschirmfotos jedes Laufs liegen auf dem Branch `ci
 
 - **Weitere VPN-Erweiterungen und PPP** für NetworkManager (OpenConnect, L2TP/IPsec, DSL).
 - **Webbrowser aus dem Quellcode:** Firefox braucht Rust und Node.js, Falkon braucht QtWebEngine; beide passen nicht in eine Bauetappe der CI. Bis dahin kommt ein Browser über Flathub (z. B. `flatpak install flathub org.mozilla.firefox` oder in Discover).
-- **SELinux für Flatpak:** Programme laufen als `unconfined_t` in der bubblewrap-Sandbox; der Systemhelfer (`flatpak-system-helper`) hat noch kein eigenes Modul und ist im enforcing-Test noch nicht abgedeckt.
+- **Flatpak im enforcing-Test:** Programme laufen als `unconfined_t` in der bubblewrap-Sandbox, der Systemhelfer wie bei Fedora in der uneingeschränkten Domäne `flatpak_helper_t` (Modul `symfonos-selinux`). Eine Installation von Flathub ist in der CI noch nicht abgedeckt.
 - **Kreativprogramme** (Krita, Blender, Ardour …) und PySide6 für die symfonOS-Apps folgen als nächste Stufe.
