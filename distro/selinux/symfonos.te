@@ -1,4 +1,4 @@
-policy_module(symfonos, 1.4)
+policy_module(symfonos, 1.5)
 
 # Ergänzungen zur Reference Policy 2025.02 für symfonOS (systemd 257, Plasma 6, SDDM, CUPS, Live-Medium).
 # Entstanden aus den Verweigerungen des Desktop-Tests (tools/avc-summary.py, Branch ci-diag: avc.txt).
@@ -109,3 +109,10 @@ type flatpak_helper_t;
 type flatpak_helper_exec_t;
 init_daemon_domain(flatpak_helper_t, flatpak_helper_exec_t)
 unconfined_domain(flatpak_helper_t)
+# D-Bus: Discover (Sitzung) ruft den Helfer, der fragt polkit und antwortet
+gen_require(`
+	type policykit_t, unconfined_t;
+	class dbus send_msg;
+')
+allow { unconfined_t policykit_t } flatpak_helper_t:dbus send_msg;
+allow flatpak_helper_t { unconfined_t policykit_t }:dbus send_msg;

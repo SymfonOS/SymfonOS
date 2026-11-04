@@ -126,7 +126,11 @@ jobs:
           # Erst vollständig hochladen, dann den alten Stand ersetzen: ein fehlgeschlagener Upload
           # darf den letzten guten Zwischenstand (Stunden Rechenzeit) nicht löschen.
           tmp="$STATE_TAG-run-$GITHUB_RUN_ID"
-          gh release create "$tmp" --repo "$GITHUB_REPOSITORY" --prerelease --title "Bootstrap-Zwischenstand" \
+          # GitHub antwortet beim Hochladen großer Dateien gelegentlich mit 502: bis zu drei Versuche
+          create() { for a in 1 2 3; do gh release create "$@" && return 0
+            echo "::warning title=Zwischenstand::Hochladen fehlgeschlagen (Versuch $a)"
+            gh release delete "$1" --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag || true; sleep 60; done; return 1; }
+          create "$tmp" --repo "$GITHUB_REPOSITORY" --prerelease --title "Bootstrap-Zwischenstand" \
             --notes "Interner Zustand des Quellcode-Bootstraps (nicht zur Installation gedacht)." state.tar.zst.part* keys.tar
           gh release delete "$STATE_TAG" --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag || true
           gh release edit "$tmp" --repo "$GITHUB_REPOSITORY" --tag "$STATE_TAG"
@@ -172,7 +176,11 @@ jobs:
           if [ "$(stat -c %s "$iso")" -lt 2147483648 ]; then files=("$iso"); note="Direkt herunterladen: $iso"
           else split -b 1900M -d -a 2 "$iso" "$iso.part"; files=("$iso".part*); note="Zusammensetzen: cat $iso.part* > $iso"; fi
           tmp="source-nightly-run-$GITHUB_RUN_ID"
-          gh release create "$tmp" --repo "$GITHUB_REPOSITORY" --prerelease \
+          # GitHub antwortet beim Hochladen großer Dateien gelegentlich mit 502: bis zu drei Versuche
+          create() { for a in 1 2 3; do gh release create "$@" && return 0
+            echo "::warning title=Veröffentlichen::Hochladen fehlgeschlagen (Versuch $a)"
+            gh release delete "$1" --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag || true; sleep 60; done; return 1; }
+          create "$tmp" --repo "$GITHUB_REPOSITORY" --prerelease \
             --title "symfonOS Basissystem aus Quellcode $(date +%Y-%m-%d)" \
             --notes "$note · Prüfen: sha256sum -c $iso.sha256 · Auf USB: sudo dd if=$iso of=/dev/sdX bs=4M status=progress oflag=sync" \
             "${files[@]}" "$iso.sha256" $(ls smoke-serial.log install-serial.log 2>/dev/null)
@@ -229,7 +237,11 @@ jobs:
           if [ "$(stat -c %s "$iso")" -lt 2147483648 ]; then files=("$iso"); note="Direkt herunterladen: $iso"
           else split -b 1900M -d -a 2 "$iso" "$iso.part"; files=("$iso".part*); note="Zusammensetzen: cat $iso.part* > $iso"; fi
           tmp="desktop-nightly-run-$GITHUB_RUN_ID"
-          gh release create "$tmp" --repo "$GITHUB_REPOSITORY" --prerelease \
+          # GitHub antwortet beim Hochladen großer Dateien gelegentlich mit 502: bis zu drei Versuche
+          create() { for a in 1 2 3; do gh release create "$@" && return 0
+            echo "::warning title=Veröffentlichen::Hochladen fehlgeschlagen (Versuch $a)"
+            gh release delete "$1" --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag || true; sleep 60; done; return 1; }
+          create "$tmp" --repo "$GITHUB_REPOSITORY" --prerelease \
             --title "symfonOS Desktop (KDE Plasma) aus Quellcode $(date +%Y-%m-%d)" \
             --notes "$note · Prüfen: sha256sum -c $iso.sha256 · Auf USB: sudo dd if=$iso of=/dev/sdX bs=4M status=progress oflag=sync · Live-Benutzer meldet sich automatisch an; installieren mit »sudo symfonos-install« im Terminal" \
             "${files[@]}" "$iso.sha256" $(ls ../desktop-test/*.png 2>/dev/null)
