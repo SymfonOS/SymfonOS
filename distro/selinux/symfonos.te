@@ -1,4 +1,4 @@
-policy_module(symfonos, 1.5)
+policy_module(symfonos, 1.6)
 
 # Ergänzungen zur Reference Policy 2025.02 für symfonOS (systemd 257, Plasma 6, SDDM, CUPS, Live-Medium).
 # Entstanden aus den Verweigerungen des Desktop-Tests (tools/avc-summary.py, Branch ci-diag: avc.txt).
@@ -14,9 +14,9 @@ gen_require(`
 	type cupsd_t, cupsd_rw_etc_t;
 	type ntpd_t, udev_t, iso9660_t, systemd_networkd_var_lib_t, NetworkManager_t;
 	type systemd_sessions_runtime_t, systemd_logind_runtime_t, systemd_machined_runtime_t;
-	type devicekit_disk_t, mount_runtime_t, systemd_locale_t;
-	class dir { getattr search open read watch add_name write relabelfrom relabelto };
-	class file { getattr open read write execmod relabelfrom relabelto };
+	type devicekit_disk_t, mount_runtime_t, systemd_locale_t, ipsec_t, ipsec_key_file_t;
+	class dir { getattr search open read watch add_name write setattr relabelfrom relabelto };
+	class file { getattr open read write map execmod relabelfrom relabelto };
 	class lnk_file { getattr read };
 	class fd use;
 	class process { execmem execstack };
@@ -60,6 +60,9 @@ allow systemd_tmpfiles_t bin_t:dir search;
 allow systemd_tmpfiles_t bin_t:lnk_file { getattr read };
 allow systemd_tmpfiles_t { user_home_dir_t ssh_home_t xdm_var_lib_t auditd_log_t systemd_networkd_var_lib_t }:dir { relabelfrom relabelto };
 allow systemd_tmpfiles_t lib_t:file { relabelfrom relabelto };
+# … und prüft Besitzer und Rechte der Verzeichnisse aus d-Zeilen (fstat, ggf. fchmod/fchown). Die Reference Policy
+# unterdrückt diese Meldungen (dontaudit); im Modus enforcing meldet tmpfiles »Permission denied«.
+allow systemd_tmpfiles_t { bin_t auditd_log_t ssh_home_t xdm_var_lib_t systemd_networkd_var_lib_t }:dir { getattr search open read setattr };
 
 # auditctl liest beim Laden der Regeln /var/log/audit
 allow auditctl_t auditd_log_t:dir { getattr search open read };
@@ -91,6 +94,9 @@ allow { systemd_logind_t system_dbusd_t } xdm_t:fd use;
 
 # NetworkManager beobachtet Sitzungen und Benutzer über /run/systemd (sonst »logind monitor: -13«)
 allow NetworkManager_t { systemd_sessions_runtime_t systemd_logind_runtime_t systemd_machined_runtime_t }:dir watch;
+
+# strongSwan (charon-systemd) bildet /etc/ipsec.secrets in den Speicher ab (L2TP/IPsec über NetworkManager)
+allow ipsec_t ipsec_key_file_t:file map;
 
 # udisks beobachtet /run/mount (Einhängepunkte)
 allow devicekit_disk_t mount_runtime_t:dir watch;
