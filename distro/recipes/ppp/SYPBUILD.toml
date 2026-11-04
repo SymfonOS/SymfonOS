@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "ppp"
+version = "2.5.2-1"
+summary = "Point-to-Point-Protokoll (pppd; DSL, Modems)"
+license = "BSD-3-Clause AND GPL-2.0-or-later"
+url = "https://download.samba.org/pub/ppp/"
+depends = ["openssl", "libpcap", "linux-pam", "systemd"]
+
+[[source]]
+url = "https://download.samba.org/pub/ppp/ppp-2.5.2.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--with-runtime-dir=/run/ppp --with-logfile-dir=/var/log/ppp --with-system-ca-path=/etc/ssl/certs --enable-systemd --enable-multilink --enable-cbcp"
