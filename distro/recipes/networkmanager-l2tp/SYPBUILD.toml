@@ -11,7 +11,7 @@ makedepends = ["gettext"]
 
 [[source]]
 url = "https://github.com/nm-l2tp/NetworkManager-l2tp/releases/download/1.20.20/NetworkManager-l2tp-1.20.20.tar.xz"
-sha256 = "TODO"
+sha256 = "0859a35148fb0e1a1b6eef7beafd7c7211e87748af67879f1ecc40a4d01c008c"
 
 [build]
 style = "autotools"

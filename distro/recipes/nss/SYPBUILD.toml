@@ -11,7 +11,7 @@ makedepends = ["perl", "pkgconf"]
 
 [[source]]
 url = "https://archive.mozilla.org/pub/security/nss/releases/NSS_3_115_RTM/src/nss-3.115.tar.gz"
-sha256 = "TODO"
+sha256 = "ac2a47fb33bd79320159144e01c0d4af9a937a2d928c7c77ff06f5d9507861ab"
 
 [build]
 build = '''
