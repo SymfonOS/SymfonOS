@@ -11,15 +11,15 @@ makedepends = ["meson", "python", "python-jinja", "vulkan-headers"]
 
 [[source]]
 url = "https://github.com/haasn/libplacebo/archive/v7.351.0/libplacebo-7.351.0.tar.gz"
-sha256 = "TODO"
+sha256 = "716954501d9b76e6906fddda66febc5886493d0673dd265ec1e6e52f4e5cd7c6"
 
 [[source]]
 url = "https://github.com/fastfloat/fast_float/archive/v8.0.2/fast_float-8.0.2.tar.gz"
-sha256 = "TODO"
+sha256 = "e14a33089712b681d74d94e2a11362643bd7d769ae8f7e7caefe955f57f7eacd"
 
 [[source]]
 url = "https://github.com/Dav1dde/glad/archive/v2.0.8/glad-2.0.8.tar.gz"
-sha256 = "TODO"
+sha256 = "44f06f9195427c7017f5028d0894f57eb216b0a8f7c4eda7ce883732aeb2d0fc"
 
 [build]
 dir = "libplacebo-7.351.0"

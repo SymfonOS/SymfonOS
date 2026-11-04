@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://github.com/KDE/mpvqt/archive/v1.1.1/mpvqt-1.1.1.tar.gz"
-sha256 = "TODO"
+sha256 = "7d509600de97fa1c4d8f40e23f28a814f529b25d312de9b6be5a8dd854b335e5"
 
 [build]
 style = "cmake"
