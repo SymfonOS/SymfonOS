@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "python-pyparsing"
+version = "3.2.3-1"
+arch = "any"
+summary = "Parser-Bibliothek für Python (GVariant-Schema-Compiler von Flatpak)"
+license = "MIT"
+url = "https://files.pythonhosted.org/packages/source/p/pyparsing/"
+depends = ["python"]
+makedepends = ["python-flit-core"]
+
+[[source]]
+url = "https://files.pythonhosted.org/packages/source/p/pyparsing/pyparsing-3.2.3.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "python"
