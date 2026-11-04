@@ -12,7 +12,7 @@ makedepends = ["python-flit-core"]
 
 [[source]]
 url = "https://files.pythonhosted.org/packages/source/p/pyparsing/pyparsing-3.2.3.tar.gz"
-sha256 = "TODO"
+sha256 = "b9c13f1ab8b3b542f72e28f634bad4de758ab3ce4546e4301970ad6fa77c38be"
 
 [build]
 style = "python"
