@@ -7,7 +7,7 @@ summary = "Programme in Sandboxen (Flatpak), mit Flathub als Quelle"
 license = "LGPL-2.1-or-later"
 url = "https://github.com/flatpak/flatpak/releases/download/1.16.1/"
 depends = ["glib2", "libarchive", "curl", "libxml2", "zstd", "systemd", "polkit", "fuse3", "libxau", "ostree", "json-glib", "appstream", "gdk-pixbuf", "libseccomp", "gpgme", "libcap", "bubblewrap", "xdg-dbus-proxy", "wayland", "libselinux"]
-makedepends = ["meson", "python", "wayland-protocols", "libxslt"]
+makedepends = ["meson", "python", "python-pyparsing", "wayland-protocols", "libxslt"]
 
 [[source]]
 url = "https://github.com/flatpak/flatpak/releases/download/1.16.1/flatpak-1.16.1.tar.xz"

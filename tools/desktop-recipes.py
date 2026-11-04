@@ -142,6 +142,9 @@ pkg("python-cython", "3.1.3", "https://github.com/cython/cython/releases/downloa
 pkg("python-ply", "3.11", "https://files.pythonhosted.org/packages/source/p/ply/ply-3.11.tar.gz",
     "Lex/Yacc für Python (Intel-Vulkan-Treiber)", "BSD-3-Clause", ["python"],
     ["python-setuptools", "python-wheel"], style="python", arch="any")
+pkg("python-pyparsing", "3.2.3", "https://files.pythonhosted.org/packages/source/p/pyparsing/pyparsing-3.2.3.tar.gz",
+    "Parser-Bibliothek für Python (GVariant-Schema-Compiler von Flatpak)", "MIT",
+    ["python"], ["python-flit-core"], style="python", arch="any")
 pkg("python-docutils", "0.21.2", "https://files.pythonhosted.org/packages/source/d/docutils/docutils-0.21.2.tar.gz",
     "Dokumentationswerkzeuge (Handbuchseiten)", "BSD-2-Clause AND GPL-3.0-or-later AND Python-2.0",
     ["python"], ["python-flit-core"], style="python", arch="any")
@@ -830,7 +833,7 @@ pkg("flatpak", "1.16.1", ["https://github.com/flatpak/flatpak/releases/download/
     ["glib2", "libarchive", "curl", "libxml2", "zstd", "systemd", "polkit", "fuse3", "libxau", "ostree", "json-glib",
      "appstream", "gdk-pixbuf", "libseccomp", "gpgme", "libcap", "bubblewrap", "xdg-dbus-proxy", "wayland",
      "libselinux"],
-    ["meson", "python", "wayland-protocols", "libxslt"], style="meson",
+    ["meson", "python", "python-pyparsing", "wayland-protocols", "libxslt"], style="meson",
     flags="-Dsystem_bubblewrap=/usr/bin/bwrap -Dsystem_dbus_proxy=/usr/bin/xdg-dbus-proxy -Dhttp_backend=curl "
           "-Dgir=disabled -Dgtkdoc=disabled -Ddocbook_docs=disabled -Dman=disabled -Dtests=false "
           "-Dinstalled_tests=false -Dmalcontent=disabled -Ddconf=disabled -Dselinux_module=disabled "
