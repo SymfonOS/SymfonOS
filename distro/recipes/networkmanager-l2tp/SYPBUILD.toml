@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "networkmanager-l2tp"
+version = "1.20.20-1"
+summary = "L2TP- und L2TP/IPsec-Verbindungen in NetworkManager"
+license = "GPL-2.0-or-later"
+url = "https://github.com/nm-l2tp/NetworkManager-l2tp/releases/download/1.20.20/"
+depends = ["networkmanager", "ppp", "openssl", "nss", "glib2", "xl2tpd", "strongswan"]
+makedepends = ["gettext"]
+
+[[source]]
+url = "https://github.com/nm-l2tp/NetworkManager-l2tp/releases/download/1.20.20/NetworkManager-l2tp-1.20.20.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--disable-static --without-gnome --sysconfdir=/etc"

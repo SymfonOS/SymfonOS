@@ -11,7 +11,7 @@ Version für Version zur Basis und sind von den BLFS-Autoren gemeinsam getestet.
 | Grafik | LLVM 20 mit Clang, Mesa 25.1 (radeonsi, r600, iris, crocus, i915, nouveau, virgl, llvmpipe, zink; Vulkan: AMD, Intel, lavapipe, virtio), libdrm, libva, Vulkan-Loader, glslang, SPIR-V |
 | Anzeige | Wayland 1.24, wayland-protocols, Xwayland 24.1 für X11-Programme, libxkbcommon, X11-Bibliotheken |
 | SELinux | Reference Policy 2025.02 mit eigenem Modul `symfonos-selinux` (`distro/selinux/`): SDDM läuft als `xdm_t`, die Sitzung als `unconfined_t`. Live-System und installierter Desktop laufen im Modus *enforcing* (Standard, wie Fedora) ohne Verweigerungen (siehe [SICHERHEIT.md](SICHERHEIT.md)) |
-| Netzwerk | NetworkManager 1.54 mit `plasma-nm` (WLAN über iwd, DNS über systemd-resolved), Mobilfunk über ModemManager (LTE/5G-Modems mit MBIM und QMI, Anbieterdaten aus mobile-broadband-provider-info), DSL (PPPoE über pppd 2.5), VPN mit WireGuard und OpenVPN 2.6; das Basissystem bleibt bei systemd-networkd. Bluetooth mit BlueZ 5.83 und `bluedevil`, Audio über PipeWire (SBC, Opus) |
+| Netzwerk | NetworkManager 1.54 mit `plasma-nm` (WLAN über iwd, DNS über systemd-resolved), Mobilfunk über ModemManager (LTE/5G-Modems mit MBIM und QMI, Anbieterdaten aus mobile-broadband-provider-info), DSL (PPPoE über pppd 2.5), VPN mit WireGuard, OpenVPN 2.6 und L2TP/IPsec (xl2tpd, strongSwan 6, NSS); das Basissystem bleibt bei systemd-networkd. Bluetooth mit BlueZ 5.83 und `bluedevil`, Audio über PipeWire (SBC, Opus) |
 | Laufwerke | UDisks2 2.10 mit libblockdev 3.3 (Partitionen, Dateisysteme, LUKS, NVMe): USB-Sticks und Platten erscheinen in Dolphin und im Infobereich und lassen sich ohne root einhängen (unter `/run/media/$USER`) |
 | Drucken | CUPS 2.4 mit driverlosem Drucken (IPP Everywhere, AirPrint), Druckersuche über Avahi (Namen wie `drucker.local` über nss-mdns), cups-filters 2 (PDF über qpdf, Rasterung über Ghostscript), `print-manager` in den Systemeinstellungen, Qt-Druckdialog mit CUPS und Druck-Portal; Drucker verwalten dürfen Mitglieder von `wheel` |
 | Eingabe | libinput mit libwacom (Grafiktabletts von Wacom, Huion und XP-Pen), libevdev, mtdev |
@@ -63,7 +63,7 @@ Vollständige Logs und die Bildschirmfotos jedes Laufs liegen auf dem Branch `ci
 
 ## Noch nicht enthalten
 
-- **Weitere VPN-Erweiterungen:** OpenConnect (Cisco AnyConnect, GlobalProtect …) – die Oberfläche in plasma-nm braucht QtWebEngine; L2TP/IPsec – NetworkManager-l2tp braucht NSS, dazu strongSwan und xl2tpd.
+- **Weitere VPN-Erweiterungen:** OpenConnect (Cisco AnyConnect, GlobalProtect …) – die Oberfläche in plasma-nm braucht QtWebEngine.
 - **Webbrowser aus dem Quellcode:** Firefox braucht Rust und Node.js, Falkon braucht QtWebEngine; beide passen nicht in eine Bauetappe der CI. Bis dahin kommt ein Browser über Flathub (z. B. `flatpak install flathub org.mozilla.firefox` oder in Discover).
 - **Flatpak im enforcing-Test:** Programme laufen als `unconfined_t` in der bubblewrap-Sandbox, der Systemhelfer wie bei Fedora in der uneingeschränkten Domäne `flatpak_helper_t` (Modul `symfonos-selinux`). Eine Installation von Flathub ist in der CI noch nicht abgedeckt.
 - **Kreativprogramme** (Krita, Blender, Ardour …) und PySide6 für die symfonOS-Apps folgen als nächste Stufe.

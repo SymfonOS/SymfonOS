@@ -754,6 +754,59 @@ pkg("libqmi", "1.36.0", {"url": "https://gitlab.freedesktop.org/mobile-broadband
     ["meson", "python"], style="meson",
     flags="-Dmbim_qmux=true -Dqrtr=true -Dudev=true -Dintrospection=false -Dgtk_doc=false -Dman=false "
           "-Dbash_completion=false")
+# L2TP/IPsec-VPN: NetworkManager-l2tp steuert xl2tpd und strongSwan über ipsec.conf (stroke/starter); NSS für
+# Zertifikate. Die Oberfläche liefert plasma-nm.
+pkg("nspr", "4.37", "https://archive.mozilla.org/pub/nspr/releases/v4.37/src/nspr-4.37.tar.gz",
+    "Netscape Portable Runtime (NSS)", "MPL-2.0", ["glibc"],
+    build='''cd "$S/nspr"
+sed -i '/^RELEASE/s|^|#|' pr/src/misc/Makefile.in
+sed -i 's|$(LIBRARY) ||' config/rules.mk
+./configure --prefix=/usr --with-mozilla --with-pthreads --enable-64bit
+make''',
+    package='cd "$S/nspr"\nmake DESTDIR="$DESTDIR" install\nrm -f "$DESTDIR"/usr/lib/lib*.a "$DESTDIR/usr/bin/compile-et.pl" "$DESTDIR/usr/bin/prerr.properties"')
+pkg("nss", "3.115", "https://archive.mozilla.org/pub/security/nss/releases/NSS_3_115_RTM/src/nss-3.115.tar.gz",
+    "Network Security Services (Mozilla-Kryptobibliothek)", "MPL-2.0", ["nspr", "sqlite", "zlib"],
+    # eigenes Make-System ohne Installationsziel (wie BLFS); parallel nicht zuverlässig
+    build='''cd "$S/nss"
+make -j1 BUILD_OPT=1 NSPR_INCLUDE_DIR=/usr/include/nspr USE_SYSTEM_ZLIB=1 ZLIB_LIBS=-lz NSS_ENABLE_WERROR=0 \\
+  USE_64=1 NSS_USE_SYSTEM_SQLITE=1 NSS_DISABLE_GTESTS=1''',
+    package='''cd "$S/dist"
+install -d "$DESTDIR/usr/lib/pkgconfig" "$DESTDIR/usr/include/nss" "$DESTDIR/usr/bin"
+install -m755 Linux*/lib/*.so "$DESTDIR/usr/lib/"
+install -m644 Linux*/lib/*.chk "$DESTDIR/usr/lib/"
+cp -RL public/nss/* private/nss/* "$DESTDIR/usr/include/nss/"
+install -m755 Linux*/bin/certutil Linux*/bin/pk12util "$DESTDIR/usr/bin/"
+v=$(sed -n 's/^#define NSS_VERSION "\\([^"]*\\)".*/\\1/p' public/nss/nss.h | cut -d' ' -f1)
+nv=$(pkg-config --modversion nspr)
+cat > "$DESTDIR/usr/lib/pkgconfig/nss.pc" <<PC
+prefix=/usr
+exec_prefix=/usr
+libdir=/usr/lib
+includedir=/usr/include/nss
+
+Name: NSS
+Description: Network Security Services
+Version: $v
+Requires: nspr >= $nv
+Libs: -L/usr/lib -lnss3 -lnssutil3 -lsmime3 -lssl3
+Cflags: -I/usr/include/nss
+PC''', makedepends=["perl", "pkgconf"])
+pkg("xl2tpd", "1.3.18", {"url": "https://github.com/xelerance/xl2tpd/archive/v1.3.18/xl2tpd-1.3.18.tar.gz",
+                         "filename": "xl2tpd-1.3.18.tar.gz"},
+    "L2TP-Dienst", "GPL-2.0-or-later", ["libpcap"],
+    build='cd "$S"\nmake PREFIX=/usr',
+    package='cd "$S"\nmake PREFIX=/usr SBINDIR="$DESTDIR/usr/sbin" BINDIR="$DESTDIR/usr/bin" MANDIR="$DESTDIR/usr/share/man" install')
+pkg("strongswan", "6.0.2", "https://download.strongswan.org/strongswan-6.0.2.tar.bz2", "IPsec (strongSwan)",
+    "GPL-2.0-or-later", ["openssl", "gmp", "systemd", "curl"], style="autotools",
+    flags="--sysconfdir=/etc --enable-stroke --enable-openssl --enable-systemd --enable-swanctl --enable-curl "
+          "--enable-eap-mschapv2 --enable-eap-identity --enable-xauth-generic --disable-static "
+          "--with-systemdsystemunitdir=/usr/lib/systemd/system",
+    backup=["etc/ipsec.conf", "etc/ipsec.secrets", "etc/strongswan.conf"])
+pkg("networkmanager-l2tp", "1.20.20",
+    "https://github.com/nm-l2tp/NetworkManager-l2tp/releases/download/1.20.20/NetworkManager-l2tp-1.20.20.tar.xz",
+    "L2TP- und L2TP/IPsec-Verbindungen in NetworkManager", "GPL-2.0-or-later",
+    ["networkmanager", "ppp", "openssl", "nss", "glib2", "xl2tpd", "strongswan"], ["gettext"], style="autotools",
+    flags="--disable-static --without-gnome --sysconfdir=/etc")
 pkg("networkmanager", "1.54.0", "https://gitlab.freedesktop.org/NetworkManager/NetworkManager/-/releases/1.54.0/downloads/NetworkManager-1.54.0.tar.xz",
     "Netzwerkverwaltung (NetworkManager)", "GPL-2.0-or-later AND LGPL-2.1-or-later",
     ["glib2", "dbus", "systemd", "util-linux", "libndp", "curl", "gnutls", "polkit", "libselinux", "readline", "iwd",
@@ -1519,11 +1572,11 @@ DESKTOP = ["symfonos-base", "symfonos-desktop-config", "plasma-desktop", "plasma
            "polkit-kde-agent-1", "plasma-systemmonitor", "ksystemstats", "kdeplasma-addons", "ocean-sound-theme",
            "kactivitymanagerd", "kglobalacceld", "kimageformats", "qt6-imageformats", "qt6-translations",
            "qt6-wayland", "mesa", "vulkan-loader", "libva", "pipewire", "wireplumber", "alsa-utils", "ffmpeg",
-           "xdg-user-dirs", "networkmanager", "networkmanager-openvpn", "plasma-nm", "bluez", "bluedevil", "udisks2", "cups", "cups-filters", "nss-mdns", "print-manager", "flatpak", "discover", "flatpak-kcm", "konsole", "dolphin", "kate", "ark", "gwenview", "okular", "dragon", "elisa", "spectacle", "kcalc", "kcharselect",
+           "xdg-user-dirs", "networkmanager", "networkmanager-openvpn", "networkmanager-l2tp", "plasma-nm", "bluez", "bluedevil", "udisks2", "cups", "cups-filters", "nss-mdns", "print-manager", "flatpak", "discover", "flatpak-kcm", "konsole", "dolphin", "kate", "ark", "gwenview", "okular", "dragon", "elisa", "spectacle", "kcalc", "kcharselect",
            "inter-font", "jetbrains-mono-font", "dejavu-fonts", "noto-color-emoji", "hunspell", "upower",
            "accountsservice", "polkit"]
 pkg("symfonos-desktop", "2025.10", [], "symfonOS-Desktop (KDE Plasma 6, Wayland, PipeWire)", "GPL-3.0-or-later",
-    DESKTOP, arch="any", style="meta", rel=12)
+    DESKTOP, arch="any", style="meta", rel=13)
 
 # ---------------------------------------------------------------------------------------------------
 # Rezepte schreiben

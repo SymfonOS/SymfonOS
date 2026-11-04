@@ -1,0 +1,44 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "nss"
+version = "3.115-1"
+summary = "Network Security Services (Mozilla-Kryptobibliothek)"
+license = "MPL-2.0"
+url = "https://archive.mozilla.org/pub/security/nss/releases/NSS_3_115_RTM/src/"
+depends = ["nspr", "sqlite", "zlib"]
+makedepends = ["perl", "pkgconf"]
+
+[[source]]
+url = "https://archive.mozilla.org/pub/security/nss/releases/NSS_3_115_RTM/src/nss-3.115.tar.gz"
+sha256 = "TODO"
+
+[build]
+build = '''
+cd "$S/nss"
+make -j1 BUILD_OPT=1 NSPR_INCLUDE_DIR=/usr/include/nspr USE_SYSTEM_ZLIB=1 ZLIB_LIBS=-lz NSS_ENABLE_WERROR=0 \
+  USE_64=1 NSS_USE_SYSTEM_SQLITE=1 NSS_DISABLE_GTESTS=1
+'''
+package = '''
+cd "$S/dist"
+install -d "$DESTDIR/usr/lib/pkgconfig" "$DESTDIR/usr/include/nss" "$DESTDIR/usr/bin"
+install -m755 Linux*/lib/*.so "$DESTDIR/usr/lib/"
+install -m644 Linux*/lib/*.chk "$DESTDIR/usr/lib/"
+cp -RL public/nss/* private/nss/* "$DESTDIR/usr/include/nss/"
+install -m755 Linux*/bin/certutil Linux*/bin/pk12util "$DESTDIR/usr/bin/"
+v=$(sed -n 's/^#define NSS_VERSION "\([^"]*\)".*/\1/p' public/nss/nss.h | cut -d' ' -f1)
+nv=$(pkg-config --modversion nspr)
+cat > "$DESTDIR/usr/lib/pkgconfig/nss.pc" <<PC
+prefix=/usr
+exec_prefix=/usr
+libdir=/usr/lib
+includedir=/usr/include/nss
+
+Name: NSS
+Description: Network Security Services
+Version: $v
+Requires: nspr >= $nv
+Libs: -L/usr/lib -lnss3 -lnssutil3 -lsmime3 -lssl3
+Cflags: -I/usr/include/nss
+PC
+'''
