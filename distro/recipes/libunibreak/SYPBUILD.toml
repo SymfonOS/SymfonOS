@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libunibreak"
+version = "6.1-1"
+summary = "Zeilen- und Wortumbruch nach Unicode"
+license = "Zlib"
+url = "https://github.com/adah1972/libunibreak/releases/download/libunibreak_6_1/"
+depends = ["glibc"]
+
+[[source]]
+url = "https://github.com/adah1972/libunibreak/releases/download/libunibreak_6_1/libunibreak-6.1.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--disable-static"

@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "zug"
+version = "0.1.1-1"
+arch = "any"
+summary = "Transducer (C++-Header)"
+license = "BSL-1.0"
+url = "https://github.com/arximboldi/zug/archive/v0.1.1/"
+makedepends = ["cmake", "ninja"]
+
+[[source]]
+url = "https://github.com/arximboldi/zug/archive/v0.1.1/zug-0.1.1.tar.gz"
+sha256 = "TODO"
+
+[build]
+dir = "zug-0.1.1"
+style = "cmake"
+configure_flags = "-Dzug_BUILD_TESTS=OFF -Dzug_BUILD_EXAMPLES=OFF -Dzug_BUILD_DOCS=OFF"

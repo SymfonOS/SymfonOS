@@ -1,0 +1,20 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "sdl2"
+version = "2.32.10-1"
+summary = "Simple DirectMedia Layer 2"
+license = "Zlib"
+url = "https://github.com/libsdl-org/SDL/releases/download/release-2.32.10/"
+depends = ["glibc", "libx11", "libxext", "libxcursor", "libxi", "libxrandr", "libxkbcommon", "wayland", "mesa", "libdrm", "pipewire", "alsa-lib", "dbus"]
+makedepends = ["cmake", "ninja", "wayland-protocols"]
+provides = ["so:libSDL2-2.0.so.0"]
+
+[[source]]
+url = "https://github.com/libsdl-org/SDL/releases/download/release-2.32.10/SDL2-2.32.10.tar.gz"
+sha256 = "TODO"
+
+[build]
+dir = "SDL2-2.32.10"
+style = "cmake"
+configure_flags = "-DSDL_STATIC=OFF -DSDL_TEST_LIBRARY=OFF -DSDL_TESTS=OFF -DSDL_RPATH=OFF -DCMAKE_INSTALL_LIBDIR=lib"
