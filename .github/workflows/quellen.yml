@@ -1,0 +1,55 @@
+name: Quellen spiegeln
+
+# Erzeugt Quell-Tarballs aus Git-Tags für Projekte ohne herunterladbaren Release-Tarball und legt sie im Release
+# »quellen« ab. Die Rezepte verweisen dann auf diese Datei; ihre sha256 wird wie üblich im Rezept festgeschrieben.
+#
+#   ardour-waf-dist: Ardour (GitHub-Archive sind per .gitattributes leer; der Release-Tarball entsteht mit
+#                    »waf dist« und enthält libs/ardour/revision.cc mit der Version aus »git describe«)
+on:
+  workflow_dispatch:
+    inputs:
+      art:
+        description: "Art der Quelle"
+        type: choice
+        options: [ardour-waf-dist]
+        required: true
+      tag:
+        description: "Git-Tag (z. B. 9.8)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  spiegeln:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tarball erzeugen
+        env:
+          ART: ${{ inputs.art }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -eu
+          case "$TAG" in *[!0-9A-Za-z._-]*) echo "ungültiger Tag: $TAG"; exit 1;; esac
+          mkdir out
+          case "$ART" in
+            ardour-waf-dist)
+              git clone -q --depth 1 --branch "$TAG" https://github.com/Ardour/ardour.git src
+              cd src
+              git describe HEAD
+              APPNAME=Ardour python3 waf dist
+              ls -la
+              mv Ardour-*.tar.* ../out/
+              ;;
+          esac
+          cd "$GITHUB_WORKSPACE/out"
+          sha256sum * | tee SHA256SUMS
+      - name: Im Release »quellen« ablegen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd out
+          gh release view quellen --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 ||
+            gh release create quellen --repo "$GITHUB_REPOSITORY" --title "Gespiegelte Quellen" \
+              --notes "Quell-Tarballs aus Git-Tags (Workflow »Quellen spiegeln«) für Projekte ohne Download-Tarball"
+          for f in *.tar.*; do gh release upload quellen "$f" --repo "$GITHUB_REPOSITORY" --clobber; done
