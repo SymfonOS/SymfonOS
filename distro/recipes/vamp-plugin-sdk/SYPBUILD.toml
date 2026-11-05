@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "vamp-plugin-sdk"
-version = "2.10.0-1"
+version = "2.10.0-2"
 summary = "Vamp-Schnittstelle für Audio-Analyse-Plugins"
 license = "BSD-3-Clause"
 url = "https://github.com/vamp-plugins/vamp-plugin-sdk/archive/vamp-plugin-sdk-v2.10/"
@@ -15,4 +15,3 @@ sha256 = "b552bc91817294c7f90ea07d70938642ebf15d5e3bafc81cf7d55efab9995399"
 [build]
 dir = "vamp-plugin-sdk-vamp-plugin-sdk-v2.10"
 style = "autotools"
-configure_flags = "--disable-programs"
