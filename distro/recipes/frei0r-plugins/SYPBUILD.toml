@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "frei0r-plugins"
+version = "2.3.3-1"
+summary = "Video-Effekte (frei0r)"
+license = "GPL-2.0-or-later"
+url = "https://github.com/dyne/frei0r/archive/v2.3.3/"
+depends = ["glibc", "gcc", "cairo"]
+makedepends = ["cmake", "ninja"]
+
+[[source]]
+url = "https://github.com/dyne/frei0r/archive/v2.3.3/frei0r-2.3.3.tar.gz"
+sha256 = "TODO"
+
+[build]
+dir = "frei0r-2.3.3"
+style = "cmake"
+configure_flags = "-DWITHOUT_OPENCV=ON -DWITHOUT_GAVL=ON -DCMAKE_INSTALL_LIBDIR=lib"

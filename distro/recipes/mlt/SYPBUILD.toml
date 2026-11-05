@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "mlt"
+version = "7.32.0-1"
+summary = "Multimedia-Framework für Videoschnitt (MLT, melt)"
+license = "LGPL-2.1-or-later AND GPL-3.0-or-later"
+url = "https://github.com/mltframework/mlt/archive/v7.32.0/"
+depends = ["ffmpeg", "libxml2", "libsamplerate", "libvorbis", "frei0r-plugins", "fontconfig", "qt6-base", "qt6-svg", "qt6-5compat", "libx11"]
+makedepends = ["cmake", "ninja", "pkgconf"]
+
+[[source]]
+url = "https://github.com/mltframework/mlt/archive/v7.32.0/mlt-7.32.0.tar.gz"
+sha256 = "TODO"
+
+[build]
+dir = "mlt-7.32.0"
+style = "cmake"
+configure_flags = "-DCMAKE_INSTALL_LIBDIR=lib -DGPL=ON -DGPL3=ON -DCLANG_FORMAT=OFF -DBUILD_TESTING=OFF -DMOD_QT=OFF -DMOD_QT6=ON -DMOD_GLAXNIMATE_QT6=OFF -DMOD_DECKLINK=OFF -DMOD_GDK=OFF -DMOD_JACKRACK=OFF -DMOD_MOVIT=OFF -DMOD_OPENCV=OFF -DMOD_RTAUDIO=OFF -DMOD_RUBBERBAND=OFF -DMOD_SDL1=OFF -DMOD_SDL2=OFF -DMOD_SOX=OFF -DMOD_SPATIALAUDIO=OFF -DMOD_VIDSTAB=OFF -DMOD_XINE=OFF -DMOD_NDI=OFF -DMOD_FREI0R=ON -DMOD_RESAMPLE=ON -DMOD_VORBIS=ON -DMOD_PLUS=ON -DMOD_PLUSGPL=ON -DMOD_XML=ON -DMOD_AVFORMAT=ON -DMOD_KDENLIVE=ON -DMOD_NORMALIZE=ON -DMOD_OLDFILM=ON -DSWIG_PYTHON=OFF"
