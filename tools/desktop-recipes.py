@@ -1639,7 +1639,8 @@ pkg("liblo", "0.32", "https://downloads.sourceforge.net/liblo/liblo-0.32.tar.gz"
 pkg("vamp-plugin-sdk", "2.10.0",
     {"url": "https://github.com/vamp-plugins/vamp-plugin-sdk/archive/vamp-plugin-sdk-v2.10/vamp-plugin-sdk-2.10.0.tar.gz"},
     "Vamp-Schnittstelle für Audio-Analyse-Plugins", "BSD-3-Clause", ["gcc", "libsndfile"], style="autotools",
-    dir="vamp-plugin-sdk-vamp-plugin-sdk-v2.10", flags="--disable-programs")
+    # »make install« baut die Beispielprogramme auch mit --disable-programs, dann aber ohne libsndfile
+    dir="vamp-plugin-sdk-vamp-plugin-sdk-v2.10", rel=2)
 pkg("rubberband", "4.0.0", "https://breakfastquay.com/files/releases/rubberband-4.0.0.tar.bz2",
     "Zeitdehnung und Tonhöhenverschiebung", "GPL-2.0-or-later", ["gcc", "fftw", "libsamplerate"], ["meson"],
     style="meson", flags="-Dfft=fftw -Dresampler=libsamplerate -Djni=disabled -Dladspa=disabled -Dvamp=disabled "
