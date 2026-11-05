@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "pangomm1.4"
+version = "2.46.4-1"
+summary = "C++-Anbindung an Pango (ABI 1.4)"
+license = "LGPL-2.1-or-later"
+url = "https://download.gnome.org/sources/pangomm/2.46/"
+depends = ["pango", "glibmm2.4", "cairomm1.0"]
+makedepends = ["meson"]
+
+[[source]]
+url = "https://download.gnome.org/sources/pangomm/2.46/pangomm-2.46.4.tar.xz"
+sha256 = "TODO"
+
+[build]
+dir = "pangomm-2.46.4"
+style = "meson"
+configure_flags = "-Dbuild-documentation=false"
