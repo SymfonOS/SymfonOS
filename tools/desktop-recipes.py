@@ -1688,13 +1688,20 @@ pkg("ardour", "9.8", "https://github.com/SymfonOS/SymfonOS/releases/download/que
      "curl", "liblo", "taglib", "vamp-plugin-sdk", "rubberband", "aubio", "fftw", "lilv", "lv2", "serd", "sord",
      "sratom", "libxml2", "flac", "libogg", "fontconfig", "freetype", "harfbuzz", "alsa-lib", "pulseaudio",
      "libusb", "libx11", "libxext", "libxrandr", "boost", "readline", "hicolor-icon-theme"],
-    ["python", "boost", "pkgconf", "gettext", "perl"], dir="Ardour-9.8.0", rel=2,
+    ["python", "boost", "pkgconf", "gettext", "perl"], dir="Ardour-9.8.0", rel=3,
     build=r"""cd "$S"
-python3 waf configure --prefix=/usr --configdir=/etc --freedesktop --no-phone-home --no-lrdf --cxx17 \
+# ohne --freedesktop: das verlangt itstool (Übersetzung der AppStream-Daten); Starter und Symbole legt package() an
+python3 waf configure --prefix=/usr --configdir=/etc --no-phone-home --no-lrdf --cxx17 \
   --with-backends=alsa,pulseaudio,dummy
 python3 waf build -j"$(nproc)"
 python3 waf i18n_mo""",
-    package='cd "$S"\npython3 waf install --destdir="$DESTDIR"')
+    package=r"""cd "$S"
+python3 waf install --destdir="$DESTDIR"
+sed -e 's/@ARDOUR_EXEC@/ardour9/g; s/@ARDOUR_ICON@/ardour9/g' gtk2_ardour/ardour.desktop.in > ardour9.desktop
+install -Dm644 ardour9.desktop "$DESTDIR/usr/share/applications/ardour9.desktop"
+for n in 16 22 32 48 256 512; do
+  install -Dm644 "gtk2_ardour/resources/Ardour-icon_${n}px.png" "$DESTDIR/usr/share/icons/hicolor/${n}x${n}/apps/ardour9.png"
+done""")
 gear("kdenlive", KF_GUI + ["karchive", "kbookmarks", "kcodecs", "kconfigwidgets", "knotifyconfig", "knewstuff",
                            "kguiaddons", "ktextwidgets", "solid", "kfilemetadata", "purpose", "mlt", "opentimelineio",
                            "imath", "ffmpeg", "qt6-svg", "qt6-multimedia", "qt6-networkauth", "qt6-5compat",
