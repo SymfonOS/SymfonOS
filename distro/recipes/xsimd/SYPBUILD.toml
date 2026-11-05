@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "xsimd"
+version = "13.2.0-1"
+arch = "any"
+summary = "SIMD-Befehle (C++-Header)"
+license = "BSD-3-Clause"
+url = "https://github.com/xtensor-stack/xsimd/archive/13.2.0/"
+makedepends = ["cmake", "ninja"]
+
+[[source]]
+url = "https://github.com/xtensor-stack/xsimd/archive/13.2.0/xsimd-13.2.0.tar.gz"
+sha256 = "TODO"
+
+[build]
+dir = "xsimd-13.2.0"
+style = "cmake"
+configure_flags = "-DBUILD_TESTS=OFF"

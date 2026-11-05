@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "immer"
+version = "0.8.1-1"
+arch = "any"
+summary = "Unveränderliche Datenstrukturen (C++-Header)"
+license = "BSL-1.0"
+url = "https://github.com/arximboldi/immer/archive/v0.8.1/"
+makedepends = ["cmake", "ninja"]
+
+[[source]]
+url = "https://github.com/arximboldi/immer/archive/v0.8.1/immer-0.8.1.tar.gz"
+sha256 = "TODO"
+
+[build]
+dir = "immer-0.8.1"
+style = "cmake"
+configure_flags = "-Dimmer_BUILD_TESTS=OFF -Dimmer_BUILD_EXAMPLES=OFF -Dimmer_BUILD_DOCS=OFF -Dimmer_BUILD_EXTRAS=OFF"

@@ -1,0 +1,20 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "lager"
+version = "0.1.1-1"
+arch = "any"
+summary = "Unidirektionaler Datenfluss (C++-Header)"
+license = "MIT"
+url = "https://github.com/arximboldi/lager/archive/v0.1.1/"
+depends = ["immer", "zug"]
+makedepends = ["cmake", "ninja", "boost"]
+
+[[source]]
+url = "https://github.com/arximboldi/lager/archive/v0.1.1/lager-0.1.1.tar.gz"
+sha256 = "TODO"
+
+[build]
+dir = "lager-0.1.1"
+style = "cmake"
+configure_flags = "-Dlager_BUILD_TESTS=OFF -Dlager_BUILD_FAILURE_TESTS=OFF -Dlager_BUILD_EXAMPLES=OFF -Dlager_BUILD_DEBUGGER_EXAMPLES=OFF -Dlager_BUILD_DOCS=OFF"

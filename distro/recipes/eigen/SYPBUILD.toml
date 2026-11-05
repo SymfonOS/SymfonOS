@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "eigen"
+version = "3.4.0-1"
+arch = "any"
+summary = "Lineare Algebra (C++-Header)"
+license = "MPL-2.0"
+url = "https://gitlab.com/libeigen/eigen/-/archive/3.4.0/"
+makedepends = ["cmake", "ninja"]
+
+[[source]]
+url = "https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.bz2"
+sha256 = "TODO"
+
+[build]
+style = "cmake"
+configure_flags = "-DBUILD_TESTING=OFF -DEIGEN_BUILD_DOC=OFF -DEIGEN_BUILD_PKGCONFIG=ON"
