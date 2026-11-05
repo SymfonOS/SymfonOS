@@ -11,7 +11,7 @@ provides = ["so:libluajit-5.1.so.2"]
 
 [[source]]
 url = "https://github.com/LuaJIT/LuaJIT/archive/ea9eb7edb5eac4a9d175d74523db34fac0fa5180/LuaJIT-ea9eb7edb5eac4a9d175d74523db34fac0fa5180.tar.gz"
-sha256 = "TODO"
+sha256 = "338a5640be00b89fd0a2a027a7433fcbbb4d006be840d216d84151386b5bcdf7"
 
 [build]
 dir = "LuaJIT-ea9eb7edb5eac4a9d175d74523db34fac0fa5180"
