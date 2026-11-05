@@ -2,11 +2,11 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "ardour"
-version = "9.8-3"
+version = "9.8-4"
 summary = "Digitale Audio-Workstation (Ardour)"
 license = "GPL-2.0-or-later"
 url = "https://github.com/SymfonOS/SymfonOS/releases/download/quellen/"
-depends = ["glibmm2.4", "libsigc++2", "cairomm1.0", "cairo", "pango", "glib2", "libsndfile", "libsamplerate", "libarchive", "curl", "liblo", "taglib", "vamp-plugin-sdk", "rubberband", "aubio", "fftw", "lilv", "lv2", "serd", "sord", "sratom", "libxml2", "flac", "libogg", "fontconfig", "freetype", "harfbuzz", "alsa-lib", "pulseaudio", "libusb", "libx11", "libxext", "libxrandr", "boost", "readline", "hicolor-icon-theme"]
+depends = ["glibmm2.4", "libsigc++2", "cairomm1.0", "pangomm1.4", "cairo", "pango", "glib2", "libsndfile", "libsamplerate", "libarchive", "curl", "liblo", "taglib", "vamp-plugin-sdk", "rubberband", "aubio", "fftw", "lilv", "lv2", "serd", "sord", "sratom", "libxml2", "flac", "libogg", "fontconfig", "freetype", "harfbuzz", "alsa-lib", "pulseaudio", "libusb", "libx11", "libxext", "libxrandr", "boost", "readline", "hicolor-icon-theme"]
 makedepends = ["python", "pkgconf", "gettext", "perl"]
 
 [[source]]

@@ -1620,6 +1620,9 @@ pkg("glibmm2.4", "2.66.8", "https://download.gnome.org/sources/glibmm/2.66/glibm
 pkg("cairomm1.0", "1.14.5", "https://www.cairographics.org/releases/cairomm-1.14.5.tar.xz",
     "C++-Anbindung an Cairo (ABI 1.0)", "LGPL-2.0-or-later", ["cairo", "libsigc++2"], ["meson"], style="meson",
     dir="cairomm-1.14.5", flags="-Dbuild-examples=false -Dbuild-tests=false -Dbuild-documentation=false")
+pkg("pangomm1.4", "2.46.4", "https://download.gnome.org/sources/pangomm/2.46/pangomm-2.46.4.tar.xz",
+    "C++-Anbindung an Pango (ABI 1.4)", "LGPL-2.1-or-later", ["pango", "glibmm2.4", "cairomm1.0"], ["meson"],
+    style="meson", dir="pangomm-2.46.4", flags="-Dbuild-documentation=false")
 pkg("fftw", "3.3.10", "https://www.fftw.org/fftw-3.3.10.tar.gz",
     "Schnelle Fourier-Transformation (einfache und doppelte Genauigkeit)", "GPL-2.0-or-later", ["glibc"],
     build=r"""cd "$S"
@@ -1684,11 +1687,11 @@ pkg("lilv", "0.24.26", DROBILLA + "lilv-0.24.26.tar.xz", "LV2-Plugins laden (Hos
 # »quellen«). Ardour bietet keinen direkt ladbaren Tarball, GitHub-Archive sind per .gitattributes leer.
 pkg("ardour", "9.8", "https://github.com/SymfonOS/SymfonOS/releases/download/quellen/Ardour-9.8.0.tar.bz2",
     "Digitale Audio-Workstation (Ardour)", "GPL-2.0-or-later",
-    ["glibmm2.4", "libsigc++2", "cairomm1.0", "cairo", "pango", "glib2", "libsndfile", "libsamplerate", "libarchive",
+    ["glibmm2.4", "libsigc++2", "cairomm1.0", "pangomm1.4", "cairo", "pango", "glib2", "libsndfile", "libsamplerate", "libarchive",
      "curl", "liblo", "taglib", "vamp-plugin-sdk", "rubberband", "aubio", "fftw", "lilv", "lv2", "serd", "sord",
      "sratom", "libxml2", "flac", "libogg", "fontconfig", "freetype", "harfbuzz", "alsa-lib", "pulseaudio",
      "libusb", "libx11", "libxext", "libxrandr", "boost", "readline", "hicolor-icon-theme"],
-    ["python", "boost", "pkgconf", "gettext", "perl"], dir="Ardour-9.8.0", rel=3,
+    ["python", "boost", "pkgconf", "gettext", "perl"], dir="Ardour-9.8.0", rel=4,
     build=r"""cd "$S"
 # ohne --freedesktop: das verlangt itstool (Übersetzung der AppStream-Daten); Starter und Symbole legt package() an
 python3 waf configure --prefix=/usr --configdir=/etc --no-phone-home --no-lrdf --cxx17 \
