@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", 
 
 [[source]]
 url = "https://github.com/KDE/krita/archive/v6.0.4.1/krita-6.0.4.1.tar.gz"
-sha256 = "TODO"
+sha256 = "2bfbd1f8f79bacf5aded3f41288875c3a708caefc8aa38bde68dbedda20da33f"
 
 [build]
 dir = "krita-6.0.4.1"

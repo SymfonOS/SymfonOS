@@ -11,7 +11,7 @@ makedepends = ["cmake", "ninja"]
 
 [[source]]
 url = "https://github.com/stachenov/quazip/archive/v1.5/quazip-1.5.tar.gz"
-sha256 = "TODO"
+sha256 = "405b72b6e76c8987ff41a762523b8f64876ba406d8a831d268ee0b63f1369582"
 
 [build]
 dir = "quazip-1.5"

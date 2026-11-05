@@ -11,7 +11,7 @@ makedepends = ["cmake", "ninja"]
 
 [[source]]
 url = "https://github.com/xtensor-stack/xsimd/archive/13.2.0/xsimd-13.2.0.tar.gz"
-sha256 = "TODO"
+sha256 = "edd8cd3d548c185adc70321c53c36df41abe64c1fe2c67bc6d93c3ecda82447a"
 
 [build]
 dir = "xsimd-13.2.0"

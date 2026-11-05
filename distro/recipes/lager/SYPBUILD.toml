@@ -12,7 +12,7 @@ makedepends = ["cmake", "ninja", "boost"]
 
 [[source]]
 url = "https://github.com/arximboldi/lager/archive/v0.1.1/lager-0.1.1.tar.gz"
-sha256 = "TODO"
+sha256 = "9e4743c3fe2c95c1653c3fd088a2200108f09d758725697831852dc91d15d174"
 
 [build]
 dir = "lager-0.1.1"

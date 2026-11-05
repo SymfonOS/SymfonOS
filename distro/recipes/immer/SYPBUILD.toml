@@ -11,7 +11,7 @@ makedepends = ["cmake", "ninja"]
 
 [[source]]
 url = "https://github.com/arximboldi/immer/archive/v0.8.1/immer-0.8.1.tar.gz"
-sha256 = "TODO"
+sha256 = "de8411c84830864604bb685dc8f2e3c0dbdc40b95b2f6726092f7dcc85e75209"
 
 [build]
 dir = "immer-0.8.1"
