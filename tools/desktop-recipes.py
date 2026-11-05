@@ -1573,7 +1573,7 @@ pkg("haruna", "1.7.1", {"url": "https://github.com/KDE/haruna/archive/v1.7.1/har
     [QB, QD, "qt6-5compat", "mpvqt", "ffmpeg", "breeze", "kcolorscheme", "kconfig", "kcoreaddons", "kfilemetadata",
      "ki18n", "kiconthemes", "kio", "kirigami", "kwindowsystem", "kcrash", "kdsingleapplication",
      "qqc2-desktop-style", "hicolor-icon-theme"], KDE_MK, style="cmake", flags=KDE_FLAGS)
-# Malen (Krita 6, Qt 6): Header-Bibliotheken für Datenmodell (immer/zug/lager), SIMD (xsimd), Eigen, dazu
+# Für Krita 6 (Qt 6) vorbereitet – Krita selbst fehlt noch, siehe docs/DESKTOP.md: Header-Bibliotheken für Datenmodell (immer/zug/lager), SIMD (xsimd), Eigen, dazu
 # QuaZip (Ressourcenpakete), libunibreak (Textwerkzeug) und SDL2 (Tonausgabe der Animation über MLT)
 pkg("eigen", "3.4.0", "https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.bz2",
     "Lineare Algebra (C++-Header)", "MPL-2.0", [], ["cmake", "ninja"], style="cmake", arch="any",
@@ -1606,19 +1606,6 @@ pkg("sdl2", "2.32.10", "https://github.com/libsdl-org/SDL/releases/download/rele
     ["cmake", "ninja", "wayland-protocols"], style="cmake", dir="SDL2-2.32.10",
     flags="-DSDL_STATIC=OFF -DSDL_TEST_LIBRARY=OFF -DSDL_TESTS=OFF -DSDL_RPATH=OFF -DCMAKE_INSTALL_LIBDIR=lib",
     provides=["so:libSDL2-2.0.so.0"])
-# Krita: Qt ohne die Krita-eigenen Patches; Python-Skripte fehlen (kein PyQt6/SIP)
-pkg("krita", "6.0.4.1", {"url": "https://github.com/KDE/krita/archive/v6.0.4.1/krita-6.0.4.1.tar.gz"},
-    "Malprogramm (Krita)", "GPL-3.0-or-later",
-    [QB, QD, "qt6-svg", "qt6-5compat", "qt6-wayland", "kconfig", "kwidgetsaddons", "kcompletion", "kcoreaddons",
-     "kguiaddons", "ki18n", "kitemviews", "kcolorscheme", "kcrash", "boost", "eigen", "xsimd", "immer", "zug",
-     "lager", "quazip", "libunibreak", "sdl2", "mlt", "ffmpeg", "exiv2", "lcms2", "libpng", "zlib", "libtiff",
-     "libjpeg-turbo", "giflib", "libwebp", "libjxl", "openjpeg", "imath", "poppler", "freetype", "harfbuzz",
-     "fontconfig", "fribidi", "libx11", "libxi", "hicolor-icon-theme"],
-    KDE_MK, style="cmake", dir="krita-6.0.4.1",
-    flags=KDE_FLAGS + " -DBUILD_WITH_QT6=ON -DBUILD_TESTING=OFF -DENABLE_UPDATERS=OFF -DFOUNDATION_BUILD=OFF "
-          "-DKRITA_QT_HAS_ENTER_LEAVE_PATCH=OFF -DKRITA_QT_HAS_UNBALANCED_KEY_PRESS_RELEASE_PATCH=OFF "
-          "-DKRITA_QT_HAS_UPDATE_COMPRESSION_PATCH=OFF -DKRITA_USE_SURFACE_COLOR_MANAGEMENT_API=OFF "
-          "-DCMAKE_DISABLE_FIND_PACKAGE_PyQt6=ON -DCMAKE_DISABLE_FIND_PACKAGE_SIP=ON")
 gear("kdenlive", KF_GUI + ["karchive", "kbookmarks", "kcodecs", "kconfigwidgets", "knotifyconfig", "knewstuff",
                            "kguiaddons", "ktextwidgets", "solid", "kfilemetadata", "purpose", "mlt", "opentimelineio",
                            "imath", "ffmpeg", "qt6-svg", "qt6-multimedia", "qt6-networkauth", "qt6-5compat",
@@ -1718,11 +1705,11 @@ DESKTOP = ["symfonos-base", "symfonos-desktop-config", "plasma-desktop", "plasma
            "polkit-kde-agent-1", "plasma-systemmonitor", "ksystemstats", "kdeplasma-addons", "ocean-sound-theme",
            "kactivitymanagerd", "kglobalacceld", "kimageformats", "qt6-imageformats", "qt6-translations",
            "qt6-wayland", "mesa", "vulkan-loader", "libva", "pipewire", "wireplumber", "alsa-utils", "ffmpeg",
-           "xdg-user-dirs", "networkmanager", "networkmanager-openvpn", "networkmanager-l2tp", "plasma-nm", "bluez", "bluedevil", "udisks2", "cups", "cups-filters", "nss-mdns", "print-manager", "flatpak", "discover", "flatpak-kcm", "konsole", "dolphin", "kate", "ark", "gwenview", "okular", "dragon", "haruna", "elisa", "kdenlive", "krita", "spectacle", "kcalc", "kcharselect",
+           "xdg-user-dirs", "networkmanager", "networkmanager-openvpn", "networkmanager-l2tp", "plasma-nm", "bluez", "bluedevil", "udisks2", "cups", "cups-filters", "nss-mdns", "print-manager", "flatpak", "discover", "flatpak-kcm", "konsole", "dolphin", "kate", "ark", "gwenview", "okular", "dragon", "haruna", "elisa", "kdenlive", "spectacle", "kcalc", "kcharselect",
            "inter-font", "jetbrains-mono-font", "dejavu-fonts", "noto-color-emoji", "hunspell", "upower",
            "accountsservice", "polkit"]
 pkg("symfonos-desktop", "2025.10", [], "symfonOS-Desktop (KDE Plasma 6, Wayland, PipeWire)", "GPL-3.0-or-later",
-    DESKTOP, arch="any", style="meta", rel=16)
+    DESKTOP, arch="any", style="meta", rel=17)
 
 # ---------------------------------------------------------------------------------------------------
 # Rezepte schreiben
