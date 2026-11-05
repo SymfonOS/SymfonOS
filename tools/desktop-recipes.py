@@ -1691,10 +1691,12 @@ pkg("ardour", "9.8", "https://github.com/SymfonOS/SymfonOS/releases/download/que
      "curl", "liblo", "taglib", "vamp-plugin-sdk", "rubberband", "aubio", "fftw", "lilv", "lv2", "serd", "sord",
      "sratom", "libxml2", "flac", "libogg", "fontconfig", "freetype", "harfbuzz", "alsa-lib", "pulseaudio",
      "libusb", "libx11", "libxext", "libxrandr", "boost", "readline", "hicolor-icon-theme"],
-    ["python", "boost", "pkgconf", "gettext", "perl"], dir="Ardour-9.8.0", rel=4,
+    ["python", "boost", "pkgconf", "gettext", "perl"], dir="Ardour-9.8.0", rel=5,
     build=r"""cd "$S"
 # ohne --freedesktop: das verlangt itstool (Übersetzung der AppStream-Daten); Starter und Symbole legt package() an
-python3 waf configure --prefix=/usr --configdir=/etc --no-phone-home --no-lrdf --cxx17 \
+# --no-execstack: Ardour linkt seine Programme sonst mit -z execstack (für alte, proprietäre Plugins); die
+# Härtungsprüfung von syp lässt keinen ausführbaren Stack zu
+python3 waf configure --prefix=/usr --configdir=/etc --no-phone-home --no-lrdf --cxx17 --no-execstack \
   --with-backends=alsa,pulseaudio,dummy
 python3 waf build -j"$(nproc)"
 python3 waf i18n_mo""",

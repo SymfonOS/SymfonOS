@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "ardour"
-version = "9.8-4"
+version = "9.8-5"
 summary = "Digitale Audio-Workstation (Ardour)"
 license = "GPL-2.0-or-later"
 url = "https://github.com/SymfonOS/SymfonOS/releases/download/quellen/"
@@ -18,7 +18,9 @@ dir = "Ardour-9.8.0"
 build = '''
 cd "$S"
 # ohne --freedesktop: das verlangt itstool (Übersetzung der AppStream-Daten); Starter und Symbole legt package() an
-python3 waf configure --prefix=/usr --configdir=/etc --no-phone-home --no-lrdf --cxx17 \
+# --no-execstack: Ardour linkt seine Programme sonst mit -z execstack (für alte, proprietäre Plugins); die
+# Härtungsprüfung von syp lässt keinen ausführbaren Stack zu
+python3 waf configure --prefix=/usr --configdir=/etc --no-phone-home --no-lrdf --cxx17 --no-execstack \
   --with-backends=alsa,pulseaudio,dummy
 python3 waf build -j"$(nproc)"
 python3 waf i18n_mo
