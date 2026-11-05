@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "serd"
+version = "0.32.4-1"
+summary = "RDF-Syntax (Turtle) lesen und schreiben"
+license = "ISC"
+url = "https://download.drobilla.net/"
+depends = ["glibc"]
+makedepends = ["meson"]
+
+[[source]]
+url = "https://download.drobilla.net/serd-0.32.4.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Ddocs=disabled -Dtests=disabled -Dman=disabled"

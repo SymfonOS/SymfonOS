@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "vamp-plugin-sdk"
+version = "2.10.0-1"
+summary = "Vamp-Schnittstelle für Audio-Analyse-Plugins"
+license = "BSD-3-Clause"
+url = "https://github.com/vamp-plugins/vamp-plugin-sdk/archive/vamp-plugin-sdk-v2.10/"
+depends = ["gcc", "libsndfile"]
+
+[[source]]
+url = "https://github.com/vamp-plugins/vamp-plugin-sdk/archive/vamp-plugin-sdk-v2.10/vamp-plugin-sdk-2.10.0.tar.gz"
+sha256 = "TODO"
+
+[build]
+dir = "vamp-plugin-sdk-vamp-plugin-sdk-v2.10"
+style = "autotools"
+configure_flags = "--disable-programs"

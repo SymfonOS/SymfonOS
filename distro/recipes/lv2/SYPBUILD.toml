@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "lv2"
+version = "1.18.10-1"
+arch = "any"
+summary = "LV2-Plugin-Schnittstelle (Header und Spezifikation)"
+license = "ISC"
+url = "https://lv2plug.in/spec/"
+makedepends = ["meson"]
+
+[[source]]
+url = "https://lv2plug.in/spec/lv2-1.18.10.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Ddocs=disabled -Dplugins=disabled -Dtests=disabled -Donline_docs=false"

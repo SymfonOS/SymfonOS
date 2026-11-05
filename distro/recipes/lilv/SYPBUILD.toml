@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "lilv"
+version = "0.24.26-1"
+summary = "LV2-Plugins laden (Host-Bibliothek)"
+license = "ISC"
+url = "https://download.drobilla.net/"
+depends = ["serd", "sord", "sratom", "zix", "lv2", "libsndfile"]
+makedepends = ["meson"]
+
+[[source]]
+url = "https://download.drobilla.net/lilv-0.24.26.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Ddocs=disabled -Dtests=disabled -Dbindings_py=disabled"

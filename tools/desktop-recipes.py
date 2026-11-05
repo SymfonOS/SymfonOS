@@ -1606,6 +1606,95 @@ pkg("sdl2", "2.32.10", "https://github.com/libsdl-org/SDL/releases/download/rele
     ["cmake", "ninja", "wayland-protocols"], style="cmake", dir="SDL2-2.32.10",
     flags="-DSDL_STATIC=OFF -DSDL_TEST_LIBRARY=OFF -DSDL_TESTS=OFF -DSDL_RPATH=OFF -DCMAKE_INSTALL_LIBDIR=lib",
     provides=["so:libSDL2-2.0.so.0"])
+# Audio (Ardour 9): C++-Anbindungen in der alten ABI (glibmm 2.4, libsigc++ 2, cairomm 1.0), LV2-Plugin-Stapel,
+# FFTW, Rubber Band, Vamp, aubio und liblo. Ardour bringt sein GTK-2-Toolkit (YTK) selbst mit.
+DROBILLA = "https://download.drobilla.net/"
+DOCS_OFF = "-Ddocs=disabled -Dtests=disabled"
+pkg("libsigc++2", "2.12.1", "https://download.gnome.org/sources/libsigc++/2.12/libsigc++-2.12.1.tar.xz",
+    "Signale und Slots für C++ (ABI 2.0)", "LGPL-3.0-or-later", ["gcc"], ["meson"], style="meson",
+    dir="libsigc++-2.12.1",
+    flags="-Dbuild-examples=false -Dbuild-documentation=false -Dbuild-tests=false -Dbenchmark=false")
+pkg("glibmm2.4", "2.66.8", "https://download.gnome.org/sources/glibmm/2.66/glibmm-2.66.8.tar.xz",
+    "C++-Anbindung an GLib (ABI 2.4)", "LGPL-2.1-or-later", ["glib2", "libsigc++2"], ["meson", "perl"],
+    style="meson", dir="glibmm-2.66.8", flags="-Dbuild-examples=false -Dbuild-documentation=false")
+pkg("cairomm1.0", "1.14.5", "https://www.cairographics.org/releases/cairomm-1.14.5.tar.xz",
+    "C++-Anbindung an Cairo (ABI 1.0)", "LGPL-2.0-or-later", ["cairo", "libsigc++2"], ["meson"], style="meson",
+    dir="cairomm-1.14.5", flags="-Dbuild-examples=false -Dbuild-tests=false -Dbuild-documentation=false")
+pkg("fftw", "3.3.10", "https://www.fftw.org/fftw-3.3.10.tar.gz",
+    "Schnelle Fourier-Transformation (einfache und doppelte Genauigkeit)", "GPL-2.0-or-later", ["glibc"],
+    build=r"""cd "$S"
+for p in single double; do
+  mkdir -p "b-$p"
+  ( cd "b-$p"
+    extra="--enable-sse2 --enable-avx"
+    [ "$p" = single ] && extra="--enable-float $extra"
+    ../configure --prefix=/usr --enable-shared --disable-static --enable-threads $extra
+    make )
+done""",
+    package='cd "$S"\nfor p in single double; do make -C "b-$p" DESTDIR="$DESTDIR" install; done',
+    provides=["so:libfftw3.so.3", "so:libfftw3f.so.3"])
+pkg("liblo", "0.32", "https://downloads.sourceforge.net/liblo/liblo-0.32.tar.gz",
+    "Open Sound Control (OSC)", "LGPL-2.1-or-later", ["glibc"], style="autotools",
+    flags="--disable-static --disable-tests --disable-examples")
+pkg("vamp-plugin-sdk", "2.10.0",
+    {"url": "https://github.com/vamp-plugins/vamp-plugin-sdk/archive/vamp-plugin-sdk-v2.10/vamp-plugin-sdk-2.10.0.tar.gz"},
+    "Vamp-Schnittstelle für Audio-Analyse-Plugins", "BSD-3-Clause", ["gcc", "libsndfile"], style="autotools",
+    dir="vamp-plugin-sdk-vamp-plugin-sdk-v2.10", flags="--disable-programs")
+pkg("rubberband", "4.0.0", "https://breakfastquay.com/files/releases/rubberband-4.0.0.tar.bz2",
+    "Zeitdehnung und Tonhöhenverschiebung", "GPL-2.0-or-later", ["gcc", "fftw", "libsamplerate"], ["meson"],
+    style="meson", flags="-Dfft=fftw -Dresampler=libsamplerate -Djni=disabled -Dladspa=disabled -Dvamp=disabled "
+                         "-Dcmdline=disabled -Dtests=disabled")
+# aubio 0.4.9: das mitgelieferte waf läuft nicht mit Python 3.13; die Bibliothek ist reines C und wird direkt gebaut
+pkg("aubio", "0.4.9", {"url": "https://github.com/aubio/aubio/archive/0.4.9/aubio-0.4.9.tar.gz"},
+    "Audio-Analyse (Einsätze, Tempo, Tonhöhe)", "GPL-3.0-or-later",
+    ["glibc", "fftw", "libsndfile", "libsamplerate"], ["pkgconf"], dir="aubio-0.4.9",
+    build=r"""cd "$S"
+D="-DHAVE_STDLIB_H=1 -DHAVE_STDIO_H=1 -DHAVE_MATH_H=1 -DHAVE_STRING_H=1 -DHAVE_ERRNO_H=1
+   -DHAVE_LIMITS_H=1 -DHAVE_STDARG_H=1 -DHAVE_C99_VARARGS_MACROS=1 -DHAVE_COMPLEX_H=1 -DHAVE_MEMCPY_HACKS=1
+   -DHAVE_FFTW3=1 -DHAVE_FFTW3F=1 -DHAVE_SNDFILE=1 -DHAVE_SAMPLERATE=1 -DHAVE_WAVREAD=1 -DHAVE_WAVWRITE=1 -DNDEBUG=1"
+gcc -std=gnu17 $CFLAGS -fPIC $D -Isrc $(pkg-config --cflags fftw3f sndfile samplerate) -shared \
+  -Wl,-soname,libaubio.so.5 $LDFLAGS -o libaubio.so.5.4.8 $(find src -name '*.c' | sort) \
+  $(pkg-config --libs fftw3f sndfile samplerate) -lm
+sed -e 's|@prefix@|/usr|;s|@exec_prefix@|/usr|;s|@libdir@|/usr/lib|;s|@includedir@|/usr/include|;s|@VERSION@|0.4.9|' \
+  aubio.pc.in > aubio.pc""",
+    package=r"""cd "$S"
+install -Dm755 libaubio.so.5.4.8 "$DESTDIR/usr/lib/libaubio.so.5.4.8"
+ln -s libaubio.so.5.4.8 "$DESTDIR/usr/lib/libaubio.so.5"
+ln -s libaubio.so.5.4.8 "$DESTDIR/usr/lib/libaubio.so"
+install -Dm644 aubio.pc "$DESTDIR/usr/lib/pkgconfig/aubio.pc"
+cd src
+find . -name '*.h' ! -name aubio_priv.h | while read -r h; do install -Dm644 "$h" "$DESTDIR/usr/include/aubio/$h"; done""",
+    provides=["so:libaubio.so.5"])
+pkg("lv2", "1.18.10", "https://lv2plug.in/spec/lv2-1.18.10.tar.xz",
+    "LV2-Plugin-Schnittstelle (Header und Spezifikation)", "ISC", [], ["meson"], style="meson", arch="any",
+    flags="-Ddocs=disabled -Dplugins=disabled -Dtests=disabled -Donline_docs=false")
+pkg("zix", "0.6.2", DROBILLA + "zix-0.6.2.tar.xz", "Hilfsbibliothek (C) für serd/sord", "ISC", ["glibc"],
+    ["meson"], style="meson", flags=DOCS_OFF + " -Dbenchmarks=disabled")
+pkg("serd", "0.32.4", DROBILLA + "serd-0.32.4.tar.xz", "RDF-Syntax (Turtle) lesen und schreiben", "ISC",
+    ["glibc"], ["meson"], style="meson", flags=DOCS_OFF + " -Dman=disabled")
+pkg("sord", "0.16.18", DROBILLA + "sord-0.16.18.tar.xz", "RDF-Speicher im Arbeitsspeicher", "ISC",
+    ["serd", "zix"], ["meson"], style="meson", flags=DOCS_OFF + " -Dman=disabled")
+pkg("sratom", "0.6.18", DROBILLA + "sratom-0.6.18.tar.xz", "LV2-Atome als RDF", "ISC", ["serd", "sord", "lv2"],
+    ["meson"], style="meson", flags=DOCS_OFF)
+pkg("lilv", "0.24.26", DROBILLA + "lilv-0.24.26.tar.xz", "LV2-Plugins laden (Host-Bibliothek)", "ISC",
+    ["serd", "sord", "sratom", "zix", "lv2", "libsndfile"], ["meson"], style="meson",
+    flags=DOCS_OFF + " -Dbindings_py=disabled")
+# Ardour: GitHub-Archiv ohne revision.cc; die Datei wird wie im Release-Tarball angelegt (Version 9.8, 19.08.2026)
+pkg("ardour", "9.8", {"url": "https://github.com/Ardour/ardour/archive/9.8/ardour-9.8.tar.gz"},
+    "Digitale Audio-Workstation (Ardour)", "GPL-2.0-or-later",
+    ["glibmm2.4", "libsigc++2", "cairomm1.0", "cairo", "pango", "glib2", "libsndfile", "libsamplerate", "libarchive",
+     "curl", "liblo", "taglib", "vamp-plugin-sdk", "rubberband", "aubio", "fftw", "lilv", "lv2", "serd", "sord",
+     "sratom", "libxml2", "flac", "libogg", "fontconfig", "freetype", "harfbuzz", "alsa-lib", "pulseaudio",
+     "libusb", "libx11", "libxext", "libxrandr", "boost", "readline", "hicolor-icon-theme"],
+    ["python", "boost", "pkgconf", "gettext", "perl"], dir="ardour-9.8",
+    build=r"""cd "$S"
+printf '#include "ardour/revision.h"\nnamespace ARDOUR { const char* revision = "9.8"; const char* date = "2026-08-19"; }\n' \
+  > libs/ardour/revision.cc
+python3 waf configure --prefix=/usr --configdir=/etc --freedesktop --no-phone-home --no-lrdf --cxx17 \
+  --with-backends=alsa,pulseaudio,dummy
+python3 waf build -j"$(nproc)"
+python3 waf i18n_mo""",
+    package='cd "$S"\npython3 waf install --destdir="$DESTDIR"')
 gear("kdenlive", KF_GUI + ["karchive", "kbookmarks", "kcodecs", "kconfigwidgets", "knotifyconfig", "knewstuff",
                            "kguiaddons", "ktextwidgets", "solid", "kfilemetadata", "purpose", "mlt", "opentimelineio",
                            "imath", "ffmpeg", "qt6-svg", "qt6-multimedia", "qt6-networkauth", "qt6-5compat",
@@ -1705,11 +1794,11 @@ DESKTOP = ["symfonos-base", "symfonos-desktop-config", "plasma-desktop", "plasma
            "polkit-kde-agent-1", "plasma-systemmonitor", "ksystemstats", "kdeplasma-addons", "ocean-sound-theme",
            "kactivitymanagerd", "kglobalacceld", "kimageformats", "qt6-imageformats", "qt6-translations",
            "qt6-wayland", "mesa", "vulkan-loader", "libva", "pipewire", "wireplumber", "alsa-utils", "ffmpeg",
-           "xdg-user-dirs", "networkmanager", "networkmanager-openvpn", "networkmanager-l2tp", "plasma-nm", "bluez", "bluedevil", "udisks2", "cups", "cups-filters", "nss-mdns", "print-manager", "flatpak", "discover", "flatpak-kcm", "konsole", "dolphin", "kate", "ark", "gwenview", "okular", "dragon", "haruna", "elisa", "kdenlive", "spectacle", "kcalc", "kcharselect",
+           "xdg-user-dirs", "networkmanager", "networkmanager-openvpn", "networkmanager-l2tp", "plasma-nm", "bluez", "bluedevil", "udisks2", "cups", "cups-filters", "nss-mdns", "print-manager", "flatpak", "discover", "flatpak-kcm", "konsole", "dolphin", "kate", "ark", "gwenview", "okular", "dragon", "haruna", "elisa", "kdenlive", "ardour", "spectacle", "kcalc", "kcharselect",
            "inter-font", "jetbrains-mono-font", "dejavu-fonts", "noto-color-emoji", "hunspell", "upower",
            "accountsservice", "polkit"]
 pkg("symfonos-desktop", "2025.10", [], "symfonOS-Desktop (KDE Plasma 6, Wayland, PipeWire)", "GPL-3.0-or-later",
-    DESKTOP, arch="any", style="meta", rel=17)
+    DESKTOP, arch="any", style="meta", rel=18)
 
 # ---------------------------------------------------------------------------------------------------
 # Rezepte schreiben

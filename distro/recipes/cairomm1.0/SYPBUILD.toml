@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "cairomm1.0"
+version = "1.14.5-1"
+summary = "C++-Anbindung an Cairo (ABI 1.0)"
+license = "LGPL-2.0-or-later"
+url = "https://www.cairographics.org/releases/"
+depends = ["cairo", "libsigc++2"]
+makedepends = ["meson"]
+
+[[source]]
+url = "https://www.cairographics.org/releases/cairomm-1.14.5.tar.xz"
+sha256 = "TODO"
+
+[build]
+dir = "cairomm-1.14.5"
+style = "meson"
+configure_flags = "-Dbuild-examples=false -Dbuild-tests=false -Dbuild-documentation=false"

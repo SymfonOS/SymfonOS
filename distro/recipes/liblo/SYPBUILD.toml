@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "liblo"
+version = "0.32-1"
+summary = "Open Sound Control (OSC)"
+license = "LGPL-2.1-or-later"
+url = "https://downloads.sourceforge.net/liblo/"
+depends = ["glibc"]
+
+[[source]]
+url = "https://downloads.sourceforge.net/liblo/liblo-0.32.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--disable-static --disable-tests --disable-examples"
