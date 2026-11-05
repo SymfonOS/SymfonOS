@@ -1,0 +1,38 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "aubio"
+version = "0.4.9-1"
+summary = "Audio-Analyse (Einsätze, Tempo, Tonhöhe)"
+license = "GPL-3.0-or-later"
+url = "https://github.com/aubio/aubio/archive/0.4.9/"
+depends = ["glibc", "fftw", "libsndfile", "libsamplerate"]
+makedepends = ["pkgconf"]
+provides = ["so:libaubio.so.5"]
+
+[[source]]
+url = "https://github.com/aubio/aubio/archive/0.4.9/aubio-0.4.9.tar.gz"
+sha256 = "TODO"
+
+[build]
+dir = "aubio-0.4.9"
+build = '''
+cd "$S"
+D="-DHAVE_STDLIB_H=1 -DHAVE_STDIO_H=1 -DHAVE_MATH_H=1 -DHAVE_STRING_H=1 -DHAVE_ERRNO_H=1
+   -DHAVE_LIMITS_H=1 -DHAVE_STDARG_H=1 -DHAVE_C99_VARARGS_MACROS=1 -DHAVE_COMPLEX_H=1 -DHAVE_MEMCPY_HACKS=1
+   -DHAVE_FFTW3=1 -DHAVE_FFTW3F=1 -DHAVE_SNDFILE=1 -DHAVE_SAMPLERATE=1 -DHAVE_WAVREAD=1 -DHAVE_WAVWRITE=1 -DNDEBUG=1"
+gcc -std=gnu17 $CFLAGS -fPIC $D -Isrc $(pkg-config --cflags fftw3f sndfile samplerate) -shared \
+  -Wl,-soname,libaubio.so.5 $LDFLAGS -o libaubio.so.5.4.8 $(find src -name '*.c' | sort) \
+  $(pkg-config --libs fftw3f sndfile samplerate) -lm
+sed -e 's|@prefix@|/usr|;s|@exec_prefix@|/usr|;s|@libdir@|/usr/lib|;s|@includedir@|/usr/include|;s|@VERSION@|0.4.9|' \
+  aubio.pc.in > aubio.pc
+'''
+package = '''
+cd "$S"
+install -Dm755 libaubio.so.5.4.8 "$DESTDIR/usr/lib/libaubio.so.5.4.8"
+ln -s libaubio.so.5.4.8 "$DESTDIR/usr/lib/libaubio.so.5"
+ln -s libaubio.so.5.4.8 "$DESTDIR/usr/lib/libaubio.so"
+install -Dm644 aubio.pc "$DESTDIR/usr/lib/pkgconfig/aubio.pc"
+cd src
+find . -name '*.h' ! -name aubio_priv.h | while read -r h; do install -Dm644 "$h" "$DESTDIR/usr/include/aubio/$h"; done
+'''

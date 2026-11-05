@@ -1,0 +1,31 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "fftw"
+version = "3.3.10-1"
+summary = "Schnelle Fourier-Transformation (einfache und doppelte Genauigkeit)"
+license = "GPL-2.0-or-later"
+url = "https://www.fftw.org/"
+depends = ["glibc"]
+provides = ["so:libfftw3.so.3", "so:libfftw3f.so.3"]
+
+[[source]]
+url = "https://www.fftw.org/fftw-3.3.10.tar.gz"
+sha256 = "TODO"
+
+[build]
+build = '''
+cd "$S"
+for p in single double; do
+  mkdir -p "b-$p"
+  ( cd "b-$p"
+    extra="--enable-sse2 --enable-avx"
+    [ "$p" = single ] && extra="--enable-float $extra"
+    ../configure --prefix=/usr --enable-shared --disable-static --enable-threads $extra
+    make )
+done
+'''
+package = '''
+cd "$S"
+for p in single double; do make -C "b-$p" DESTDIR="$DESTDIR" install; done
+'''

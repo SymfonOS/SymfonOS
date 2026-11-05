@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "sratom"
+version = "0.6.18-1"
+summary = "LV2-Atome als RDF"
+license = "ISC"
+url = "https://download.drobilla.net/"
+depends = ["serd", "sord", "lv2"]
+makedepends = ["meson"]
+
+[[source]]
+url = "https://download.drobilla.net/sratom-0.6.18.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Ddocs=disabled -Dtests=disabled"

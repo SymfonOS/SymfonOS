@@ -1,0 +1,30 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "ardour"
+version = "9.8-1"
+summary = "Digitale Audio-Workstation (Ardour)"
+license = "GPL-2.0-or-later"
+url = "https://github.com/Ardour/ardour/archive/9.8/"
+depends = ["glibmm2.4", "libsigc++2", "cairomm1.0", "cairo", "pango", "glib2", "libsndfile", "libsamplerate", "libarchive", "curl", "liblo", "taglib", "vamp-plugin-sdk", "rubberband", "aubio", "fftw", "lilv", "lv2", "serd", "sord", "sratom", "libxml2", "flac", "libogg", "fontconfig", "freetype", "harfbuzz", "alsa-lib", "pulseaudio", "libusb", "libx11", "libxext", "libxrandr", "boost", "readline", "hicolor-icon-theme"]
+makedepends = ["python", "pkgconf", "gettext", "perl"]
+
+[[source]]
+url = "https://github.com/Ardour/ardour/archive/9.8/ardour-9.8.tar.gz"
+sha256 = "TODO"
+
+[build]
+dir = "ardour-9.8"
+build = '''
+cd "$S"
+printf '#include "ardour/revision.h"\nnamespace ARDOUR { const char* revision = "9.8"; const char* date = "2026-08-19"; }\n' \
+  > libs/ardour/revision.cc
+python3 waf configure --prefix=/usr --configdir=/etc --freedesktop --no-phone-home --no-lrdf --cxx17 \
+  --with-backends=alsa,pulseaudio,dummy
+python3 waf build -j"$(nproc)"
+python3 waf i18n_mo
+'''
+package = '''
+cd "$S"
+python3 waf install --destdir="$DESTDIR"
+'''

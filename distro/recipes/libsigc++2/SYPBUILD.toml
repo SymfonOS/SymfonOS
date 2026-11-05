@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libsigc++2"
+version = "2.12.1-1"
+summary = "Signale und Slots für C++ (ABI 2.0)"
+license = "LGPL-3.0-or-later"
+url = "https://download.gnome.org/sources/libsigc++/2.12/"
+depends = ["gcc"]
+makedepends = ["meson"]
+
+[[source]]
+url = "https://download.gnome.org/sources/libsigc++/2.12/libsigc++-2.12.1.tar.xz"
+sha256 = "TODO"
+
+[build]
+dir = "libsigc++-2.12.1"
+style = "meson"
+configure_flags = "-Dbuild-examples=false -Dbuild-documentation=false -Dbuild-tests=false -Dbenchmark=false"

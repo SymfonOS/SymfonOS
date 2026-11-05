@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "sord"
+version = "0.16.18-1"
+summary = "RDF-Speicher im Arbeitsspeicher"
+license = "ISC"
+url = "https://download.drobilla.net/"
+depends = ["serd", "zix"]
+makedepends = ["meson"]
+
+[[source]]
+url = "https://download.drobilla.net/sord-0.16.18.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Ddocs=disabled -Dtests=disabled -Dman=disabled"
