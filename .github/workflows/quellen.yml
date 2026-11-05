@@ -2,6 +2,7 @@ name: Quellen spiegeln
 
 # Erzeugt Quell-Tarballs aus Git-Tags für Projekte ohne herunterladbaren Release-Tarball und legt sie im Release
 # »quellen« ab. Die Rezepte verweisen dann auf diese Datei; ihre sha256 wird wie üblich im Rezept festgeschrieben.
+# Nicht für einen schon gespiegelten Tag erneut starten: der neue Tarball hätte eine andere Prüfsumme.
 #
 #   ardour-waf-dist: Ardour (GitHub-Archive sind per .gitattributes leer; der Release-Tarball entsteht mit
 #                    »waf dist« und enthält libs/ardour/revision.cc mit der Version aus »git describe«)
