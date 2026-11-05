@@ -1,0 +1,28 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "opentimelineio"
+version = "0.17.0-1"
+summary = "Austauschformat für Schnitt-Zeitleisten (C++-Bibliothek)"
+license = "Apache-2.0"
+url = "https://github.com/AcademySoftwareFoundation/OpenTimelineIO/archive/v0.17.0/"
+depends = ["glibc", "gcc", "imath"]
+makedepends = ["cmake", "ninja"]
+
+[[source]]
+url = "https://github.com/AcademySoftwareFoundation/OpenTimelineIO/archive/v0.17.0/OpenTimelineIO-0.17.0.tar.gz"
+sha256 = "TODO"
+
+[[source]]
+url = "https://github.com/Tencent/rapidjson/archive/06d58b9e848c650114556a23294d0b6440078c61/rapidjson-06d58b9e848c650114556a23294d0b6440078c61.tar.gz"
+sha256 = "TODO"
+
+[build]
+dir = "OpenTimelineIO-0.17.0"
+style = "cmake"
+configure_flags = "-DOTIO_FIND_IMATH=ON -DOTIO_AUTOMATIC_SUBMODULES=OFF -DOTIO_PYTHON_INSTALL=OFF -DOTIO_INSTALL_PYTHON_MODULES=OFF -DOTIO_INSTALL_COMMANDLINE_TOOLS=OFF -DOTIO_SHARED_LIBS=ON -DOTIO_DEPENDENCIES_INSTALL=OFF -DBUILD_TESTING=OFF"
+pre_configure = '''
+rm -rf src/deps/rapidjson src/deps/pybind11
+ln -s "$SRCDIR/rapidjson-06d58b9e848c650114556a23294d0b6440078c61" src/deps/rapidjson
+mkdir -p src/deps/pybind11 && touch src/deps/pybind11/.leer
+'''

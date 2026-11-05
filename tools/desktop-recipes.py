@@ -755,6 +755,40 @@ pkg("mpv", "0.40.0", {"url": "https://github.com/mpv-player/mpv/archive/v0.40.0/
     # JACK nicht: libjack (PipeWire) liegt außerhalb des Linkerpfads, Ton läuft über PipeWire direkt
     provides=["so:libmpv.so.2"], rel=3)
 
+# Videoschnitt (Kdenlive): MLT als Medien-Framework, frei0r-Effekte, OpenTimelineIO für den Austausch von Zeitleisten
+pkg("frei0r-plugins", "2.3.3", {"url": "https://github.com/dyne/frei0r/archive/v2.3.3/frei0r-2.3.3.tar.gz"},
+    "Video-Effekte (frei0r)", "GPL-2.0-or-later", ["glibc", "gcc", "cairo"], ["cmake", "ninja"], style="cmake",
+    dir="frei0r-2.3.3", flags="-DWITHOUT_OPENCV=ON -DWITHOUT_GAVL=ON -DCMAKE_INSTALL_LIBDIR=lib")
+pkg("imath", "3.1.12", {"url": "https://github.com/AcademySoftwareFoundation/Imath/archive/v3.1.12/Imath-3.1.12.tar.gz"},
+    "Mathematik-Bibliothek für Grafik (Vektoren, Matrizen, half)", "BSD-3-Clause", ["glibc", "gcc"],
+    ["cmake", "ninja"], style="cmake", dir="Imath-3.1.12",
+    flags="-DBUILD_TESTING=OFF -DPYTHON=OFF -DCMAKE_INSTALL_LIBDIR=lib")
+# OpenTimelineIO: rapidjson ist ein Submodul (Stand von OTIO 0.17.0); pybind11 wird ohne Python-Anbindung nicht
+# gebraucht, das Verzeichnis darf aber nicht leer sein.
+RAPIDJSON_COMMIT = "06d58b9e848c650114556a23294d0b6440078c61"
+pkg("opentimelineio", "0.17.0",
+    [{"url": "https://github.com/AcademySoftwareFoundation/OpenTimelineIO/archive/v0.17.0/OpenTimelineIO-0.17.0.tar.gz"},
+     {"url": f"https://github.com/Tencent/rapidjson/archive/{RAPIDJSON_COMMIT}/rapidjson-{RAPIDJSON_COMMIT}.tar.gz"}],
+    "Austauschformat für Schnitt-Zeitleisten (C++-Bibliothek)", "Apache-2.0", ["glibc", "gcc", "imath"],
+    ["cmake", "ninja"], style="cmake", dir="OpenTimelineIO-0.17.0",
+    pre=f'rm -rf src/deps/rapidjson src/deps/pybind11\n'
+        f'ln -s "$SRCDIR/rapidjson-{RAPIDJSON_COMMIT}" src/deps/rapidjson\n'
+        'mkdir -p src/deps/pybind11 && touch src/deps/pybind11/.leer',
+    flags="-DOTIO_FIND_IMATH=ON -DOTIO_AUTOMATIC_SUBMODULES=OFF -DOTIO_PYTHON_INSTALL=OFF "
+          "-DOTIO_INSTALL_PYTHON_MODULES=OFF -DOTIO_INSTALL_COMMANDLINE_TOOLS=OFF -DOTIO_SHARED_LIBS=ON "
+          "-DOTIO_DEPENDENCIES_INSTALL=OFF -DBUILD_TESTING=OFF")
+pkg("mlt", "7.32.0", {"url": "https://github.com/mltframework/mlt/archive/v7.32.0/mlt-7.32.0.tar.gz"},
+    "Multimedia-Framework für Videoschnitt (MLT, melt)", "LGPL-2.1-or-later AND GPL-3.0-or-later",
+    ["ffmpeg", "libxml2", "libsamplerate", "libvorbis", "frei0r-plugins", "fontconfig", "qt6-base", "qt6-svg",
+     "qt6-5compat", "libx11"],
+    ["cmake", "ninja", "pkgconf"], style="cmake", dir="mlt-7.32.0",
+    flags="-DCMAKE_INSTALL_LIBDIR=lib -DGPL=ON -DGPL3=ON -DCLANG_FORMAT=OFF -DBUILD_TESTING=OFF "
+          "-DMOD_QT=OFF -DMOD_QT6=ON -DMOD_GLAXNIMATE_QT6=OFF -DMOD_DECKLINK=OFF -DMOD_GDK=OFF -DMOD_JACKRACK=OFF "
+          "-DMOD_MOVIT=OFF -DMOD_OPENCV=OFF -DMOD_RTAUDIO=OFF -DMOD_RUBBERBAND=OFF -DMOD_SDL1=OFF -DMOD_SDL2=OFF "
+          "-DMOD_SOX=OFF -DMOD_SPATIALAUDIO=OFF -DMOD_VIDSTAB=OFF -DMOD_XINE=OFF -DMOD_NDI=OFF "
+          "-DMOD_FREI0R=ON -DMOD_RESAMPLE=ON -DMOD_VORBIS=ON -DMOD_PLUS=ON -DMOD_PLUSGPL=ON -DMOD_XML=ON "
+          "-DMOD_AVFORMAT=ON -DMOD_KDENLIVE=ON -DMOD_NORMALIZE=ON -DMOD_OLDFILM=ON -DSWIG_PYTHON=OFF")
+
 # ---------------------------------------------------------------------------------------------------
 # Systemdienste für den Desktop
 # ---------------------------------------------------------------------------------------------------
@@ -1539,6 +1573,11 @@ pkg("haruna", "1.7.1", {"url": "https://github.com/KDE/haruna/archive/v1.7.1/har
     [QB, QD, "qt6-5compat", "mpvqt", "ffmpeg", "breeze", "kcolorscheme", "kconfig", "kcoreaddons", "kfilemetadata",
      "ki18n", "kiconthemes", "kio", "kirigami", "kwindowsystem", "kcrash", "kdsingleapplication",
      "qqc2-desktop-style", "hicolor-icon-theme"], KDE_MK, style="cmake", flags=KDE_FLAGS)
+gear("kdenlive", KF_GUI + ["karchive", "kbookmarks", "kcodecs", "kconfigwidgets", "knotifyconfig", "knewstuff",
+                           "kguiaddons", "ktextwidgets", "solid", "kfilemetadata", "purpose", "mlt", "opentimelineio",
+                           "imath", "ffmpeg", "qt6-svg", "qt6-multimedia", "qt6-networkauth", "qt6-5compat",
+                           "breeze-icons"], "Videoschnitt (Kdenlive)", mk=["kdoctools"],
+     flags="-DFETCH_OTIO=OFF -DBUILD_TESTING=OFF -DRELEASE_BUILD=ON")
 gear("okular", KF_GUI + ["karchive", "kbookmarks", "kcompletion", "kconfigwidgets", "threadweaver", "kparts",
                          "kcolorscheme", "ktextwidgets", "kitemviews", "purpose", "kwallet", "plasma-activities",
                          "phonon", "qt6-speech", "qt6-svg", "poppler", "freetype", "libtiff", "zlib"],
@@ -1633,11 +1672,11 @@ DESKTOP = ["symfonos-base", "symfonos-desktop-config", "plasma-desktop", "plasma
            "polkit-kde-agent-1", "plasma-systemmonitor", "ksystemstats", "kdeplasma-addons", "ocean-sound-theme",
            "kactivitymanagerd", "kglobalacceld", "kimageformats", "qt6-imageformats", "qt6-translations",
            "qt6-wayland", "mesa", "vulkan-loader", "libva", "pipewire", "wireplumber", "alsa-utils", "ffmpeg",
-           "xdg-user-dirs", "networkmanager", "networkmanager-openvpn", "networkmanager-l2tp", "plasma-nm", "bluez", "bluedevil", "udisks2", "cups", "cups-filters", "nss-mdns", "print-manager", "flatpak", "discover", "flatpak-kcm", "konsole", "dolphin", "kate", "ark", "gwenview", "okular", "dragon", "haruna", "elisa", "spectacle", "kcalc", "kcharselect",
+           "xdg-user-dirs", "networkmanager", "networkmanager-openvpn", "networkmanager-l2tp", "plasma-nm", "bluez", "bluedevil", "udisks2", "cups", "cups-filters", "nss-mdns", "print-manager", "flatpak", "discover", "flatpak-kcm", "konsole", "dolphin", "kate", "ark", "gwenview", "okular", "dragon", "haruna", "elisa", "kdenlive", "spectacle", "kcalc", "kcharselect",
            "inter-font", "jetbrains-mono-font", "dejavu-fonts", "noto-color-emoji", "hunspell", "upower",
            "accountsservice", "polkit"]
 pkg("symfonos-desktop", "2025.10", [], "symfonOS-Desktop (KDE Plasma 6, Wayland, PipeWire)", "GPL-3.0-or-later",
-    DESKTOP, arch="any", style="meta", rel=14)
+    DESKTOP, arch="any", style="meta", rel=15)
 
 # ---------------------------------------------------------------------------------------------------
 # Rezepte schreiben
