@@ -11,7 +11,7 @@ makedepends = ["meson"]
 
 [[source]]
 url = "https://download.drobilla.net/serd-0.32.4.tar.xz"
-sha256 = "TODO"
+sha256 = "cbefb569e8db686be8c69cb3866a9538c7cb055e8f24217dd6a4471effa7d349"
 
 [build]
 style = "meson"

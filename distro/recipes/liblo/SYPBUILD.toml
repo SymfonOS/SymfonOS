@@ -10,7 +10,7 @@ depends = ["glibc"]
 
 [[source]]
 url = "https://downloads.sourceforge.net/liblo/liblo-0.32.tar.gz"
-sha256 = "TODO"
+sha256 = "5df05f2a0395fc5ac90f6b538b8c82bb21941406fd1a70a765c7336a47d70208"
 
 [build]
 style = "autotools"

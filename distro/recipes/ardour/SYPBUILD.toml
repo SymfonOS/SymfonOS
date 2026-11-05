@@ -11,7 +11,7 @@ makedepends = ["python", "pkgconf", "gettext", "perl"]
 
 [[source]]
 url = "https://github.com/Ardour/ardour/archive/9.8/ardour-9.8.tar.gz"
-sha256 = "TODO"
+sha256 = "17e978ed2ca66c1fa4046ce0213ca6bf0c9325067bc792d6a168f82965dcb93b"
 
 [build]
 dir = "ardour-9.8"

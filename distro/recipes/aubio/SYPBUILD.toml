@@ -12,7 +12,7 @@ provides = ["so:libaubio.so.5"]
 
 [[source]]
 url = "https://github.com/aubio/aubio/archive/0.4.9/aubio-0.4.9.tar.gz"
-sha256 = "TODO"
+sha256 = "0f09bee62f752d2be3a620966f020e72a027fed6838d7e9389e8305507f12455"
 
 [build]
 dir = "aubio-0.4.9"

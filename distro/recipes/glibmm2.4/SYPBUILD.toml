@@ -11,7 +11,7 @@ makedepends = ["meson", "perl"]
 
 [[source]]
 url = "https://download.gnome.org/sources/glibmm/2.66/glibmm-2.66.8.tar.xz"
-sha256 = "TODO"
+sha256 = "64f11d3b95a24e2a8d4166ecff518730f79ecc27222ef41faf7c7e0340fc9329"
 
 [build]
 dir = "glibmm-2.66.8"
