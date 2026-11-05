@@ -19,7 +19,7 @@ Version für Version zur Basis und sind von den BLFS-Autoren gemeinsam getestet.
 | Qt | Qt 6.9.2, jedes Modul ein eigenes Paket (`qt6-base`, `qt6-declarative`, `qt6-wayland` …), Verzeichnisse wie bei Fedora und Arch |
 | KDE | KDE Frameworks 6.17, Plasma 6.4.4 (KWin nur Wayland), SDDM 0.21 mit Wayland-Anmeldebildschirm über KWin |
 | Programme installieren | Discover mit Flatpak 1.16 und **Flathub** als vorbelegter Quelle (`/etc/flatpak/remotes.d/`), KDE Store über KNewStuff; Berechtigungen der Flatpak-Programme in den Systemeinstellungen (`flatpak-kcm`). Programme von Flathub sind vorgebaut (nicht aus diesem Repository) und laufen in einer bubblewrap-Sandbox; Signaturen prüft ostree mit GnuPG. Systempakete bleiben bei `syp` |
-| Programme | Konsole, Dolphin, Kate, Ark, Gwenview, Okular (PDF mit Poppler), Dragon Player (Video) und Elisa (Musik) über Qt Multimedia, Haruna (Video, mpv 0.40 mit libplacebo; Lua-Skripte wie die yt-dlp-Anbindung fehlen, da mpv Lua 5.1/LuaJIT braucht), Spectacle (Bildschirmfotos, Taste „Druck“), KCalc, KCharSelect, Systemmonitor, Systemeinstellungen |
+| Programme | Konsole, Dolphin, Kate, Ark, Gwenview, Okular (PDF mit Poppler), Dragon Player (Video) und Elisa (Musik) über Qt Multimedia, Haruna (Video, mpv 0.40 mit libplacebo und LuaJIT; Videos von Webseiten über yt-dlp), Spectacle (Bildschirmfotos, Taste „Druck“), KCalc, KCharSelect, Systemmonitor, Systemeinstellungen |
 | Schriften | Inter (Oberfläche), JetBrains Mono (Terminal), DejaVu, Noto Color Emoji |
 
 Das Metapaket `symfonos-desktop` fasst alles zusammen. `symfonos-desktop-config` enthält die
