@@ -722,19 +722,38 @@ pkg("libplacebo", "7.351.0",
         "sed -i 's/VkXML(ET.parse(xmlfile))/VkXML(ET.parse(xmlfile).getroot())/' src/vulkan/utils_gen.py",
     flags="-Dvulkan=enabled -Dopengl=enabled -Dvulkan-registry=/usr/share/vulkan/registry/vk.xml "
           "-Dlcms=enabled -Ddemos=false -Dtests=false -Dlibdovi=disabled -Dd3d11=disabled", rel=2)
-# Lua-Skripte (u. a. yt-dlp-Anbindung) brauchen Lua 5.1/5.2 oder LuaJIT; symfonOS hat Lua 5.4
+# LuaJIT (Lua 5.1) für die Skripte von mpv (u. a. ytdl_hook). Kein Release-Tarball: Stand des Zweigs v2.1,
+# die Version endet auf den Commit-Zeitstempel (wie .relver im Archiv).
+LUAJIT_COMMIT = "ea9eb7edb5eac4a9d175d74523db34fac0fa5180"
+pkg("luajit", "2.1.1793383622",
+    {"url": f"https://github.com/LuaJIT/LuaJIT/archive/{LUAJIT_COMMIT}/LuaJIT-{LUAJIT_COMMIT}.tar.gz"},
+    "Just-in-time-Compiler für Lua 5.1", "MIT", ["glibc", "gcc"], dir=f"LuaJIT-{LUAJIT_COMMIT}",
+    build='cd "$S"\nmake amalg PREFIX=/usr',
+    package='cd "$S"\nmake install PREFIX=/usr DESTDIR="$DESTDIR"',
+    provides=["so:libluajit-5.1.so.2"])
+# yt-dlp: reines Python, ohne Bau-Backend (hatchling) direkt nach site-packages installiert
+pkg("yt-dlp", "2026.10.26", "https://files.pythonhosted.org/packages/source/y/yt-dlp/yt_dlp-2026.10.26.tar.gz",
+    "Videos von Webseiten laden (für mpv und Haruna)", "Unlicense", ["python"], ["python"], arch="any",
+    dir="yt_dlp-2026.10.26", build='cd "$S"\npython3 -m compileall -q yt_dlp',
+    package='''cd "$S"
+site=$(python3 -c 'import sysconfig; print(sysconfig.get_path("purelib"))')
+install -d "$DESTDIR$site"
+cp -r yt_dlp "$DESTDIR$site/"
+printf '#!/usr/bin/python3\nimport sys\nfrom yt_dlp import main\nsys.exit(main())\n' > yt-dlp.sh
+install -Dm755 yt-dlp.sh "$DESTDIR/usr/bin/yt-dlp"
+if [ -f yt-dlp.1 ]; then install -Dm644 yt-dlp.1 "$DESTDIR/usr/share/man/man1/yt-dlp.1"; fi''')
 pkg("mpv", "0.40.0", {"url": "https://github.com/mpv-player/mpv/archive/v0.40.0/mpv-0.40.0.tar.gz"},
     "Videoplayer (mpv und libmpv)", "GPL-2.0-or-later",
     ["ffmpeg", "libass", "libplacebo", "zlib", "alsa-lib", "pipewire", "pulseaudio", "libarchive", "lcms2", "libva",
      "libdrm", "mesa", "wayland", "libxkbcommon", "vulkan-loader", "libx11", "libxext", "libxpresent",
-     "libxrandr", "libxscrnsaver", "libxinerama", "libxv", "libdisplay-info", "libjpeg-turbo",
-     "hicolor-icon-theme"],
+     "libxrandr", "libxscrnsaver", "libxinerama", "libxv", "libdisplay-info", "libjpeg-turbo", "luajit",
+     "yt-dlp", "hicolor-icon-theme"],
     ["meson", "python", "python-docutils", "wayland-protocols", "vulkan-headers"], style="meson",
-    flags="-Dlibmpv=true -Dcplayer=true -Dlua=disabled -Djavascript=disabled -Dmanpage-build=enabled "
+    flags="-Dlibmpv=true -Dcplayer=true -Dlua=luajit -Djavascript=disabled -Dmanpage-build=enabled "
           "-Dbuild-date=false -Dgl=enabled -Degl=enabled -Dwayland=enabled -Dvulkan=enabled -Dpipewire=enabled "
           "-Dalsa=enabled -Dvaapi=enabled -Dlibarchive=enabled -Dlcms2=enabled -Djack=disabled",
     # JACK nicht: libjack (PipeWire) liegt außerhalb des Linkerpfads, Ton läuft über PipeWire direkt
-    provides=["so:libmpv.so.2"], rel=2)
+    provides=["so:libmpv.so.2"], rel=3)
 
 # ---------------------------------------------------------------------------------------------------
 # Systemdienste für den Desktop

@@ -1,0 +1,25 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "luajit"
+version = "2.1.1793383622-1"
+summary = "Just-in-time-Compiler für Lua 5.1"
+license = "MIT"
+url = "https://github.com/LuaJIT/LuaJIT/archive/ea9eb7edb5eac4a9d175d74523db34fac0fa5180/"
+depends = ["glibc", "gcc"]
+provides = ["so:libluajit-5.1.so.2"]
+
+[[source]]
+url = "https://github.com/LuaJIT/LuaJIT/archive/ea9eb7edb5eac4a9d175d74523db34fac0fa5180/LuaJIT-ea9eb7edb5eac4a9d175d74523db34fac0fa5180.tar.gz"
+sha256 = "TODO"
+
+[build]
+dir = "LuaJIT-ea9eb7edb5eac4a9d175d74523db34fac0fa5180"
+build = '''
+cd "$S"
+make amalg PREFIX=/usr
+'''
+package = '''
+cd "$S"
+make install PREFIX=/usr DESTDIR="$DESTDIR"
+'''

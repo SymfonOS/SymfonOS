@@ -1,0 +1,34 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "yt-dlp"
+version = "2026.10.26-1"
+arch = "any"
+summary = "Videos von Webseiten laden (für mpv und Haruna)"
+license = "Unlicense"
+url = "https://files.pythonhosted.org/packages/source/y/yt-dlp/"
+depends = ["python"]
+
+[[source]]
+url = "https://files.pythonhosted.org/packages/source/y/yt-dlp/yt_dlp-2026.10.26.tar.gz"
+sha256 = "TODO"
+
+[build]
+dir = "yt_dlp-2026.10.26"
+build = '''
+cd "$S"
+python3 -m compileall -q yt_dlp
+'''
+package = '''
+cd "$S"
+site=$(python3 -c 'import sysconfig; print(sysconfig.get_path("purelib"))')
+install -d "$DESTDIR$site"
+cp -r yt_dlp "$DESTDIR$site/"
+printf '#!/usr/bin/python3
+import sys
+from yt_dlp import main
+sys.exit(main())
+' > yt-dlp.sh
+install -Dm755 yt-dlp.sh "$DESTDIR/usr/bin/yt-dlp"
+if [ -f yt-dlp.1 ]; then install -Dm644 yt-dlp.1 "$DESTDIR/usr/share/man/man1/yt-dlp.1"; fi
+'''
