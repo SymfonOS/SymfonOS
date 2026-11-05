@@ -1680,17 +1680,16 @@ pkg("sratom", "0.6.18", DROBILLA + "sratom-0.6.18.tar.xz", "LV2-Atome als RDF", 
 pkg("lilv", "0.24.26", DROBILLA + "lilv-0.24.26.tar.xz", "LV2-Plugins laden (Host-Bibliothek)", "ISC",
     ["serd", "sord", "sratom", "zix", "lv2", "libsndfile"], ["meson"], style="meson",
     flags=DOCS_OFF + " -Dbindings_py=disabled")
-# Ardour: GitHub-Archiv ohne revision.cc; die Datei wird wie im Release-Tarball angelegt (Version 9.8, 19.08.2026)
-pkg("ardour", "9.8", {"url": "https://github.com/Ardour/ardour/archive/9.8/ardour-9.8.tar.gz"},
+# Ardour: offizieller Release-Tarball (mit libs/ardour/revision.cc). GitHub-Archive sind leer – das Projekt schließt
+# per .gitattributes alles aus, weil die Version aus »git describe« oder revision.cc stammt.
+pkg("ardour", "9.8", "https://community.ardour.org/srctar/Ardour-9.8.0.tar.bz2",
     "Digitale Audio-Workstation (Ardour)", "GPL-2.0-or-later",
     ["glibmm2.4", "libsigc++2", "cairomm1.0", "cairo", "pango", "glib2", "libsndfile", "libsamplerate", "libarchive",
      "curl", "liblo", "taglib", "vamp-plugin-sdk", "rubberband", "aubio", "fftw", "lilv", "lv2", "serd", "sord",
      "sratom", "libxml2", "flac", "libogg", "fontconfig", "freetype", "harfbuzz", "alsa-lib", "pulseaudio",
      "libusb", "libx11", "libxext", "libxrandr", "boost", "readline", "hicolor-icon-theme"],
-    ["python", "boost", "pkgconf", "gettext", "perl"], dir="ardour-9.8",
+    ["python", "boost", "pkgconf", "gettext", "perl"], dir="Ardour-9.8.0", rel=2,
     build=r"""cd "$S"
-printf '#include "ardour/revision.h"\nnamespace ARDOUR { const char* revision = "9.8"; const char* date = "2026-08-19"; }\n' \
-  > libs/ardour/revision.cc
 python3 waf configure --prefix=/usr --configdir=/etc --freedesktop --no-phone-home --no-lrdf --cxx17 \
   --with-backends=alsa,pulseaudio,dummy
 python3 waf build -j"$(nproc)"

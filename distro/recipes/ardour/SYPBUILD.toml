@@ -2,23 +2,21 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "ardour"
-version = "9.8-1"
+version = "9.8-2"
 summary = "Digitale Audio-Workstation (Ardour)"
 license = "GPL-2.0-or-later"
-url = "https://github.com/Ardour/ardour/archive/9.8/"
+url = "https://community.ardour.org/srctar/"
 depends = ["glibmm2.4", "libsigc++2", "cairomm1.0", "cairo", "pango", "glib2", "libsndfile", "libsamplerate", "libarchive", "curl", "liblo", "taglib", "vamp-plugin-sdk", "rubberband", "aubio", "fftw", "lilv", "lv2", "serd", "sord", "sratom", "libxml2", "flac", "libogg", "fontconfig", "freetype", "harfbuzz", "alsa-lib", "pulseaudio", "libusb", "libx11", "libxext", "libxrandr", "boost", "readline", "hicolor-icon-theme"]
 makedepends = ["python", "pkgconf", "gettext", "perl"]
 
 [[source]]
-url = "https://github.com/Ardour/ardour/archive/9.8/ardour-9.8.tar.gz"
-sha256 = "17e978ed2ca66c1fa4046ce0213ca6bf0c9325067bc792d6a168f82965dcb93b"
+url = "https://community.ardour.org/srctar/Ardour-9.8.0.tar.bz2"
+sha256 = "TODO"
 
 [build]
-dir = "ardour-9.8"
+dir = "Ardour-9.8.0"
 build = '''
 cd "$S"
-printf '#include "ardour/revision.h"\nnamespace ARDOUR { const char* revision = "9.8"; const char* date = "2026-08-19"; }\n' \
-  > libs/ardour/revision.cc
 python3 waf configure --prefix=/usr --configdir=/etc --freedesktop --no-phone-home --no-lrdf --cxx17 \
   --with-backends=alsa,pulseaudio,dummy
 python3 waf build -j"$(nproc)"
