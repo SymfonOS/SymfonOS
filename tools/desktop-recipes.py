@@ -1680,9 +1680,9 @@ pkg("sratom", "0.6.18", DROBILLA + "sratom-0.6.18.tar.xz", "LV2-Atome als RDF", 
 pkg("lilv", "0.24.26", DROBILLA + "lilv-0.24.26.tar.xz", "LV2-Plugins laden (Host-Bibliothek)", "ISC",
     ["serd", "sord", "sratom", "zix", "lv2", "libsndfile"], ["meson"], style="meson",
     flags=DOCS_OFF + " -Dbindings_py=disabled")
-# Ardour: offizieller Release-Tarball (mit libs/ardour/revision.cc). GitHub-Archive sind leer – das Projekt schließt
-# per .gitattributes alles aus, weil die Version aus »git describe« oder revision.cc stammt.
-pkg("ardour", "9.8", "https://community.ardour.org/srctar/Ardour-9.8.0.tar.bz2",
+# Ardour: Release-Tarball wie upstream mit »waf dist« aus dem Git-Tag erzeugt (Workflow »Quellen spiegeln«, Release
+# »quellen«). Ardour bietet keinen direkt ladbaren Tarball, GitHub-Archive sind per .gitattributes leer.
+pkg("ardour", "9.8", "https://github.com/SymfonOS/SymfonOS/releases/download/quellen/Ardour-9.8.0.tar.bz2",
     "Digitale Audio-Workstation (Ardour)", "GPL-2.0-or-later",
     ["glibmm2.4", "libsigc++2", "cairomm1.0", "cairo", "pango", "glib2", "libsndfile", "libsamplerate", "libarchive",
      "curl", "liblo", "taglib", "vamp-plugin-sdk", "rubberband", "aubio", "fftw", "lilv", "lv2", "serd", "sord",
