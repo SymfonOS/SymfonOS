@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "libnotify"
+version = "0.8.6-1"
+summary = "Desktop-Benachrichtigungen (libnotify, notify-send)"
+license = "LGPL-2.1-or-later"
+url = "https://download.gnome.org/sources/libnotify/0.8/"
+depends = ["glib2", "gdk-pixbuf"]
+makedepends = ["meson"]
+
+[[source]]
+url = "https://download.gnome.org/sources/libnotify/0.8/libnotify-0.8.6.tar.xz"
+sha256 = "TODO"
+
+[build]
+style = "meson"
+configure_flags = "-Dtests=false -Dintrospection=disabled -Dman=false -Dgtk_doc=false -Ddocbook_docs=disabled"

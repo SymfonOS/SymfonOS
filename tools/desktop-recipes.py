@@ -1709,6 +1709,10 @@ for n in 16 22 32 48 256 512; do
 done""")
 # Qt für Python (PySide6 passend zu Qt 6.9): shiboken6 erzeugt die Anbindungen mit libclang. Gebaut werden nur
 # die Module, die symfonOS-Programme und übliche Qt-Python-Programme brauchen (ohne WebEngine, 3D, Designer)
+# notify-send für den Update-Hinweis von symfonos-tools (Plasma zeigt die Meldung über org.freedesktop.Notifications)
+pkg("libnotify", "0.8.6", "https://download.gnome.org/sources/libnotify/0.8/libnotify-0.8.6.tar.xz",
+    "Desktop-Benachrichtigungen (libnotify, notify-send)", "LGPL-2.1-or-later", ["glib2", "gdk-pixbuf"], ["meson"],
+    style="meson", flags="-Dtests=false -Dintrospection=disabled -Dman=false -Dgtk_doc=false -Ddocbook_docs=disabled")
 PYSIDE = "6.9.2"
 PYSIDE_SRC = (f"https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-{PYSIDE}-src/"
               f"pyside-setup-everywhere-src-{PYSIDE}.tar.xz")
