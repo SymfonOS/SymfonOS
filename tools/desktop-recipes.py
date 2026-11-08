@@ -1606,6 +1606,9 @@ pkg("sdl2", "2.32.10", "https://github.com/libsdl-org/SDL/releases/download/rele
     ["cmake", "ninja", "wayland-protocols"], style="cmake", dir="SDL2-2.32.10",
     flags="-DSDL_STATIC=OFF -DSDL_TEST_LIBRARY=OFF -DSDL_TESTS=OFF -DSDL_RPATH=OFF -DCMAKE_INSTALL_LIBDIR=lib",
     provides=["so:libSDL2-2.0.so.0"])
+# GSL: Krita 6.0.4.1 kompiliert ohne GSL nicht (KisBezierUtils.cpp nutzt gsl_vector außerhalb von HAVE_GSL)
+pkg("gsl", "2.8", "https://ftp.gnu.org/gnu/gsl/gsl-2.8.tar.gz", "GNU Scientific Library", "GPL-3.0-or-later",
+    ["glibc"], style="autotools", flags="--disable-static")
 pkg("libmypaint", "1.6.1", "https://github.com/mypaint/libmypaint/releases/download/v1.6.1/libmypaint-1.6.1.tar.xz",
     "MyPaint-Pinsel-Engine (für Krita)", "ISC", ["json-c", "glib2"], ["pkgconf", "intltool", "gettext"],
     style="autotools", flags="--disable-static --disable-introspection")
@@ -1615,7 +1618,7 @@ pkg("krita", "6.0.4.1", {"url": "https://github.com/KDE/krita/archive/v6.0.4.1/k
     "Malprogramm (Krita 6, Vorschau auf Qt 6)", "GPL-3.0-or-later",
     [QB, QD, "qt6-svg", "qt6-5compat", "qt6-wayland", "kconfig", "kwidgetsaddons", "kcompletion", "kcoreaddons",
      "kguiaddons", "ki18n", "kitemviews", "kcolorscheme", "kcrash", "boost", "eigen", "xsimd", "immer", "zug",
-     "lager", "quazip", "libunibreak", "sdl2", "mlt", "libmypaint", "opencolorio", "fftw", "ffmpeg", "exiv2", "lcms2", "libpng", "zlib", "libtiff",
+     "lager", "quazip", "libunibreak", "sdl2", "mlt", "libmypaint", "opencolorio", "fftw", "gsl", "ffmpeg", "exiv2", "lcms2", "libpng", "zlib", "libtiff",
      "libjpeg-turbo", "giflib", "libwebp", "libjxl", "openjpeg", "imath", "poppler", "freetype", "harfbuzz",
      "fontconfig", "fribidi", "libx11", "libxi", "hicolor-icon-theme"],
     KDE_MK, style="cmake", dir="krita-6.0.4.1",
