@@ -1724,6 +1724,16 @@ for n in 16 22 32 48 256 512; do
 done""")
 # Qt für Python (PySide6 passend zu Qt 6.9): shiboken6 erzeugt die Anbindungen mit libclang. Gebaut werden nur
 # die Module, die symfonOS-Programme und übliche Qt-Python-Programme brauchen (ohne WebEngine, 3D, Designer)
+# Lokales Sprachmodell für den symfonOS-Assistenten: llama.cpp (llama-server, OpenAI-kompatibel). Die CPU-Teile
+# liegen in allen x86-64-Varianten bei und werden zur Laufzeit passend zum Prozessor geladen; das Modell selbst
+# lädt symfonos-assist-model bei Bedarf (nicht im ISO)
+LLAMA = "12211"
+pkg("llama-cpp", LLAMA, {"url": f"https://github.com/ggml-org/llama.cpp/archive/b{LLAMA}/llama.cpp-b{LLAMA}.tar.gz"},
+    "Sprachmodelle lokal ausführen (llama.cpp)", "MIT", ["gcc", "openssl"], ["cmake", "ninja"], style="cmake",
+    dir=f"llama.cpp-b{LLAMA}",
+    flags="-DBUILD_SHARED_LIBS=ON -DGGML_NATIVE=OFF -DGGML_BACKEND_DL=ON -DGGML_CPU_ALL_VARIANTS=ON "
+          "-DGGML_BACKEND_DIR=/usr/lib/ggml -DLLAMA_BUILD_TESTS=OFF -DLLAMA_BUILD_EXAMPLES=OFF "
+          f"-DLLAMA_USE_PREBUILT_UI=OFF -DLLAMA_BUILD_UI=OFF -DBUILD_NUMBER={LLAMA} -DCMAKE_SKIP_RPATH=ON")
 # notify-send für den Update-Hinweis von symfonos-tools (Plasma zeigt die Meldung über org.freedesktop.Notifications)
 pkg("libnotify", "0.8.6", "https://download.gnome.org/sources/libnotify/0.8/libnotify-0.8.6.tar.xz",
     "Desktop-Benachrichtigungen (libnotify, notify-send)", "LGPL-2.1-or-later", ["glib2", "gdk-pixbuf"], ["meson"],

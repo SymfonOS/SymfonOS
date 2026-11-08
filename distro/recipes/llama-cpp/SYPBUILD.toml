@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "llama-cpp"
+version = "12211-1"
+summary = "Sprachmodelle lokal ausführen (llama.cpp)"
+license = "MIT"
+url = "https://github.com/ggml-org/llama.cpp/archive/b12211/"
+depends = ["gcc", "openssl"]
+makedepends = ["cmake", "ninja"]
+
+[[source]]
+url = "https://github.com/ggml-org/llama.cpp/archive/b12211/llama.cpp-b12211.tar.gz"
+sha256 = "TODO"
+
+[build]
+dir = "llama.cpp-b12211"
+style = "cmake"
+configure_flags = "-DBUILD_SHARED_LIBS=ON -DGGML_NATIVE=OFF -DGGML_BACKEND_DL=ON -DGGML_CPU_ALL_VARIANTS=ON -DGGML_BACKEND_DIR=/usr/lib/ggml -DLLAMA_BUILD_TESTS=OFF -DLLAMA_BUILD_EXAMPLES=OFF -DLLAMA_USE_PREBUILT_UI=OFF -DLLAMA_BUILD_UI=OFF -DBUILD_NUMBER=12211 -DCMAKE_SKIP_RPATH=ON"
