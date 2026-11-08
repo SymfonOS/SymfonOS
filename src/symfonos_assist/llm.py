@@ -49,7 +49,12 @@ def _post(url: str, payload: dict, timeout: int = 300):
         return urllib.request.urlopen(req, timeout=timeout)
     except urllib.error.URLError as e:
         raise LLMError(f"Lokales Modell nicht erreichbar ({url}): {e}. "
-                       f"Läuft der Dienst? `systemctl status ollama`") from e
+                       f"Läuft der Dienst? `systemctl status {_service(url)}`; "
+                       f"Modell einrichten: `sudo symfonos-assist-model`") from e
+
+
+def _service(url: str) -> str:
+    return "ollama" if ":11434" in url else "symfonos-assist-llm"
 
 
 def chat(s: Settings, messages: list[dict]) -> Iterator[str]:

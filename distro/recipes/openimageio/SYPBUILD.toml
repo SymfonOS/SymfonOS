@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "openimageio"
+version = "3.1.13.1-1"
+summary = "Bilder lesen und schreiben (OpenImageIO)"
+license = "Apache-2.0"
+url = "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/v3.1.13.1/"
+depends = ["openexr", "imath", "opencolorio", "onetbb", "libtiff", "libpng", "libjpeg-turbo", "libwebp", "giflib", "openjpeg", "openjph", "libjxl", "ffmpeg", "freetype", "zlib"]
+makedepends = ["cmake", "ninja", "fmt", "robin-map"]
+
+[[source]]
+url = "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/v3.1.13.1/OpenImageIO-3.1.13.1.tar.gz"
+sha256 = "TODO"
+
+[build]
+dir = "OpenImageIO-3.1.13.1"
+style = "cmake"
+configure_flags = "-DOIIO_BUILD_TESTS=OFF -DBUILD_DOCS=OFF -DINSTALL_DOCS=OFF -DINSTALL_FONTS=OFF -DUSE_PYTHON=OFF -DUSE_QT=OFF -DUSE_OPENCV=OFF -DUSE_OPENVDB=OFF -DUSE_PTEX=OFF -DUSE_DCMTK=OFF -DUSE_LIBRAW=OFF -DSTOP_ON_WARNING=OFF -DOIIO_INTERNALIZE_FMT=ON"

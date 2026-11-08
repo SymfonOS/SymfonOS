@@ -1724,6 +1724,32 @@ for n in 16 22 32 48 256 512; do
 done""")
 # Qt für Python (PySide6 passend zu Qt 6.9): shiboken6 erzeugt die Anbindungen mit libclang. Gebaut werden nur
 # die Module, die symfonOS-Programme und übliche Qt-Python-Programme brauchen (ohne WebEngine, 3D, Designer)
+# Lokales Sprachmodell für den symfonOS-Assistenten: llama.cpp (llama-server, OpenAI-kompatibel). Die CPU-Teile
+# liegen in allen x86-64-Varianten bei und werden zur Laufzeit passend zum Prozessor geladen; das Modell selbst
+# lädt symfonos-assist-model bei Bedarf (nicht im ISO)
+LLAMA = "12211"
+pkg("llama-cpp", LLAMA, {"url": f"https://github.com/ggml-org/llama.cpp/archive/b{LLAMA}/llama.cpp-b{LLAMA}.tar.gz"},
+    "Sprachmodelle lokal ausführen (llama.cpp)", "MIT", ["gcc", "openssl"], ["cmake", "ninja"], style="cmake",
+    dir=f"llama.cpp-b{LLAMA}",
+    flags="-DBUILD_SHARED_LIBS=ON -DGGML_NATIVE=OFF -DGGML_BACKEND_DL=ON -DGGML_CPU_ALL_VARIANTS=ON "
+          "-DGGML_BACKEND_DIR=/usr/lib/ggml -DLLAMA_BUILD_TESTS=OFF -DLLAMA_BUILD_EXAMPLES=OFF "
+          f"-DLLAMA_USE_PREBUILT_UI=OFF -DLLAMA_BUILD_UI=OFF -DBUILD_NUMBER={LLAMA} -DCMAKE_SKIP_RPATH=ON")
+# OpenConnect (Cisco AnyConnect, GlobalProtect, Pulse/Ivanti, Fortinet …) als Befehl: die plasma-nm-Oberfläche
+# braucht QtWebEngine (zu groß für eine CI-Etappe). SAML/SSO-Anmeldung über den Standardbrowser (kde-open)
+VPNC = "ce9e961bd0f6b867e1c7c35f78f6fb973f6ff101"
+pkg("vpnc-scripts", "20250727",
+    {"url": f"https://gitlab.com/openconnect/vpnc-scripts/-/archive/{VPNC}/vpnc-scripts-{VPNC}.tar.gz",
+     "filename": "vpnc-scripts-20250727.tar.gz"},
+    "Netzwerk-Einrichtung für vpnc und OpenConnect (vpnc-script)", "GPL-2.0-or-later", ["bash", "iproute2"],
+    arch="any", dir=f"vpnc-scripts-{VPNC}", build=":",
+    package='cd "$S"\ninstall -Dm755 vpnc-script "$DESTDIR/etc/vpnc/vpnc-script"')
+pkg("openconnect", "9.21", "https://www.infradead.org/openconnect/download/openconnect-9.21.tar.gz",
+    "VPN-Client für AnyConnect, GlobalProtect, Pulse, Fortinet und andere", "LGPL-2.1-only",
+    ["gnutls", "libxml2", "zlib", "lz4", "vpnc-scripts", "ca-certificates"], ["pkgconf"], style="autotools",
+    flags="--disable-static --disable-docs --with-vpnc-script=/etc/vpnc/vpnc-script --with-builtin-json "
+          "--without-stoken --without-libpskc --without-libproxy --without-libpcsclite --without-gssapi "
+          "--without-java --with-system-cafile=/etc/ssl/certs/ca-certificates.crt "
+          "--with-external-browser=/usr/bin/kde-open")
 # notify-send für den Update-Hinweis von symfonos-tools (Plasma zeigt die Meldung über org.freedesktop.Notifications)
 pkg("libnotify", "0.8.6", "https://download.gnome.org/sources/libnotify/0.8/libnotify-0.8.6.tar.xz",
     "Desktop-Benachrichtigungen (libnotify, notify-send)", "LGPL-2.1-or-later", ["glib2", "gdk-pixbuf"], ["meson"],
@@ -1742,6 +1768,90 @@ pkg("pyside6", PYSIDE, PYSIDE_SRC, "Qt für Python (PySide6)", PYSIDE_LIC,
     flags="-DFORCE_LIMITED_API=no -DBUILD_TESTS=OFF -DNO_QT_TOOLS=yes -DCMAKE_SKIP_RPATH=ON -Wno-dev "
           "-DMODULES='Core;Gui;Widgets;PrintSupport;Network;Concurrent;DBus;Xml;OpenGL;OpenGLWidgets;Svg;"
           "SvgWidgets;Qml;Quick;QuickControls2;QuickWidgets'")
+# 3D (Blender 5.2): Bildbibliotheken der VFX-Referenzplattform (OpenEXR, OpenColorIO, OpenImageIO), oneTBB, fmt,
+# NumPy. Versionen wie in Blenders build_files/build_environment/cmake/versions.cmake
+CMAKE_OLD = " -DCMAKE_POLICY_VERSION_MINIMUM=3.5"
+pkg("libdeflate", "1.24", {"url": "https://github.com/ebiggers/libdeflate/archive/v1.24/libdeflate-1.24.tar.gz"},
+    "Schnelle DEFLATE-/zlib-/gzip-Kompression", "MIT", ["glibc"], ["cmake", "ninja"], style="cmake",
+    dir="libdeflate-1.24", flags="-DLIBDEFLATE_BUILD_STATIC_LIB=OFF -DLIBDEFLATE_BUILD_GZIP=OFF")
+pkg("openjph", "0.25.2", {"url": "https://github.com/aous72/OpenJPH/archive/0.25.2/OpenJPH-0.25.2.tar.gz"},
+    "HTJ2K (JPEG 2000 Teil 15) für OpenEXR", "BSD-2-Clause", ["gcc"], ["cmake", "ninja"], style="cmake",
+    dir="OpenJPH-0.25.2", flags="-DOJPH_BUILD_EXECUTABLES=OFF -DOJPH_ENABLE_TIFF_SUPPORT=OFF")
+pkg("openexr", "3.4.10", {"url": "https://github.com/AcademySoftwareFoundation/openexr/archive/v3.4.10/openexr-3.4.10.tar.gz"},
+    "Bilder mit hohem Dynamikumfang (OpenEXR)", "BSD-3-Clause", ["imath", "libdeflate", "openjph"],
+    ["cmake", "ninja"], style="cmake", dir="openexr-3.4.10",
+    flags="-DOPENEXR_BUILD_EXAMPLES=OFF -DOPENEXR_TEST_LIBRARIES=OFF -DOPENEXR_TEST_TOOLS=OFF "
+          "-DOPENEXR_TEST_PYTHON=OFF -DOPENEXR_BUILD_PYTHON=OFF")
+pkg("onetbb", "2022.3.0", {"url": "https://github.com/uxlfoundation/oneTBB/archive/v2022.3.0/oneTBB-2022.3.0.tar.gz"},
+    "Threading Building Blocks (oneTBB)", "Apache-2.0", ["gcc"], ["cmake", "ninja"], style="cmake",
+    dir="oneTBB-2022.3.0", flags="-DTBB_TEST=OFF -DTBB_STRICT=OFF -DTBB_EXAMPLES=OFF")
+pkg("fmt", "12.1.0", {"url": "https://github.com/fmtlib/fmt/archive/12.1.0/fmt-12.1.0.tar.gz"},
+    "Formatierung für C++ (fmt)", "MIT", ["gcc"], ["cmake", "ninja"], style="cmake", dir="fmt-12.1.0",
+    flags="-DBUILD_SHARED_LIBS=ON -DFMT_TEST=OFF -DFMT_DOC=OFF")
+pkg("robin-map", "1.3.0", {"url": "https://github.com/Tessil/robin-map/archive/v1.3.0/robin-map-1.3.0.tar.gz"},
+    "Hash-Tabellen mit Robin-Hood-Hashing (C++-Header)", "MIT", [], ["cmake", "ninja"], style="cmake",
+    arch="any", dir="robin-map-1.3.0", flags=CMAKE_OLD.strip())
+pkg("yaml-cpp", "0.8.0", {"url": "https://github.com/jbeder/yaml-cpp/archive/0.8.0/yaml-cpp-0.8.0.tar.gz"},
+    "YAML für C++", "MIT", ["gcc"], ["cmake", "ninja"], style="cmake", dir="yaml-cpp-0.8.0",
+    pre="sed -i '1i #include <cstdint>' src/emitterutils.cpp",
+    flags="-DYAML_BUILD_SHARED_LIBS=ON -DYAML_CPP_BUILD_TESTS=OFF -DYAML_CPP_BUILD_TOOLS=OFF" + CMAKE_OLD)
+pkg("pystring", "1.1.4", {"url": "https://github.com/imageworks/pystring/archive/v1.1.4/pystring-1.1.4.tar.gz"},
+    "Python-Zeichenkettenfunktionen für C++", "BSD-3-Clause", ["gcc"], ["cmake", "ninja"], style="cmake",
+    dir="pystring-1.1.4", flags="-DBUILD_SHARED_LIBS=ON" + CMAKE_OLD)
+# minizip-ng wie in OpenColorIOs eigenem Bau (nur zlib), ohne zlib-Kompatibilitätsschicht
+pkg("minizip-ng", "4.0.10", {"url": "https://github.com/zlib-ng/minizip-ng/archive/4.0.10/minizip-ng-4.0.10.tar.gz"},
+    "ZIP-Archive (minizip-ng)", "Zlib", ["zlib"], ["cmake", "ninja"], style="cmake", dir="minizip-ng-4.0.10",
+    flags="-DBUILD_SHARED_LIBS=ON -DMZ_COMPAT=OFF -DMZ_BZIP2=OFF -DMZ_LZMA=OFF -DMZ_ZSTD=OFF -DMZ_PKCRYPT=OFF "
+          "-DMZ_WZAES=OFF -DMZ_OPENSSL=OFF -DMZ_LIBBSD=OFF -DMZ_ICONV=OFF -DMZ_FETCH_LIBS=OFF -DMZ_ZLIB=ON")
+pkg("opencolorio", "2.5.0",
+    {"url": "https://github.com/AcademySoftwareFoundation/OpenColorIO/archive/v2.5.0/OpenColorIO-2.5.0.tar.gz"},
+    "Farbmanagement für Film und Grafik (OpenColorIO)", "BSD-3-Clause",
+    ["expat", "yaml-cpp", "pystring", "imath", "minizip-ng", "zlib"], ["cmake", "ninja"], style="cmake",
+    dir="OpenColorIO-2.5.0",
+    flags="-DOCIO_BUILD_APPS=OFF -DOCIO_BUILD_TESTS=OFF -DOCIO_BUILD_GPU_TESTS=OFF -DOCIO_BUILD_PYTHON=OFF "
+          "-DOCIO_BUILD_DOCS=OFF -DOCIO_INSTALL_EXT_PACKAGES=NONE")
+pkg("openimageio", "3.1.13.1",
+    {"url": "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/v3.1.13.1/OpenImageIO-3.1.13.1.tar.gz"},
+    "Bilder lesen und schreiben (OpenImageIO)", "Apache-2.0",
+    ["openexr", "imath", "opencolorio", "onetbb", "libtiff", "libpng", "libjpeg-turbo", "libwebp", "giflib",
+     "openjpeg", "openjph", "libjxl", "ffmpeg", "freetype", "zlib"],
+    ["cmake", "ninja", "fmt", "robin-map"], style="cmake", dir="OpenImageIO-3.1.13.1",
+    flags="-DOIIO_BUILD_TESTS=OFF -DBUILD_DOCS=OFF -DINSTALL_DOCS=OFF -DINSTALL_FONTS=OFF -DUSE_PYTHON=OFF "
+          "-DUSE_QT=OFF -DUSE_OPENCV=OFF -DUSE_OPENVDB=OFF -DUSE_PTEX=OFF -DUSE_DCMTK=OFF -DUSE_LIBRAW=OFF "
+          "-DSTOP_ON_WARNING=OFF -DOIIO_INTERNALIZE_FMT=ON")
+pkg("python-pyproject-metadata", "0.9.1",
+    "https://files.pythonhosted.org/packages/source/p/pyproject_metadata/pyproject_metadata-0.9.1.tar.gz",
+    "Projektmetadaten aus pyproject.toml (PEP 621)", "MIT", ["python", "python-packaging"], ["python-flit-core"],
+    style="python", arch="any", dir="pyproject_metadata-0.9.1")
+pkg("python-meson-python", "0.18.0",
+    "https://files.pythonhosted.org/packages/source/m/meson_python/meson_python-0.18.0.tar.gz",
+    "Bau-Backend für Python-Pakete mit Meson", "MIT",
+    ["python", "meson", "ninja", "python-pyproject-metadata", "python-packaging"], [], style="python", arch="any",
+    dir="meson_python-0.18.0")
+pkg("python-numpy", "2.3.4", "https://files.pythonhosted.org/packages/source/n/numpy/numpy-2.3.4.tar.gz",
+    "Numerik für Python (NumPy, ohne externes BLAS)", "BSD-3-Clause", ["python"],
+    ["python-cython", "python-meson-python", "ninja", "pkgconf"], style="python", dir="numpy-2.3.4",
+    flags="--config-settings=setup-args=-Dblas=none --config-settings=setup-args=-Dlapack=none "
+          "--config-settings=setup-args=-Dallow-noblas=true")
+# Blender: ohne Kamera-Tracking (libmv braucht Ceres), ohne OSL/Embree/OpenVDB/USD/OpenXR und ohne GPU-Rendern
+# über CUDA/HIP; Cycles rendert auf der CPU, die Oberfläche läuft über OpenGL (X11 und Wayland)
+pkg("blender", "5.2.3", "https://download.blender.org/source/blender-5.2.3.tar.xz",
+    "3D-Modellierung, Animation und Rendern (Blender)", "GPL-3.0-or-later",
+    ["python", "python-numpy", "openimageio", "opencolorio", "openexr", "imath", "onetbb", "fmt", "libepoxy",
+     "freetype", "harfbuzz", "fribidi", "libpng", "libjpeg-turbo", "zlib", "zstd", "fftw", "ffmpeg", "libsndfile",
+     "openjpeg", "libwebp", "gmp", "pulseaudio", "pipewire", "libx11", "libxi", "libxfixes", "libxrender",
+     "libxkbcommon", "wayland", "mesa", "hicolor-icon-theme", "shared-mime-info"],
+    ["cmake", "ninja", "eigen", "wayland-protocols", "pkgconf"], style="cmake", dir="blender-5.2.3",
+    flags="-DWITH_INSTALL_PORTABLE=OFF -DWITH_LIBS_PRECOMPILED=OFF -DWITH_BUILDINFO=OFF -DPYTHON_VERSION=3.13 "
+          "-DWITH_PYTHON_INSTALL=OFF -DWITH_PYTHON_INSTALL_NUMPY=OFF -DWITH_PYTHON_INSTALL_ZSTANDARD=OFF "
+          "-DWITH_PYTHON_INSTALL_REQUESTS=OFF -DWITH_LIBMV=OFF -DWITH_CYCLES_OSL=OFF -DWITH_CYCLES_EMBREE=OFF "
+          "-DWITH_CYCLES_PATH_GUIDING=OFF -DWITH_CYCLES_DEVICE_CUDA=OFF -DWITH_CYCLES_DEVICE_OPTIX=OFF "
+          "-DWITH_CYCLES_DEVICE_HIP=OFF -DWITH_OPENIMAGEDENOISE=OFF -DWITH_OPENVDB=OFF -DWITH_NANOVDB=OFF "
+          "-DWITH_OPENSUBDIV=OFF -DWITH_USD=OFF -DWITH_MATERIALX=OFF -DWITH_HYDRA=OFF -DWITH_ALEMBIC=OFF "
+          "-DWITH_XR_OPENXR=OFF -DWITH_MANIFOLD=OFF -DWITH_HARU=OFF -DWITH_POTRACE=OFF -DWITH_DRACO=OFF "
+          "-DWITH_MESHOPTIMIZER=OFF -DWITH_VULKAN_BACKEND=OFF -DWITH_JACK=OFF -DWITH_OPENAL=OFF "
+          "-DWITH_GHOST_CSD=OFF -DWITH_INPUT_NDOF=OFF -DWITH_HARFBUZZ=ON -DWITH_FRIBIDI=ON "
+          "-DWITH_LINKER_LLD=OFF -DWITH_LINKER_MOLD=OFF -DWITH_DOC_MANPAGE=OFF -DWITH_GTESTS=OFF -Wno-dev")
 gear("kdenlive", KF_GUI + ["karchive", "kbookmarks", "kcodecs", "kconfigwidgets", "knotifyconfig", "knewstuff",
                            "kguiaddons", "ktextwidgets", "solid", "kfilemetadata", "purpose", "mlt", "opentimelineio",
                            "imath", "ffmpeg", "qt6-svg", "qt6-multimedia", "qt6-networkauth", "qt6-5compat",
@@ -1841,11 +1951,11 @@ DESKTOP = ["symfonos-base", "symfonos-desktop-config", "plasma-desktop", "plasma
            "polkit-kde-agent-1", "plasma-systemmonitor", "ksystemstats", "kdeplasma-addons", "ocean-sound-theme",
            "kactivitymanagerd", "kglobalacceld", "kimageformats", "qt6-imageformats", "qt6-translations",
            "qt6-wayland", "mesa", "vulkan-loader", "libva", "pipewire", "wireplumber", "alsa-utils", "ffmpeg",
-           "xdg-user-dirs", "networkmanager", "networkmanager-openvpn", "networkmanager-l2tp", "plasma-nm", "bluez", "bluedevil", "udisks2", "cups", "cups-filters", "nss-mdns", "print-manager", "flatpak", "discover", "flatpak-kcm", "konsole", "dolphin", "kate", "ark", "gwenview", "okular", "dragon", "haruna", "elisa", "kdenlive", "krita", "ardour", "spectacle", "symfonos-tools", "kcalc", "kcharselect",
+           "xdg-user-dirs", "networkmanager", "networkmanager-openvpn", "networkmanager-l2tp", "openconnect", "plasma-nm", "bluez", "bluedevil", "udisks2", "cups", "cups-filters", "nss-mdns", "print-manager", "flatpak", "discover", "flatpak-kcm", "konsole", "dolphin", "kate", "ark", "gwenview", "okular", "dragon", "haruna", "elisa", "kdenlive", "krita", "blender", "ardour", "spectacle", "symfonos-tools", "kcalc", "kcharselect",
            "inter-font", "jetbrains-mono-font", "dejavu-fonts", "noto-color-emoji", "hunspell", "upower",
            "accountsservice", "polkit"]
 pkg("symfonos-desktop", "2025.10", [], "symfonOS-Desktop (KDE Plasma 6, Wayland, PipeWire)", "GPL-3.0-or-later",
-    DESKTOP, arch="any", style="meta", rel=20)
+    DESKTOP, arch="any", style="meta", rel=22)
 
 # ---------------------------------------------------------------------------------------------------
 # Rezepte schreiben

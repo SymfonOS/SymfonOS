@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "python-numpy"
+version = "2.3.4-1"
+summary = "Numerik für Python (NumPy, ohne externes BLAS)"
+license = "BSD-3-Clause"
+url = "https://files.pythonhosted.org/packages/source/n/numpy/"
+depends = ["python"]
+makedepends = ["python-cython", "python-meson-python", "ninja", "pkgconf"]
+
+[[source]]
+url = "https://files.pythonhosted.org/packages/source/n/numpy/numpy-2.3.4.tar.gz"
+sha256 = "TODO"
+
+[build]
+dir = "numpy-2.3.4"
+style = "python"
+configure_flags = "--config-settings=setup-args=-Dblas=none --config-settings=setup-args=-Dlapack=none --config-settings=setup-args=-Dallow-noblas=true"

@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "openjph"
+version = "0.25.2-1"
+summary = "HTJ2K (JPEG 2000 Teil 15) für OpenEXR"
+license = "BSD-2-Clause"
+url = "https://github.com/aous72/OpenJPH/archive/0.25.2/"
+depends = ["gcc"]
+makedepends = ["cmake", "ninja"]
+
+[[source]]
+url = "https://github.com/aous72/OpenJPH/archive/0.25.2/OpenJPH-0.25.2.tar.gz"
+sha256 = "TODO"
+
+[build]
+dir = "OpenJPH-0.25.2"
+style = "cmake"
+configure_flags = "-DOJPH_BUILD_EXECUTABLES=OFF -DOJPH_ENABLE_TIFF_SUPPORT=OFF"

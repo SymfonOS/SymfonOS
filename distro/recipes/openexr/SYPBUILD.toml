@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "openexr"
+version = "3.4.10-1"
+summary = "Bilder mit hohem Dynamikumfang (OpenEXR)"
+license = "BSD-3-Clause"
+url = "https://github.com/AcademySoftwareFoundation/openexr/archive/v3.4.10/"
+depends = ["imath", "libdeflate", "openjph"]
+makedepends = ["cmake", "ninja"]
+
+[[source]]
+url = "https://github.com/AcademySoftwareFoundation/openexr/archive/v3.4.10/openexr-3.4.10.tar.gz"
+sha256 = "TODO"
+
+[build]
+dir = "openexr-3.4.10"
+style = "cmake"
+configure_flags = "-DOPENEXR_BUILD_EXAMPLES=OFF -DOPENEXR_TEST_LIBRARIES=OFF -DOPENEXR_TEST_TOOLS=OFF -DOPENEXR_TEST_PYTHON=OFF -DOPENEXR_BUILD_PYTHON=OFF"

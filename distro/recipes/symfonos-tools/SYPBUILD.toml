@@ -1,11 +1,12 @@
 # symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
 [package]
 name = "symfonos-tools"
-version = "0.1.0-1"
+version = "0.1.0-2"
 arch = "any"
-summary = "symfonOS-Programme: Software (syp), Design-Center, Paket-Konverter"
+summary = "symfonOS-Programme: Software (syp), Design-Center, Paket-Konverter, Assistent"
 license = "GPL-3.0-or-later"
-depends = ["python", "pyside6", "qt6-wayland", "syp", "polkit", "plasma-workspace", "libnotify"]
+depends = ["python", "pyside6", "qt6-wayland", "syp", "polkit", "plasma-workspace", "libnotify", "llama-cpp", "curl"]
+backup = ["etc/symfonos/assist.toml"]
 
 [[source]]
 path = "@/src"
@@ -13,23 +14,27 @@ path = "@/src"
 [[source]]
 path = "@/system"
 
+[[source]]
+path = "@/docs/handbuch"
+
 [build]
 build = ":"
-# Der Assistent (symfonos_assist) fehlt: er braucht ollama und ein lokales Sprachmodell
+# Der Assistent nutzt llama.cpp (llama-server auf 127.0.0.1:8080); das Modell lädt »symfonos-assist-model« bei Bedarf
 package = '''
 site=$(python3 -c 'import sysconfig; print(sysconfig.get_path("purelib"))')
 install -d "$DESTDIR$site"
-for m in symfonos_ui symfonos_design syp_store syp_convert; do
+for m in symfonos_ui symfonos_design syp_store syp_convert symfonos_assist; do
   cp -r "$SRCDIR/src/$m" "$DESTDIR$site/"
 done
 find "$DESTDIR$site" -name __pycache__ -prune -exec rm -rf {} +
 python3 -m compileall -q -s "$DESTDIR" -p / "$DESTDIR$site"
-for e in symfonos-store:syp_store.gui symfonos-design:symfonos_design.center syp-convert-gui:syp_convert.gui; do
+for e in symfonos-store:syp_store.gui symfonos-design:symfonos_design.center syp-convert-gui:syp_convert.gui \
+         symfonos-assist:symfonos_assist.cli symfonos-assist-gui:symfonos_assist.gui; do
   printf '#!/usr/bin/python3\nimport sys\nfrom %s import main\nsys.exit(main())\n' "${e#*:}" > "$SRCDIR/${e%%:*}"
   install -Dm755 "$SRCDIR/${e%%:*}" "$DESTDIR/usr/bin/${e%%:*}"
 done
 cd "$SRCDIR/system"
-for f in org.symfonos.Store org.symfonos.Design org.symfonos.Convert; do
+for f in org.symfonos.Store org.symfonos.Design org.symfonos.Convert org.symfonos.Assist; do
   install -Dm644 "usr/share/applications/$f.desktop" "$DESTDIR/usr/share/applications/$f.desktop"
 done
 install -Dm644 usr/share/polkit-1/actions/org.symfonos.syp.policy "$DESTDIR/usr/share/polkit-1/actions/org.symfonos.syp.policy"
@@ -38,6 +43,38 @@ install -Dm644 usr/share/polkit-1/actions/org.symfonos.syp.policy "$DESTDIR/usr/
 for f in symfonos-design-auto.service symfonos-design-auto.timer symfonos-update-notify.service symfonos-update-notify.timer; do
   install -Dm644 "usr/lib/systemd/user/$f" "$DESTDIR/usr/lib/systemd/user/$f"
 done
+install -Dm755 usr/bin/symfonos-assist-model "$DESTDIR/usr/bin/symfonos-assist-model"
+install -d "$DESTDIR/usr/share/doc/symfonos"
+cp -r "$SRCDIR/handbuch/." "$DESTDIR/usr/share/doc/symfonos/"
+install -Dm644 /dev/stdin "$DESTDIR/etc/symfonos/assist.toml" <<'TOML'
+# Lokaler Assistent – nur lokale Endpunkte erlaubt. Modell einrichten: sudo symfonos-assist-model
+backend = "llamacpp"
+url = "http://127.0.0.1:8080"
+model = "symfonos-assist"
+temperature = 0.2
+context = 8192
+TOML
+# Startet erst, wenn ein Modell eingerichtet ist (symfonos-assist-model schaltet den Dienst ein)
+install -Dm644 /dev/stdin "$DESTDIR/usr/lib/systemd/system/symfonos-assist-llm.service" <<'UNIT'
+[Unit]
+Description=Lokales Sprachmodell für den symfonOS-Assistenten (llama.cpp)
+ConditionPathExists=/var/lib/symfonos-assist/models/model.gguf
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/llama-server --model /var/lib/symfonos-assist/models/model.gguf --alias symfonos-assist --host 127.0.0.1 --port 8080 --ctx-size 8192 --jinja --no-webui
+DynamicUser=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=no
+NoNewPrivileges=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+UNIT
 printf 'enable symfonos-design-auto.timer\nenable symfonos-update-notify.timer\n' |
   install -Dm644 /dev/stdin "$DESTDIR/usr/lib/systemd/user-preset/40-symfonos-tools.preset"
 '''

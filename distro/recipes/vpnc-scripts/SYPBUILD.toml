@@ -1,0 +1,23 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "vpnc-scripts"
+version = "20250727-1"
+arch = "any"
+summary = "Netzwerk-Einrichtung für vpnc und OpenConnect (vpnc-script)"
+license = "GPL-2.0-or-later"
+url = "https://gitlab.com/openconnect/vpnc-scripts/-/archive/ce9e961bd0f6b867e1c7c35f78f6fb973f6ff101/"
+depends = ["bash", "iproute2"]
+
+[[source]]
+url = "https://gitlab.com/openconnect/vpnc-scripts/-/archive/ce9e961bd0f6b867e1c7c35f78f6fb973f6ff101/vpnc-scripts-ce9e961bd0f6b867e1c7c35f78f6fb973f6ff101.tar.gz"
+sha256 = "TODO"
+filename = "vpnc-scripts-20250727.tar.gz"
+
+[build]
+dir = "vpnc-scripts-ce9e961bd0f6b867e1c7c35f78f6fb973f6ff101"
+build = ":"
+package = '''
+cd "$S"
+install -Dm755 vpnc-script "$DESTDIR/etc/vpnc/vpnc-script"
+'''

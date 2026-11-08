@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "python-pyproject-metadata"
+version = "0.9.1-1"
+arch = "any"
+summary = "Projektmetadaten aus pyproject.toml (PEP 621)"
+license = "MIT"
+url = "https://files.pythonhosted.org/packages/source/p/pyproject_metadata/"
+depends = ["python", "python-packaging"]
+makedepends = ["python-flit-core"]
+
+[[source]]
+url = "https://files.pythonhosted.org/packages/source/p/pyproject_metadata/pyproject_metadata-0.9.1.tar.gz"
+sha256 = "TODO"
+
+[build]
+dir = "pyproject_metadata-0.9.1"
+style = "python"
