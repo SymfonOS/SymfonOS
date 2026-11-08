@@ -11,7 +11,7 @@ makedepends = ["cmake", "ninja", "eigen", "wayland-protocols", "pkgconf"]
 
 [[source]]
 url = "https://download.blender.org/source/blender-5.2.3.tar.xz"
-sha256 = "TODO"
+sha256 = "5c66e0ab20da26d684deecfc27e84c4d39e456daaa9112b47eeb45d0e0283876"
 
 [build]
 dir = "blender-5.2.3"

@@ -11,7 +11,7 @@ makedepends = ["cmake", "ninja"]
 
 [[source]]
 url = "https://github.com/ggml-org/llama.cpp/archive/b12211/llama.cpp-b12211.tar.gz"
-sha256 = "TODO"
+sha256 = "5b6c04c4f38f7afc39cbbe22180f8caedd76cd85c131cfb968511aeae27c191a"
 
 [build]
 dir = "llama.cpp-b12211"

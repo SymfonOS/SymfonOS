@@ -11,7 +11,7 @@ makedepends = ["cmake", "ninja"]
 
 [[source]]
 url = "https://github.com/zlib-ng/minizip-ng/archive/4.0.10/minizip-ng-4.0.10.tar.gz"
-sha256 = "TODO"
+sha256 = "c362e35ee973fa7be58cc5e38a4a6c23cc8f7e652555daf4f115a9eb2d3a6be7"
 
 [build]
 dir = "minizip-ng-4.0.10"

@@ -11,7 +11,7 @@ makedepends = ["cmake", "ninja"]
 
 [[source]]
 url = "https://github.com/imageworks/pystring/archive/v1.1.4/pystring-1.1.4.tar.gz"
-sha256 = "TODO"
+sha256 = "49da0fe2a049340d3c45cce530df63a2278af936003642330287b68cefd788fb"
 
 [build]
 dir = "pystring-1.1.4"

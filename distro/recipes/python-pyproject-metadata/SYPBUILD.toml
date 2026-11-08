@@ -12,7 +12,7 @@ makedepends = ["python-flit-core"]
 
 [[source]]
 url = "https://files.pythonhosted.org/packages/source/p/pyproject_metadata/pyproject_metadata-0.9.1.tar.gz"
-sha256 = "TODO"
+sha256 = "b8b2253dd1b7062b78cf949a115f02ba7fa4114aabe63fa10528e9e1a954a816"
 
 [build]
 dir = "pyproject_metadata-0.9.1"

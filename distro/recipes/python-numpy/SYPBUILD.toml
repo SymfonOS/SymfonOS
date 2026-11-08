@@ -11,7 +11,7 @@ makedepends = ["python-cython", "python-meson-python", "ninja", "pkgconf"]
 
 [[source]]
 url = "https://files.pythonhosted.org/packages/source/n/numpy/numpy-2.3.4.tar.gz"
-sha256 = "TODO"
+sha256 = "a7d018bfedb375a8d979ac758b120ba846a7fe764911a64465fd87b8729f4a6a"
 
 [build]
 dir = "numpy-2.3.4"

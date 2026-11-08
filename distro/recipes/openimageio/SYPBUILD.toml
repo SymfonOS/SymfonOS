@@ -11,7 +11,7 @@ makedepends = ["cmake", "ninja", "fmt", "robin-map"]
 
 [[source]]
 url = "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/v3.1.13.1/OpenImageIO-3.1.13.1.tar.gz"
-sha256 = "TODO"
+sha256 = "0fc59b8e2708ded02d3793b8f3331f037ed49bfcde38158f05ac0e876ebb85b7"
 
 [build]
 dir = "OpenImageIO-3.1.13.1"

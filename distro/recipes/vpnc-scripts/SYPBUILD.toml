@@ -11,7 +11,7 @@ depends = ["bash", "iproute2"]
 
 [[source]]
 url = "https://gitlab.com/openconnect/vpnc-scripts/-/archive/ce9e961bd0f6b867e1c7c35f78f6fb973f6ff101/vpnc-scripts-ce9e961bd0f6b867e1c7c35f78f6fb973f6ff101.tar.gz"
-sha256 = "TODO"
+sha256 = "4c50aedfcabf5d8ef3219a06fc8797790d370cd317e6f6da0064be75a0ce77c0"
 filename = "vpnc-scripts-20250727.tar.gz"
 
 [build]
