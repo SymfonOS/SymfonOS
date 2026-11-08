@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "pyside6"
+version = "6.9.2-1"
+summary = "Qt für Python (PySide6)"
+license = "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only"
+url = "https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.9.2-src/"
+depends = ["python", "shiboken6", "qt6-base", "qt6-declarative", "qt6-svg", "qt6-wayland"]
+makedepends = ["cmake", "ninja", "qt6-tools"]
+
+[[source]]
+url = "https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.9.2-src/pyside-setup-everywhere-src-6.9.2.tar.xz"
+sha256 = "TODO"
+
+[build]
+dir = "pyside-setup-everywhere-src-6.9.2/sources/pyside6"
+style = "cmake"
+configure_flags = "-DFORCE_LIMITED_API=no -DBUILD_TESTS=OFF -DNO_QT_TOOLS=yes -DCMAKE_SKIP_RPATH=ON -Wno-dev -DMODULES='Core;Gui;Widgets;PrintSupport;Network;Concurrent;DBus;Xml;OpenGL;OpenGLWidgets;Svg;SvgWidgets;Qml;Quick;QuickControls2;QuickWidgets'"

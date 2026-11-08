@@ -1,0 +1,43 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+[package]
+name = "symfonos-tools"
+version = "0.1.0-1"
+arch = "any"
+summary = "symfonOS-Programme: Software (syp), Design-Center, Paket-Konverter"
+license = "GPL-3.0-or-later"
+depends = ["python", "pyside6", "qt6-wayland", "syp", "polkit", "plasma-workspace", "libnotify"]
+
+[[source]]
+path = "@/src"
+
+[[source]]
+path = "@/system"
+
+[build]
+build = ":"
+# Der Assistent (symfonos_assist) fehlt: er braucht ollama und ein lokales Sprachmodell
+package = '''
+site=$(python3 -c 'import sysconfig; print(sysconfig.get_path("purelib"))')
+install -d "$DESTDIR$site"
+for m in symfonos_ui symfonos_design syp_store syp_convert; do
+  cp -r "$SRCDIR/src/$m" "$DESTDIR$site/"
+done
+find "$DESTDIR$site" -name __pycache__ -prune -exec rm -rf {} +
+python3 -m compileall -q -s "$DESTDIR" -p / "$DESTDIR$site"
+for e in symfonos-store:syp_store.gui symfonos-design:symfonos_design.center syp-convert-gui:syp_convert.gui; do
+  printf '#!/usr/bin/python3\nimport sys\nfrom %s import main\nsys.exit(main())\n' "${e#*:}" > "$SRCDIR/${e%%:*}"
+  install -Dm755 "$SRCDIR/${e%%:*}" "$DESTDIR/usr/bin/${e%%:*}"
+done
+cd "$SRCDIR/system"
+for f in org.symfonos.Store org.symfonos.Design org.symfonos.Convert; do
+  install -Dm644 "usr/share/applications/$f.desktop" "$DESTDIR/usr/share/applications/$f.desktop"
+done
+install -Dm644 usr/share/polkit-1/actions/org.symfonos.syp.policy "$DESTDIR/usr/share/polkit-1/actions/org.symfonos.syp.policy"
+# Benutzer-Timer: Hell/Dunkel nach Uhrzeit (tut nichts, solange das Design-Center nicht auf »Automatisch« steht)
+# und der Hinweis auf verfügbare Updates
+for f in symfonos-design-auto.service symfonos-design-auto.timer symfonos-update-notify.service symfonos-update-notify.timer; do
+  install -Dm644 "usr/lib/systemd/user/$f" "$DESTDIR/usr/lib/systemd/user/$f"
+done
+printf 'enable symfonos-design-auto.timer\nenable symfonos-update-notify.timer\n' |
+  install -Dm644 /dev/stdin "$DESTDIR/usr/lib/systemd/user-preset/40-symfonos-tools.preset"
+'''

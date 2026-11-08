@@ -1707,6 +1707,22 @@ install -Dm644 ardour9.desktop "$DESTDIR/usr/share/applications/ardour9.desktop"
 for n in 16 22 32 48 256 512; do
   install -Dm644 "gtk2_ardour/resources/Ardour-icon_${n}px.png" "$DESTDIR/usr/share/icons/hicolor/${n}x${n}/apps/ardour9.png"
 done""")
+# Qt für Python (PySide6 passend zu Qt 6.9): shiboken6 erzeugt die Anbindungen mit libclang. Gebaut werden nur
+# die Module, die symfonOS-Programme und übliche Qt-Python-Programme brauchen (ohne WebEngine, 3D, Designer)
+PYSIDE = "6.9.2"
+PYSIDE_SRC = (f"https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-{PYSIDE}-src/"
+              f"pyside-setup-everywhere-src-{PYSIDE}.tar.xz")
+PYSIDE_DIR = f"pyside-setup-everywhere-src-{PYSIDE}/sources/"
+PYSIDE_LIC = "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only"
+pkg("shiboken6", PYSIDE, PYSIDE_SRC, "Anbindungs-Generator und Laufzeit für Qt für Python", PYSIDE_LIC,
+    ["python", QB, "llvm", "libxml2", "libxslt"], ["cmake", "ninja"], style="cmake", dir=PYSIDE_DIR + "shiboken6",
+    flags="-DFORCE_LIMITED_API=no -DBUILD_TESTS=OFF -DCMAKE_SKIP_RPATH=ON -Wno-dev")
+pkg("pyside6", PYSIDE, PYSIDE_SRC, "Qt für Python (PySide6)", PYSIDE_LIC,
+    ["python", "shiboken6", QB, QD, QS, QW], ["cmake", "ninja", "qt6-tools"], style="cmake",
+    dir=PYSIDE_DIR + "pyside6",
+    flags="-DFORCE_LIMITED_API=no -DBUILD_TESTS=OFF -DNO_QT_TOOLS=yes -DCMAKE_SKIP_RPATH=ON -Wno-dev "
+          "-DMODULES='Core;Gui;Widgets;PrintSupport;Network;Concurrent;DBus;Xml;OpenGL;OpenGLWidgets;Svg;"
+          "SvgWidgets;Qml;Quick;QuickControls2;QuickWidgets'")
 gear("kdenlive", KF_GUI + ["karchive", "kbookmarks", "kcodecs", "kconfigwidgets", "knotifyconfig", "knewstuff",
                            "kguiaddons", "ktextwidgets", "solid", "kfilemetadata", "purpose", "mlt", "opentimelineio",
                            "imath", "ffmpeg", "qt6-svg", "qt6-multimedia", "qt6-networkauth", "qt6-5compat",
@@ -1806,11 +1822,11 @@ DESKTOP = ["symfonos-base", "symfonos-desktop-config", "plasma-desktop", "plasma
            "polkit-kde-agent-1", "plasma-systemmonitor", "ksystemstats", "kdeplasma-addons", "ocean-sound-theme",
            "kactivitymanagerd", "kglobalacceld", "kimageformats", "qt6-imageformats", "qt6-translations",
            "qt6-wayland", "mesa", "vulkan-loader", "libva", "pipewire", "wireplumber", "alsa-utils", "ffmpeg",
-           "xdg-user-dirs", "networkmanager", "networkmanager-openvpn", "networkmanager-l2tp", "plasma-nm", "bluez", "bluedevil", "udisks2", "cups", "cups-filters", "nss-mdns", "print-manager", "flatpak", "discover", "flatpak-kcm", "konsole", "dolphin", "kate", "ark", "gwenview", "okular", "dragon", "haruna", "elisa", "kdenlive", "ardour", "spectacle", "kcalc", "kcharselect",
+           "xdg-user-dirs", "networkmanager", "networkmanager-openvpn", "networkmanager-l2tp", "plasma-nm", "bluez", "bluedevil", "udisks2", "cups", "cups-filters", "nss-mdns", "print-manager", "flatpak", "discover", "flatpak-kcm", "konsole", "dolphin", "kate", "ark", "gwenview", "okular", "dragon", "haruna", "elisa", "kdenlive", "ardour", "spectacle", "symfonos-tools", "kcalc", "kcharselect",
            "inter-font", "jetbrains-mono-font", "dejavu-fonts", "noto-color-emoji", "hunspell", "upower",
            "accountsservice", "polkit"]
 pkg("symfonos-desktop", "2025.10", [], "symfonOS-Desktop (KDE Plasma 6, Wayland, PipeWire)", "GPL-3.0-or-later",
-    DESKTOP, arch="any", style="meta", rel=18)
+    DESKTOP, arch="any", style="meta", rel=19)
 
 # ---------------------------------------------------------------------------------------------------
 # Rezepte schreiben
