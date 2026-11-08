@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "gsl"
+version = "2.8-1"
+summary = "GNU Scientific Library"
+license = "GPL-3.0-or-later"
+url = "https://ftp.gnu.org/gnu/gsl/"
+depends = ["glibc"]
+
+[[source]]
+url = "https://ftp.gnu.org/gnu/gsl/gsl-2.8.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--disable-static"
