@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "fmt"
+version = "12.1.0-1"
+summary = "Formatierung für C++ (fmt)"
+license = "MIT"
+url = "https://github.com/fmtlib/fmt/archive/12.1.0/"
+depends = ["gcc"]
+makedepends = ["cmake", "ninja"]
+
+[[source]]
+url = "https://github.com/fmtlib/fmt/archive/12.1.0/fmt-12.1.0.tar.gz"
+sha256 = "TODO"
+
+[build]
+dir = "fmt-12.1.0"
+style = "cmake"
+configure_flags = "-DBUILD_SHARED_LIBS=ON -DFMT_TEST=OFF -DFMT_DOC=OFF"

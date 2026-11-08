@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "minizip-ng"
+version = "4.0.10-1"
+summary = "ZIP-Archive (minizip-ng)"
+license = "Zlib"
+url = "https://github.com/zlib-ng/minizip-ng/archive/4.0.10/"
+depends = ["zlib"]
+makedepends = ["cmake", "ninja"]
+
+[[source]]
+url = "https://github.com/zlib-ng/minizip-ng/archive/4.0.10/minizip-ng-4.0.10.tar.gz"
+sha256 = "TODO"
+
+[build]
+dir = "minizip-ng-4.0.10"
+style = "cmake"
+configure_flags = "-DBUILD_SHARED_LIBS=ON -DMZ_COMPAT=OFF -DMZ_BZIP2=OFF -DMZ_LZMA=OFF -DMZ_ZSTD=OFF -DMZ_PKCRYPT=OFF -DMZ_WZAES=OFF -DMZ_OPENSSL=OFF -DMZ_LIBBSD=OFF -DMZ_ICONV=OFF -DMZ_FETCH_LIBS=OFF -DMZ_ZLIB=ON"

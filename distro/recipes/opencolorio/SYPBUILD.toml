@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "opencolorio"
+version = "2.5.0-1"
+summary = "Farbmanagement für Film und Grafik (OpenColorIO)"
+license = "BSD-3-Clause"
+url = "https://github.com/AcademySoftwareFoundation/OpenColorIO/archive/v2.5.0/"
+depends = ["expat", "yaml-cpp", "pystring", "imath", "minizip-ng", "zlib"]
+makedepends = ["cmake", "ninja"]
+
+[[source]]
+url = "https://github.com/AcademySoftwareFoundation/OpenColorIO/archive/v2.5.0/OpenColorIO-2.5.0.tar.gz"
+sha256 = "TODO"
+
+[build]
+dir = "OpenColorIO-2.5.0"
+style = "cmake"
+configure_flags = "-DOCIO_BUILD_APPS=OFF -DOCIO_BUILD_TESTS=OFF -DOCIO_BUILD_GPU_TESTS=OFF -DOCIO_BUILD_PYTHON=OFF -DOCIO_BUILD_DOCS=OFF -DOCIO_INSTALL_EXT_PACKAGES=NONE"

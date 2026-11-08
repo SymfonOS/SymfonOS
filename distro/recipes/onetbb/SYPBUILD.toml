@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "onetbb"
+version = "2022.3.0-1"
+summary = "Threading Building Blocks (oneTBB)"
+license = "Apache-2.0"
+url = "https://github.com/uxlfoundation/oneTBB/archive/v2022.3.0/"
+depends = ["gcc"]
+makedepends = ["cmake", "ninja"]
+
+[[source]]
+url = "https://github.com/uxlfoundation/oneTBB/archive/v2022.3.0/oneTBB-2022.3.0.tar.gz"
+sha256 = "TODO"
+
+[build]
+dir = "oneTBB-2022.3.0"
+style = "cmake"
+configure_flags = "-DTBB_TEST=OFF -DTBB_STRICT=OFF -DTBB_EXAMPLES=OFF"

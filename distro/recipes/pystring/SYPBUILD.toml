@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "pystring"
+version = "1.1.4-1"
+summary = "Python-Zeichenkettenfunktionen für C++"
+license = "BSD-3-Clause"
+url = "https://github.com/imageworks/pystring/archive/v1.1.4/"
+depends = ["gcc"]
+makedepends = ["cmake", "ninja"]
+
+[[source]]
+url = "https://github.com/imageworks/pystring/archive/v1.1.4/pystring-1.1.4.tar.gz"
+sha256 = "TODO"
+
+[build]
+dir = "pystring-1.1.4"
+style = "cmake"
+configure_flags = "-DBUILD_SHARED_LIBS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5"

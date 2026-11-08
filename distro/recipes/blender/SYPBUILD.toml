@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "blender"
+version = "5.2.3-1"
+summary = "3D-Modellierung, Animation und Rendern (Blender)"
+license = "GPL-3.0-or-later"
+url = "https://download.blender.org/source/"
+depends = ["python", "python-numpy", "openimageio", "opencolorio", "openexr", "imath", "onetbb", "fmt", "libepoxy", "freetype", "harfbuzz", "fribidi", "libpng", "libjpeg-turbo", "zlib", "zstd", "fftw", "ffmpeg", "libsndfile", "openjpeg", "libwebp", "gmp", "pulseaudio", "pipewire", "libx11", "libxi", "libxfixes", "libxrender", "libxkbcommon", "wayland", "mesa", "hicolor-icon-theme", "shared-mime-info"]
+makedepends = ["cmake", "ninja", "eigen", "wayland-protocols", "pkgconf"]
+
+[[source]]
+url = "https://download.blender.org/source/blender-5.2.3.tar.xz"
+sha256 = "TODO"
+
+[build]
+dir = "blender-5.2.3"
+style = "cmake"
+configure_flags = "-DWITH_INSTALL_PORTABLE=OFF -DWITH_LIBS_PRECOMPILED=OFF -DWITH_BUILDINFO=OFF -DPYTHON_VERSION=3.13 -DWITH_PYTHON_INSTALL=OFF -DWITH_PYTHON_INSTALL_NUMPY=OFF -DWITH_PYTHON_INSTALL_ZSTANDARD=OFF -DWITH_PYTHON_INSTALL_REQUESTS=OFF -DWITH_LIBMV=OFF -DWITH_CYCLES_OSL=OFF -DWITH_CYCLES_EMBREE=OFF -DWITH_CYCLES_PATH_GUIDING=OFF -DWITH_CYCLES_DEVICE_CUDA=OFF -DWITH_CYCLES_DEVICE_OPTIX=OFF -DWITH_CYCLES_DEVICE_HIP=OFF -DWITH_OPENIMAGEDENOISE=OFF -DWITH_OPENVDB=OFF -DWITH_NANOVDB=OFF -DWITH_OPENSUBDIV=OFF -DWITH_USD=OFF -DWITH_MATERIALX=OFF -DWITH_HYDRA=OFF -DWITH_ALEMBIC=OFF -DWITH_XR_OPENXR=OFF -DWITH_MANIFOLD=OFF -DWITH_HARU=OFF -DWITH_POTRACE=OFF -DWITH_DRACO=OFF -DWITH_MESHOPTIMIZER=OFF -DWITH_VULKAN_BACKEND=OFF -DWITH_JACK=OFF -DWITH_OPENAL=OFF -DWITH_GHOST_CSD=OFF -DWITH_INPUT_NDOF=OFF -DWITH_HARFBUZZ=ON -DWITH_FRIBIDI=ON -DWITH_LINKER_LLD=OFF -DWITH_LINKER_MOLD=OFF -DWITH_DOC_MANPAGE=OFF -DWITH_GTESTS=OFF -Wno-dev"
