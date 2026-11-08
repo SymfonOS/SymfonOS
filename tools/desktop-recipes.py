@@ -1606,6 +1606,21 @@ pkg("sdl2", "2.32.10", "https://github.com/libsdl-org/SDL/releases/download/rele
     ["cmake", "ninja", "wayland-protocols"], style="cmake", dir="SDL2-2.32.10",
     flags="-DSDL_STATIC=OFF -DSDL_TEST_LIBRARY=OFF -DSDL_TESTS=OFF -DSDL_RPATH=OFF -DCMAKE_INSTALL_LIBDIR=lib",
     provides=["so:libSDL2-2.0.so.0"])
+# Krita 6 als Vorschau: das Projekt gibt den Qt-6-Bau noch nicht als stabil frei (ALLOW_UNSTABLE=QT6); Qt ohne
+# die Krita-eigenen Patches, Python-Skripte fehlen (kein PyQt6/SIP). Hinweis im Handbuch (docs/DESKTOP.md)
+pkg("krita", "6.0.4.1", {"url": "https://github.com/KDE/krita/archive/v6.0.4.1/krita-6.0.4.1.tar.gz"},
+    "Malprogramm (Krita 6, Vorschau auf Qt 6)", "GPL-3.0-or-later",
+    [QB, QD, "qt6-svg", "qt6-5compat", "qt6-wayland", "kconfig", "kwidgetsaddons", "kcompletion", "kcoreaddons",
+     "kguiaddons", "ki18n", "kitemviews", "kcolorscheme", "kcrash", "boost", "eigen", "xsimd", "immer", "zug",
+     "lager", "quazip", "libunibreak", "sdl2", "mlt", "ffmpeg", "exiv2", "lcms2", "libpng", "zlib", "libtiff",
+     "libjpeg-turbo", "giflib", "libwebp", "libjxl", "openjpeg", "imath", "poppler", "freetype", "harfbuzz",
+     "fontconfig", "fribidi", "libx11", "libxi", "hicolor-icon-theme"],
+    KDE_MK, style="cmake", dir="krita-6.0.4.1",
+    flags=KDE_FLAGS + " -DBUILD_WITH_QT6=ON -DALLOW_UNSTABLE=QT6 -DBUILD_TESTING=OFF -DENABLE_UPDATERS=OFF "
+          "-DFOUNDATION_BUILD=OFF -DKRITA_QT_HAS_ENTER_LEAVE_PATCH=OFF "
+          "-DKRITA_QT_HAS_UNBALANCED_KEY_PRESS_RELEASE_PATCH=OFF -DKRITA_QT_HAS_UPDATE_COMPRESSION_PATCH=OFF "
+          "-DKRITA_USE_SURFACE_COLOR_MANAGEMENT_API=OFF "
+          "-DCMAKE_DISABLE_FIND_PACKAGE_PyQt6=ON -DCMAKE_DISABLE_FIND_PACKAGE_SIP=ON")
 # Audio (Ardour 9): C++-Anbindungen in der alten ABI (glibmm 2.4, libsigc++ 2, cairomm 1.0), LV2-Plugin-Stapel,
 # FFTW, Rubber Band, Vamp, aubio und liblo. Ardour bringt sein GTK-2-Toolkit (YTK) selbst mit.
 DROBILLA = "https://download.drobilla.net/"
@@ -1826,11 +1841,11 @@ DESKTOP = ["symfonos-base", "symfonos-desktop-config", "plasma-desktop", "plasma
            "polkit-kde-agent-1", "plasma-systemmonitor", "ksystemstats", "kdeplasma-addons", "ocean-sound-theme",
            "kactivitymanagerd", "kglobalacceld", "kimageformats", "qt6-imageformats", "qt6-translations",
            "qt6-wayland", "mesa", "vulkan-loader", "libva", "pipewire", "wireplumber", "alsa-utils", "ffmpeg",
-           "xdg-user-dirs", "networkmanager", "networkmanager-openvpn", "networkmanager-l2tp", "plasma-nm", "bluez", "bluedevil", "udisks2", "cups", "cups-filters", "nss-mdns", "print-manager", "flatpak", "discover", "flatpak-kcm", "konsole", "dolphin", "kate", "ark", "gwenview", "okular", "dragon", "haruna", "elisa", "kdenlive", "ardour", "spectacle", "symfonos-tools", "kcalc", "kcharselect",
+           "xdg-user-dirs", "networkmanager", "networkmanager-openvpn", "networkmanager-l2tp", "plasma-nm", "bluez", "bluedevil", "udisks2", "cups", "cups-filters", "nss-mdns", "print-manager", "flatpak", "discover", "flatpak-kcm", "konsole", "dolphin", "kate", "ark", "gwenview", "okular", "dragon", "haruna", "elisa", "kdenlive", "krita", "ardour", "spectacle", "symfonos-tools", "kcalc", "kcharselect",
            "inter-font", "jetbrains-mono-font", "dejavu-fonts", "noto-color-emoji", "hunspell", "upower",
            "accountsservice", "polkit"]
 pkg("symfonos-desktop", "2025.10", [], "symfonOS-Desktop (KDE Plasma 6, Wayland, PipeWire)", "GPL-3.0-or-later",
-    DESKTOP, arch="any", style="meta", rel=19)
+    DESKTOP, arch="any", style="meta", rel=20)
 
 # ---------------------------------------------------------------------------------------------------
 # Rezepte schreiben
