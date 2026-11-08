@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "pystring"
-version = "1.1.4-1"
+version = "1.1.4-2"
 summary = "Python-Zeichenkettenfunktionen für C++"
 license = "BSD-3-Clause"
 url = "https://github.com/imageworks/pystring/archive/v1.1.4/"
@@ -17,3 +17,6 @@ sha256 = "49da0fe2a049340d3c45cce530df63a2278af936003642330287b68cefd788fb"
 dir = "pystring-1.1.4"
 style = "cmake"
 configure_flags = "-DBUILD_SHARED_LIBS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5"
+post_install = '''
+install -Dm644 "$S/pystring.h" "$DESTDIR/usr/include/pystring/pystring.h"
+'''

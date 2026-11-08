@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "fftw"
-version = "3.3.10-1"
+version = "3.3.10-2"
 summary = "Schnelle Fourier-Transformation (einfache und doppelte Genauigkeit)"
 license = "GPL-2.0-or-later"
 url = "https://www.fftw.org/"
@@ -28,4 +28,5 @@ done
 package = '''
 cd "$S"
 for p in single double; do make -C "b-$p" DESTDIR="$DESTDIR" install; done
+rm -rf "$DESTDIR/usr/lib/cmake/fftw3"
 '''

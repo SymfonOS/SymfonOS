@@ -1606,13 +1606,16 @@ pkg("sdl2", "2.32.10", "https://github.com/libsdl-org/SDL/releases/download/rele
     ["cmake", "ninja", "wayland-protocols"], style="cmake", dir="SDL2-2.32.10",
     flags="-DSDL_STATIC=OFF -DSDL_TEST_LIBRARY=OFF -DSDL_TESTS=OFF -DSDL_RPATH=OFF -DCMAKE_INSTALL_LIBDIR=lib",
     provides=["so:libSDL2-2.0.so.0"])
+pkg("libmypaint", "1.6.1", "https://github.com/mypaint/libmypaint/releases/download/v1.6.1/libmypaint-1.6.1.tar.xz",
+    "MyPaint-Pinsel-Engine (für Krita)", "ISC", ["json-c", "glib2"], ["pkgconf", "intltool", "gettext"],
+    style="autotools", flags="--disable-static --disable-introspection")
 # Krita 6 als Vorschau: das Projekt gibt den Qt-6-Bau noch nicht als stabil frei (ALLOW_UNSTABLE=QT6); Qt ohne
 # die Krita-eigenen Patches, Python-Skripte fehlen (kein PyQt6/SIP). Hinweis im Handbuch (docs/DESKTOP.md)
 pkg("krita", "6.0.4.1", {"url": "https://github.com/KDE/krita/archive/v6.0.4.1/krita-6.0.4.1.tar.gz"},
     "Malprogramm (Krita 6, Vorschau auf Qt 6)", "GPL-3.0-or-later",
     [QB, QD, "qt6-svg", "qt6-5compat", "qt6-wayland", "kconfig", "kwidgetsaddons", "kcompletion", "kcoreaddons",
      "kguiaddons", "ki18n", "kitemviews", "kcolorscheme", "kcrash", "boost", "eigen", "xsimd", "immer", "zug",
-     "lager", "quazip", "libunibreak", "sdl2", "mlt", "ffmpeg", "exiv2", "lcms2", "libpng", "zlib", "libtiff",
+     "lager", "quazip", "libunibreak", "sdl2", "mlt", "libmypaint", "opencolorio", "fftw", "ffmpeg", "exiv2", "lcms2", "libpng", "zlib", "libtiff",
      "libjpeg-turbo", "giflib", "libwebp", "libjxl", "openjpeg", "imath", "poppler", "freetype", "harfbuzz",
      "fontconfig", "fribidi", "libx11", "libxi", "hicolor-icon-theme"],
     KDE_MK, style="cmake", dir="krita-6.0.4.1",
@@ -1649,7 +1652,10 @@ for p in single double; do
     ../configure --prefix=/usr --enable-shared --disable-static --enable-threads $extra
     make )
 done""",
-    package='cd "$S"\nfor p in single double; do make -C "b-$p" DESTDIR="$DESTDIR" install; done',
+    # die von autotools installierte CMake-Konfiguration verweist auf eine fehlende Datei (FFTW3LibraryDepends.cmake)
+    # und bricht damit CMake-Projekte ab (Krita); pkg-config bleibt
+    package='cd "$S"\nfor p in single double; do make -C "b-$p" DESTDIR="$DESTDIR" install; done\n'
+            'rm -rf "$DESTDIR/usr/lib/cmake/fftw3"', rel=2,
     provides=["so:libfftw3.so.3", "so:libfftw3f.so.3"])
 pkg("liblo", "0.32", "https://downloads.sourceforge.net/liblo/liblo-0.32.tar.gz",
     "Open Sound Control (OSC)", "LGPL-2.1-or-later", ["glibc"], style="autotools",
@@ -1797,7 +1803,8 @@ pkg("yaml-cpp", "0.8.0", {"url": "https://github.com/jbeder/yaml-cpp/archive/0.8
     flags="-DYAML_BUILD_SHARED_LIBS=ON -DYAML_CPP_BUILD_TESTS=OFF -DYAML_CPP_BUILD_TOOLS=OFF" + CMAKE_OLD)
 pkg("pystring", "1.1.4", {"url": "https://github.com/imageworks/pystring/archive/v1.1.4/pystring-1.1.4.tar.gz"},
     "Python-Zeichenkettenfunktionen für C++", "BSD-3-Clause", ["gcc"], ["cmake", "ninja"], style="cmake",
-    dir="pystring-1.1.4", flags="-DBUILD_SHARED_LIBS=ON" + CMAKE_OLD)
+    dir="pystring-1.1.4", flags="-DBUILD_SHARED_LIBS=ON" + CMAKE_OLD, rel=2,
+    post='install -Dm644 "$S/pystring.h" "$DESTDIR/usr/include/pystring/pystring.h"')
 # minizip-ng wie in OpenColorIOs eigenem Bau (nur zlib), ohne zlib-Kompatibilitätsschicht
 pkg("minizip-ng", "4.0.10", {"url": "https://github.com/zlib-ng/minizip-ng/archive/4.0.10/minizip-ng-4.0.10.tar.gz"},
     "ZIP-Archive (minizip-ng)", "Zlib", ["zlib"], ["cmake", "ninja"], style="cmake", dir="minizip-ng-4.0.10",
