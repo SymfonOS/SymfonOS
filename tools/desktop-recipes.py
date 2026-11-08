@@ -1734,6 +1734,22 @@ pkg("llama-cpp", LLAMA, {"url": f"https://github.com/ggml-org/llama.cpp/archive/
     flags="-DBUILD_SHARED_LIBS=ON -DGGML_NATIVE=OFF -DGGML_BACKEND_DL=ON -DGGML_CPU_ALL_VARIANTS=ON "
           "-DGGML_BACKEND_DIR=/usr/lib/ggml -DLLAMA_BUILD_TESTS=OFF -DLLAMA_BUILD_EXAMPLES=OFF "
           f"-DLLAMA_USE_PREBUILT_UI=OFF -DLLAMA_BUILD_UI=OFF -DBUILD_NUMBER={LLAMA} -DCMAKE_SKIP_RPATH=ON")
+# OpenConnect (Cisco AnyConnect, GlobalProtect, Pulse/Ivanti, Fortinet …) als Befehl: die plasma-nm-Oberfläche
+# braucht QtWebEngine (zu groß für eine CI-Etappe). SAML/SSO-Anmeldung über den Standardbrowser (kde-open)
+VPNC = "ce9e961bd0f6b867e1c7c35f78f6fb973f6ff101"
+pkg("vpnc-scripts", "20250727",
+    {"url": f"https://gitlab.com/openconnect/vpnc-scripts/-/archive/{VPNC}/vpnc-scripts-{VPNC}.tar.gz",
+     "filename": "vpnc-scripts-20250727.tar.gz"},
+    "Netzwerk-Einrichtung für vpnc und OpenConnect (vpnc-script)", "GPL-2.0-or-later", ["bash", "iproute2"],
+    arch="any", dir=f"vpnc-scripts-{VPNC}", build=":",
+    package='cd "$S"\ninstall -Dm755 vpnc-script "$DESTDIR/etc/vpnc/vpnc-script"')
+pkg("openconnect", "9.21", "https://www.infradead.org/openconnect/download/openconnect-9.21.tar.gz",
+    "VPN-Client für AnyConnect, GlobalProtect, Pulse, Fortinet und andere", "LGPL-2.1-only",
+    ["gnutls", "libxml2", "zlib", "lz4", "vpnc-scripts", "ca-certificates"], ["pkgconf"], style="autotools",
+    flags="--disable-static --disable-docs --with-vpnc-script=/etc/vpnc/vpnc-script --with-builtin-json "
+          "--without-stoken --without-libpskc --without-libproxy --without-libpcsclite --without-gssapi "
+          "--without-java --with-system-cafile=/etc/ssl/certs/ca-certificates.crt "
+          "--with-external-browser=/usr/bin/kde-open")
 # notify-send für den Update-Hinweis von symfonos-tools (Plasma zeigt die Meldung über org.freedesktop.Notifications)
 pkg("libnotify", "0.8.6", "https://download.gnome.org/sources/libnotify/0.8/libnotify-0.8.6.tar.xz",
     "Desktop-Benachrichtigungen (libnotify, notify-send)", "LGPL-2.1-or-later", ["glib2", "gdk-pixbuf"], ["meson"],
@@ -1935,11 +1951,11 @@ DESKTOP = ["symfonos-base", "symfonos-desktop-config", "plasma-desktop", "plasma
            "polkit-kde-agent-1", "plasma-systemmonitor", "ksystemstats", "kdeplasma-addons", "ocean-sound-theme",
            "kactivitymanagerd", "kglobalacceld", "kimageformats", "qt6-imageformats", "qt6-translations",
            "qt6-wayland", "mesa", "vulkan-loader", "libva", "pipewire", "wireplumber", "alsa-utils", "ffmpeg",
-           "xdg-user-dirs", "networkmanager", "networkmanager-openvpn", "networkmanager-l2tp", "plasma-nm", "bluez", "bluedevil", "udisks2", "cups", "cups-filters", "nss-mdns", "print-manager", "flatpak", "discover", "flatpak-kcm", "konsole", "dolphin", "kate", "ark", "gwenview", "okular", "dragon", "haruna", "elisa", "kdenlive", "krita", "blender", "ardour", "spectacle", "symfonos-tools", "kcalc", "kcharselect",
+           "xdg-user-dirs", "networkmanager", "networkmanager-openvpn", "networkmanager-l2tp", "openconnect", "plasma-nm", "bluez", "bluedevil", "udisks2", "cups", "cups-filters", "nss-mdns", "print-manager", "flatpak", "discover", "flatpak-kcm", "konsole", "dolphin", "kate", "ark", "gwenview", "okular", "dragon", "haruna", "elisa", "kdenlive", "krita", "blender", "ardour", "spectacle", "symfonos-tools", "kcalc", "kcharselect",
            "inter-font", "jetbrains-mono-font", "dejavu-fonts", "noto-color-emoji", "hunspell", "upower",
            "accountsservice", "polkit"]
 pkg("symfonos-desktop", "2025.10", [], "symfonOS-Desktop (KDE Plasma 6, Wayland, PipeWire)", "GPL-3.0-or-later",
-    DESKTOP, arch="any", style="meta", rel=21)
+    DESKTOP, arch="any", style="meta", rel=22)
 
 # ---------------------------------------------------------------------------------------------------
 # Rezepte schreiben

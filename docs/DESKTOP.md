@@ -63,7 +63,7 @@ Vollständige Logs und die Bildschirmfotos jedes Laufs liegen auf dem Branch `ci
 
 ## Noch nicht enthalten
 
-- **Weitere VPN-Erweiterungen:** OpenConnect (Cisco AnyConnect, GlobalProtect …) – die Oberfläche in plasma-nm braucht QtWebEngine.
+- **OpenConnect nur als Befehl:** `openconnect` (Cisco AnyConnect, GlobalProtect, Pulse/Ivanti, Fortinet …) ist installiert, z. B. `sudo openconnect --protocol=gp vpn.example.org`; SAML/SSO-Anmeldungen öffnen den Standardbrowser. Die Einbindung in die Netzwerkverwaltung von Plasma braucht QtWebEngine (Chromium); dessen Bau dauert auf den CI-Rechnern länger als eine Bauetappe (gut 4 Stunden) und fehlt deshalb.
 - **Webbrowser aus dem Quellcode:** Firefox braucht Rust und Node.js, Falkon braucht QtWebEngine; beide passen nicht in eine Bauetappe der CI. Bis dahin kommt ein Browser über Flathub (z. B. `flatpak install flathub org.mozilla.firefox` oder in Discover).
 - **Flatpak im enforcing-Test:** Programme laufen als `unconfined_t` in der bubblewrap-Sandbox, der Systemhelfer wie bei Fedora in der uneingeschränkten Domäne `flatpak_helper_t` (Modul `symfonos-selinux`). Eine Installation von Flathub ist in der CI noch nicht abgedeckt.
 - **Krita 6 (Vorschau):** Krita 6 baut mit Qt 6, das Projekt gibt diesen Bau aber noch nicht als stabil frei; symfonOS baut ihn trotzdem mit `-DALLOW_UNSTABLE=QT6`, ohne die Krita-eigenen Qt-Patches und ohne Python-Skripte. Fehler bitte nicht an Krita melden, sondern an symfonOS. Wer die vom Projekt freigegebene Version möchte, installiert Krita über Flathub (Discover).

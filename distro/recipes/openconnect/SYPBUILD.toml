@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "openconnect"
+version = "9.21-1"
+summary = "VPN-Client für AnyConnect, GlobalProtect, Pulse, Fortinet und andere"
+license = "LGPL-2.1-only"
+url = "https://www.infradead.org/openconnect/download/"
+depends = ["gnutls", "libxml2", "zlib", "lz4", "vpnc-scripts", "ca-certificates"]
+makedepends = ["pkgconf"]
+
+[[source]]
+url = "https://www.infradead.org/openconnect/download/openconnect-9.21.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--disable-static --disable-docs --with-vpnc-script=/etc/vpnc/vpnc-script --with-builtin-json --without-stoken --without-libpskc --without-libproxy --without-libpcsclite --without-gssapi --without-java --with-system-cafile=/etc/ssl/certs/ca-certificates.crt --with-external-browser=/usr/bin/kde-open"
