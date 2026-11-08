@@ -6,7 +6,7 @@ version = "6.0.4.1-1"
 summary = "Malprogramm (Krita 6, Vorschau auf Qt 6)"
 license = "GPL-3.0-or-later"
 url = "https://github.com/KDE/krita/archive/v6.0.4.1/"
-depends = ["qt6-base", "qt6-declarative", "qt6-svg", "qt6-5compat", "qt6-wayland", "kconfig", "kwidgetsaddons", "kcompletion", "kcoreaddons", "kguiaddons", "ki18n", "kitemviews", "kcolorscheme", "kcrash", "boost", "eigen", "xsimd", "immer", "zug", "lager", "quazip", "libunibreak", "sdl2", "mlt", "ffmpeg", "exiv2", "lcms2", "libpng", "zlib", "libtiff", "libjpeg-turbo", "giflib", "libwebp", "libjxl", "openjpeg", "imath", "poppler", "freetype", "harfbuzz", "fontconfig", "fribidi", "libx11", "libxi", "hicolor-icon-theme"]
+depends = ["qt6-base", "qt6-declarative", "qt6-svg", "qt6-5compat", "qt6-wayland", "kconfig", "kwidgetsaddons", "kcompletion", "kcoreaddons", "kguiaddons", "ki18n", "kitemviews", "kcolorscheme", "kcrash", "boost", "eigen", "xsimd", "immer", "zug", "lager", "quazip", "libunibreak", "sdl2", "mlt", "libmypaint", "opencolorio", "fftw", "ffmpeg", "exiv2", "lcms2", "libpng", "zlib", "libtiff", "libjpeg-turbo", "giflib", "libwebp", "libjxl", "openjpeg", "imath", "poppler", "freetype", "harfbuzz", "fontconfig", "fribidi", "libx11", "libxi", "hicolor-icon-theme"]
 makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", "gettext"]
 
 [[source]]
