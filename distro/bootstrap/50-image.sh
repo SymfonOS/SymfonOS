@@ -101,6 +101,12 @@ User=live
 Session=plasma
 Relogin=false
 CONF
+  # Live-Sitzung ohne Bildschirmsperre und ohne Abschalten des Bildschirms (kein Passwort, Vorführungen)
+  mkdir -p "$IMG/home/live/.config"
+  printf '[Daemon]\nAutolock=false\nLockOnResume=false\n' > "$IMG/home/live/.config/kscreenlockerrc"
+  printf '[AC][Display]\nDimDisplayWhenIdle=false\nTurnOffDisplayWhenIdle=false\n\n[AC][SuspendAndShutdown]\nAutoSuspendAction=0\n' \
+    > "$IMG/home/live/.config/powerdevilrc"
+  in_img "chown -R live:live /home/live/.config"
   # Programmstart-Test für tools/desktop-test.sh (APPTEST=1): ohne den Kernel-Parameter symfonos.apptest
   # beendet sich das Skript sofort. Jedes Programm startet einzeln; läuft es nach der Wartezeit noch,
   # gilt es als gestartet (der Test hält dann ein Bildschirmfoto fest), sonst landet seine Ausgabe im Journal.

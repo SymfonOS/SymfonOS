@@ -695,18 +695,18 @@ pkg("ffmpeg", "7.1.1", ["https://ffmpeg.org/releases/ffmpeg-7.1.1.tar.xz",
     "Audio- und Video-Werkzeugkasten (FFmpeg)", "GPL-3.0-or-later",
     ["libaom", "dav1d", "libass", "freetype", "lame", "libvpx", "opus", "libvorbis", "x264", "x265", "alsa-lib",
      "libva", "libdrm", "libwebp", "openssl", "zlib", "bzip2", "xz", "pulseaudio", "libxcb",
-     "vulkan-loader", "openjpeg", "speexdsp", "libxv"],
+     "vulkan-loader", "openjpeg", "speexdsp", "libxv", "sdl2"],
     ["nasm", "vulkan-headers", "glslang"], dir="ffmpeg-7.1.1",
     pre="patch -Np1 -i ../ffmpeg-7.1.1-chromium_method-1.patch",
     build=r'''cd "$S"
 ./configure --prefix=/usr --enable-gpl --enable-version3 --disable-static --enable-shared --disable-debug \
   --enable-libaom --enable-libdav1d --enable-libass --enable-libfreetype --enable-libmp3lame --enable-libopus \
   --enable-libvorbis --enable-libvpx --enable-libx264 --enable-libx265 --enable-libwebp --enable-libopenjpeg \
-  --enable-openssl --enable-vaapi --enable-libdrm --enable-vulkan --enable-libpulse --enable-libxcb \
+  --enable-openssl --enable-vaapi --enable-libdrm --enable-vulkan --enable-libpulse --enable-libxcb --enable-sdl2 \
   --disable-doc --ignore-tests=enhanced-flv-av1
 make''',
     package='cd "$S"\nmake DESTDIR="$DESTDIR" install',
-    provides=["so:libavcodec.so.61", "so:libavformat.so.61", "so:libavutil.so.59", "so:libswscale.so.8"], rel=2)
+    provides=["so:libavcodec.so.61", "so:libavformat.so.61", "so:libavutil.so.59", "so:libswscale.so.8"], rel=3)
 # Videoplayer mpv (libmpv für Haruna). libplacebo braucht fast_float (Header) und den GL-Lader-Generator glad 2,
 # die im Git-Archiv als Submodule fehlen; beide werden als eigene Quellen nach 3rdparty/ verlinkt.
 pkg("libplacebo", "7.351.0",
@@ -780,11 +780,11 @@ pkg("opentimelineio", "0.17.0",
 pkg("mlt", "7.32.0", {"url": "https://github.com/mltframework/mlt/archive/v7.32.0/mlt-7.32.0.tar.gz"},
     "Multimedia-Framework für Videoschnitt (MLT, melt)", "LGPL-2.1-or-later AND GPL-3.0-or-later",
     ["ffmpeg", "libxml2", "libsamplerate", "libvorbis", "frei0r-plugins", "fontconfig", "qt6-base", "qt6-svg",
-     "qt6-5compat", "libx11"],
-    ["cmake", "ninja", "pkgconf"], style="cmake", dir="mlt-7.32.0",
+     "qt6-5compat", "libx11", "sdl2"],
+    ["cmake", "ninja", "pkgconf"], style="cmake", dir="mlt-7.32.0", rel=2,
     flags="-DCMAKE_INSTALL_LIBDIR=lib -DGPL=ON -DGPL3=ON -DCLANG_FORMAT=OFF -DBUILD_TESTING=OFF "
           "-DMOD_QT=OFF -DMOD_QT6=ON -DMOD_GLAXNIMATE_QT6=OFF -DMOD_DECKLINK=OFF -DMOD_GDK=OFF -DMOD_JACKRACK=OFF "
-          "-DMOD_MOVIT=OFF -DMOD_OPENCV=OFF -DMOD_RTAUDIO=OFF -DMOD_RUBBERBAND=OFF -DMOD_SDL1=OFF -DMOD_SDL2=OFF "
+          "-DMOD_MOVIT=OFF -DMOD_OPENCV=OFF -DMOD_RTAUDIO=OFF -DMOD_RUBBERBAND=OFF -DMOD_SDL1=OFF -DMOD_SDL2=ON "
           "-DMOD_SOX=OFF -DMOD_SPATIALAUDIO=OFF -DMOD_VIDSTAB=OFF -DMOD_XINE=OFF -DMOD_NDI=OFF "
           "-DMOD_FREI0R=ON -DMOD_RESAMPLE=ON -DMOD_VORBIS=ON -DMOD_PLUS=ON -DMOD_PLUSGPL=ON -DMOD_XML=ON "
           "-DMOD_AVFORMAT=ON -DMOD_KDENLIVE=ON -DMOD_NORMALIZE=ON -DMOD_OLDFILM=ON -DSWIG_PYTHON=OFF")
