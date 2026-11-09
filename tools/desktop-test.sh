@@ -52,6 +52,21 @@ for i in $(seq "${TIMEOUT:-1500}"); do
 done
 sleep "${SETTLE:-60}"   # Sitzung fertig aufbauen lassen, späte Abstürze erfassen
 shot desktop
+if [[ ${APPTEST:-0} == 1 ]] && ((session)); then
+  # Programmstart-Test (Skript /usr/lib/symfonos/apptest im Live-System): je Programm ein Bildschirmfoto
+  echo ":: Programmstart-Test"
+  declare -A shotdone=()
+  for i in $(seq "${APPTIMEOUT:-1200}"); do
+    log=$(clean)
+    while read -r app; do
+      [[ -n $app && -z ${shotdone[$app]:-} ]] || continue
+      shotdone[$app]=1; shot "app-$app"
+    done < <(grep -aoE "symfonos-apptest\[[0-9]+\]: läuft [a-z0-9-]+" <<<"$log" | awk '{print $3}')
+    grep -aqE "symfonos-apptest\[[0-9]+\]: ende" <<<"$log" && break
+    kill -0 "$qpid" 2>/dev/null || break
+    sleep 1
+  done
+fi
 kill "$qpid" 2>/dev/null || true
 qpid=""
 clean > "$OUT/serial.log"
@@ -59,6 +74,16 @@ log=$(cat "$OUT/serial.log")
 # SELinux-Verweigerungen je Regel (vollständig, wenn APPEND auditd maskiert und das printk-Ratenlimit abschaltet)
 python3 "$(dirname "$0")/avc-summary.py" "$OUT/serial.log" > "$OUT/avc.txt" 2>&1 || true
 echo ":: SELinux: $(tail -1 "$OUT/avc.txt")"
+if [[ ${APPTEST:-0} == 1 ]]; then
+  grep -aE "symfonos-apptest\[[0-9]+\]: " <<<"$log" | sed -E 's/.*symfonos-apptest\[[0-9]+\]: //' > "$OUT/apptest.txt" || true
+  grep -q '^ende' "$OUT/apptest.txt" || echo "::warning title=Programmstart-Test::nicht vollständig durchgelaufen"
+  ok=$(grep -c '^läuft ' "$OUT/apptest.txt" || true)
+  echo ":: Programmstart-Test: $ok gestartet"
+  # Vorschau-Programme sollen das ISO nicht blockieren: Fehlschläge als Warnung mit der Programmausgabe
+  for app in $(grep -oE '^(beendet|fehlt) [a-z0-9-]+' "$OUT/apptest.txt" | awk '{print $2}' | sort -u); do
+    echo "::warning title=Programmstart $app::$(grep -E "^(beendet|fehlt) $app|^  $app: " "$OUT/apptest.txt" | tail -c 3000 | sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g')"
+  done
+fi
 crashes=$(grep -aE "segfault at|general protection fault|Oops|BUG:|dumped core|Process [0-9]+ \(.*\) of user [0-9]+ dumped core" <<<"$log" | awk '!s[$0]++' | head -15 || true)
 fails=$(grep -a "\[FAILED\]" <<<"$log" | awk '!s[$0]++' | head -15 || true)
 echo ":: graphical=$graphical session=$session"
