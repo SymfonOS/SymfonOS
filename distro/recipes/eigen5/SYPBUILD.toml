@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "eigen5"
+version = "5.0.1-1"
+arch = "any"
+summary = "Lineare Algebra (C++-Header, Eigen 5 für Blender)"
+license = "MPL-2.0"
+url = "https://gitlab.com/libeigen/eigen/-/archive/5.0.1/"
+makedepends = ["cmake", "ninja"]
+
+[[source]]
+url = "https://gitlab.com/libeigen/eigen/-/archive/5.0.1/eigen-5.0.1.tar.bz2"
+sha256 = "TODO"
+
+[build]
+dir = "eigen-5.0.1"
+style = "cmake"
+configure_flags = "-DCMAKE_INSTALL_PREFIX=/usr/lib/eigen5 -DBUILD_TESTING=OFF -DEIGEN_BUILD_DOC=OFF -DEIGEN_BUILD_PKGCONFIG=OFF -DEIGEN_BUILD_BLAS=OFF -DEIGEN_BUILD_LAPACK=OFF"
