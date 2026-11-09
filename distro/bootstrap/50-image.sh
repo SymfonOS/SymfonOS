@@ -101,6 +101,45 @@ User=live
 Session=plasma
 Relogin=false
 CONF
+  # Programmstart-Test für tools/desktop-test.sh (APPTEST=1): ohne den Kernel-Parameter symfonos.apptest
+  # beendet sich das Skript sofort. Jedes Programm startet einzeln; läuft es nach der Wartezeit noch,
+  # gilt es als gestartet (der Test hält dann ein Bildschirmfoto fest), sonst landet seine Ausgabe im Journal.
+  mkdir -p "$IMG/usr/lib/symfonos" "$IMG/etc/xdg/autostart"
+  cat > "$IMG/usr/lib/symfonos/apptest" <<'SH'
+#!/bin/bash
+grep -qw symfonos.apptest /proc/cmdline || exit 0
+log() { logger -t symfonos-apptest -- "$*"; }
+sleep 90   # Bildschirmfoto der leeren Arbeitsfläche abwarten
+log "beginn"
+for app in krita blender kdenlive ardour9 symfonos-store symfonos-design syp-convert-gui symfonos-assist-gui \
+           dolphin okular; do
+  if ! command -v "$app" >/dev/null; then log "fehlt $app"; continue; fi
+  out=$(mktemp)
+  "$app" >"$out" 2>&1 &
+  pid=$!
+  sleep 45
+  if kill -0 "$pid" 2>/dev/null; then
+    log "läuft $app"
+    sleep 10   # Zeit für das Bildschirmfoto
+    kill "$pid" 2>/dev/null; sleep 5; kill -9 "$pid" 2>/dev/null
+  else
+    wait "$pid"; log "beendet $app (Exit $?)"
+    tail -n 20 "$out" | while IFS= read -r l; do log "  $app: $l"; done
+  fi
+  rm -f "$out"
+  sleep 3
+done
+log "ende"
+SH
+  chmod 755 "$IMG/usr/lib/symfonos/apptest"
+  cat > "$IMG/etc/xdg/autostart/symfonos-apptest.desktop" <<'CONF'
+[Desktop Entry]
+Type=Application
+Name=symfonOS Programmstart-Test
+Exec=/usr/lib/symfonos/apptest
+NoDisplay=true
+OnlyShowIn=KDE;
+CONF
 else
   mkdir -p "$IMG/etc/systemd/system/getty@tty1.service.d"
   cat > "$IMG/etc/systemd/system/getty@tty1.service.d/autologin.conf" <<'CONF'
