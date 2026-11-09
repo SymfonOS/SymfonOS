@@ -1578,6 +1578,12 @@ pkg("haruna", "1.7.1", {"url": "https://github.com/KDE/haruna/archive/v1.7.1/har
 pkg("eigen", "3.4.0", "https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.bz2",
     "Lineare Algebra (C++-Header)", "MPL-2.0", [], ["cmake", "ninja"], style="cmake", arch="any",
     flags="-DBUILD_TESTING=OFF -DEIGEN_BUILD_DOC=OFF -DEIGEN_BUILD_PKGCONFIG=ON")
+# Blender 5.2 braucht die Eigen-5-API (jacobiSvd<Options>()); nur als Bauabhängigkeit neben Eigen 3.4 abgelegt
+pkg("eigen5", "5.0.1", "https://gitlab.com/libeigen/eigen/-/archive/5.0.1/eigen-5.0.1.tar.bz2",
+    "Lineare Algebra (C++-Header, Eigen 5 für Blender)", "MPL-2.0", [], ["cmake", "ninja"], style="cmake",
+    arch="any", dir="eigen-5.0.1",
+    flags="-DCMAKE_INSTALL_PREFIX=/usr/lib/eigen5 -DBUILD_TESTING=OFF -DEIGEN_BUILD_DOC=OFF "
+          "-DEIGEN_BUILD_PKGCONFIG=OFF -DEIGEN_BUILD_BLAS=OFF -DEIGEN_BUILD_LAPACK=OFF")
 pkg("xsimd", "13.2.0", {"url": "https://github.com/xtensor-stack/xsimd/archive/13.2.0/xsimd-13.2.0.tar.gz"},
     "SIMD-Befehle (C++-Header)", "BSD-3-Clause", [], ["cmake", "ninja"], style="cmake", arch="any",
     dir="xsimd-13.2.0", flags="-DBUILD_TESTS=OFF")
@@ -1622,6 +1628,8 @@ pkg("krita", "6.0.4.1", {"url": "https://github.com/KDE/krita/archive/v6.0.4.1/k
      "libjpeg-turbo", "giflib", "libwebp", "libjxl", "openjpeg", "imath", "poppler", "freetype", "harfbuzz",
      "fontconfig", "fribidi", "libx11", "libxi", "hicolor-icon-theme"],
     KDE_MK, style="cmake", dir="krita-6.0.4.1",
+    # ohne Farbmanagement-API wird der Protokoll-Header nicht erzeugt, die Datei bindet ihn aber unbedingt ein
+    pre="sed -i '/qwayland-color-management-v1.h/d' plugins/platforms/wayland/KritaPlatformPluginWayland.cpp",
     flags=KDE_FLAGS + " -DBUILD_WITH_QT6=ON -DALLOW_UNSTABLE=QT6 -DBUILD_TESTING=OFF -DENABLE_UPDATERS=OFF "
           "-DFOUNDATION_BUILD=OFF -DKRITA_QT_HAS_ENTER_LEAVE_PATCH=OFF "
           "-DKRITA_QT_HAS_UNBALANCED_KEY_PRESS_RELEASE_PATCH=OFF -DKRITA_QT_HAS_UPDATE_COMPRESSION_PATCH=OFF "
@@ -1851,8 +1859,8 @@ pkg("blender", "5.2.3", "https://download.blender.org/source/blender-5.2.3.tar.x
      "freetype", "harfbuzz", "fribidi", "libpng", "libjpeg-turbo", "zlib", "zstd", "fftw", "ffmpeg", "libsndfile",
      "openjpeg", "libwebp", "gmp", "pulseaudio", "pipewire", "libx11", "libxi", "libxfixes", "libxrender",
      "libxkbcommon", "wayland", "mesa", "hicolor-icon-theme", "shared-mime-info"],
-    ["cmake", "ninja", "eigen", "wayland-protocols", "pkgconf"], style="cmake", dir="blender-5.2.3",
-    flags="-DWITH_INSTALL_PORTABLE=OFF -DWITH_LIBS_PRECOMPILED=OFF -DWITH_BUILDINFO=OFF -DPYTHON_VERSION=3.13 "
+    ["cmake", "ninja", "eigen5", "wayland-protocols", "pkgconf"], style="cmake", dir="blender-5.2.3",
+    flags="-DEigen3_ROOT=/usr/lib/eigen5 -DWITH_INSTALL_PORTABLE=OFF -DWITH_LIBS_PRECOMPILED=OFF -DWITH_BUILDINFO=OFF -DPYTHON_VERSION=3.13 "
           "-DWITH_PYTHON_INSTALL=OFF -DWITH_PYTHON_INSTALL_NUMPY=OFF -DWITH_PYTHON_INSTALL_ZSTANDARD=OFF "
           "-DWITH_PYTHON_INSTALL_REQUESTS=OFF -DWITH_LIBMV=OFF -DWITH_CYCLES_OSL=OFF -DWITH_CYCLES_EMBREE=OFF "
           "-DWITH_CYCLES_PATH_GUIDING=OFF -DWITH_CYCLES_DEVICE_CUDA=OFF -DWITH_CYCLES_DEVICE_OPTIX=OFF "
