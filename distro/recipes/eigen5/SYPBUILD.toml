@@ -11,7 +11,7 @@ makedepends = ["cmake", "ninja"]
 
 [[source]]
 url = "https://gitlab.com/libeigen/eigen/-/archive/5.0.1/eigen-5.0.1.tar.bz2"
-sha256 = "TODO"
+sha256 = "e4de6b08f33fd8b8985d2f204381408c660bffa6170ac65b68ae1bd3cd575c0a"
 
 [build]
 dir = "eigen-5.0.1"
