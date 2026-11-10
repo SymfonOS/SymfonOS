@@ -5,6 +5,7 @@ import os
 import time
 import shlex
 import sys
+from pathlib import Path
 
 from PySide6.QtCore import QProcess, QSize, Qt
 from PySide6.QtGui import QColor, QIcon
@@ -88,7 +89,7 @@ class Details(QFrame):
             self.desc.setText("Wähle links eine Anwendung aus.")
             self.icon.clear()
             return
-        self.icon.setPixmap(app_icon(item.name).pixmap(64, 64))
+        self.icon.setPixmap(app_icon(item.name, item.icon).pixmap(64, 64))
         self.title.setText(item.name)
         state = (f"installiert {item.installed}" + (f" · Update auf {item.version}" if item.update else "")
                  if item.installed else f"Version {item.version}")
@@ -103,8 +104,10 @@ class Details(QFrame):
             self.meta.setText(self.meta.text() + " · ⚠ Fremdpaket, Skripte werden nicht automatisch ausgeführt")
 
 
-def app_icon(name: str) -> QIcon:
-    for n in (name, f"org.kde.{name}", f"org.gnome.{name}", "application-x-executable"):
+def app_icon(name: str, icon: str = "") -> QIcon:
+    if icon.startswith("/") and Path(icon).is_file():
+        return QIcon(icon)
+    for n in ([icon] if icon else []) + [name, f"org.kde.{name}", f"org.gnome.{name}", "application-x-executable"]:
         ic = QIcon.fromTheme(n)
         if not ic.isNull():
             return ic
@@ -169,7 +172,7 @@ class Store(QMainWindow):
             if not all(t in hay for t in q):
                 continue
             badge = "  ⬆" if it.update else ("  ✓" if it.installed else "")
-            li = QListWidgetItem(app_icon(it.name), f"{it.name}{badge}\n{it.summary}")
+            li = QListWidgetItem(app_icon(it.name, it.icon), f"{it.name}{badge}\n{it.summary}")
             li.setData(Qt.UserRole, it)
             self.list.addItem(li)
 

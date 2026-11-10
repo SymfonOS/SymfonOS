@@ -24,7 +24,7 @@ def system(tmp_path, monkeypatch):
             # ohne Kategorien gebaut (älteres syp), aber mit Programmstarter
             make_pkg(tmp_path, "okular", "25.08.0-1", key=key, license="GPL-2.0-or-later",
                      files={"usr/share/applications/org.kde.okular.desktop":
-                            "[Desktop Entry]\nType=Application\nName=Okular\nCategories=Qt;KDE;Graphics;Office;Viewer;\n",
+                            "[Desktop Entry]\nType=Application\nName=Okular\nIcon=okular\nCategories=Qt;KDE;Graphics;Office;Viewer;\n",
                             "usr/share/applications/okular_part.desktop":
                             "[Desktop Entry]\nType=Application\nNoDisplay=true\nCategories=System;\n"}))
     root = setup_root(tmp_path, repo, pub)
@@ -46,6 +46,7 @@ def test_store_backend(system):
     items = {i.name: i for i in be.items()}
     assert set(items) == {"krita", "ardour", "closed", "okular"}  # libfoo ohne Kategorie = kein App-Eintrag
     assert items["okular"].categories == ["Graphics", "Office", "Viewer"]   # aus der .desktop-Datei
+    assert items["okular"].icon == "okular" and items["krita"].icon == ""
     assert items["krita"].installed == "5.2.9-1" and items["krita"].update
     assert items["krita"].section() == "Grafik & Illustration"
     assert items["ardour"].section() == "Audio & Musik"
