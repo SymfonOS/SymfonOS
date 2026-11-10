@@ -11,7 +11,7 @@ makedepends = ["extra-cmake-modules", "cmake", "ninja", "pkgconf", "gettext"]
 
 [[source]]
 url = "https://download.kde.org/stable/glaxnimate/0.6.0/glaxnimate-0.6.0.tar.xz"
-sha256 = "TODO"
+sha256 = "4fe5e4d48124d499aab318c932884e3e98da2fd279399c3ba3c6a4d1e07de94a"
 
 [build]
 style = "cmake"
