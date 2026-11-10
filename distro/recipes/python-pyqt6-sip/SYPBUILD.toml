@@ -11,7 +11,7 @@ makedepends = ["python-setuptools"]
 
 [[source]]
 url = "https://files.pythonhosted.org/packages/source/p/pyqt6_sip/pyqt6_sip-13.13.0.tar.gz"
-sha256 = "TODO"
+sha256 = "2cd55f575cde208c398d6cfdecc5a13394ed2afb54226210c50e3a6df7c3a997"
 
 [build]
 dir = "pyqt6_sip-13.13.0"

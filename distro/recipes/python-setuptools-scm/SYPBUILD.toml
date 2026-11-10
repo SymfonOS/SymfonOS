@@ -11,7 +11,7 @@ depends = ["python", "python-packaging", "python-setuptools"]
 
 [[source]]
 url = "https://files.pythonhosted.org/packages/source/s/setuptools_scm/setuptools_scm-8.3.1.tar.gz"
-sha256 = "TODO"
+sha256 = "3d555e92b75dacd037d32bafdf94f97af51ea29ae8c7b234cf94b7a5bd242a63"
 
 [build]
 dir = "setuptools_scm-8.3.1"
