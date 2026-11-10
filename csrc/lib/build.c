@@ -477,6 +477,63 @@ static char *default_srccache(const build_opts *o) {
     return xasprintf("%s/.cache/syp/sources", h && *h ? h : "/tmp");
 }
 
+/* Kategorien für das Software-Center: ohne Angabe im Rezept aus den sichtbaren .desktop-Dateien des Pakets
+ * (usr/share/applications, Type=Application, nicht NoDisplay/Hidden). Allgemeine Toolkit-Namen zählen nicht. */
+static void desktop_categories(const char *dest, jval *info) {
+    jval *have = jgeta(info, "categories");
+    if (have && have->n) return;
+    char *dir = path_join(dest, "usr/share/applications");
+    DIR *d = opendir(dir);
+    if (!d) {
+        free(dir);
+        return;
+    }
+    jval *cats = jarr();
+    struct dirent *e;
+    while ((e = readdir(d))) {
+        size_t l = strlen(e->d_name);
+        if (l < 9 || strcmp(e->d_name + l - 8, ".desktop")) continue;
+        char *f = path_join(dir, e->d_name), *buf = NULL;
+        size_t len = 0;
+        if (read_file(f, &buf, &len) || !buf) {
+            free(f);
+            continue;
+        }
+        free(f);
+        int in_entry = 0, app = 0, hidden = 0;
+        char *found = NULL;
+        for (char *line = strtok(buf, "\n"); line; line = strtok(NULL, "\n")) {
+            if (line[0] == '[') {
+                in_entry = !strncmp(line, "[Desktop Entry]", 15);
+                continue;
+            }
+            if (!in_entry) continue;
+            if (!strncmp(line, "Type=", 5)) app = !strncmp(line + 5, "Application", 11);
+            else if (!strncmp(line, "NoDisplay=true", 14) || !strncmp(line, "Hidden=true", 11)) hidden = 1;
+            else if (!strncmp(line, "Categories=", 11)) found = line + 11;
+        }
+        if (app && !hidden && found) {
+            for (char *c = strtok(found, ";\r"); c; c = strtok(NULL, ";\r")) {
+                if (!*c || !strcmp(c, "Qt") || !strcmp(c, "KDE") || !strcmp(c, "GTK") || !strcmp(c, "GNOME") ||
+                    !strncmp(c, "X-", 2))
+                    continue;
+                int dup = 0;
+                for (size_t i = 0; i < cats->n && !dup; i++) dup = !strcmp(cats->items[i]->s, c);
+                if (!dup) jpush(cats, jstr(c));
+            }
+        }
+        free(buf);
+    }
+    closedir(d);
+    free(dir);
+    if (cats->n) {
+        printf("    Kategorien aus .desktop: %zu\n", cats->n);
+        jset(info, "categories", cats);
+    } else {
+        json_free(cats);
+    }
+}
+
 char *build_recipe(const char *recipe, const char *outdir, const seckey *signer, const build_opts *o) {
     char *rpath = realpath(recipe, NULL);
     if (!rpath) {
@@ -704,6 +761,7 @@ char *build_recipe(const char *recipe, const char *outdir, const seckey *signer,
             jset(hj, "mode", jstr(mode));
             if (jgets(opts, "hardening_reason", NULL)) jset(hj, "reason", jstr(jgets(opts, "hardening_reason", "")));
             jset(origin, "hardening", hj);
+            desktop_categories(dest, info);
             out = syp_build(dest, info, outdir, signer);
         }
         harden_free(&hr);

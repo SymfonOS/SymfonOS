@@ -20,10 +20,16 @@ def system(tmp_path, monkeypatch):
                      categories=["Graphics", "RasterGraphics"], summary="Malen"),
             make_pkg(tmp_path, "ardour", "8.12-1", key=key, license="GPL-2.0-or-later", categories=["Audio"]),
             make_pkg(tmp_path, "libfoo", "1-1", key=key, license="MIT"),
-            make_pkg(tmp_path, "closed", "1-1", key=key, license="LicenseRef-Proprietary", categories=["Utility"]))
+            make_pkg(tmp_path, "closed", "1-1", key=key, license="LicenseRef-Proprietary", categories=["Utility"]),
+            # ohne Kategorien gebaut (älteres syp), aber mit Programmstarter
+            make_pkg(tmp_path, "okular", "25.08.0-1", key=key, license="GPL-2.0-or-later",
+                     files={"usr/share/applications/org.kde.okular.desktop":
+                            "[Desktop Entry]\nType=Application\nName=Okular\nCategories=Qt;KDE;Graphics;Office;Viewer;\n",
+                            "usr/share/applications/okular_part.desktop":
+                            "[Desktop Entry]\nType=Application\nNoDisplay=true\nCategories=System;\n"}))
     root = setup_root(tmp_path, repo, pub)
     syp("-r", root, "sync")
-    syp("-r", root, "-y", "install", "krita")
+    syp("-r", root, "-y", "install", "krita", "okular")
     publish(repo, key, make_pkg(tmp_path, "krita", "5.3.0-1", key=key, license="GPL-3.0-or-later",
                                 categories=["Graphics"], summary="Malen"))
     syp("-r", root, "sync")
@@ -38,13 +44,14 @@ def test_store_backend(system):
     importlib.reload(b)
     be = b.Backend(str(system))
     items = {i.name: i for i in be.items()}
-    assert set(items) == {"krita", "ardour", "closed"}          # libfoo ohne Kategorie = kein App-Eintrag
+    assert set(items) == {"krita", "ardour", "closed", "okular"}  # libfoo ohne Kategorie = kein App-Eintrag
+    assert items["okular"].categories == ["Graphics", "Office", "Viewer"]   # aus der .desktop-Datei
     assert items["krita"].installed == "5.2.9-1" and items["krita"].update
     assert items["krita"].section() == "Grafik & Illustration"
     assert items["ardour"].section() == "Audio & Musik"
     ups, err = be.updates()
     assert ups == [("krita", "5.2.9-1", "5.3.0-1")] and err is None
-    assert be.history()[0]["cmd"].endswith("install krita")
+    assert be.history()[0]["cmd"].endswith("install krita okular")
     assert be.command("install", "x")[:2] == ["pkexec", SYP]
 
 
