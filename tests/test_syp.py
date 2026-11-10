@@ -257,6 +257,27 @@ post_install = "echo installiert"
     assert "makedepends" not in info and info["scripts"]["post_install"] == "echo installiert"
 
 
+def test_build_takes_categories_from_desktop_files(tmp_path):
+    (tmp_path / "SYPBUILD.toml").write_text('''
+[package]
+name = "malen"
+version = "1.0-1"
+arch = "any"
+license = "MIT"
+[build]
+package = """
+a="$DESTDIR/usr/share/applications"; mkdir -p "$a"
+printf '[Desktop Entry]\\nType=Application\\nName=Malen\\nCategories=Qt;KDE;Graphics;RasterGraphics;\\n' > "$a/malen.desktop"
+printf '[Desktop Entry]\\nType=Application\\nNoDisplay=true\\nCategories=System;\\n' > "$a/hilfe.desktop"
+printf '[Desktop Entry]\\nType=Application\\nCategories=Graphics;Photography;X-KDE-Foo;\\n' > "$a/foto.desktop"
+"""
+''')
+    syp("build", tmp_path / "SYPBUILD.toml", "-o", tmp_path / "o")
+    with tarfile.open(tmp_path / "o/malen-1.0-1-any.syp") as tf:
+        info = json.loads(tf.extractfile(".SYPINFO.json").read())
+    assert sorted(info["categories"]) == ["Graphics", "Photography", "RasterGraphics"]
+
+
 def test_build_rejects_package_containing_build_dir(tmp_path):
     # Makefile mit $(DESTDIR)$(PREFIX) und PREFIX="$DESTDIR/usr": das Paket enthielte den Bauordner statt /usr
     (tmp_path / "SYPBUILD.toml").write_text('''
