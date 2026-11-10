@@ -1890,10 +1890,17 @@ pkg("blender", "5.2.3", "https://download.blender.org/source/blender-5.2.3.tar.x
           "-DWITH_MESHOPTIMIZER=OFF -DWITH_VULKAN_BACKEND=OFF -DWITH_JACK=OFF -DWITH_OPENAL=OFF "
           "-DWITH_GHOST_CSD=OFF -DWITH_INPUT_NDOF=OFF -DWITH_HARFBUZZ=ON -DWITH_FRIBIDI=ON "
           "-DWITH_LINKER_LLD=OFF -DWITH_LINKER_MOLD=OFF -DWITH_DOC_MANPAGE=OFF -DWITH_GTESTS=OFF -Wno-dev")
+pkg("potrace", "1.16", "https://potrace.sourceforge.net/download/1.16/potrace-1.16.tar.gz",
+    "Bitmaps in Vektorgrafik umwandeln", "GPL-2.0-or-later", ["glibc", "zlib"], style="autotools",
+    flags="--with-libpotrace --disable-static")
+kde("glaxnimate", "0.6.0", "https://download.kde.org/stable/glaxnimate/0.6.0/",
+    [QB] + KF_GUI + [QS, "qt6-tools", "karchive", "kcompletion", "kconfigwidgets", "ffmpeg", "potrace", "libarchive",
+              "zlib", "python", "hicolor-icon-theme"],
+    "Vektoranimationen (Glaxnimate, Titel in Kdenlive)", mk=["qt6-tools"], license="GPL-3.0-or-later")
 gear("kdenlive", KF_GUI + ["karchive", "kbookmarks", "kcodecs", "kconfigwidgets", "knotifyconfig", "knewstuff",
                            "kguiaddons", "ktextwidgets", "solid", "kfilemetadata", "purpose", "mlt", "opentimelineio",
                            "imath", "ffmpeg", "qt6-svg", "qt6-multimedia", "qt6-networkauth", "qt6-5compat",
-                           "breeze-icons"], "Videoschnitt (Kdenlive)", mk=["kdoctools"],
+                           "breeze-icons", "glaxnimate"], "Videoschnitt (Kdenlive)", mk=["kdoctools"], rel=2,
      flags="-DFETCH_OTIO=OFF -DBUILD_TESTING=OFF -DRELEASE_BUILD=ON")
 gear("okular", KF_GUI + ["karchive", "kbookmarks", "kcompletion", "kconfigwidgets", "threadweaver", "kparts",
                          "kcolorscheme", "ktextwidgets", "kitemviews", "purpose", "kwallet", "plasma-activities",

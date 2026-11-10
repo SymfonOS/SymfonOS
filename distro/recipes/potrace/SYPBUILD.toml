@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "potrace"
+version = "1.16-1"
+summary = "Bitmaps in Vektorgrafik umwandeln"
+license = "GPL-2.0-or-later"
+url = "https://potrace.sourceforge.net/download/1.16/"
+depends = ["glibc", "zlib"]
+
+[[source]]
+url = "https://potrace.sourceforge.net/download/1.16/potrace-1.16.tar.gz"
+sha256 = "TODO"
+
+[build]
+style = "autotools"
+configure_flags = "--with-libpotrace --disable-static"
