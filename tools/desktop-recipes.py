@@ -1895,8 +1895,9 @@ pkg("potrace", "1.16", "https://potrace.sourceforge.net/download/1.16/potrace-1.
     flags="--with-libpotrace --disable-static")
 kde("glaxnimate", "0.6.0", "https://download.kde.org/stable/glaxnimate/0.6.0/",
     [QB] + KF_GUI + [QS, "qt6-tools", "karchive", "kcompletion", "kconfigwidgets", "ffmpeg", "potrace", "libarchive",
-              "zlib", "python", "hicolor-icon-theme"],
-    "Vektoranimationen (Glaxnimate, Titel in Kdenlive)", mk=["qt6-tools"], license="GPL-3.0-or-later")
+              "zlib", "python", "breeze-icons", "hicolor-icon-theme"],
+    "Vektoranimationen (Glaxnimate, Titel in Kdenlive)", mk=["qt6-tools"], license="GPL-3.0-or-later", rel=2,
+    flags="-DQT_MAJOR_VERSION=6 -DKF_MAJOR=6 -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF")
 gear("kdenlive", KF_GUI + ["karchive", "kbookmarks", "kcodecs", "kconfigwidgets", "knotifyconfig", "knewstuff",
                            "kguiaddons", "ktextwidgets", "solid", "kfilemetadata", "purpose", "mlt", "opentimelineio",
                            "imath", "ffmpeg", "qt6-svg", "qt6-multimedia", "qt6-networkauth", "qt6-5compat",

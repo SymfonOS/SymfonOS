@@ -2,11 +2,11 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "glaxnimate"
-version = "0.6.0-1"
+version = "0.6.0-2"
 summary = "Vektoranimationen (Glaxnimate, Titel in Kdenlive)"
 license = "GPL-3.0-or-later"
 url = "https://download.kde.org/stable/glaxnimate/0.6.0/"
-depends = ["qt6-base", "kconfig", "kcoreaddons", "ki18n", "kwidgetsaddons", "kiconthemes", "kxmlgui", "kio", "kdbusaddons", "kcrash", "knotifications", "kwindowsystem", "kservice", "kglobalaccel", "kcmutils", "kirigami", "qt6-declarative", "qt6-svg", "qt6-tools", "karchive", "kcompletion", "kconfigwidgets", "ffmpeg", "potrace", "libarchive", "zlib", "python", "hicolor-icon-theme"]
+depends = ["qt6-base", "kconfig", "kcoreaddons", "ki18n", "kwidgetsaddons", "kiconthemes", "kxmlgui", "kio", "kdbusaddons", "kcrash", "knotifications", "kwindowsystem", "kservice", "kglobalaccel", "kcmutils", "kirigami", "qt6-declarative", "qt6-svg", "qt6-tools", "karchive", "kcompletion", "kconfigwidgets", "ffmpeg", "potrace", "libarchive", "zlib", "python", "breeze-icons", "hicolor-icon-theme"]
 makedepends = ["extra-cmake-modules", "cmake", "ninja", "pkgconf", "gettext"]
 
 [[source]]
@@ -15,4 +15,4 @@ sha256 = "4fe5e4d48124d499aab318c932884e3e98da2fd279399c3ba3c6a4d1e07de94a"
 
 [build]
 style = "cmake"
-configure_flags = "-DKDE_INSTALL_LIBEXECDIR=lib -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF -Wno-dev"
+configure_flags = "-DKDE_INSTALL_LIBEXECDIR=lib -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF -Wno-dev -DQT_MAJOR_VERSION=6 -DKF_MAJOR=6 -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF"
