@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "python-sip"
+version = "6.17.2-1"
+arch = "any"
+summary = "Generator für Python-Anbindungen an C/C++ (SIP)"
+license = "BSD-2-Clause"
+url = "https://files.pythonhosted.org/packages/source/s/sip/"
+depends = ["python", "python-packaging", "python-setuptools"]
+makedepends = ["python-setuptools-scm"]
+
+[[source]]
+url = "https://files.pythonhosted.org/packages/source/s/sip/sip-6.17.2.tar.gz"
+sha256 = "TODO"
+
+[build]
+dir = "sip-6.17.2"
+style = "python"

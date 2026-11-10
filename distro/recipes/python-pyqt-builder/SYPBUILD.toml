@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "python-pyqt-builder"
+version = "1.21.0-1"
+arch = "any"
+summary = "Bau-Backend für PyQt und PyQt-Erweiterungen"
+license = "BSD-2-Clause"
+url = "https://files.pythonhosted.org/packages/source/p/pyqt_builder/"
+depends = ["python", "python-sip", "python-packaging"]
+makedepends = ["python-setuptools-scm"]
+
+[[source]]
+url = "https://files.pythonhosted.org/packages/source/p/pyqt_builder/pyqt_builder-1.21.0.tar.gz"
+sha256 = "TODO"
+
+[build]
+dir = "pyqt_builder-1.21.0"
+style = "python"

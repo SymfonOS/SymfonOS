@@ -1,0 +1,19 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "python-pyqt6"
+version = "6.9.1-1"
+summary = "Python-Anbindung an Qt 6 (PyQt6)"
+license = "GPL-3.0-only"
+url = "https://files.pythonhosted.org/packages/source/p/pyqt6/"
+depends = ["python", "python-pyqt6-sip", "qt6-base", "qt6-svg"]
+makedepends = ["python-sip", "python-pyqt-builder"]
+
+[[source]]
+url = "https://files.pythonhosted.org/packages/source/p/pyqt6/pyqt6-6.9.1.tar.gz"
+sha256 = "TODO"
+
+[build]
+dir = "pyqt6-6.9.1"
+style = "python"
+configure_flags = "--config-settings=--qmake=/usr/lib/qt6/bin/qmake --config-settings=--confirm-license= --config-settings=--jobs=$(nproc)"

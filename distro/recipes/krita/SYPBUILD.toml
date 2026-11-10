@@ -2,12 +2,12 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "krita"
-version = "6.0.4.1-1"
+version = "6.0.4.1-2"
 summary = "Malprogramm (Krita 6, Vorschau auf Qt 6)"
 license = "GPL-3.0-or-later"
 url = "https://github.com/KDE/krita/archive/v6.0.4.1/"
-depends = ["qt6-base", "qt6-declarative", "qt6-svg", "qt6-5compat", "qt6-wayland", "kconfig", "kwidgetsaddons", "kcompletion", "kcoreaddons", "kguiaddons", "ki18n", "kitemviews", "kcolorscheme", "kcrash", "boost", "eigen", "xsimd", "immer", "zug", "lager", "quazip", "libunibreak", "sdl2", "mlt", "libmypaint", "opencolorio", "fftw", "gsl", "ffmpeg", "exiv2", "lcms2", "libpng", "zlib", "libtiff", "libjpeg-turbo", "giflib", "libwebp", "libjxl", "openjpeg", "imath", "poppler", "freetype", "harfbuzz", "fontconfig", "fribidi", "libx11", "libxi", "hicolor-icon-theme"]
-makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", "gettext"]
+depends = ["qt6-base", "qt6-declarative", "qt6-svg", "qt6-5compat", "qt6-wayland", "kconfig", "kwidgetsaddons", "kcompletion", "kcoreaddons", "kguiaddons", "ki18n", "kitemviews", "kcolorscheme", "kcrash", "boost", "eigen", "xsimd", "immer", "zug", "lager", "quazip", "libunibreak", "sdl2", "mlt", "libmypaint", "opencolorio", "fftw", "gsl", "ffmpeg", "exiv2", "lcms2", "libpng", "zlib", "libtiff", "python", "python-pyqt6", "python-pyqt6-sip", "libjpeg-turbo", "giflib", "libwebp", "libjxl", "openjpeg", "imath", "poppler", "freetype", "harfbuzz", "fontconfig", "fribidi", "libx11", "libxi", "hicolor-icon-theme"]
+makedepends = ["extra-cmake-modules", "qt6-tools", "cmake", "ninja", "pkgconf", "gettext", "python-sip", "python-pyqt-builder"]
 
 [[source]]
 url = "https://github.com/KDE/krita/archive/v6.0.4.1/krita-6.0.4.1.tar.gz"
@@ -16,5 +16,5 @@ sha256 = "2bfbd1f8f79bacf5aded3f41288875c3a708caefc8aa38bde68dbedda20da33f"
 [build]
 dir = "krita-6.0.4.1"
 style = "cmake"
-configure_flags = "-DKDE_INSTALL_LIBEXECDIR=lib -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF -Wno-dev -DBUILD_WITH_QT6=ON -DALLOW_UNSTABLE=QT6 -DBUILD_TESTING=OFF -DENABLE_UPDATERS=OFF -DFOUNDATION_BUILD=OFF -DKRITA_QT_HAS_ENTER_LEAVE_PATCH=OFF -DKRITA_QT_HAS_UNBALANCED_KEY_PRESS_RELEASE_PATCH=OFF -DKRITA_QT_HAS_UPDATE_COMPRESSION_PATCH=OFF -DKRITA_USE_SURFACE_COLOR_MANAGEMENT_API=OFF -DCMAKE_DISABLE_FIND_PACKAGE_PyQt6=ON -DCMAKE_DISABLE_FIND_PACKAGE_SIP=ON"
+configure_flags = "-DKDE_INSTALL_LIBEXECDIR=lib -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF -Wno-dev -DBUILD_WITH_QT6=ON -DALLOW_UNSTABLE=QT6 -DBUILD_TESTING=OFF -DENABLE_UPDATERS=OFF -DFOUNDATION_BUILD=OFF -DKRITA_QT_HAS_ENTER_LEAVE_PATCH=OFF -DKRITA_QT_HAS_UNBALANCED_KEY_PRESS_RELEASE_PATCH=OFF -DKRITA_QT_HAS_UPDATE_COMPRESSION_PATCH=OFF -DKRITA_USE_SURFACE_COLOR_MANAGEMENT_API=OFF"
 pre_configure = "sed -i '/qwayland-color-management-v1.h/d' plugins/platforms/wayland/KritaPlatformPluginWayland.cpp"
