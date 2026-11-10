@@ -1625,16 +1625,16 @@ pkg("krita", "6.0.4.1", {"url": "https://github.com/KDE/krita/archive/v6.0.4.1/k
     [QB, QD, "qt6-svg", "qt6-5compat", "qt6-wayland", "kconfig", "kwidgetsaddons", "kcompletion", "kcoreaddons",
      "kguiaddons", "ki18n", "kitemviews", "kcolorscheme", "kcrash", "boost", "eigen", "xsimd", "immer", "zug",
      "lager", "quazip", "libunibreak", "sdl2", "mlt", "libmypaint", "opencolorio", "fftw", "gsl", "ffmpeg", "exiv2", "lcms2", "libpng", "zlib", "libtiff",
+     "python", "python-pyqt6", "python-pyqt6-sip",
      "libjpeg-turbo", "giflib", "libwebp", "libjxl", "openjpeg", "imath", "poppler", "freetype", "harfbuzz",
      "fontconfig", "fribidi", "libx11", "libxi", "hicolor-icon-theme"],
-    KDE_MK, style="cmake", dir="krita-6.0.4.1",
+    KDE_MK + ["python-sip", "python-pyqt-builder"], style="cmake", dir="krita-6.0.4.1", rel=2,
     # ohne Farbmanagement-API wird der Protokoll-Header nicht erzeugt, die Datei bindet ihn aber unbedingt ein
     pre="sed -i '/qwayland-color-management-v1.h/d' plugins/platforms/wayland/KritaPlatformPluginWayland.cpp",
     flags=KDE_FLAGS + " -DBUILD_WITH_QT6=ON -DALLOW_UNSTABLE=QT6 -DBUILD_TESTING=OFF -DENABLE_UPDATERS=OFF "
           "-DFOUNDATION_BUILD=OFF -DKRITA_QT_HAS_ENTER_LEAVE_PATCH=OFF "
           "-DKRITA_QT_HAS_UNBALANCED_KEY_PRESS_RELEASE_PATCH=OFF -DKRITA_QT_HAS_UPDATE_COMPRESSION_PATCH=OFF "
-          "-DKRITA_USE_SURFACE_COLOR_MANAGEMENT_API=OFF "
-          "-DCMAKE_DISABLE_FIND_PACKAGE_PyQt6=ON -DCMAKE_DISABLE_FIND_PACKAGE_SIP=ON")
+          "-DKRITA_USE_SURFACE_COLOR_MANAGEMENT_API=OFF")
 # Audio (Ardour 9): C++-Anbindungen in der alten ABI (glibmm 2.4, libsigc++ 2, cairomm 1.0), LV2-Plugin-Stapel,
 # FFTW, Rubber Band, Vamp, aubio und liblo. Ardour bringt sein GTK-2-Toolkit (YTK) selbst mit.
 DROBILLA = "https://download.drobilla.net/"
@@ -1851,6 +1851,26 @@ pkg("python-numpy", "2.3.4", "https://files.pythonhosted.org/packages/source/n/n
     ["python-cython", "python-meson-python", "ninja", "pkgconf"], style="python", dir="numpy-2.3.4",
     flags="--config-settings=setup-args=-Dblas=none --config-settings=setup-args=-Dlapack=none "
           "--config-settings=setup-args=-Dallow-noblas=true")
+# PyQt6 für die Python-Erweiterungen in Krita: SIP-Werkzeug, PyQt-builder (Bau-Backend), sip-Modul und PyQt6
+pkg("python-setuptools-scm", "8.3.1", "https://files.pythonhosted.org/packages/source/s/setuptools_scm/setuptools_scm-8.3.1.tar.gz",
+    "Versionsnummern aus Git für setuptools", "MIT", ["python", "python-packaging", "python-setuptools"], [],
+    style="python", arch="any", dir="setuptools_scm-8.3.1")
+pkg("python-sip", "6.17.2", "https://files.pythonhosted.org/packages/source/s/sip/sip-6.17.2.tar.gz",
+    "Generator für Python-Anbindungen an C/C++ (SIP)", "BSD-2-Clause",
+    ["python", "python-packaging", "python-setuptools"], ["python-setuptools-scm"], style="python", arch="any",
+    dir="sip-6.17.2")
+pkg("python-pyqt-builder", "1.21.0", "https://files.pythonhosted.org/packages/source/p/pyqt_builder/pyqt_builder-1.21.0.tar.gz",
+    "Bau-Backend für PyQt und PyQt-Erweiterungen", "BSD-2-Clause", ["python", "python-sip", "python-packaging"],
+    ["python-setuptools-scm"], style="python", arch="any", dir="pyqt_builder-1.21.0")
+pkg("python-pyqt6-sip", "13.13.0", "https://files.pythonhosted.org/packages/source/p/pyqt6_sip/pyqt6_sip-13.13.0.tar.gz",
+    "sip-Laufzeitmodul für PyQt6", "BSD-2-Clause", ["python"], ["python-setuptools"], style="python",
+    dir="pyqt6_sip-13.13.0")
+pkg("python-pyqt6", "6.9.1", "https://files.pythonhosted.org/packages/source/p/pyqt6/pyqt6-6.9.1.tar.gz",
+    "Python-Anbindung an Qt 6 (PyQt6)", "GPL-3.0-only",
+    ["python", "python-pyqt6-sip", QB, "qt6-svg"], ["python-sip", "python-pyqt-builder"], style="python",
+    dir="pyqt6-6.9.1",
+    flags="--config-settings=--qmake=/usr/lib/qt6/bin/qmake --config-settings=--confirm-license= "
+          "--config-settings=--jobs=$(nproc)")
 # Blender: ohne Kamera-Tracking (libmv braucht Ceres), ohne OSL/Embree/OpenVDB/USD/OpenXR und ohne GPU-Rendern
 # über CUDA/HIP; Cycles rendert auf der CPU, die Oberfläche läuft über OpenGL (X11 und Wayland)
 pkg("blender", "5.2.3", "https://download.blender.org/source/blender-5.2.3.tar.xz",

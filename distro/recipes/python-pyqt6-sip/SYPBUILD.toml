@@ -1,0 +1,18 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "python-pyqt6-sip"
+version = "13.13.0-1"
+summary = "sip-Laufzeitmodul für PyQt6"
+license = "BSD-2-Clause"
+url = "https://files.pythonhosted.org/packages/source/p/pyqt6_sip/"
+depends = ["python"]
+makedepends = ["python-setuptools"]
+
+[[source]]
+url = "https://files.pythonhosted.org/packages/source/p/pyqt6_sip/pyqt6_sip-13.13.0.tar.gz"
+sha256 = "TODO"
+
+[build]
+dir = "pyqt6_sip-13.13.0"
+style = "python"
