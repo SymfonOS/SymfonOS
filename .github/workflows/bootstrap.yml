@@ -39,8 +39,7 @@ jobs:
         run: |
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache \
             /usr/local/share/boost /usr/share/swift /usr/local/lib/node_modules /opt/microsoft /opt/az
-          sudo apt-get update -q
-          sudo apt-get install -y -q build-essential bison gawk texinfo m4 python3 xz-utils pkg-config zstd \
+          tools/apt-install.sh build-essential bison gawk texinfo m4 python3 xz-utils pkg-config zstd \
             libarchive-dev libzstd-dev libsodium-dev libsqlite3-dev libcurl4-openssl-dev attr
           df -h /
       - name: Zustand wiederherstellen
@@ -152,7 +151,7 @@ jobs:
         # Gate: ohne bestandenen Boot-Test wird nichts veröffentlicht
         if: steps.build.outputs.rc == '0'
         run: |
-          sudo apt-get install -y -q qemu-system-x86 xorriso genisoimage
+          tools/apt-install.sh qemu-system-x86 xorriso genisoimage
           sudo chmod 666 /dev/kvm 2>/dev/null || true
           LOG=out/smoke-serial.log STRICT=1 SETTLE=45 tools/smoke-test.sh out/symfonos-base-*.iso
       - name: Installationstest
@@ -206,12 +205,7 @@ jobs:
         id: desktop_test
         if: always() && steps.desktop.outcome == 'success'
         run: |
-          # Ubuntu-Spiegel fallen zeitweise aus (apt Exit 100): neu einlesen und bis zu dreimal versuchen
-          for i in 1 2 3; do
-            sudo apt-get install -y -q qemu-system-x86 xorriso genisoimage socat imagemagick && break
-            [ "$i" = 3 ] && exit 100
-            sleep 30; sudo apt-get update -q || true
-          done
+          tools/apt-install.sh qemu-system-x86 xorriso genisoimage socat imagemagick
           sudo chmod 666 /dev/kvm 2>/dev/null || true
           # permissive, ohne auditd und printk-Ratenlimit: alle SELinux-Verweigerungen landen auf der Konsole (→ avc.txt)
           # dazu der Programmstart-Test (Krita, Blender, symfonOS-Programme …) mit Bildschirmfotos
