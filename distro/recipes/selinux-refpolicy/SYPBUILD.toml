@@ -1,7 +1,7 @@
 # symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
 [package]
 name = "selinux-refpolicy"
-version = "2.20250213-3"
+version = "2.20250213-4"
 summary = "SELinux Reference Policy (MCS, systemd)"
 license = "GPL-2.0-only"
 url = "https://github.com/SELinuxProject/refpolicy/releases/download/RELEASE_2_20250213/"
@@ -18,7 +18,12 @@ dir = "refpolicy"
 build = '''
 cd "$S"
 sed -i -e 's/^#\?TYPE = .*/TYPE = mcs/' -e 's/^#\?NAME = .*/NAME = refpolicy/' -e 's/^#\?MONOLITHIC = .*/MONOLITHIC = n/' \
-  -e 's/^#\?UBAC = .*/UBAC = y/' -e 's/^#\?SYSTEMD = .*/SYSTEMD = y/' -e 's/^#\?DIRECT_INITRC = .*/DIRECT_INITRC = n/' build.conf
+  -e 's/^#\?UBAC = .*/UBAC = y/' -e 's/^#\?SYSTEMD = .*/SYSTEMD = y/' -e 's/^#\?DIRECT_INITRC = .*/DIRECT_INITRC = n/' \
+  -e 's/^#\?UNK_PERMS = .*/UNK_PERMS = allow/' build.conf
+# UNK_PERMS = allow (wie Fedora): Kernel-Berechtigungen, die diese Richtlinie noch nicht kennt
+# (z. B. system:firmware_load seit Linux 6.x), sind sonst immer verweigert, auch für kernel_t –
+# dann lädt der Kernel keine Firmware (GPU, WLAN, regulatory.db)
+grep -qx 'UNK_PERMS = allow' build.conf
 make conf
 T="SEMOD_PKG=$(command -v semodule_package) SEMOD_LNK=$(command -v semodule_link) SEMOD_EXP=$(command -v semodule_expand) CHECKMODULE=$(command -v checkmodule) CHECKPOLICY=$(command -v checkpolicy)"
 for t in semodule_package semodule_link semodule_expand checkmodule checkpolicy; do command -v "$t" >/dev/null || { echo "SELinux-Werkzeug fehlt: $t" >&2; exit 1; }; done
