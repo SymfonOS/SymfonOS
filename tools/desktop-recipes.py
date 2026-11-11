@@ -1409,7 +1409,10 @@ pl("kwin", KF_GUI + ["kdecoration", "kwayland", "libplasma", "kscreenlocker", "b
                      "xcb-util-cursor", "libxi", "libx11", "systemd", "libcap", "qt6-tools"],
    "Fenstermanager und Wayland-Compositor (KWin)", mk=["plasma-wayland-protocols", "wayland-protocols", "kdoctools"],
    # KWIN_BUILD_X11 schaltet auch Xwayland ab; plasma-kwin_wayland.service startet kwin_wayland_wrapper --xwayland
-   rel=3)
+   # CAP_SYS_NICE: KWin setzt seinen Render-Thread selbst auf Echtzeit-Priorität (flüssigere Bildausgabe unter Last)
+   scripts={k: "setcap cap_sys_nice+ep /usr/bin/kwin_wayland || echo 'kwin: setcap fehlgeschlagen' >&2"
+            for k in ("post_install", "post_upgrade")},
+   rel=4)
 pl("plasma5support", ["kconfig", "kcoreaddons", "ki18n", "kio", "kguiaddons", "kservice", "knotifications", "solid",
                       "kidletime", "libksysguard", "plasma-activities", "kholidays", "libplasma"],
    "Kompatibilität für ältere Plasma-Datenquellen")
