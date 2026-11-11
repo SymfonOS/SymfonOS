@@ -777,13 +777,17 @@ pkg("opentimelineio", "0.17.0",
     flags="-DOTIO_FIND_IMATH=ON -DOTIO_AUTOMATIC_SUBMODULES=OFF -DOTIO_PYTHON_INSTALL=OFF "
           "-DOTIO_INSTALL_PYTHON_MODULES=OFF -DOTIO_INSTALL_COMMANDLINE_TOOLS=OFF -DOTIO_SHARED_LIBS=ON "
           "-DOTIO_DEPENDENCIES_INSTALL=OFF -DBUILD_TESTING=OFF")
-pkg("mlt", "7.32.0", {"url": "https://github.com/mltframework/mlt/archive/v7.32.0/mlt-7.32.0.tar.gz"},
+# MLT bindet Glaxnimate als Git-Submodul ein (für Lottie-Animationen in Kdenlive); das Release-Archiv enthält es nicht
+MLT_GLAX = "65f7406393e0b3868654fd71b3a335a86ffd2c47"
+pkg("mlt", "7.32.0", [{"url": "https://github.com/mltframework/mlt/archive/v7.32.0/mlt-7.32.0.tar.gz"},
+                      f"https://github.com/KDE/glaxnimate/archive/{MLT_GLAX}/glaxnimate-{MLT_GLAX}.tar.gz"],
     "Multimedia-Framework für Videoschnitt (MLT, melt)", "LGPL-2.1-or-later AND GPL-3.0-or-later",
     ["ffmpeg", "libxml2", "libsamplerate", "libvorbis", "frei0r-plugins", "fontconfig", "qt6-base", "qt6-svg",
-     "qt6-5compat", "libx11", "sdl2"],
-    ["cmake", "ninja", "pkgconf"], style="cmake", dir="mlt-7.32.0", rel=2,
+     "qt6-5compat", "libx11", "sdl2", "libarchive", "zlib"],
+    ["cmake", "ninja", "pkgconf"], style="cmake", dir="mlt-7.32.0", rel=3,
+    pre=f'rm -rf src/modules/glaxnimate/glaxnimate\nln -s "$SRCDIR/glaxnimate-{MLT_GLAX}" src/modules/glaxnimate/glaxnimate',
     flags="-DCMAKE_INSTALL_LIBDIR=lib -DGPL=ON -DGPL3=ON -DCLANG_FORMAT=OFF -DBUILD_TESTING=OFF "
-          "-DMOD_QT=OFF -DMOD_QT6=ON -DMOD_GLAXNIMATE_QT6=OFF -DMOD_DECKLINK=OFF -DMOD_GDK=OFF -DMOD_JACKRACK=OFF "
+          "-DMOD_QT=OFF -DMOD_QT6=ON -DMOD_GLAXNIMATE_QT6=ON -DMOD_DECKLINK=OFF -DMOD_GDK=OFF -DMOD_JACKRACK=OFF "
           "-DMOD_MOVIT=OFF -DMOD_OPENCV=OFF -DMOD_RTAUDIO=OFF -DMOD_RUBBERBAND=OFF -DMOD_SDL1=OFF -DMOD_SDL2=ON "
           "-DMOD_SOX=OFF -DMOD_SPATIALAUDIO=OFF -DMOD_VIDSTAB=OFF -DMOD_XINE=OFF -DMOD_NDI=OFF "
           "-DMOD_FREI0R=ON -DMOD_RESAMPLE=ON -DMOD_VORBIS=ON -DMOD_PLUS=ON -DMOD_PLUSGPL=ON -DMOD_XML=ON "
