@@ -206,7 +206,12 @@ jobs:
         id: desktop_test
         if: always() && steps.desktop.outcome == 'success'
         run: |
-          sudo apt-get install -y -q qemu-system-x86 xorriso genisoimage socat imagemagick
+          # Ubuntu-Spiegel fallen zeitweise aus (apt Exit 100): neu einlesen und bis zu dreimal versuchen
+          for i in 1 2 3; do
+            sudo apt-get install -y -q qemu-system-x86 xorriso genisoimage socat imagemagick && break
+            [ "$i" = 3 ] && exit 100
+            sleep 30; sudo apt-get update -q || true
+          done
           sudo chmod 666 /dev/kvm 2>/dev/null || true
           # permissive, ohne auditd und printk-Ratenlimit: alle SELinux-Verweigerungen landen auf der Konsole (→ avc.txt)
           # dazu der Programmstart-Test (Krita, Blender, symfonOS-Programme …) mit Bildschirmfotos

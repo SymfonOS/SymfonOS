@@ -1,4 +1,4 @@
-policy_module(symfonos, 1.6)
+policy_module(symfonos, 1.7)
 
 # Ergänzungen zur Reference Policy 2025.02 für symfonOS (systemd 257, Plasma 6, SDDM, CUPS, Live-Medium).
 # Entstanden aus den Verweigerungen des Desktop-Tests (tools/avc-summary.py, Branch ci-diag: avc.txt).
@@ -103,6 +103,9 @@ allow devicekit_disk_t mount_runtime_t:dir watch;
 
 # systemd-localed antwortet dem Anmeldebildschirm und der Sitzung (Tastaturbelegung)
 allow systemd_locale_t { xdm_t unconfined_t }:dbus send_msg;
+# … und liest /etc/selinux/config: ohne SELINUXTYPE sucht libselinux die Dateikontexte unter »targeted«, findet
+# sie nicht (ENOENT) und localed bricht im Modus enforcing ab (»Failed to initialize SELinux labeling handle«)
+seutil_read_config(systemd_locale_t)
 
 # Anmeldebildschirm (KWin für SDDM) startet den Barrierefreiheits-Bus (org.freedesktop.a11y.Manager)
 allow xdm_t unconfined_t:dbus acquire_svc;
