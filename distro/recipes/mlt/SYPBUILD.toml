@@ -15,7 +15,7 @@ sha256 = "ae3ba3b68e1d761633913d9d9d3775b1130a7c2640d17dc4de3bf619e5a0c3d9"
 
 [[source]]
 url = "https://github.com/KDE/glaxnimate/archive/65f7406393e0b3868654fd71b3a335a86ffd2c47/glaxnimate-65f7406393e0b3868654fd71b3a335a86ffd2c47.tar.gz"
-sha256 = "TODO"
+sha256 = "719781be0c29b2bcce0bfad43f43239ad6341cdb65ec9b5b68305d4ae05b69a7"
 
 [build]
 dir = "mlt-7.32.0"
