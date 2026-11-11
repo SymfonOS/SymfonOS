@@ -908,7 +908,13 @@ pkg("strongswan", "6.0.2", "https://download.strongswan.org/strongswan-6.0.2.tar
     flags="--sysconfdir=/etc --enable-stroke --enable-openssl --enable-systemd --enable-swanctl --enable-curl "
           "--enable-eap-mschapv2 --enable-eap-identity --enable-xauth-generic --disable-static "
           "--with-systemdsystemunitdir=/usr/lib/systemd/system",
-    backup=["etc/ipsec.conf", "etc/ipsec.secrets", "etc/strongswan.conf"])
+    # NetworkManager startet für IPsec-Verbindungen eigene Daemons (charon-nm, ipsec über nm-l2tp); die beiden
+    # Systemdienste liefen sonst nach »systemctl preset-all« gleichzeitig und stritten um Port 500 und den vici-Socket
+    post="""install -Dm644 /dev/stdin "$DESTDIR/usr/lib/systemd/system-preset/80-strongswan.preset" <<'PRE'
+disable strongswan.service
+disable strongswan-starter.service
+PRE""",
+    backup=["etc/ipsec.conf", "etc/ipsec.secrets", "etc/strongswan.conf"], rel=2)
 pkg("networkmanager-l2tp", "1.20.20",
     "https://github.com/nm-l2tp/NetworkManager-l2tp/releases/download/1.20.20/NetworkManager-l2tp-1.20.20.tar.xz",
     "L2TP- und L2TP/IPsec-Verbindungen in NetworkManager", "GPL-2.0-or-later",
