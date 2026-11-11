@@ -647,6 +647,19 @@ ln -s /usr/share/alsa/alsa.conf.d/99-pipewire-default.conf "$DESTDIR/etc/alsa/co
 printf 'enable pipewire.socket\nenable pipewire-pulse.socket\nenable wireplumber.service\n' \
   > "$DESTDIR/usr/lib/systemd/user-preset/50-pipewire.preset"''',
     provides=["pulseaudio-server", "jack", "so:libpipewire-0.3.so.0", "so:libjack.so.0"], rel=2)
+# Echtzeit-Priorität für PipeWire, KWin und Audio-Programme (Ardour) über D-Bus, ohne CAP_SYS_NICE
+pkg("rtkit", "0.13", "https://github.com/heftig/rtkit/archive/v0.13/rtkit-0.13.tar.gz",
+    "RealtimeKit (Echtzeit-Priorität für Audio)", "GPL-3.0-or-later", ["dbus", "libcap", "systemd", "polkit"],
+    ["meson"], style="meson", dir="rtkit-0.13", flags="-Dinstalled_tests=false -Dlibsystemd=enabled",
+    post='''install -Dm644 /dev/stdin "$DESTDIR/usr/lib/sysusers.d/rtkit.conf" <<'SYS'
+u rtkit - "RealtimeKit" /proc
+SYS''')
+# WLAN-Regulierungsdatenbank (cfg80211 lädt regulatory.db aus der Firmware)
+pkg("wireless-regdb", "2025.07.10",
+    "https://www.kernel.org/pub/software/network/wireless-regdb/wireless-regdb-2025.07.10.tar.xz",
+    "WLAN-Regulierungsdatenbank (erlaubte Kanäle und Sendeleistung)", "ISC", [], arch="any", build=":",
+    package='cd "$SRCDIR/wireless-regdb-2025.07.10"\n'
+            'install -Dm644 -t "$DESTDIR/usr/lib/firmware" regulatory.db regulatory.db.p7s')
 pkg("wireplumber", "0.5.10", {"url": "https://gitlab.freedesktop.org/pipewire/wireplumber/-/archive/0.5.10/wireplumber-0.5.10.tar.bz2"},
     "Sitzungsverwaltung für PipeWire", "MIT", ["pipewire", "glib2", "systemd", "lua"], ["meson"], style="meson",
     flags="-Dsystem-lua=true -Dintrospection=disabled -Ddoc=disabled -Dtests=false")
@@ -2001,11 +2014,11 @@ DESKTOP = ["symfonos-base", "symfonos-desktop-config", "plasma-desktop", "plasma
            "polkit-kde-agent-1", "plasma-systemmonitor", "ksystemstats", "kdeplasma-addons", "ocean-sound-theme",
            "kactivitymanagerd", "kglobalacceld", "kimageformats", "qt6-imageformats", "qt6-translations",
            "qt6-wayland", "mesa", "vulkan-loader", "libva", "pipewire", "wireplumber", "alsa-utils", "ffmpeg",
-           "xdg-user-dirs", "networkmanager", "networkmanager-openvpn", "networkmanager-l2tp", "openconnect", "plasma-nm", "bluez", "bluedevil", "udisks2", "cups", "cups-filters", "nss-mdns", "print-manager", "flatpak", "discover", "flatpak-kcm", "konsole", "dolphin", "kate", "ark", "gwenview", "okular", "dragon", "haruna", "elisa", "kdenlive", "krita", "blender", "ardour", "spectacle", "symfonos-tools", "kcalc", "kcharselect",
+           "xdg-user-dirs", "networkmanager", "networkmanager-openvpn", "networkmanager-l2tp", "openconnect", "plasma-nm", "bluez", "bluedevil", "rtkit", "wireless-regdb", "udisks2", "cups", "cups-filters", "nss-mdns", "print-manager", "flatpak", "discover", "flatpak-kcm", "konsole", "dolphin", "kate", "ark", "gwenview", "okular", "dragon", "haruna", "elisa", "kdenlive", "krita", "blender", "ardour", "spectacle", "symfonos-tools", "kcalc", "kcharselect",
            "inter-font", "jetbrains-mono-font", "dejavu-fonts", "noto-color-emoji", "hunspell", "upower",
            "accountsservice", "polkit"]
 pkg("symfonos-desktop", "2025.10", [], "symfonOS-Desktop (KDE Plasma 6, Wayland, PipeWire)", "GPL-3.0-or-later",
-    DESKTOP, arch="any", style="meta", rel=22)
+    DESKTOP, arch="any", style="meta", rel=23)
 
 # ---------------------------------------------------------------------------------------------------
 # Rezepte schreiben

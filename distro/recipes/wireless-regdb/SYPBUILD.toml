@@ -1,0 +1,20 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "wireless-regdb"
+version = "2025.07.10-1"
+arch = "any"
+summary = "WLAN-Regulierungsdatenbank (erlaubte Kanäle und Sendeleistung)"
+license = "ISC"
+url = "https://www.kernel.org/pub/software/network/wireless-regdb/"
+
+[[source]]
+url = "https://www.kernel.org/pub/software/network/wireless-regdb/wireless-regdb-2025.07.10.tar.xz"
+sha256 = "TODO"
+
+[build]
+build = ":"
+package = '''
+cd "$SRCDIR/wireless-regdb-2025.07.10"
+install -Dm644 -t "$DESTDIR/usr/lib/firmware" regulatory.db regulatory.db.p7s
+'''

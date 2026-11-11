@@ -1,0 +1,24 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
+[package]
+name = "rtkit"
+version = "0.13-1"
+summary = "RealtimeKit (Echtzeit-Priorität für Audio)"
+license = "GPL-3.0-or-later"
+url = "https://github.com/heftig/rtkit/archive/v0.13/"
+depends = ["dbus", "libcap", "systemd", "polkit"]
+makedepends = ["meson"]
+
+[[source]]
+url = "https://github.com/heftig/rtkit/archive/v0.13/rtkit-0.13.tar.gz"
+sha256 = "TODO"
+
+[build]
+dir = "rtkit-0.13"
+style = "meson"
+configure_flags = "-Dinstalled_tests=false -Dlibsystemd=enabled"
+post_install = '''
+install -Dm644 /dev/stdin "$DESTDIR/usr/lib/sysusers.d/rtkit.conf" <<'SYS'
+u rtkit - "RealtimeKit" /proc
+SYS
+'''
