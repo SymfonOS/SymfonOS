@@ -16,8 +16,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: syp bauen
         run: |
-          sudo apt-get update -q
-          sudo apt-get install -y -q build-essential pkg-config libarchive-dev libzstd-dev libsodium-dev libsqlite3-dev libcurl4-openssl-dev
+          tools/apt-install.sh build-essential pkg-config libarchive-dev libzstd-dev libsodium-dev libsqlite3-dev libcurl4-openssl-dev
           make -C csrc -j4
       - name: Fehlende Prüfsummen ermitteln (Quellen laden, sha256 eintragen)
         run: |

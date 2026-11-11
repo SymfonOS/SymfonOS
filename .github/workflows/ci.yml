@@ -22,8 +22,7 @@ jobs:
           python-version: "3.13"
       - name: Abhängigkeiten
         run: |
-          sudo apt-get update -q
-          sudo apt-get install -y -q libegl1 libgl1 libxkbcommon0 libfontconfig1 libdbus-1-3 nftables shellcheck dpkg \
+          tools/apt-install.sh libegl1 libgl1 libxkbcommon0 libfontconfig1 libdbus-1-3 nftables shellcheck dpkg \
             build-essential pkg-config libarchive-dev libzstd-dev libsodium-dev libsqlite3-dev libcurl4-openssl-dev
           pip install -e ".[gui,test]" ruff
       - name: Lint
@@ -93,7 +92,7 @@ jobs:
         run: |
           mkdir -p keys
           if [ -n "$SYP_SIGNING_KEY" ]; then
-            sudo apt-get install -y -q build-essential pkg-config libarchive-dev libzstd-dev libsodium-dev libsqlite3-dev libcurl4-openssl-dev >/dev/null
+            tools/apt-install.sh build-essential pkg-config libarchive-dev libzstd-dev libsodium-dev libsqlite3-dev libcurl4-openssl-dev >/dev/null
             make -C csrc -j4 >/dev/null
             (umask 077; printf '%s\n' "$SYP_SIGNING_KEY" > keys/release.key)
             csrc/bin/syp pubkey keys/release.key keys/release.pub
@@ -115,7 +114,7 @@ jobs:
       - name: Boot-Test (QEMU)
         continue-on-error: true
         run: |
-          sudo apt-get update -q && sudo apt-get install -y -q qemu-system-x86 xorriso genisoimage
+          tools/apt-install.sh qemu-system-x86 xorriso genisoimage
           sudo chmod 666 /dev/kvm 2>/dev/null || true
           LOG=out/smoke-serial.log ./tools/smoke-test.sh out/symfonos-*.iso
       - name: Als Release »nightly« veröffentlichen (Teile < 2 GB)
