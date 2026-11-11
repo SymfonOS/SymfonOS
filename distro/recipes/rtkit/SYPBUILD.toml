@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "rtkit"
-version = "0.13-1"
+version = "0.13-2"
 summary = "RealtimeKit (Echtzeit-Priorität für Audio)"
 license = "GPL-3.0-or-later"
 url = "https://github.com/heftig/rtkit/archive/v0.13/"
@@ -17,6 +17,14 @@ sha256 = "0f9508530868109f0348e044cc1b20893672875467ace6d847ba6364274de003"
 dir = "rtkit-0.13"
 style = "meson"
 configure_flags = "-Dinstalled_tests=false -Dlibsystemd=enabled"
+pre_configure = '''
+cat > xxd.sh <<'XXD'
+#!/bin/sh
+od -An -v -tx1 | tr -s ' ' '\n' | sed '/^$/d; s/^/0x/' | paste -sd, -
+XXD
+chmod +x xxd.sh
+sed -i "s/find_program('xxd')/find_program('xxd.sh')/" meson.build
+'''
 post_install = '''
 install -Dm644 /dev/stdin "$DESTDIR/usr/lib/sysusers.d/rtkit.conf" <<'SYS'
 u rtkit - "RealtimeKit" /proc

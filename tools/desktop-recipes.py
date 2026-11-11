@@ -650,7 +650,14 @@ printf 'enable pipewire.socket\nenable pipewire-pulse.socket\nenable wireplumber
 # Echtzeit-Priorität für PipeWire, KWin und Audio-Programme (Ardour) über D-Bus, ohne CAP_SYS_NICE
 pkg("rtkit", "0.13", "https://github.com/heftig/rtkit/archive/v0.13/rtkit-0.13.tar.gz",
     "RealtimeKit (Echtzeit-Priorität für Audio)", "GPL-3.0-or-later", ["dbus", "libcap", "systemd", "polkit"],
-    ["meson"], style="meson", dir="rtkit-0.13", flags="-Dinstalled_tests=false -Dlibsystemd=enabled",
+    ["meson"], style="meson", dir="rtkit-0.13", flags="-Dinstalled_tests=false -Dlibsystemd=enabled", rel=2,
+    # xxd (aus vim) wandelt nur das Introspektions-XML in C-Bytes um; od und sed genügen dafür
+    pre=r'''cat > xxd.sh <<'XXD'
+#!/bin/sh
+od -An -v -tx1 | tr -s ' ' '\n' | sed '/^$/d; s/^/0x/' | paste -sd, -
+XXD
+chmod +x xxd.sh
+sed -i "s/find_program('xxd')/find_program('xxd.sh')/" meson.build''',
     post='''install -Dm644 /dev/stdin "$DESTDIR/usr/lib/sysusers.d/rtkit.conf" <<'SYS'
 u rtkit - "RealtimeKit" /proc
 SYS''')
