@@ -1,0 +1,17 @@
+# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
+# Öffentliche Signaturschlüssel des Paket-Repos. Schlüsselwechsel: neuen Schlüssel zusätzlich nach distro/keys,
+# Version erhöhen, veröffentlichen – erst danach mit dem neuen Schlüssel signieren (siehe bootstrap.yml).
+[package]
+name = "symfonos-keyring"
+version = "1-1"
+arch = "any"
+summary = "Öffentliche Signaturschlüssel des symfonOS-Paket-Repos"
+license = "CC0-1.0"
+
+[[source]]
+path = "@/distro/keys/symfonos-release.pub"
+
+[build]
+package = '''
+install -Dm644 "$SRCDIR/symfonos-release.pub" "$DESTDIR/etc/syp/keys/symfonos-release.pub"
+'''
