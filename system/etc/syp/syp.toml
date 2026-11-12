@@ -26,7 +26,7 @@ enabled = false
 
 [snapshots]
 enabled = true
-backend = "snapper"
+backend = "btrfs"          # syp legt vor jedem Update /.snapshots/syp-…-pre an (die letzten 10); »syp rollback --system«
 
 [cache]
 keep = 3                   # Versionen je Paket für `syp rollback`

@@ -606,6 +606,16 @@ static int c_rollback(ctx *c, long long tx_id, int system) {
         }
         if (!snap) die("Kein Snapshot zu dieser Transaktion");
         printf("System wird auf Snapshot %s zurückgesetzt (Neustart nötig).\n", snap);
+        if (!strcmp(c->cfg.snapshot_backend, "btrfs")) {
+            printf("Hinweis: Kernel und Bootloader liegen auf der EFI-Partition und werden nicht zurückgesetzt.\n");
+            if (confirm(c, "Fortfahren?")) {
+                need_root(c);
+                execlp("/usr/lib/syp/btrfs-rollback", "btrfs-rollback", snap, (char *)NULL);
+                die("btrfs-rollback: %s", strerror(errno));
+            }
+            json_free(h);
+            return 0;
+        }
         if (confirm(c, "Fortfahren?")) {
             need_root(c);
             execlp("snapper", "snapper", "--ambit", "classic", "rollback", snap, (char *)NULL);

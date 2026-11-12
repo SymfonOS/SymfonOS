@@ -36,6 +36,7 @@ install: all
 	install -Dm644 -t $(DESTDIR)$(DATADIR)/triggers ../system/usr/share/syp/triggers/*.toml
 	install -Dm644 ../system/usr/share/syp/convert-map.toml $(DESTDIR)$(DATADIR)/convert-map.toml
 	install -Dm755 ../system/usr/lib/syp/kernel-hook $(DESTDIR)$(PREFIX)/lib/syp/kernel-hook
+	install -Dm755 ../system/usr/lib/syp/btrfs-rollback $(DESTDIR)$(PREFIX)/lib/syp/btrfs-rollback
 
 clean:
 	rm -rf lib/*.o syp/*.o convert/*.o libsyp.a bin

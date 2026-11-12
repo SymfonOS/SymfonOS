@@ -40,6 +40,7 @@ static void logm(txn *t, const char *fmt, ...) {
 }
 
 /* --- Snapshots ------------------------------------------------------------------ */
+#define SNAP_KEEP 10   /* btrfs-Backend: so viele Stände vor Updates bleiben erhalten */
 int snapshot_available(config *c) {
     if (!c->snapshots || !cfg_is_root(c)) return 0;
     struct statfs fs;
@@ -70,12 +71,28 @@ char *snapshot_create(config *c, const char *kind, const char *desc, const char 
         }
         return s;
     }
+    /* btrfs-Backend: nur der Stand vor der Transaktion zählt (Rollback-Ziel); »post« wäre ein zweiter
+     * Vollsnapshot je Update. Die ältesten syp-Snapshots über SNAP_KEEP hinaus werden gelöscht. */
+    if (strcmp(kind, "pre")) return NULL;
     char *name = xasprintf("/.snapshots/syp-%ld-%s", (long)time(NULL), kind);
-    char *argv[] = {"btrfs", "subvolume", "snapshot", "-r", "/", name, NULL};
+    char *argv[] = {"btrfs", "-q", "subvolume", "snapshot", "-r", "/", name, NULL};
     if (run_cmd(argv, NULL, NULL) != 0) {
         free(name);
         return NULL;
     }
+    struct dirent **list;
+    int n = scandir("/.snapshots", &list, NULL, alphasort), have = 0;
+    for (int i = 0; i < n; i++) have += !strncmp(list[i]->d_name, "syp-", 4);
+    for (int i = 0; i < n; i++) {
+        if (!strncmp(list[i]->d_name, "syp-", 4) && have > SNAP_KEEP) {
+            char *old = xasprintf("/.snapshots/%s", list[i]->d_name);
+            char *del[] = {"btrfs", "-q", "subvolume", "delete", old, NULL};
+            if (run_cmd(del, NULL, NULL) == 0) have--;
+            free(old);
+        }
+        free(list[i]);
+    }
+    if (n >= 0) free(list);
     return name;
 }
 
