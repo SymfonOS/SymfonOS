@@ -30,8 +30,11 @@ static int read_ar(const char *path, armember **out, size_t *n) {
         name[16] = 0;
         memcpy(size, d + off + 48, 10);
         size[10] = 0;
-        size_t sz = strtoul(size, NULL, 10);
-        if (off + 60 + sz > len) break;
+        /* nur Ziffern (strtoul nähme »-1« als SIZE_MAX), Grenze ohne Überlauf prüfen */
+        char *st = str_trim(size), *end;
+        if (!*st || strspn(st, "0123456789") != strlen(st)) break;
+        size_t sz = strtoul(st, &end, 10);
+        if (sz > len - off - 60) break;
         char *nm = str_trim(name);
         size_t nl = strlen(nm);
         if (nl && nm[nl - 1] == '/') nm[nl - 1] = 0;
@@ -141,10 +144,11 @@ static void parse_rel(const char *s, deplist *out) {
 }
 
 static char *deb_license(const char *tree, const char *pkg) {
+    if (!*pkg || strchr(pkg, '/') || strstr(pkg, "..")) return xstrdup("unknown");   /* Paketname aus fremder control-Datei */
     char *rel = xasprintf("usr/share/doc/%s/copyright", pkg), *p = path_join(tree, rel), *txt;
     free(rel);
     strvec lic = {0};
-    if (read_file(p, &txt, NULL) == 0) {
+    if (read_tree_file(p, &txt, NULL) == 0) {
         char *save = NULL;
         for (char *l = strtok_r(txt, "\n", &save); l; l = strtok_r(NULL, "\n", &save)) {
             if (!str_starts(l, "License:")) continue;
@@ -182,7 +186,7 @@ int parse_deb(const char *path, const char *workdir, converted *c) {
         extract_archive_mem(data->data, data->len, c->tree, &c->warnings, NULL))
         goto out;
     char *cp = path_join(ctldir, "control"), *txt;
-    if (read_file(cp, &txt, NULL)) {
+    if (read_tree_file(cp, &txt, NULL)) {
         free(cp);
         goto out;
     }
@@ -243,7 +247,7 @@ int parse_deb(const char *path, const char *workdir, converted *c) {
     dl_free(&repl);
     json_free(f);
     char *cf = path_join(ctldir, "conffiles");
-    if (read_file(cf, &txt, NULL) == 0) {
+    if (read_tree_file(cf, &txt, NULL) == 0) {
         char *s2 = NULL;
         for (char *l = strtok_r(txt, "\n", &s2); l; l = strtok_r(NULL, "\n", &s2)) {
             char *t = str_trim(l);
@@ -263,7 +267,7 @@ int parse_deb(const char *path, const char *workdir, converted *c) {
                  {"postrm", "post_remove", "remove"}};
     for (size_t i = 0; i < sizeof hooks / sizeof *hooks; i++) {
         char *p = path_join(ctldir, hooks[i].file), *body;
-        if (read_file(p, &body, NULL) == 0) {
+        if (read_tree_file(p, &body, NULL) == 0) {
             jset(c->scripts, hooks[i].hook, jstr_own(wrap_script(body, hooks[i].args)));
             free(body);
         }

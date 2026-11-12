@@ -115,6 +115,17 @@ char *wrap_script(const char *body, const char *args) {
 }
 
 /* --- Entpacken ---------------------------------------------------------------------- */
+/* Datei aus einem entpackten Fremdpaket lesen: nur reguläre Dateien. Ein Symlink im Paket
+ * (postinst -> /etc/shadow) würde sonst Dateien des Rechners in das erzeugte Paket übernehmen. */
+int read_tree_file(const char *path, char **out, size_t *len) {
+    struct stat st;
+    if (lstat(path, &st) || !S_ISREG(st.st_mode)) {
+        set_error("%s: keine reguläre Datei", path);
+        return -1;
+    }
+    return read_file(path, out, len);
+}
+
 int extract_archive_mem(const char *data, size_t len, const char *dest, strvec *warnings, const char *const *skip) {
     struct archive *a = archive_read_new(), *w = archive_write_disk_new();
     archive_read_support_filter_all(a);
@@ -281,6 +292,26 @@ static const char *RELOCATE[][2] = {{"bin", "usr/bin"},
                                     {"usr/lib/x86_64-linux-gnu", "usr/lib"},
                                     {"usr/lib/aarch64-linux-gnu", "usr/lib"}};
 
+/* Liegt im Zielpfad (unterhalb von tree) ein Symlink? Dann zeigte ein Umzug evtl. aus dem Baum heraus
+ * (Paket enthält usr -> /irgendwo): rename()/mkdir_p() würden ihm folgen und auf dem Rechner schreiben. */
+static int symlink_in_path(const char *tree, const char *path) {
+    size_t tl = strlen(tree);
+    if (strncmp(path, tree, tl) || path[tl] != '/') return 1;
+    char *p = xstrdup(path);
+    int bad = 0;
+    for (char *c = p + tl + 1; !bad; c++) {
+        if (*c != '/' && *c) continue;
+        char saved = *c;
+        *c = 0;
+        struct stat st;
+        if (!lstat(p, &st) && S_ISLNK(st.st_mode)) bad = 1;
+        *c = saved;
+        if (!saved) break;
+    }
+    free(p);
+    return bad;
+}
+
 static void move_tree(const char *src, const char *dst, const char *tree, strvec *warn) {
     struct dirent **list;
     int n = scandir(src, &list, NULL, alphasort);
@@ -292,6 +323,8 @@ static void move_tree(const char *src, const char *dst, const char *tree, strvec
             lstat(s, &st);
             if (S_ISDIR(st.st_mode)) {
                 move_tree(s, t, tree, warn);
+            } else if (symlink_in_path(tree, t)) {
+                sv_push_own(warn, xasprintf("Umzug verweigert (Symlink im Zielpfad): /%s", s + strlen(tree) + 1));
             } else {
                 mkdir_p(dst, 0755);
                 if (path_exists(t)) {
@@ -388,7 +421,7 @@ static jval *desktop_categories(const char *tree) {
     for (int i = 0; i < n; i++) {
         if (str_ends(list[i]->d_name, ".desktop")) {
             char *p = path_join(dir, list[i]->d_name), *txt;
-            if (read_file(p, &txt, NULL) == 0) {
+            if (read_tree_file(p, &txt, NULL) == 0) {
                 char *save = NULL;
                 for (char *l = strtok_r(txt, "\n", &save); l; l = strtok_r(NULL, "\n", &save)) {
                     if (!str_starts(l, "Categories=")) continue;

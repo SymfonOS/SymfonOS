@@ -58,6 +58,7 @@ static int read_header(const unsigned char *d, size_t len, size_t off, header *h
         memset(t, 0, sizeof *t);
         t->tag = (int)tag;
         t->type = (int)type;
+        if (cnt > hsize) cnt = (uint32_t)hsize;   /* mehr Einträge als Bytes im Speicherbereich: unmöglich (Überlauf bei cnt + 1) */
         if (type == 6 || type == 8 || type == 9) {
             size_t c = type == 6 ? 1 : cnt;
             for (size_t k = 0; k < c && p < store + hsize; k++) {
@@ -66,10 +67,10 @@ static int read_header(const unsigned char *d, size_t len, size_t off, header *h
                 p += l + 1;
             }
         } else if (type == 4) {
-            t->ints = xcalloc(cnt + 1, sizeof(uint32_t));
+            t->ints = xcalloc((size_t)cnt + 1, sizeof(uint32_t));
             for (size_t k = 0; k < cnt && p + 4 <= store + hsize; k++, p += 4) t->ints[t->nints++] = be32(d + p);
         } else if (type == 3) {
-            t->ints = xcalloc(cnt + 1, sizeof(uint32_t));
+            t->ints = xcalloc((size_t)cnt + 1, sizeof(uint32_t));
             for (size_t k = 0; k < cnt && p + 2 <= store + hsize; k++, p += 2)
                 t->ints[t->nints++] = (uint32_t)(d[p] << 8 | d[p + 1]);
         } else {
