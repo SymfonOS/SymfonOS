@@ -36,6 +36,7 @@ int parse_arch(const char *path, const char *workdir, converted *c);
 char *norm_version(const char *v);
 char *norm_name(const char *n);
 char *wrap_script(const char *body, const char *args);
+int read_tree_file(const char *path, char **out, size_t *len);
 int extract_archive_mem(const char *data, size_t len, const char *dest, strvec *warnings, const char *const *skip);
 void elf_dynamic(const char *path, strvec *needed, char **soname);
 
