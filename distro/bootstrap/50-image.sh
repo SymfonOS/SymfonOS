@@ -63,7 +63,13 @@ cp "$SYP_PUB" "$IMG/etc/syp/keys/symfonos-release.pub"
 "$SYP" -r "$IMG" sync
 # Paketskripte und Trigger laufen per chroot; systemd-tmpfiles braucht /proc
 mkdir -p "$IMG/proc"; mountpoint -q "$IMG/proc" || mount -t proc proc "$IMG/proc"
-"$SYP" -r "$IMG" -y install --overwrite /etc/syp/syp.toml "$META" symfonos-installer   # vorläufige Konfiguration ersetzen
+# vorläufige Konfiguration und den vorab kopierten Schlüssel durch die Paketversionen ersetzen
+"$SYP" -r "$IMG" -y install --overwrite /etc/syp/syp.toml --overwrite "/etc/syp/keys/*" "$META" symfonos-installer
+# Lokaler Bau mit eigenem Schlüssel (nicht dem aus symfonos-keyring): weiter vertrauen, sonst lehnt das Image
+# die eigenen Pakete ab
+if ! grep -qxF "$(grep '^id: ' "$SYP_PUB")" "$IMG"/etc/syp/keys/*.pub; then
+  cp "$SYP_PUB" "$IMG/etc/syp/keys/local-build.pub"
+fi
 # Für das installierte System zeigt die Konfiguration wieder auf die Online-Repos
 cp "$REPO_ROOT/system/etc/syp/syp.toml" "$IMG/etc/syp/syp.toml"
 # Fehlende Laufzeitabhängigkeiten (Bibliothek nicht installiert) zeigen sich sonst erst beim Programmstart
