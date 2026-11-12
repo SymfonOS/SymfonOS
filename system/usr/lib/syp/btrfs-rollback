@@ -16,7 +16,13 @@ dev=$(findmnt -nvo SOURCE /)
 [[ $(findmnt -no FSTYPE /) == btrfs ]] || { echo "/ ist kein Btrfs" >&2; exit 1; }
 top=$(mktemp -d /run/syp-rollback.XXXXXX)
 trap 'umount "$top" 2>/dev/null; rmdir "$top"' EXIT
-mount -o subvolid=5 "$dev" "$top"
+# Optionen der Wurzel übernehmen (ohne Subvolume-Angaben und SELinux-Marker): ein zweiter Mount desselben
+# Dateisystems mit abweichenden Optionen kann der Kernel mit EBUSY ablehnen
+opts=$(findmnt -no OPTIONS / | tr ',' '\n' | grep -vE '^(subvol=|subvolid=|seclabel$)' | paste -sd, -)
+if ! mount -t btrfs -o "${opts:+$opts,}subvolid=5" "$dev" "$top"; then
+  dmesg 2>/dev/null | tail -5 >&2
+  echo "Oberste Btrfs-Ebene von $dev lässt sich nicht einhängen; nichts verändert" >&2; exit 1
+fi
 [[ -d $top/@ && -d $top/@snapshots/$name ]] || {
   echo "Unerwarteter Aufbau: $top/@ oder $top/@snapshots/$name fehlt" >&2; exit 1; }
 old="@.vor-rollback-$(date +%Y%m%d-%H%M%S)"
