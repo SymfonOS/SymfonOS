@@ -5,7 +5,8 @@ Ein Paket wird übernommen, wenn
   * es mindestens --min-days Tage in testing liegt (Sicherheitsupdates: --security-days, Standard 0),
   * es nicht gesperrt ist (Datei testing/hold: je Zeile »name« oder »name version«, # Kommentar),
   * alle Abhängigkeiten in stable plus den ebenfalls übernommenen Paketen erfüllbar sind
-    (sonst würde stable brechen; das Paket wartet dann auf seine Abhängigkeiten) und
+    (sonst würde stable brechen; das Paket wartet dann auf seine Abhängigkeiten),
+  * es keine Abhängigkeit eines Pakets bricht, das schon in stable liegt, und
   * stable keine gleiche oder neuere Version hat.
 
 Seit wann ein Paket in testing liegt, steht in testing/promotion.json (vom Werkzeug gepflegt).
@@ -151,17 +152,34 @@ def main() -> int:
         if n not in best or vercmp(e["info"]["version"], best[n]["info"]["version"]) > 0:
             best[n] = e
     cands = list(best.values())
-    # Fixpunkt: Kandidaten mit unerfüllbaren Abhängigkeiten zurückstellen
+    # Fixpunkt: Kandidaten zurückstellen, deren Abhängigkeiten unerfüllbar wären – oder die Abhängigkeiten
+    # von Paketen brechen würden, die schon in stable liegen (z. B. »lib<2« bei lib 2 in testing).
+    # Was in stable schon vorher unerfüllbar war, zählt nicht (sonst blockierte es jede Übernahme).
+    base = Universe(stable)
+    pre_broken = {(n, d) for n, i in base.pkgs.items() for d in i.get("depends", []) if not base.satisfies(d)}
     while True:
         uni = Universe(stable)
         for e in cands:
             uni.add(e["info"])
         broken = [(e, d) for e in cands for d in e["info"].get("depends", []) if not uni.satisfies(d)]
+        cand_names = {e["info"]["name"] for e in cands}
+        for n, i in uni.pkgs.items():
+            if n in cand_names:
+                continue
+            for d in i.get("depends", []):
+                if (n, d) in pre_broken or uni.satisfies(d):
+                    continue
+                names = {DEP.match(alt).group(1) for alt in d.split("|") if DEP.match(alt)}
+                for e in cands:  # Schuld sind die Kandidaten, die den Namen ersetzen oder bereitstellen
+                    prov = {m.group(1) for p in e["info"].get("provides", []) if (m := DEP.match(p))}
+                    if e["info"]["name"] in names or prov & names:
+                        broken.append((e, f"bricht {n} {i['version']}: {d}"))
         if not broken:
             break
         drop = {id(e) for e, _ in broken}
         for e, d in broken:
-            reasons[f"{e['info']['name']} {e['info']['version']}"] = f"Abhängigkeit »{d}« in stable nicht erfüllbar"
+            why = d if d.startswith("bricht ") else f"Abhängigkeit »{d}« in stable nicht erfüllbar"
+            reasons[f"{e['info']['name']} {e['info']['version']}"] = why
         cands = [e for e in cands if id(e) not in drop]
 
     order = sorted(cands, key=lambda e: e["info"]["name"])

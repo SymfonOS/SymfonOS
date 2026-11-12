@@ -49,6 +49,19 @@ def test_promotion_rules(tmp_path):
     out = promote(testing2, stable2, pub, key, t0 + 8 * DAY)
     assert "app2 1-1: Abhängigkeit »libfoo>=2« in stable nicht erfüllbar" in out
     assert names(stable2, pub) == ["libfoo 1-1"]
+    # Umgekehrt: libbar 2 würde »libbar<2« eines Pakets brechen, das schon in stable liegt
+    stable3, testing3 = tmp_path / "stable3", tmp_path / "testing3"
+    syp("repo-add", stable3, p("libbar", "1-1"), p("old", "1-1", depends=["libbar<2"]), "--name", "stable", "-k", key)
+    syp("repo-add", testing3, p("libbar", "2-1"), p("other", "1-1"), "--name", "testing", "-k", key)
+    promote(testing3, stable3, pub, key, t0)
+    out = promote(testing3, stable3, pub, key, t0 + 8 * DAY)
+    assert "libbar 2-1: bricht old 1-1: libbar<2" in out
+    assert names(stable3, pub) == ["libbar 1-1", "old 1-1", "other 1-1"]
+    # … bis eine neue Version von old mitkommt
+    syp("repo-add", testing3, p("old", "2-1", depends=["libbar>=2"]), "--name", "testing", "-k", key)
+    promote(testing3, stable3, pub, key, t0 + 8 * DAY)
+    out = promote(testing3, stable3, pub, key, t0 + 16 * DAY)
+    assert "→ stable: libbar 2-1" in out and "→ stable: old 2-1" in out
 
 
 def test_promotion_requires_valid_signature(tmp_path):
