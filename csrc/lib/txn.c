@@ -155,6 +155,31 @@ void run_triggers(config *c, strvec *changed, int quiet) {
     sv_free(&ids);
 }
 
+/* SELinux: neu ausgepackte Dateien erben den Kontext ihres Verzeichnisses bzw. des Staging-Ordners. Ohne
+ * Nachlabeln verlören z. B. /usr/lib/systemd/systemd oder sshd beim ersten Update ihren Einstiegstyp
+ * (init_exec_t, sshd_exec_t) und Dienste liefen nach dem Neustart in der falschen Domäne. Nur auf dem
+ * laufenden System mit aktivem SELinux; Image-Bau und Installer labeln am Ende mit setfiles. */
+static void relabel_changed(txn *t) {
+    if (!cfg_is_root(t->cfg) || !t->changed.n || access("/sys/fs/selinux/enforce", F_OK) ||
+        access("/usr/sbin/restorecon", X_OK))
+        return;
+    char tmpl[] = "/run/syp-relabel-XXXXXX";
+    int fd = mkstemp(tmpl);
+    if (fd < 0) return;
+    FILE *f = fdopen(fd, "w");
+    if (!f) {
+        close(fd);
+        unlink(tmpl);
+        return;
+    }
+    for (size_t i = 0; i < t->changed.n; i++) fprintf(f, "/%s\n", t->changed.v[i]);
+    fclose(f);
+    char *argv[] = {"/usr/sbin/restorecon", "-F", "-i", "-f", tmpl, NULL};
+    int rc = run_cmd(argv, NULL, NULL);
+    if (rc && !t->quiet) printf("   Warnung: SELinux-Kontexte nicht vollständig gesetzt (restorecon %d)\n", rc);
+    unlink(tmpl);
+}
+
 /* --- Skripte ----------------------------------------------------------------------- */
 static int run_script(txn *t, const jval *info, const char *hook, const char *newv, const char *oldv) {
     const char *body = jgets(jget(info, "scripts"), hook, NULL);
@@ -630,6 +655,7 @@ long long txn_execute(txn *t, plan *p, const char *cmdline) {
     }
     free(post_hook);
     free(post_old);
+    if (!rc) relabel_changed(t);   /* vor den Triggern: die laufen u. U. gerade ausgepackte Programme */
     if (!rc) run_triggers(t->cfg, &t->changed, t->quiet);
     if (rc) {
         db_tx_end(t->db, tx, "failed", NULL);
