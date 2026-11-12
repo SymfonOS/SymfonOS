@@ -9,7 +9,13 @@ PATH=/usr/bin:/usr/sbin
 PHASE=/var/log/symfonos-upgrade-test.phase   # /var/log ist ein eigenes Subvolume: übersteht den Rollback
 GEN=/usr/lib/systemd/system-generators/symfonos-upgrade-probe   # Label laut Richtlinie: systemd_generator_exec_t,
 # das Verzeichnis selbst ist bin_t – ohne restorecon nach dem Update bekäme die neue Datei das falsche Label
-fail() { echo "UPGRADE-TEST FAIL: $*"; systemctl poweroff; exit 1; }
+fail() {
+  # SELinux-Verweigerungen landen bei laufendem auditd nicht auf der Konsole; vor der FAIL-Zeile ausgeben,
+  # denn der Host beendet die VM, sobald er sie sieht
+  grep -a 'avc: *denied' /var/log/audit/audit.log 2>/dev/null | tail -8 | sed 's/^/UPGRADE-TEST avc: /'
+  echo "UPGRADE-TEST FAIL: $*"
+  systemctl poweroff; exit 1
+}
 
 case $(cat "$PHASE" 2>/dev/null) in
   "")
