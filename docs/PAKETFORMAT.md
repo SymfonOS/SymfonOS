@@ -44,16 +44,16 @@ Backtracking-Solver: Kandidaten sortiert nach installierter Version, Namensgleic
 ## Transaktion
 1. Pakete laden, Index-Prüfsumme + Signatur prüfen
 2. Topologisch sortieren, Dateikonflikte prüfen (gegen DB und unverwaltete Dateien)
-3. snapper-Pre-Snapshot, Historieneintrag `running`
+3. Platzprüfung, Btrfs-Snapshot `/.snapshots/syp-<Zeit>-pre` (die letzten 10 bleiben), Historieneintrag `running`
 4. Entfernen → Entpacken in Staging → atomar platzieren (`rename`, Fallback copy+replace bei EXDEV) → alte Dateien entfernen → DB
 5. Konfigdateien (`backup`): unverändert → ersetzen; lokal geändert → `.sypnew`; beim Entfernen geändert → `.sypsave`
-6. Trigger einmalig (ldconfig, systemd, Icons, Schriften, MIME, depmod, mkinitcpio, GRUB)
-7. Post-Snapshot, Historie `done`
+6. SELinux-Kontexte der geänderten Dateien setzen (restorecon), Trigger einmalig (ldconfig, systemd, Icons, Schriften, MIME, depmod, mkinitcpio, GRUB)
+7. Historie `done`
 
 ## Updates und Rollbacks
 - `syp upgrade`: sync + Solver mit `name>=installiert`; Downgrades nur per Rollback.
 - `syp rollback [tx]`: stellt den Paketzustand vor `tx` aus dem Cache (Standard: 3 Versionen je Paket) oder dem Repo wieder her – als neue, selbst wieder umkehrbare Transaktion.
-- `syp rollback --system [tx]`: Btrfs-Snapshot (snapper) – erfasst auch Konfigurationsänderungen außerhalb von syp.
+- `syp rollback --system [tx]`: Btrfs-Snapshot vor `tx` wird zum neuen `@` (`/usr/lib/syp/btrfs-rollback`, wirksam nach Neustart; der alte Stand bleibt als `@.vor-rollback-<Zeit>`) – erfasst auch Konfigurationsänderungen außerhalb von syp.
 - `syp doctor`: unterbrochene Transaktionen, verletzte Abhängigkeiten, Schlüssel, veraltete Repos, offene `.sypnew`.
 
 ## Bau-Rezept (`SYPBUILD.toml`)

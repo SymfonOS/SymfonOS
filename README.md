@@ -10,8 +10,8 @@ Eine schlanke, moderne Linux-Distribution für kreative Arbeit: Grafik, Illustra
 | **Release-Modell** | Rolling Release (nächtlicher Abgleich, Snapshots vor jeder Änderung) |
 | **Kernel** | `linux-zen` (niedrige Latenz für Audio/Stift), Fallback `linux-lts` |
 | **Init** | systemd |
-| **Bootloader** | GRUB + grub-btrfs (Booten in Snapshots), Live-Medium: systemd-boot/syslinux |
-| **Dateisystem** | Btrfs (`@`, `@home`, `@snapshots`, `@var_log`, `@cache`, `@ollama`, `@ai_models`), zstd, snapper |
+| **Bootloader** | GRUB (oder systemd-boot mit UKI), Live-Medium: systemd-boot/syslinux |
+| **Dateisystem** | Btrfs (`@`, `@home`, `@snapshots`, `@var_log`, `@cache`, `@ollama`, `@ai_models`), zstd, syp-Snapshots vor jedem Update (`syp rollback --system`) |
 | **Desktop** | KDE Plasma 6 (Wayland), PipeWire/JACK, Inter + JetBrains Mono + Noto |
 | **Installer** | Calamares (Btrfs-Standardlayout, optional LUKS) |
 | **Paketsystem** | `syp` (Format `.syp`, Ed25519-signiert, SQLite-Datenbank, Rollback) |
@@ -31,7 +31,7 @@ flowchart TB
     CAL[Calamares] -->|postinstall: syp import-pacman| SYP
     SYP[syp CLI] --> SOLVER[Solver<br/>Backtracking, provides, Konflikte]
     SYP --> TX[Transaktionen<br/>Konfliktcheck, Trigger, Konfig-Schutz]
-    TX --> SNAP[snapper Pre/Post-Snapshot]
+    TX --> SNAP[Btrfs-Snapshot vor jeder Transaktion]
     TX --> DB[(SQLite: Pakete, Dateien, Historie)]
     STORE[Software-Center] -->|pkexec| SYP
     CGUI[Konverter-GUI] --> CONVL[syp-convert] --> SYP
