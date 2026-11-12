@@ -221,7 +221,8 @@ static int search(solver *s, state *st, agenda *a) {
         pkg *c = cands.v[i];
         pkg *cur = hm_get(&st->sel, c->name);
         int isfixed = hm_get(&st->fixed, c->name) != NULL;
-        if (cur && isfixed && !strcmp(cur->version, c->version)) {
+        /* gleiche Version aus einem anderen Repo ist ein anderes Paket (andere provides): nur der gewählte zählt */
+        if (cur && isfixed && cur == c) {
             ok = search(s, st, a->next);
             break;
         }
