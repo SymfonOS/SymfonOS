@@ -9,6 +9,7 @@
 #include <string.h>
 #include <sys/file.h>
 #include <sys/stat.h>
+#include <sys/statvfs.h>
 #include <sys/vfs.h>
 #include <time.h>
 #include <unistd.h>
@@ -203,6 +204,37 @@ static void relabel_changed(txn *t) {
     }
     free(argv);
     if (bad && !t->quiet) printf("   Warnung: SELinux-Kontexte nicht vollständig gesetzt (restorecon %d)\n", bad);
+}
+
+/* Freier Platz vor dem Auspacken: eine volle Platte mitten in der Transaktion hinterlässt ein halb
+ * aktualisiertes System. Mit Btrfs-Snapshot belegen ersetzte Dateien weiter Platz (der Snapshot hält sie),
+ * also zählt die volle neue Größe; ohne Snapshot nur der Zuwachs gegenüber der installierten Version.
+ * SYP_NO_SPACE_CHECK=1 schaltet die Prüfung ab. */
+static int check_space(txn *t, sypfile *files, size_t n) {
+    if (getenv("SYP_NO_SPACE_CHECK")) return 0;
+    struct statvfs sv;
+    char *usr = cfg_path(t->cfg, "usr");
+    int ok = statvfs(path_exists(usr) ? usr : t->cfg->root, &sv) == 0;
+    free(usr);
+    if (!ok || !sv.f_frsize) return 0;
+    hmap inst;
+    db_installed(t->db, &inst);
+    int snap = snapshot_available(t->cfg);
+    long long need = 0;
+    for (size_t i = 0; i < n; i++) {
+        need += jgeti(files[i].info, "installed_size", 0);
+        pkg *old = hm_get(&inst, jgets(files[i].info, "name", ""));
+        if (old && !snap) need -= jgeti(old->info, "installed_size", 0);
+    }
+    HM_FOREACH(&inst, i) pkg_free(inst.vals[i]);
+    hm_free(&inst);
+    need += 64LL << 20;   /* Datenbank, Temporärdateien, Trigger */
+    long long avail = (long long)sv.f_bavail * (long long)sv.f_frsize;
+    if (need <= avail) return 0;
+    set_error("Zu wenig Speicherplatz: %lld MiB nötig%s, %lld MiB frei (syp clean, alte Snapshots löschen; "
+              "SYP_NO_SPACE_CHECK=1 überspringt die Prüfung)",
+              need >> 20, snap ? " (Snapshot hält ersetzte Dateien)" : "", avail >> 20);
+    return -1;
 }
 
 /* --- Skripte ----------------------------------------------------------------------- */
@@ -656,6 +688,10 @@ long long txn_execute(txn *t, plan *p, const char *cmdline) {
     free(state);
     hm_free(&prov);
     if (check_conflicts(t, files, n, &p->remove)) {
+        free(order);
+        goto out;
+    }
+    if (check_space(t, files, n)) {
         free(order);
         goto out;
     }
