@@ -16,14 +16,58 @@ import subprocess
 import sys
 
 SYP = os.environ.get("SYP_BIN", "syp")
-FREE = re.compile(r"^(L?GPL|AGPL|MPL|MIT|BSD|Apache|ISC|Zlib|CC0|CC-BY|OFL|Unlicense|PSF|Python|"
-                  r"Artistic|BSL-1.0|CECILL|EPL|ImageMagick|FTL|curl|X11|0BSD|WTFPL|Vim|Ruby|PHP|"
-                  r"LicenseRef-(Arch|custom)|custom)", re.I)
+# Freie Lizenzen (SPDX-Kennungen, Präfixe). »custom« ohne Angabe ist unklar und wird gemeldet.
+FREE = re.compile(r"^(L?GPL|AGPL|MPL|MIT|BSD|Apache|ISC|Zlib|CC0|CC-BY|CC-PDDC|OFL|Unlicense|PSF|Python|"
+                  r"Artistic|BSL|CECILL|EPL|ImageMagick|FTL|curl|X11|0BSD|WTFPL|Vim|Ruby|PHP|"
+                  r"AFL|Bitstream-Vera|HPND|Unicode|IJG|libpng|libtiff|OLDAP|SGI-B|CDDL|bzip2|"
+                  r"NTP|OpenSSL|SSLeay|PostgreSQL|Sendmail|TCL|UCD|W3C|Xfig|blessing|"
+                  r"LicenseRef-Public-Domain|Public-Domain|LicenseRef-Arch)([-.].*)?$", re.I)
+# Nicht frei, aber weitergebbar und für Hardware nötig: nur ausdrücklich zugelassen
+REDISTRIBUTABLE = {"LicenseRef-linux-firmware"}
 
 
-def is_free(expr: str) -> bool:
-    parts = [p.strip("() ") for p in re.split(r"\s+(?:AND|OR|WITH)\s+|,", expr) if p.strip("() ")]
-    return bool(parts) and all(FREE.match(p) or p.endswith("-exception") for p in parts)
+def _tokens(expr: str) -> list[str]:
+    return re.findall(r"\(|\)|[^\s()]+", expr.replace(",", " AND "))
+
+
+def _eval(tok: list[str], allowed) -> bool:
+    """SPDX-Ausdruck auswerten: OR = eine Alternative genügt, AND = alle, »X WITH Ausnahme« zählt wie X."""
+    def atom() -> bool:
+        t = tok.pop(0) if tok else ""
+        if t == "(":
+            v = expr()
+            if tok and tok[0] == ")":
+                tok.pop(0)
+            return v
+        v = allowed(t)
+        if tok and tok[0].upper() == "WITH":
+            tok.pop(0)
+            if tok:
+                tok.pop(0)
+        return v
+
+    def conj() -> bool:
+        v = atom()
+        while tok and tok[0].upper() == "AND":
+            tok.pop(0)
+            v = atom() and v
+        return v
+
+    def expr() -> bool:
+        v = conj()
+        while tok and tok[0].upper() == "OR":
+            tok.pop(0)
+            v = conj() or v
+        return v
+
+    return bool(tok) and expr()
+
+
+def is_free(expr: str, redistributable: bool = False) -> bool:
+    def ok(t: str) -> bool:
+        t = t.rstrip("+")
+        return bool(FREE.match(t)) or (redistributable and t in REDISTRIBUTABLE)
+    return _eval(_tokens(expr or ""), ok)
 
 
 def main() -> int:
@@ -40,9 +84,12 @@ def main() -> int:
         if a.apps_only and not i.get("categories"):
             continue
         origin = i["origin"] if isinstance(i.get("origin"), str) else i.get("origin", {}).get("format", "?")
-        free = is_free(i.get("license", ""))
-        bad += not free
-        print(f"| {i['name']} | {i['version']} | {i.get('license', '')} | {origin} | {'✓' if free else '⚠'} |")
+        lic = i.get("license", "")
+        free = is_free(lic)
+        redis = not free and is_free(lic, redistributable=True)
+        bad += not (free or redis)
+        mark = "✓" if free else "weitergebbar" if redis else "⚠"
+        print(f"| {i['name']} | {i['version']} | {lic} | {origin} | {mark} |")
     print(f"\n{len(rows)} Pakete, {bad} mit unklarer/unfreier Lizenz", file=sys.stderr)
     return 1 if bad else 0
 
