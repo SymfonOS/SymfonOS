@@ -74,6 +74,15 @@ jobs:
           rm -f keys/release.key keys/.dev
           (umask 077; printf '%s\n' "$SYP_SIGNING_KEY" > keys/release.key)
           csrc/bin/syp pubkey keys/release.key keys/release.pub
+          # Öffentlicher Schlüssel gehört ins Repository (Paket symfonos-keyring, distro/keys): installierte Systeme
+          # vertrauen nur Schlüsseln, die sie per Update erhalten haben. Ein neuer Schlüssel muss dort neben dem
+          # alten liegen, BEVOR mit ihm signiert wird – sonst lehnen alle Installationen die Updates ab.
+          id=$(sed -n 's/^id: //p' keys/release.pub)
+          echo "::notice title=Release-Schlüssel (öffentlich, id $id)::$(sed ':a;N;$!ba;s/\n/%0A/g' keys/release.pub)"
+          if [ -d distro/keys ] && ! grep -qx "id: $id" distro/keys/*.pub; then
+            echo "::error title=Schlüssel nicht im Repository::keys/release.pub (id $id) zuerst als distro/keys/*.pub committen (alten Schlüssel behalten)"
+            exit 1
+          fi
           if [ -n "$old_pub" ] && [ "$old_pub" != "$(cat keys/release.pub)" ]; then
             # Schlüsselwechsel: mit dem alten Schlüssel signierte Pakete verwerfen und neu bauen
             # (Toolchain und Chroot bleiben); die Bauumgebung vertraut danach nur dem neuen Schlüssel.
