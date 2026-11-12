@@ -11,14 +11,15 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-/* Bereiche ohne normale Benutzerprogramme (Kernel, Firmware, Bootloader-Module, Objektdateien) */
+/* Bereiche ohne normale Benutzerprogramme (Kernel, Firmware, Bootloader-Module, Debug-Symbole).
+ * Keine Ausnahmen nach Dateiendung: Objektdateien, Archive und Kernelmodule sind ohnehin kein ET_EXEC/ET_DYN
+ * (siehe inspect), und ein Programm namens »x.o« soll nicht an der Prüfung vorbeikommen. */
 static int exempt(const char *rel) {
     static const char *pre[] = {"usr/lib/modules/", "usr/lib/firmware/", "usr/lib/grub/", "usr/share/", "boot/",
                                 "usr/lib/debug/", NULL};
     for (const char **p = pre; *p; p++)
         if (str_starts(rel, *p)) return 1;
-    return str_ends(rel, ".o") || str_ends(rel, ".a") || str_ends(rel, ".ko") || str_ends(rel, ".ko.zst") ||
-           str_ends(rel, ".efi");
+    return 0;
 }
 
 typedef struct {
@@ -54,6 +55,12 @@ static void inspect(const char *path, elfinfo *e) {
     if (memcmp(m, ELFMAG, SELFMAG) || m[EI_CLASS] != ELFCLASS64 || m[EI_DATA] != ELFDATA2LSB) goto out;
     Elf64_Ehdr *h = (Elf64_Ehdr *)m;
     if (h->e_type != ET_EXEC && h->e_type != ET_DYN) goto out;
+    /* nur Code für diese Maschine: fremde ELF-Dateien (Firmware für Coprozessoren, BPF) laufen hier nicht */
+#if defined(__x86_64__)
+    if (h->e_machine != EM_X86_64) goto out;
+#elif defined(__aarch64__)
+    if (h->e_machine != EM_AARCH64) goto out;
+#endif
     e->is_elf = 1;
     e->is_dyn = h->e_type == ET_DYN;
     Elf64_Off dyn_off = 0;

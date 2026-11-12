@@ -478,6 +478,13 @@ package = 'install -Dm755 x "$DESTDIR/usr/bin/x"'
     assert "kein PIE" in r.stdout and "ausführbarer Stack" in r.stdout
     recipe("-no-pie", '[options]\nhardening = "warn"\nhardening_reason = "Test"')
     syp("build", rec / "SYPBUILD.toml", "-o", tmp_path / "warn")
+    # Dateiendung ist keine Ausnahme: ein unsicheres Programm als »x.o« fällt genauso durch
+    (rec / "SYPBUILD.toml").write_text((rec / "SYPBUILD.toml").read_text()
+                                       .replace('-o x x.c', '-no-pie -Wl,-z,execstack -o x x.c')
+                                       .replace('/usr/bin/x"', '/usr/lib/x/x.o"')
+                                       .replace('[options]\nhardening = "warn"\nhardening_reason = "Test"', ''))
+    r = syp("build", rec / "SYPBUILD.toml", "-o", tmp_path / "suffix", check=False)
+    assert r.returncode == 1 and "/usr/lib/x/x.o" in r.stdout
 
 
 def test_hardening_file_modes(tmp_path):
