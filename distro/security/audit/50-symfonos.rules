@@ -13,7 +13,7 @@
 -w /etc/security/ -p wa -k pam
 -w /etc/pam.d/ -p wa -k pam
 ## Anmeldung und Netzwerkkonfiguration
--w /var/log/faillock -p wa -k logins
+-w /run/faillock -p wa -k logins
 -w /etc/ssh/sshd_config -p wa -k sshd
 -w /etc/ssh/sshd_config.d/ -p wa -k sshd
 -w /etc/nftables.conf -p wa -k firewall

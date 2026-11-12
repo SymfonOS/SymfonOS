@@ -50,4 +50,7 @@ jobs:
           done
           exit 1
       - name: Abhängigkeitsgraph prüfen
-        run: csrc/bin/syp buildall distro/recipes --repo /tmp/dry -n | tail -3
+        run: |
+          # ohne pipefail zählte nur der Status von tail: ein kaputter Abhängigkeitsgraph fiel nie auf
+          set -o pipefail
+          csrc/bin/syp buildall distro/recipes --repo /tmp/dry -n | tail -3

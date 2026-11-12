@@ -3,6 +3,7 @@
 # Läuft in Arch Linux. Standard: alle Pakete des ISOs inkl. Abhängigkeiten; ALL=1 für komplette Repos.
 #   SYP_KEY=/pfad/release.key ./tools/repo-sync.sh <ausgabe>
 set -euo pipefail
+failed=()
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 OUT=${1:-$ROOT/out/repo}
 : "${SYP_KEY:?SYP_KEY (geheimer Signaturschlüssel) nicht gesetzt}"
@@ -31,8 +32,11 @@ while read -r url; do
   name=$(basename "$f" | sed -E 's/-[^-]+-[^-]+-[^-]+\.pkg\.tar\.zst$//')
   ls "$conv"/*/"$name"-*.syp &>/dev/null && continue
   "$SYP_CONVERT" "$f" -o "$conv/${name:0:1}" -k "$SYP_KEY" --offline --mark-scripts-reviewed \
-    --json > "$CACHE/$name.report.json" || echo "!! $name fehlgeschlagen" >&2
+    --json > "$CACHE/$name.report.json" || { echo "!! $name fehlgeschlagen" >&2; failed+=("$name"); }
 done < "$CACHE/urls.txt"
+
+# fehlgeschlagene Umwandlungen nicht still veröffentlichen (dem ISO fehlten sonst Pakete ohne Fehlermeldung)
+if ((${#failed[@]})); then echo "Umwandlung fehlgeschlagen: ${failed[*]}" >&2; exit 1; fi
 
 for repo in core extra multilib; do
   [[ -d $OUT/$repo/x86_64 ]] || continue
