@@ -12,10 +12,10 @@
 `syp doctor` zeigt die betroffene Transaktion. Mit `sudo syp rollback <nr>` zurücknehmen oder `sudo syp upgrade` erneut ausführen.
 
 ## System startet nicht
-Im GRUB-Menü „symfonOS Snapshots“ einen Snapshot vor dem Update wählen, dann `sudo snapper rollback`. Alternativ den Fallback-Kernel „linux-lts“ wählen.
+Vom Installationsmedium starten, die oberste Btrfs-Ebene einhängen und `@` durch den Snapshot vor dem Update ersetzen (Schritte in Kapitel „Snapshots und Rollback“). Startet das System noch bis zur Anmeldung: `sudo syp rollback --system`, dann neu starten.
 
 ## Datenträger voll
-`df -h /`, dann `sudo syp clean --keep 1`, alte Snapshots mit `snapper list` / `sudo snapper delete <nr>` löschen, `du -sh ~/.cache`.
+`df -h /`, dann `sudo syp clean --keep 1`, alte Snapshots mit `ls /.snapshots` / `sudo btrfs subvolume delete /.snapshots/syp-<Zeit>-pre` löschen, `du -sh ~/.cache`.
 
 ## Kein Netzwerk
 `nmcli device` zeigt die Schnittstellen. WLAN-Firmware fehlt? `journalctl -k | grep -i firmware`. Prüfungsmodus aktiv? `symfonos-exam status`.
