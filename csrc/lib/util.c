@@ -154,7 +154,9 @@ void hm_init(hmap *m) {
 }
 static size_t hm_slot(const hmap *m, const char *k, int *found) {
     size_t i = hash(k) & (m->cap - 1), tomb = (size_t)-1;
-    for (;;) {
+    /* höchstens einmal rundherum: nach vielen hm_del kann jeder freie Platz ein Grabstein sein (kein NULL
+     * mehr), dann suchte eine fehlende Taste sonst endlos. n <= cap/2, also gibt es dann einen Grabstein. */
+    for (size_t steps = 0; steps < m->cap; steps++) {
         char *key = m->keys[i];
         if (!key) {
             *found = 0;
@@ -168,6 +170,8 @@ static size_t hm_slot(const hmap *m, const char *k, int *found) {
         }
         i = (i + 1) & (m->cap - 1);
     }
+    *found = 0;
+    return tomb;
 }
 void *hm_get(const hmap *m, const char *k) {
     if (!m->cap) return NULL;

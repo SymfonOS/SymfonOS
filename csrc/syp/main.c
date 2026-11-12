@@ -12,7 +12,7 @@
 #include "solver.h"
 #include "txn.h"
 
-int cmd_buildall(int argc, char **argv, const char *root);
+int cmd_buildall(int argc, char **argv, const char *root, int dry);
 
 typedef struct {
     const char *root;
@@ -805,7 +805,12 @@ int main(int argc, char **argv) {
         return 2;
     }
     const char *cmd = argv[i++];
-    if (!strcmp(cmd, "buildall")) return cmd_buildall(argc - i, argv + i, c.root);
+    if (!strcmp(cmd, "buildall")) {
+        /* globale Optionen vor buildall: -n gilt (sonst baute »syp -n buildall« wirklich), -r ergibt keinen Sinn */
+        if (strcmp(c.root, "/") && !getenv("SYP_ROOT"))
+            die("-r/--root vor buildall wirkt nicht; Bauumgebung mit »buildall … --root WURZEL« angeben");
+        return cmd_buildall(argc - i, argv + i, c.root, c.dry);
+    }
     if (!strcmp(cmd, "vercmp")) {
         if (argc - i != 2) die("Aufruf: syp vercmp A B");
         printf("%d\n", vercmp(argv[i], argv[i + 1]));

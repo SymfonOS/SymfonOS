@@ -16,6 +16,7 @@
 #define _GNU_SOURCE
 #include <dirent.h>
 #include <stdlib.h>
+#include <errno.h>
 #include <string.h>
 #include <sys/mount.h>
 #include <time.h>
@@ -172,11 +173,11 @@ static char *build_in_root(recipe *r, const char *broot, const build_opts *o) {
     return res;
 }
 
-int cmd_buildall(int argc, char **argv, const char *root) {
+int cmd_buildall(int argc, char **argv, const char *root, int gdry) {
     (void)root;
     const char *rdir = NULL, *repo = NULL, *key = NULL, *broot = NULL, *only = NULL, *rname = "symfonos";
     const char *arch = "x86_64";
-    int maxmin = 0, nocheck = 0, update_sums = 0, keep_going = 0, dry = 0, install_built = 1;
+    int maxmin = 0, nocheck = 0, update_sums = 0, keep_going = 0, dry = gdry, install_built = 1;
     for (int i = 0; i < argc; i++) {
         const char *a = argv[i];
         int more = i + 1 < argc;
@@ -193,6 +194,7 @@ int cmd_buildall(int argc, char **argv, const char *root) {
         else if (!strcmp(a, "--no-install")) install_built = 0;
         else if (!strcmp(a, "-n") || !strcmp(a, "--dry-run")) dry = 1;
         else if (a[0] == '-') die("Unbekannte Option für buildall: %s", a);
+        else if (rdir) die("buildall: nur ein Rezeptordner erlaubt (%s und %s)", rdir, a);
         else rdir = a;
     }
     if (!rdir || !repo) die("Aufruf: syp buildall REZEPTE --repo REPO [...]");
@@ -200,6 +202,7 @@ int cmd_buildall(int argc, char **argv, const char *root) {
     if (!repo_abs) {
         mkdir_p(repo, 0755);
         repo_abs = realpath(repo, NULL);
+        if (!repo_abs) die("%s: Repo-Ordner nicht anlegbar: %s", repo, strerror(errno));
     }
     seckey *k = NULL;
     char *pubpath = NULL;

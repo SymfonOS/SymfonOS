@@ -9,6 +9,7 @@
 typedef struct {
     const char *p, *e;
     int line;
+    int depth; /* Verschachtelung von Arrays/Inline-Tabellen (Stapelüberlauf bei [[[[…) */
 } tp;
 
 #define FAIL(...)                                                \
@@ -239,6 +240,12 @@ static jval *pinline(tp *s) {
             return NULL;
         }
         jval *t = descend(o, &kp, kp.n - 1, s->line);
+        if (!t) {
+            json_free(v);
+            json_free(o);
+            sv_free(&kp);
+            FAIL("Schlüssel ist keine Tabelle");
+        }
         jset(t, kp.v[kp.n - 1], v);
         sv_free(&kp);
         skip_ws(s);
@@ -256,7 +263,15 @@ static jval *pinline(tp *s) {
     }
 }
 
+static jval *pvalue1(tp *s);
 static jval *pvalue(tp *s) {
+    if (s->depth >= 200) FAIL("zu tief verschachtelt");
+    s->depth++;
+    jval *v = pvalue1(s);
+    s->depth--;
+    return v;
+}
+static jval *pvalue1(tp *s) {
     skip_ws(s);
     if (s->p >= s->e) FAIL("Wert erwartet");
     char c = *s->p;
@@ -314,7 +329,7 @@ static jval *descend(jval *root, strvec *path, size_t upto, int line) {
         } else if (n->t == J_ARR && n->n && n->items[n->n - 1]->t == J_OBJ) {
             n = n->items[n->n - 1];
         } else if (n->t != J_OBJ) {
-            return cur;
+            return NULL;   /* »x = 1« und danach »[x]« oder »x.y = 2«: x ist keine Tabelle */
         }
         cur = n;
     }
@@ -322,7 +337,7 @@ static jval *descend(jval *root, strvec *path, size_t upto, int line) {
 }
 
 jval *toml_parse(const char *text, size_t len) {
-    tp st = {text, text + len, 1}, *s = &st;
+    tp st = {text, text + len, 1, 0}, *s = &st;
     jval *root = jobj(), *cur = root;
     for (;;) {
         skip_ws_nl(s);
@@ -344,6 +359,11 @@ jval *toml_parse(const char *text, size_t len) {
             }
             s->p += arr ? 2 : 1;
             jval *parent = descend(root, &kp, kp.n - 1, s->line);
+            if (!parent) {
+                sv_free(&kp);
+                json_free(root);
+                FAIL("Tabellenpfad führt durch einen Wert");
+            }
             const char *last = kp.v[kp.n - 1];
             if (arr) {
                 jval *a = jget(parent, last);
@@ -363,6 +383,13 @@ jval *toml_parse(const char *text, size_t len) {
                 if (!t) {
                     t = jobj();
                     jset(parent, last, t);
+                } else if (t->t != J_OBJ) {
+                    char *nm = xstrdup(last);
+                    sv_free(&kp);
+                    json_free(root);
+                    set_error("TOML Zeile %d: %s ist keine Tabelle", s->line, nm);
+                    free(nm);
+                    return NULL;
                 }
                 cur = t;
             }
@@ -393,6 +420,12 @@ jval *toml_parse(const char *text, size_t len) {
             return NULL;
         }
         jval *t = descend(cur, &kp, kp.n - 1, s->line);
+        if (!t) {
+            json_free(v);
+            sv_free(&kp);
+            json_free(root);
+            FAIL("Schlüssel ist keine Tabelle");
+        }
         jset(t, kp.v[kp.n - 1], v);
         sv_free(&kp);
         if (!eol(s)) {

@@ -310,6 +310,8 @@ static void remove_files(txn *t, const char *name, hmap *keep, const jval *info)
             free(canon);
             if (same) continue;
         }
+        /* per [install] exclude nie ausgepackt: eine Datei dort gehört nicht dem Paket (sondern z. B. dem Benutzer) */
+        if (!strcmp(jgets(f, "type", ""), "excluded")) continue;
         char *target = rp(t, path);
         if (!strcmp(jgets(f, "type", ""), "dir")) {
             rmdir(target);
@@ -756,8 +758,9 @@ int clean_cache(config *c, database *d, int keep) {
             unlink(e[i].p->local_path);
             removed++;
         }
-        pkg_free(e[i].p);
     }
+    /* erst nach der Schleife freigeben: der Vergleich oben liest den Namen des vorigen Eintrags */
+    for (size_t i = 0; i < ne; i++) pkg_free(e[i].p);
     json_free(state);
     free(e);
     free(cache);
