@@ -137,7 +137,9 @@ check_all() {
   ((QUIET)) || echo "${B}Pakete${N}"
   local out rc=0
   out=$("$SYP" audit 2>&1) || rc=$?
-  if ((rc == 0)); then ok "Sicherheitsupdates" "keine offenen Lücken"
+  if ((rc == 0)) && grep -q "keine Sicherheitshinweise" <<<"$out"; then
+    warn "Sicherheitsupdates" "Paketquellen ohne Sicherheitshinweise – regelmäßig »sudo syp upgrade«"
+  elif ((rc == 0)); then ok "Sicherheitsupdates" "keine offenen Lücken"
   elif ((rc == 1)); then bad "Sicherheitsupdates" "$(echo "$out" | sed -n '1p') (sudo syp upgrade --security)"
   else warn "Sicherheitsupdates" "syp audit fehlgeschlagen"; fi
   if systemctl is-enabled --quiet syp-security-update.timer 2>/dev/null; then ok "Automatische Updates" "Sicherheitsupdates täglich"; fi
@@ -242,7 +244,7 @@ reload_fw() {
 # ------------------------------------------------------------------ Updates
 cmd_autoupdate() {
   case ${1:-status} in
-    on) need_root; systemctl enable --now syp-security-update.timer; echo "Sicherheitsupdates werden täglich eingespielt (vorher Btrfs-Snapshot)." ;;
+    on) need_root; systemctl enable --now syp-security-update.timer; echo "Sicherheitsupdates werden täglich eingespielt (vorher Btrfs-Snapshot; solange die Paketquellen keine Sicherheitshinweise tragen: alle getesteten Updates)." ;;
     off) need_root; systemctl disable --now syp-security-update.timer; echo "Automatische Sicherheitsupdates aus." ;;
     status) systemctl is-enabled --quiet syp-security-update.timer 2>/dev/null && echo an || echo aus ;;
     *) die "autoupdate on|off|status" ;;

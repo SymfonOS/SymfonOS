@@ -226,6 +226,15 @@ static void security_updates(ptrvec *av, hmap *inst, strvec *reqs, jval *report)
     }
 }
 
+/* Tragen die Paketquellen überhaupt Sicherheitshinweise? Ohne sie ist »keine Lücken« keine Aussage. */
+static int have_advisories(ptrvec *av) {
+    for (size_t k = 0; k < av->n; k++) {
+        jval *sec = jgeta(((pkg *)av->v[k])->info, "security");
+        if (sec && sec->n) return 1;
+    }
+    return 0;
+}
+
 static int c_audit(ctx *c) {
     ptrvec av = {0};
     repo_load_synced(&c->cfg, &av);
@@ -237,6 +246,9 @@ static int c_audit(ctx *c) {
         char *s = json_dump(rep, 0, 0);
         puts(s);
         free(s);
+    } else if (!rep->n && !have_advisories(&av)) {
+        printf(":: Die Paketquellen enthalten keine Sicherheitshinweise – offene Lücken sind nicht erkennbar.\n"
+               "   Updates regelmäßig einspielen: sudo syp upgrade\n");
     } else if (!rep->n) {
         printf(":: Keine bekannten Sicherheitslücken in installierten Paketen\n");
     } else {
@@ -267,6 +279,12 @@ static int c_upgrade(ctx *c, int nosync, int security_only) {
     plan p;
     plan_init(&p);
     int rc;
+    if (security_only && !have_advisories(&av)) {
+        /* ohne Hinweise erkennte --security nie etwas: dann wie dnf-automatic »default« alle (in der CI
+         * getesteten) Updates einspielen, mit Snapshot vorher */
+        if (!c->quiet) printf(":: Keine Sicherheitshinweise in den Paketquellen – alle Updates werden eingespielt\n");
+        security_only = 0;
+    }
     if (security_only) {
         strvec reqs = {0};
         security_updates(&av, &inst, &reqs, NULL);
