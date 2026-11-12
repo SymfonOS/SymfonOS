@@ -1,0 +1,14 @@
+[Unit]
+Description=Prüfungsmodus nach einem Neustart fortsetzen (Firewall, USB-Sperre, Kiosk-Sitzung)
+# nur wenn eine Prüfung läuft; vor dem Anmeldebildschirm, damit die Kiosk-Sitzung gleich gesperrt startet
+ConditionPathExists=|/var/lib/symfonos-exam-state/active
+ConditionPathExists=|/etc/sddm.conf.d/90-symfonos-exam.conf
+After=nftables.service systemd-modules-load.service
+Before=display-manager.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/symfonos-exam boot
+
+[Install]
+WantedBy=multi-user.target

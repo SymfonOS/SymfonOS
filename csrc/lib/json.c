@@ -184,6 +184,8 @@ static char *pstr(ps *s) {
                         s->p += 6;
                     }
                 }
+                /* NUL im Text: C-Strings endeten dort, »gut\u0000/../x« würde als »gut« geprüft */
+                if (!cp) goto bad;
                 utf8(&b, cp);
                 break;
             }

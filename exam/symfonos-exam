@@ -4,13 +4,15 @@
 #   symfonos-exam start --url URL [--allow DOMAIN]... [--seb DATEI.seb] [--minutes N] [--yes]
 #   symfonos-exam vm --image WINDOWS.qcow2 [--allow DOMAIN]...
 #   symfonos-exam stop | status | refresh
+#   symfonos-exam boot        (Dienst symfonos-exam-boot: nach einem Neustart Sperren wieder setzen)
 #   symfonos-exam render --url URL --allow DOMAIN...     (Trockenlauf: zeigt Firewall + Policies)
 #
 # Wirkung: eigener Benutzer »exam«, Kiosk-Compositor cage (ein Vollbildfenster, kein VT-Wechsel),
 # nftables-Allowlist, gestoppte Hintergrunddienste, gesperrte USB-Datenträger, SysRq aus.
 set -euo pipefail
 
-STATE=/run/symfonos-exam
+# dauerhaft (nicht /run): ein Neustart darf weder die Prüfung beenden noch Reste ohne Rückweg hinterlassen
+STATE=/var/lib/symfonos-exam-state
 SDDM_CONF=/etc/sddm.conf.d/90-symfonos-exam.conf
 FF_POLICY=/etc/firefox/policies/policies.json
 MODPROBE=/run/modprobe.d/symfonos-exam.conf
@@ -160,6 +162,55 @@ Relogin=true
 EOF
 }
 
+# Laufzeit-Sperren (gehen bei einem Neustart verloren): Firewall, Dienste, USB, SysRq
+lockdown() {
+  mapfile -t ALLOW < "$STATE/allow"
+  log "Firewall-Allowlist aktivieren (${#ALLOW[@]} Domains)"
+  local rules
+  rules=$(render_nft)
+  printf 'table inet symfonos_exam {}\ndelete table inet symfonos_exam\n%s\n' "$rules" | nft -f -
+  log "Hintergrunddienste anhalten"
+  for u in "${STOP_UNITS[@]}"; do
+    if systemctl is-active --quiet "$u"; then
+      systemctl stop "$u" && { grep -qx "$u" "$STATE/stopped-units" || echo "$u" >> "$STATE/stopped-units"; }
+    fi
+  done
+  log "USB-Datenträger sperren, SysRq aus"
+  install -d /run/modprobe.d
+  printf 'install usb_storage /bin/false\ninstall uas /bin/false\n' > "$MODPROBE"
+  modprobe -r uas usb_storage 2>/dev/null || true
+  sysctl -q kernel.sysrq=0
+}
+
+# Zeitlimit und regelmäßiges Neuauflösen der Allowlist (systemd-run-Timer überstehen keinen Neustart)
+timers() {
+  local END=""
+  # shellcheck disable=SC1091
+  . "$STATE/info"
+  if [[ -n $END ]]; then
+    local left=$(( (END - $(date +%s)) / 60 ))
+    ((left > 0)) || left=1
+    systemd-run --unit=symfonos-exam-timeout --on-active="${left}min" /usr/bin/symfonos-exam stop --yes >/dev/null
+  fi
+  systemd-run --unit=symfonos-exam-refresh --on-active=5min --on-unit-active=5min \
+    /usr/bin/symfonos-exam refresh >/dev/null
+}
+
+cmd_boot() {
+  need_root
+  if [[ -e $STATE/active ]]; then
+    log "Prüfungsmodus nach Neustart fortsetzen"
+    # shellcheck disable=SC1091
+    . "$STATE/info"
+    lockdown
+    write_session
+    timers
+  elif [[ -e $SDDM_CONF ]]; then
+    # Reste eines abgebrochenen Starts/Stopps: Normalbetrieb herstellen
+    rm -f "$SDDM_CONF" /usr/share/wayland-sessions/symfonos-exam.desktop
+  fi
+}
+
 cmd_start() {
   need_root
   parse "$@"
@@ -184,21 +235,12 @@ cmd_start() {
   local started=
   trap '[[ -n $started ]] || { echo "Fehler: Start fehlgeschlagen, Normalbetrieb wird wiederhergestellt" >&2; cmd_stop --yes; }' EXIT
   printf '%s\n' "${ALLOW[@]}" > "$STATE/allow"
-  printf 'MODE=%q\nURL=%q\nSTARTED=%q\n' "$MODE" "$URL" "$(date -Iseconds)" > "$STATE/info"
+  printf 'MODE=%q\nURL=%q\nSEB=%q\nIMAGE=%q\nSTARTED=%q\n' "$MODE" "$URL" "$SEB" "$IMAGE" "$(date -Iseconds)" > "$STATE/info"
 
-  log "Firewall-Allowlist aktivieren (${#ALLOW[@]} Domains)"
-  render_nft | nft -f -
-
-  log "Hintergrunddienste anhalten"
   : > "$STATE/stopped-units"
-  for u in "${STOP_UNITS[@]}"; do
-    if systemctl is-active --quiet "$u"; then systemctl stop "$u" && echo "$u" >> "$STATE/stopped-units"; fi
-  done
-  log "USB-Datenträger sperren, SysRq aus"
-  install -d /run/modprobe.d
-  printf 'install usb_storage /bin/false\ninstall uas /bin/false\n' > "$MODPROBE"
-  modprobe -r uas usb_storage 2>/dev/null || true
-  sysctl -n kernel.sysrq > "$STATE/sysrq"; sysctl -q kernel.sysrq=0
+  sysctl -n kernel.sysrq > "$STATE/sysrq"
+  ((MINUTES > 0)) && echo "END=$(( $(date +%s) + MINUTES * 60 ))" >> "$STATE/info"
+  lockdown
 
   if [[ $MODE == browser ]]; then
     install -d /etc/firefox/policies
@@ -206,11 +248,7 @@ cmd_start() {
     render_policy > "$FF_POLICY"
   fi
   write_session
-  if ((MINUTES > 0)); then
-    systemd-run --unit=symfonos-exam-timeout --on-active="${MINUTES}min" /usr/bin/symfonos-exam stop --yes
-  fi
-  systemd-run --unit=symfonos-exam-refresh --on-active=5min --on-unit-active=5min \
-    /usr/bin/symfonos-exam refresh >/dev/null
+  timers
   started=1
   log "Prüfungssitzung startet"
   systemctl restart display-manager
@@ -225,6 +263,7 @@ cmd_refresh() {  # CDN-Adressen ändern sich: Allowlist regelmäßig neu auflös
   # in einer nft-Transaktion ersetzen: scheitert das Laden, bleibt die alte Sperre stehen (nie ohne Firewall)
   printf 'table inet symfonos_exam {}\ndelete table inet symfonos_exam\n%s\n' "$rules" | nft -f -
 }
+
 
 cmd_stop() {
   need_root
@@ -262,6 +301,7 @@ case "${1:-}" in
   vm) shift; cmd_start "$@" ;;
   stop) shift; cmd_stop "$@" ;;
   refresh) cmd_refresh ;;
+  boot) cmd_boot ;;
   status) cmd_status ;;
   render) shift; parse "$@"; echo "# nftables"; render_nft; echo "# Firefox-Policies"; render_policy ;;
   *) sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;

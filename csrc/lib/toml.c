@@ -130,8 +130,12 @@ static char *pstring(tp *s) {
                 int n = e == 'u' ? 4 : 8;
                 if (s->e - s->p < n) goto bad;
                 char *h = xstrndup(s->p, (size_t)n);
-                utf8(&b, strtoul(h, NULL, 16));
+                /* genau n Hex-Ziffern (strtoul nähme »-1«, Leerzeichen und Müll als 0), kein NUL */
+                int okhex = strspn(h, "0123456789abcdefABCDEF") == (size_t)n;
+                unsigned long cp = strtoul(h, NULL, 16);
                 free(h);
+                if (!okhex || !cp || cp > 0x10FFFF || (cp >= 0xD800 && cp < 0xE000)) goto bad;
+                utf8(&b, (unsigned)cp);
                 s->p += n;
                 break;
             }
