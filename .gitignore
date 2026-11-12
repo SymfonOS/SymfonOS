@@ -8,3 +8,4 @@ __pycache__/
 csrc/bin/
 csrc/**/*.o
 csrc/*.a
+*.egg-info/
