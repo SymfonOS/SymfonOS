@@ -21,8 +21,12 @@ case $(cat "$PHASE" 2>/dev/null) in
   "")
     echo upgrade > "$PHASE"; sync
     [[ $(symfonos-upgrade-probe) == 1-1 ]] || fail "Ausgangsversion fehlt"
-    syp sync || fail "syp sync"
-    syp -y upgrade || fail "syp upgrade (Exit $?)"
+    # wie im Alltag: über den Dienst der automatischen Sicherheitsupdates (syp als systemd-Dienst, init_t);
+    # ohne Sicherheitshinweise im Index spielt »upgrade --security« alle Updates ein
+    systemctl start syp-security-update.service
+    res=$(systemctl show -p Result --value syp-security-update.service)
+    journalctl -u syp-security-update.service -o cat --no-pager | sed 's/^/UPGRADE-TEST dienst: /'
+    [[ $res == success ]] || fail "syp-security-update.service: $res"
     [[ $(symfonos-upgrade-probe) == 2-1 ]] || fail "neue Version nicht aktiv: $(symfonos-upgrade-probe)"
     syp list | grep -qx 'symfonos-upgrade-probe 2-1' || fail "Paketdatenbank: $(syp list | grep probe)"
     if [[ -e /sys/fs/selinux/enforce ]]; then
