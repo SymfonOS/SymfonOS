@@ -211,6 +211,7 @@ static int read_entry(struct archive *a, char **out, size_t *n) {
 }
 
 static int syp_open_impl(const char *path, sypfile *f, int with_data);
+static int unsafe_path(const char *p);
 int syp_open(const char *path, sypfile *f) { return syp_open_impl(path, f, 1); }
 int syp_open_meta(const char *path, sypfile *f) { return syp_open_impl(path, f, 0); }
 
@@ -266,6 +267,15 @@ static int syp_open_impl(const char *path, sypfile *f, int with_data) {
             rc = -1;
         } else {
             info_defaults(f->info);
+            /* Pfade der Dateiliste wie die Archiv-Einträge prüfen: die Installation schreibt nach dieser Liste
+             * (Links, Verzeichnisse) – »..« oder ».« dort führten aus der Wurzel heraus */
+            for (size_t i = 0; !rc && i < f->files->n; i++) {
+                const char *fp = jgets(f->files->items[i], "path", "");
+                if (unsafe_path(fp)) {
+                    set_error("%s: unsicherer Pfad in der Dateiliste: %s", path, fp);
+                    rc = -1;
+                }
+            }
         }
     }
     free(sigb);
@@ -326,6 +336,9 @@ static int unsafe_path(const char *p) {
         const char *e = strchr(s, '/');
         size_t n = e ? (size_t)(e - s) : strlen(s);
         if (n == 2 && !strncmp(s, "..", 2)) return 1;
+        /* auch ».« und leere Teile (»./l«, »a//b«): die Symlink-Prüfung vergleicht Pfade als Text, »./l« (Link)
+         * und »l/datei« wären sonst verschiedene Namen und das Auspacken schriebe durch den Link */
+        if (n == 0 || (n == 1 && *s == '.')) return 1;
         if (!e) break;
         s = e + 1;
     }

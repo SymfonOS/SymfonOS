@@ -163,6 +163,9 @@ cat > "$IMG/etc/motd" <<CONF
   Hilfe:         man syp  ·  https://github.com/thomasrohm23-bit/symfonOS
 
 CONF
+# Paket-Cache leeren: syp kopiert auch aus dem file://-Repo jedes Paket nach /var/cache/syp/pkg, im Live-System
+# läge damit jedes Programm zweimal (installiert und als .syp). Der Installer braucht den Cache nicht.
+rm -rf "${IMG:?}"/var/cache/syp/pkg/*
 # Größenübersicht (das ISO muss als eine Datei unter 2 GiB bleiben)
 log "Größe des Live-Systems: $(du -sxm "$IMG" | cut -f1) MiB"
 # head schließt die Pipe vorzeitig; sort bekommt dann SIGPIPE, das darf mit pipefail nicht abbrechen
