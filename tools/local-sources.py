@@ -20,8 +20,10 @@ LOCK = os.path.join(RECIPES, "local-sources.lock")
 
 
 def tree_hash(paths):
-    """Nur von git verfolgte Dateien: Bauergebnisse (csrc/bin, *.o) dürfen das Ergebnis nicht ändern."""
-    out = subprocess.run(["git", "-C", ROOT, "ls-files", "-z", "--", *paths], capture_output=True, check=True)
+    """Von git verfolgte und neue, nicht ignorierte Dateien: Bauergebnisse (csrc/bin, *.o) dürfen das Ergebnis
+    nicht ändern, eine neu angelegte, noch nicht hinzugefügte Datei muss aber zählen (sonst weicht die CI ab)."""
+    out = subprocess.run(["git", "-C", ROOT, "ls-files", "-z", "--cached", "--others", "--exclude-standard", "--",
+                          *paths], capture_output=True, check=True)
     h = hashlib.sha256()
     for rel in sorted(f for f in out.stdout.decode().split("\0") if f):
         f = os.path.join(ROOT, rel)
