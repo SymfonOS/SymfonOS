@@ -2,20 +2,27 @@
 arch = "x86_64"
 
 # Signierte Repositories. Kleinere priority = bevorzugt.
+# Das ganze System ist aus Quellcode gebaut; die CI veröffentlicht die Pakete nach bestandenen ISO-Tests als
+# GitHub-Release (tools/publish-repo.sh). Release-Dateien haben keine Unterordner: flat = true.
 [[repo]]
-name = "symfonos"          # eigene Pakete (Tools, Branding, Rebuilds)
-url = "https://thomasrohm23-bit.github.io/symfonOS/repo/symfonos/x86_64"
+name = "symfonos"
+url = "https://github.com/SymfonOS/SymfonOS/releases/download/repo-x86_64"
+flat = true
 priority = 10
 
+# Aus Arch konvertierte Pakete (nur für die alte Arch-basierte Ausgabe): aus. Sie würden Kernel, systemd und
+# glibc durch Arch-Builds ohne SELinux und ohne die symfonOS-Härtung ersetzen.
 [[repo]]
-name = "core"              # aus Arch [core] konvertiert und neu signiert
+name = "core"
 url = "https://thomasrohm23-bit.github.io/symfonOS/repo/core/x86_64"
 priority = 20
+enabled = false
 
 [[repo]]
-name = "extra"             # aus Arch [extra] konvertiert und neu signiert
+name = "extra"
 url = "https://thomasrohm23-bit.github.io/symfonOS/repo/extra/x86_64"
 priority = 30
+enabled = false
 
 [snapshots]
 enabled = true

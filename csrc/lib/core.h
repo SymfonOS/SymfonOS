@@ -10,6 +10,7 @@
 typedef struct {
     char *name, *url;
     int priority, enabled;
+    int flat; /* Pakete liegen ohne Unterordner neben dem Index (GitHub-Release: keine »/« in Dateinamen) */
 } repoconf;
 
 typedef struct {

@@ -1,5 +1,7 @@
 [Unit]
 Description=Täglich nach Updates suchen
+# nicht im Live-System (kein installiertes System, oft ohne Netz)
+ConditionKernelCommandLine=!rd.live.image
 
 [Timer]
 OnBootSec=10min
