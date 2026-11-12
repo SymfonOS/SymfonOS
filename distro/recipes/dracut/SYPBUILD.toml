@@ -1,7 +1,7 @@
 # symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
 [package]
 name = "dracut"
-version = "107-1"
+version = "107-2"
 summary = "Initramfs-Generator (inkl. Live-Boot)"
 license = "GPL-2.0-or-later"
 url = "https://github.com/dracut-ng/dracut-ng/archive/refs/tags/"
@@ -22,6 +22,9 @@ cd "$S"
 make DESTDIR="$DESTDIR" install
 install -Dm644 /dev/stdin "$DESTDIR/etc/dracut.conf.d/symfonos.conf" <<'EOF'
 hostonly="yes"
+# root=/rootflags=/rd.luks.* nur von der Kernel-Befehlszeile: sonst landet subvolid=<id> von @ in der initramfs,
+# und nach »syp rollback --system« (neues @ mit anderer id) startet das System nicht mehr
+hostonly_cmdline="no"
 compress="zstd"
 add_dracutmodules+=" btrfs crypt lvm "
 EOF
