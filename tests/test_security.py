@@ -189,7 +189,9 @@ def test_install_layout(tmp_path):
     assert "nullok" not in pam
     preset = (tmp_path / "usr/lib/systemd/system-preset/50-symfonos-security.preset").read_text()
     assert "disable sshd.service" in preset and "enable nftables.service" in preset
-    if shutil.which("visudo"):
+    # nur mit dem echten sudo prüfen (symfonOS liefert sudo aus); sudo-rs (Ubuntu 26) kennt z. B. »logfile« nicht
+    ver = run("visudo", "--version", check=False) if shutil.which("visudo") else None
+    if ver and "-rs" not in ver.stdout + ver.stderr:   # »visudo-rs …« bzw. »sudo-rs …«
         r = run("visudo", "-cf", tmp_path / "etc/sudoers.d/00-symfonos", check=False)
         assert r.returncode == 0, r.stdout + r.stderr
 
