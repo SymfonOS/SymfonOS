@@ -1,6 +1,8 @@
 """symfonOS Software-Center."""
 from __future__ import annotations
 
+import codecs
+import html
 import os
 import time
 import shlex
@@ -8,7 +10,7 @@ import sys
 from pathlib import Path
 
 from PySide6.QtCore import QProcess, QSize, Qt
-from PySide6.QtGui import QColor, QIcon
+from PySide6.QtGui import QColor, QIcon, QTextCursor
 from PySide6.QtWidgets import (QApplication, QDialog, QFrame, QHBoxLayout, QLabel, QLineEdit,
                                QListWidget, QListWidgetItem, QMainWindow, QMessageBox,
                                QPlainTextEdit, QPushButton, QTabWidget, QTreeWidget,
@@ -38,10 +40,22 @@ class RunDialog(QDialog):
         lay.addWidget(self.close_btn, alignment=Qt.AlignRight)
         self.proc = QProcess(self)
         self.proc.setProcessChannelMode(QProcess.MergedChannels)
-        self.proc.readyReadStandardOutput.connect(
-            lambda: self.log.appendPlainText(bytes(self.proc.readAllStandardOutput()).decode(errors="replace")))
+        # schrittweise dekodieren: ein Umlaut kann auf zwei Lesevorgänge verteilt ankommen
+        self._dec = codecs.getincrementaldecoder("utf-8")(errors="replace")
+        self.proc.readyReadStandardOutput.connect(self._read)
         self.proc.finished.connect(self.done_)
+        self.proc.errorOccurred.connect(self._error)
         self.proc.start(cmd[0], cmd[1:])
+
+    def _read(self):
+        self.log.moveCursor(QTextCursor.End)
+        self.log.insertPlainText(self._dec.decode(bytes(self.proc.readAllStandardOutput())))
+
+    def _error(self, err):
+        if err == QProcess.FailedToStart:   # dann kommt kein »finished«: Fenster sonst ewig »Wird ausgeführt«
+            self.log.appendPlainText(f"Konnte {self.proc.program()} nicht starten: {self.proc.errorString()}")
+            self.setWindowTitle("Fehlgeschlagen")
+            self.close_btn.setEnabled(True)
 
     def done_(self, code, _status):
         self.setWindowTitle("Fertig" if code == 0 else f"Fehlgeschlagen ({code})")
@@ -95,8 +109,10 @@ class Details(QFrame):
                  if item.installed else f"Version {item.version}")
         self.meta.setText(f"{state} · Lizenz {item.license} · {ORIGIN_LABEL.get(item.origin, item.origin)}"
                           f" · Repo {item.repo} · {item.size / 1e6:.1f} MB")
-        url = f'<p><a href="{item.url}">{item.url}</a></p>' if item.url else ""
-        self.desc.setText(f"<p><b>{item.summary}</b></p><p>{item.description}</p>{url}")
+        # Texte stammen auch aus konvertierten Fremdpaketen: nie als HTML deuten (keine eingeschleusten Links)
+        e = html.escape
+        url = f'<p><a href="{e(item.url, quote=True)}">{e(item.url)}</a></p>' if item.url else ""
+        self.desc.setText(f"<p><b>{e(item.summary or '')}</b></p><p>{e(item.description or '')}</p>{url}")
         self.remove.setVisible(bool(item.installed))
         self.action.setVisible(not item.installed or item.update)
         self.action.setText("Aktualisieren" if item.update else "Installieren")

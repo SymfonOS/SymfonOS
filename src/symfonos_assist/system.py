@@ -83,7 +83,7 @@ RULES = [
             ("sudo btrfs device stats /", "sudo smartctl -H /dev/nvme0n1")),
     Finding(r"Out of memory|oom-kill|OOM", "Arbeitsspeicher erschöpft",
             "zram ist aktiv; große Projekte ggf. mit weniger Vorschauqualität öffnen.", ("free -h", "zramctl")),
-    Finding(r"Failed to start (\S+)", "Dienst startet nicht",
+    Finding(r"Failed to start ([\w.@:-]+)", "Dienst startet nicht",
             "Status und Log des Dienstes ansehen.", ("systemctl status {1}", "journalctl -u {1} -b")),
     Finding(r"signature.*(invalid|ungültig)|Unbekannter Signaturschlüssel", "Paketsignatur ungültig",
             "Schlüsselbund aktualisieren und neu synchronisieren.", ("syp install symfonos-keyring", "syp sync")),

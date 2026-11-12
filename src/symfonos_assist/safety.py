@@ -14,6 +14,11 @@ READ_ONLY_SUB = {"systemctl": {"status", "--failed", "list-units", "is-active", 
                                "cat", "list-timers"},
                  "syp": {"info", "search", "list", "files", "owns", "history", "doctor", "verify"},
                  "snapper": {"list"}, "btrfs": {"device", "filesystem"}, "nmcli": {"device", "connection", "general"}}
+# Teilbefehle, die etwas verändern, auch bei sonst lesenden Programmen (ip link set, nmcli connection delete,
+# btrfs device remove, pactl set-sink-volume, journalctl --vacuum-size …)
+CHANGING_ARGS = {"set", "add", "del", "delete", "remove", "flush", "change", "replace", "modify", "up", "down",
+                 "reload", "restart", "start", "stop", "enable", "disable", "mask", "unmask", "kill", "load-module",
+                 "unload-module", "resize", "balance", "scrub", "defragment"}
 DANGER = [r"\brm\s+-[a-z]*r[a-z]*f?\s+(/|~|\$HOME|\*)", r"\bdd\b.*\bof=/dev/", r"\bmkfs", r"\bwipefs",
           r"\bchmod\s+-R\s+\d+\s+/", r"\bchown\s+-R\b.*\s/(\s|$)", r"curl[^|]*\|\s*(sudo\s+)?(ba)?sh",
           r"wget[^|]*\|\s*(sudo\s+)?(ba)?sh", r">\s*/dev/sd", r":\(\)\s*\{", r"\bsyp\b.*--allow-unsigned",
@@ -35,7 +40,7 @@ class Proposal:
 def classify(cmd: str) -> str:
     if any(re.search(p, cmd) for p in DANGER):
         return "gefährlich"
-    if re.search(r"[;&|]|\$\(|`|>", cmd.replace("2>&1", "")):
+    if re.search(r"[;&|<]|\$\(|`|>", cmd.replace("2>&1", "")):
         return "ändernd"            # Verkettung/Umleitung nie als harmlos werten
     try:
         argv = shlex.split(cmd)
@@ -48,6 +53,8 @@ def classify(cmd: str) -> str:
     prog = argv[0]
     if prog in READ_ONLY:
         subs = READ_ONLY_SUB.get(prog)
+        if any(a in CHANGING_ARGS or a.startswith(("set-", "--vacuum", "--rotate")) for a in argv[1:]):
+            return "ändernd"
         if subs is None or (len(argv) > 1 and argv[1] in subs):
             return "lesend"
     return "ändernd"

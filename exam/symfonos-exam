@@ -176,7 +176,13 @@ cmd_start() {
     echo "Erlaubte Ziele: ${ALLOW[*]}"
     read -rp "Fortfahren? [j/N] " a; [[ $a =~ ^[jJyY] ]] || exit 0
   fi
-  install -d -m 700 "$STATE"
+  # 711: der Benutzer exam führt $STATE/session.sh aus und prüft $STATE/active (nur Durchgang, kein Auflisten)
+  install -d -m 711 "$STATE"
+  # Ab hier ist das System verändert: »active« zuerst anlegen, damit »stop« alles zurücknimmt; scheitert ein
+  # Schritt, stellt der EXIT-Trap den Normalbetrieb sofort wieder her (sonst bliebe die Firewall-Sperre stehen)
+  touch "$STATE/active"
+  local started=
+  trap '[[ -n $started ]] || { echo "Fehler: Start fehlgeschlagen, Normalbetrieb wird wiederhergestellt" >&2; cmd_stop --yes; }' EXIT
   printf '%s\n' "${ALLOW[@]}" > "$STATE/allow"
   printf 'MODE=%q\nURL=%q\nSTARTED=%q\n' "$MODE" "$URL" "$(date -Iseconds)" > "$STATE/info"
 
@@ -199,13 +205,13 @@ cmd_start() {
     [[ -e $FF_POLICY ]] && cp -a "$FF_POLICY" "$STATE/policies.json.bak"
     render_policy > "$FF_POLICY"
   fi
-  touch "$STATE/active"
   write_session
   if ((MINUTES > 0)); then
     systemd-run --unit=symfonos-exam-timeout --on-active="${MINUTES}min" /usr/bin/symfonos-exam stop --yes
   fi
   systemd-run --unit=symfonos-exam-refresh --on-active=5min --on-unit-active=5min \
     /usr/bin/symfonos-exam refresh >/dev/null
+  started=1
   log "Prüfungssitzung startet"
   systemctl restart display-manager
 }
@@ -214,8 +220,10 @@ cmd_refresh() {  # CDN-Adressen ändern sich: Allowlist regelmäßig neu auflös
   need_root
   [[ -e $STATE/active ]] || exit 0
   mapfile -t ALLOW < "$STATE/allow"
-  nft delete table inet symfonos_exam 2>/dev/null || true
-  render_nft | nft -f -
+  local rules
+  rules=$(render_nft)
+  # in einer nft-Transaktion ersetzen: scheitert das Laden, bleibt die alte Sperre stehen (nie ohne Firewall)
+  printf 'table inet symfonos_exam {}\ndelete table inet symfonos_exam\n%s\n' "$rules" | nft -f -
 }
 
 cmd_stop() {
@@ -229,7 +237,9 @@ cmd_stop() {
   if [[ -e $STATE/policies.json.bak ]]; then mv "$STATE/policies.json.bak" "$FF_POLICY"; else rm -f "$FF_POLICY"; fi
   nft delete table inet symfonos_exam 2>/dev/null || true
   [[ -e $STATE/sysrq ]] && sysctl -q kernel.sysrq="$(cat "$STATE/sysrq")"
-  while read -r u; do [[ -n $u ]] && systemctl start "$u" || true; done < "$STATE/stopped-units"
+  if [[ -e $STATE/stopped-units ]]; then
+    while read -r u; do [[ -n $u ]] && systemctl start "$u" || true; done < "$STATE/stopped-units"
+  fi
   loginctl terminate-user exam 2>/dev/null || true
   rm -rf "${EXAM_HOME:?}"/* "$STATE"
   systemctl restart display-manager

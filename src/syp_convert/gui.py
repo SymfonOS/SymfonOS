@@ -142,7 +142,11 @@ class Window(QMainWindow):
 
     def add_files(self, files: list[Path]):
         for f in files:
-            if not f.name.endswith(SUFFIXES) or str(f) in self.results:
+            if not f.name.endswith(SUFFIXES):
+                continue
+            if str(f) in self.results:
+                if isinstance(self.results[str(f)], str):   # fehlgeschlagen: erneut versuchen lassen
+                    self.results[str(f)] = None
                 continue
             self.results[str(f)] = None
             it = QListWidgetItem(f"⏳  {f.name}")
@@ -150,6 +154,10 @@ class Window(QMainWindow):
             self.list.addItem(it)
 
     def start(self):
+        # fehlgeschlagene Dateien beim nächsten Klick erneut versuchen
+        for p, r in self.results.items():
+            if isinstance(r, str):
+                self.results[p] = None
         todo = [Path(p) for p, r in self.results.items() if r is None]
         if not todo:
             return
@@ -224,8 +232,17 @@ class Window(QMainWindow):
             return
         args = ["syp", "-y", "install", r.output]
         if not self.key.text().strip():
+            # ohne Schlüssel ist das Paket unsigniert: die Signaturpflicht nur nach ausdrücklicher Zustimmung umgehen
+            if QMessageBox.warning(
+                    self, "Unsigniertes Paket",
+                    "Das Paket wurde ohne Signaturschlüssel umgewandelt. symfonOS installiert normalerweise nur "
+                    "signierte Pakete.\n\nNur fortfahren, wenn du der Quelle der Originaldatei vertraust. "
+                    "Trotzdem installieren?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No) != QMessageBox.Yes:
+                return
             args.append("--allow-unsigned")
         proc = QProcess(self)
+        proc.errorOccurred.connect(lambda err: err == QProcess.FailedToStart and QMessageBox.critical(
+            self, "Installation", f"pkexec konnte nicht gestartet werden: {proc.errorString()}"))
         proc.finished.connect(lambda code, _s: QMessageBox.information(
             self, "Installation", "Installiert." if code == 0 else
             f"Fehlgeschlagen ({code}):\n{bytes(proc.readAllStandardError()).decode()[-800:]}"))
