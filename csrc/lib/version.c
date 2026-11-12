@@ -9,9 +9,19 @@
 int rpmvercmp(const char *a, const char *b) {
     if (strcmp(a, b) == 0) return 0;
     size_t i = 0, j = 0, la = strlen(a), lb = strlen(b);
-    while (i < la && j < lb) {
-        while (i < la && !isalnum((unsigned char)a[i])) i++;
-        while (j < lb && !isalnum((unsigned char)b[j])) j++;
+    for (;;) {
+        /* Trennzeichen erst auf beiden Seiten überspringen, dann das Ende prüfen: sonst galt »1.0.rc1« wegen
+         * des stehengebliebenen ».« als neuer als »1.0«, »1.0rc1« aber als älter */
+        while (i < la && !isalnum((unsigned char)a[i]) && a[i] != '~') i++;
+        while (j < lb && !isalnum((unsigned char)b[j]) && b[j] != '~') j++;
+        /* »~« steht vor allem, auch vor dem Ende: 1.0~rc1 < 1.0 (Vorabversion, wie bei rpm/dpkg) */
+        if ((i < la && a[i] == '~') || (j < lb && b[j] == '~')) {
+            if (i >= la || a[i] != '~') return 1;
+            if (j >= lb || b[j] != '~') return -1;
+            i++;
+            j++;
+            continue;
+        }
         if (i >= la || j >= lb) break;
         size_t si = i, sj = j;
         int isnum = isdigit((unsigned char)a[i]);

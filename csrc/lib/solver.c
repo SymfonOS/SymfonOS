@@ -349,6 +349,15 @@ int solve_upgrade(solver *s, plan *out) {
     agenda *head = NULL, **tail = &head;
     for (size_t i = 0; i < names.n; i++) {
         pkg *p = hm_get(&st.sel, names.v[i]);
+        /* Ist das Installierte neuer als alles im Repo (lokal gebaut, Repo zurückgesetzt), gibt es nichts zu
+         * aktualisieren: keine erzwungene Anfrage »name>=installiert«, die sonst das ganze Upgrade scheitern ließ */
+        ptrvec *cv = hm_get(&s->by_provide, p->name);
+        int newer = 0;
+        for (size_t k = 0; cv && k < cv->n && !newer; k++) {
+            pkg *c = cv->v[k];
+            if (!strcmp(c->name, p->name) && vercmp(c->version, p->version) >= 0) newer = 1;
+        }
+        if (!newer) continue;
         char *r = xasprintf("%s>=%s", p->name, p->version);
         dep_parse(r, &reqd[i]);
         free(r);
