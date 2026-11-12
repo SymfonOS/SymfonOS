@@ -84,7 +84,10 @@ class Backend:
         self.reload()
 
     def _syp(self, *args: str):
-        r = subprocess.run([SYP, "-r", self.root, *args], capture_output=True, text=True)
+        try:
+            r = subprocess.run([SYP, "-r", self.root, *args], capture_output=True, text=True, timeout=300)
+        except (OSError, subprocess.TimeoutExpired) as e:   # syp fehlt oder hängt: Fehler zeigen statt Absturz
+            raise SypError(f"syp {args[0]} nicht ausführbar: {e}") from e
         if r.returncode:
             raise SypError(r.stderr.strip().removeprefix("Fehler: ") or f"syp {args[0]} fehlgeschlagen")
         return json.loads(r.stdout or "null")
@@ -98,8 +101,10 @@ class Backend:
             self._update_error = str(e)
         try:
             self._search = self._syp("search", "--json")
-        except SypError:
+        except (SypError, json.JSONDecodeError) as e:
+            # sonst sähe der Store einfach leer aus; die Meldung erscheint wie Update-Fehler
             self._search = []
+            self._update_error = self._update_error or f"Katalog nicht lesbar: {e}"
         self._local, self._icons = self._local_apps()
 
     def _local_apps(self) -> tuple[dict[str, list[str]], dict[str, str]]:

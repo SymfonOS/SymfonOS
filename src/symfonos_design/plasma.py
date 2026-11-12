@@ -42,13 +42,22 @@ class Profile:
     @classmethod
     def load(cls, path: Path = CONFIG) -> "Profile":
         if path.exists():
-            data = json.loads(path.read_text())
-            return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
+            try:
+                data = json.loads(path.read_text())
+                return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
+            except (OSError, ValueError, TypeError, AttributeError):
+                # beschädigte Datei (z. B. Stromausfall beim Schreiben): beiseitelegen, mit Standardwerten starten
+                try:
+                    path.replace(path.with_suffix(".json.kaputt"))
+                except OSError:
+                    pass
         return cls()
 
     def save(self, path: Path = CONFIG) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(asdict(self), indent=2, ensure_ascii=False))
+        tmp = path.with_suffix(".json.tmp")   # atomar ersetzen: nie eine halb geschriebene design.json
+        tmp.write_text(json.dumps(asdict(self), indent=2, ensure_ascii=False))
+        os.replace(tmp, path)
 
 
 PRESETS = {

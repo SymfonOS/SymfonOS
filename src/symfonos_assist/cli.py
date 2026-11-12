@@ -20,13 +20,17 @@ def stream_print(it) -> None:
     print()
 
 
-def offer_commands(a: Assistant, ask=input) -> None:
+def offer_commands(a: Assistant, ask=input, _done: set[str] | None = None) -> None:
+    done = set() if _done is None else _done
     for p in a.proposals():
+        if p.command in done:   # schon ausgeführt (z. B. Auswertung gescheitert, alte Antwort): nicht erneut anbieten
+            continue
         if safety.confirm_cli(p, ask):
+            done.add(p.command)
             code, out = safety.run(p.command)
             print(f"  → Exit-Code {code}\n" + "\n".join("    " + l for l in out.splitlines()[-30:]))
             stream_print(a.feed_output(p.command, code, out))
-            offer_commands(a, ask)
+            offer_commands(a, ask, done)
             return
         print("  Übersprungen.")
 
