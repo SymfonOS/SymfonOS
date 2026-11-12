@@ -19,7 +19,8 @@ LABEL=SYMFONOS
 if [[ -d $WORK ]]; then
   # grep ohne Treffer (nichts eingehängt, z. B. nach dem Basis-Image) darf mit pipefail nicht abbrechen
   findmnt -rn -o TARGET | { grep "^$WORK" || true; } | sort -r | while read -r m; do umount -l "$m"; done
-  if findmnt -rn -o TARGET | grep "^$WORK" >/dev/null; then   # ohne -q: grep -q bräche findmnt per SIGPIPE ab (pipefail) echo "unter $WORK ist noch etwas eingehängt" >&2; exit 1; fi
+  # ohne -q: grep -q bräche findmnt per SIGPIPE ab, und mit pipefail fiele die Prüfung dann still aus
+  if findmnt -rn -o TARGET | grep "^$WORK" >/dev/null; then echo "unter $WORK ist noch etwas eingehängt" >&2; exit 1; fi
   rm -rf --one-file-system "$WORK"
 fi
 mkdir -p "$IMG/etc/syp/keys" "$ISO"/{boot,LiveOS}
