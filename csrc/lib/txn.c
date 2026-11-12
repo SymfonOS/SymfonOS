@@ -180,21 +180,29 @@ static void relabel_changed(txn *t) {
     if (!cfg_is_root(t->cfg) || !t->changed.n || access("/sys/fs/selinux/enforce", F_OK) ||
         access("/usr/sbin/restorecon", X_OK))
         return;
-    char tmpl[] = "/run/syp-relabel-XXXXXX";
-    int fd = mkstemp(tmpl);
-    if (fd < 0) return;
-    FILE *f = fdopen(fd, "w");
-    if (!f) {
-        close(fd);
-        unlink(tmpl);
-        return;
+    /* Pfade als Argumente, nicht als Listendatei (-f): restorecon wechselt unter enforcing nach setfiles_t und
+     * darf eine von syp angelegte Datei in /run nicht lesen (z. B. wenn syp als systemd-Dienst läuft).
+     * Stapel begrenzen, damit die Kommandozeile unter ARG_MAX bleibt. */
+    enum { HEAD = 3, MAXN = 512, MAXLEN = 64 * 1024 };
+    char **argv = xmalloc((HEAD + MAXN + 1) * sizeof *argv);
+    argv[0] = "/usr/sbin/restorecon";
+    argv[1] = "-F";
+    argv[2] = "-i";
+    int bad = 0;
+    for (size_t i = 0; i < t->changed.n;) {
+        size_t n = 0, len = 0;
+        while (i < t->changed.n && n < MAXN && len < MAXLEN) {
+            char *p = xasprintf("/%s", t->changed.v[i++]);
+            len += strlen(p) + 1;
+            argv[HEAD + n++] = p;
+        }
+        argv[HEAD + n] = NULL;
+        int rc = run_cmd(argv, NULL, NULL);
+        if (rc) bad = rc;
+        for (size_t k = 0; k < n; k++) free(argv[HEAD + k]);
     }
-    for (size_t i = 0; i < t->changed.n; i++) fprintf(f, "/%s\n", t->changed.v[i]);
-    fclose(f);
-    char *argv[] = {"/usr/sbin/restorecon", "-F", "-i", "-f", tmpl, NULL};
-    int rc = run_cmd(argv, NULL, NULL);
-    if (rc && !t->quiet) printf("   Warnung: SELinux-Kontexte nicht vollständig gesetzt (restorecon %d)\n", rc);
-    unlink(tmpl);
+    free(argv);
+    if (bad && !t->quiet) printf("   Warnung: SELinux-Kontexte nicht vollständig gesetzt (restorecon %d)\n", bad);
 }
 
 /* --- Skripte ----------------------------------------------------------------------- */
