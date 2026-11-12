@@ -49,8 +49,16 @@ static int extract_archive(const char *file, const char *dest) {
     }
     struct archive_entry *e;
     int rc = 0, r;
-    while ((r = archive_read_next_header(a, &e)) == ARCHIVE_OK) {
-        char *p = path_join(dest, archive_entry_pathname(e));
+    /* Jeder Fehler bricht ab: ein halb entpacktes Quellarchiv (volle Platte, abgeschnittene Datei, abgewiesener
+     * Pfad) würde sonst still zu einem anderen Paket führen. ARCHIVE_WARN (z. B. unbekannte Erweiterungen) ist ok. */
+    while ((r = archive_read_next_header(a, &e)) != ARCHIVE_EOF) {
+        if (r < ARCHIVE_WARN) {
+            set_error("%s: %s", file, archive_error_string(a));
+            rc = -1;
+            break;
+        }
+        char *name = xstrdup(archive_entry_pathname(e) ? archive_entry_pathname(e) : "?");
+        char *p = path_join(dest, name);
         archive_entry_set_pathname(e, p);
         const char *hl = archive_entry_hardlink(e);
         if (hl) {
@@ -59,17 +67,30 @@ static int extract_archive(const char *file, const char *dest) {
             free(h);
         }
         free(p);
-        if (archive_write_header(w, e) == ARCHIVE_OK && archive_entry_size(e) > 0) {
+        if (archive_write_header(w, e) < ARCHIVE_WARN) {
+            set_error("%s: %s: %s", file, name, archive_error_string(w));
+            rc = -1;
+        } else if (archive_entry_size(e) > 0) {
             const void *buf;
             size_t sz;
             la_int64_t off;
-            while (archive_read_data_block(a, &buf, &sz, &off) == ARCHIVE_OK) archive_write_data_block(w, buf, sz, off);
+            while ((r = archive_read_data_block(a, &buf, &sz, &off)) == ARCHIVE_OK)
+                if (archive_write_data_block(w, buf, sz, off) < ARCHIVE_WARN) {
+                    set_error("%s: %s: %s", file, name, archive_error_string(w));
+                    rc = -1;
+                    break;
+                }
+            if (!rc && r != ARCHIVE_EOF && r < ARCHIVE_WARN) {
+                set_error("%s: %s: %s", file, name, archive_error_string(a));
+                rc = -1;
+            }
         }
-        archive_write_finish_entry(w);
-    }
-    if (r != ARCHIVE_EOF) {
-        set_error("%s: %s", file, archive_error_string(a));
-        rc = -1;
+        if (!rc && archive_write_finish_entry(w) < ARCHIVE_WARN) {
+            set_error("%s: %s: %s", file, name, archive_error_string(w));
+            rc = -1;
+        }
+        free(name);
+        if (rc) break;
     }
     archive_read_free(a);
     archive_write_free(w);
