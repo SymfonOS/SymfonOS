@@ -76,7 +76,10 @@ def main(root):
                     if so.startswith("/") and os.path.exists(os.path.join(root, so.lstrip("/"))):
                         continue
                     # private Bibliotheksordner (usr/lib/systemd): das Programm lädt die Geschwister über seinen RUNPATH
-                    dirs = [base] + [r.replace("$ORIGIN", base) if "$ORIGIN" in r else os.path.join(root, r.lstrip("/"))
+                    # Plugins in Unterordnern eines privaten Bibliotheksordners (usr/lib/ardour9/surfaces): das
+                    # Programm hat libardour usw. aus dem übergeordneten Ordner schon geladen
+                    up = [os.path.dirname(base)] if rel_base.count("/") > 3 else []
+                    dirs = [base] + up + [r.replace("$ORIGIN", base) if "$ORIGIN" in r else os.path.join(root, r.lstrip("/"))
                                      for r in runpath]
                     if not any(os.path.exists(os.path.join(d, so)) for d in dirs):
                         if rel_base.startswith(PLUGINS) and so in private:

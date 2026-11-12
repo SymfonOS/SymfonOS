@@ -1900,8 +1900,9 @@ pkg("python-pyqt6-sip", "13.13.0", "https://files.pythonhosted.org/packages/sour
     dir="pyqt6_sip-13.13.0")
 pkg("python-pyqt6", "6.9.1", "https://files.pythonhosted.org/packages/source/p/pyqt6/pyqt6-6.9.1.tar.gz",
     "Python-Anbindung an Qt 6 (PyQt6)", "GPL-3.0-only",
-    ["python", "python-pyqt6-sip", QB, "qt6-svg"], ["python-sip", "python-pyqt-builder"], style="python",
-    dir="pyqt6-6.9.1",
+    # qt6-webchannel: PyQt6 baut QtWebChannel mit, sobald es in der Bauumgebung liegt (sonst fehlt libQt6WebChannel)
+    ["python", "python-pyqt6-sip", QB, "qt6-svg", "qt6-webchannel"], ["python-sip", "python-pyqt-builder", "qt6-webchannel"],
+    style="python", dir="pyqt6-6.9.1", rel=2,
     flags="--config-settings=--qmake=/usr/lib/qt6/bin/qmake --config-settings=--confirm-license= "
           "--config-settings=--jobs=$(nproc)")
 # Blender: ohne Kamera-Tracking (libmv braucht Ceres), ohne OSL/Embree/OpenVDB/USD/OpenXR und ohne GPU-Rendern
