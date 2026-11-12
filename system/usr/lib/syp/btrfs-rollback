@@ -15,12 +15,24 @@ name=$(basename "$snap")
 dev=$(findmnt -nvo SOURCE /)
 [[ $(findmnt -no FSTYPE /) == btrfs ]] || { echo "/ ist kein Btrfs" >&2; exit 1; }
 top=$(mktemp -d /run/syp-rollback.XXXXXX)
-trap 'umount "$top" 2>/dev/null; rmdir "$top"' EXIT
-# Optionen der Wurzel übernehmen (ohne Subvolume-Angaben und SELinux-Marker): ein zweiter Mount desselben
-# Dateisystems mit abweichenden Optionen kann der Kernel mit EBUSY ablehnen
+trap 'umount "$top" 2>/dev/null; rmdir "$top" 2>/dev/null; rm -f "$top.err"' EXIT
+# Oberste Ebene einhängen. Mehrere Wege: je nach util-linux/Kernel lehnt der zweite Mount desselben
+# Dateisystems eine Variante mit EBUSY (»bereits eingehängt«) ab. Optionen der Wurzel ohne Subvolume-Angaben.
 opts=$(findmnt -no OPTIONS / | tr ',' '\n' | grep -vE '^(subvol=|subvolid=|seclabel$)' | paste -sd, -)
-if ! mount -t btrfs -o "${opts:+$opts,}subvolid=5" "$dev" "$top"; then
-  dmesg 2>/dev/null | tail -5 >&2
+mounted=0
+uuid=$(findmnt -no UUID / || true)
+for src in ${uuid:+"UUID=$uuid"} "$dev"; do
+  for try in "subvol=/" "subvolid=5" "mount2:subvolid=5"; do
+    env=(); o=${try#mount2:}
+    [[ $try == mount2:* ]] && env=(LIBMOUNT_FORCE_MOUNT2=always)
+    if env "${env[@]}" mount -t btrfs -o "${opts:+$opts,}$o" "$src" "$top" 2>"$top.err"; then mounted=1; break 2; fi
+    echo "Einhängen von $src mit $try fehlgeschlagen: $(tr '\n' ' ' < "$top.err")" >&2
+  done
+done
+rm -f "$top.err"
+if ((!mounted)); then
+  findmnt -o TARGET,SOURCE,FSROOT,OPTIONS -t btrfs >&2 || true
+  dmesg 2>/dev/null | grep -iE 'btrfs|selinux|mount' | tail -5 >&2
   echo "Oberste Btrfs-Ebene von $dev lässt sich nicht einhängen; nichts verändert" >&2; exit 1
 fi
 [[ -d $top/@ && -d $top/@snapshots/$name ]] || {
