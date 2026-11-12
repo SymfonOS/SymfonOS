@@ -743,3 +743,33 @@ def test_post_scripts_run_after_whole_transaction(tmp_path):
     syp("-r", root, "sync")
     out = syp("-r", root, "-y", "install", "a", "b").stdout
     assert (root / "a-ok").exists(), out
+
+
+
+def test_build_fails_when_source_entry_cannot_be_written(tmp_path):
+    # »x« zuerst als Datei, dann »x/y«: der zweite Eintrag lässt sich nicht anlegen. Früher wurde das still
+    # übergangen und mit einer unvollständigen Quelle weitergebaut.
+    import hashlib
+    import io
+    rec = tmp_path / "rec"
+    rec.mkdir()
+    with tarfile.open(rec / "bad-1.0.tar", "w") as tf:
+        for name, data in (("bad-1.0/x", b"Datei"), ("bad-1.0/x/y", b"darunter")):
+            ti = tarfile.TarInfo(name)
+            ti.size = len(data)
+            tf.addfile(ti, io.BytesIO(data))
+    digest = hashlib.sha256((rec / "bad-1.0.tar").read_bytes()).hexdigest()
+    (rec / "SYPBUILD.toml").write_text(f'''
+[package]
+name = "bad"
+version = "1.0-1"
+arch = "any"
+[[source]]
+url = "file://{rec}/bad-1.0.tar"
+sha256 = "{digest}"
+[build]
+package = 'install -Dm644 x "$DESTDIR/usr/share/bad/x"'
+''')
+    r = syp("build", rec / "SYPBUILD.toml", "-o", tmp_path / "o", check=False)
+    assert r.returncode != 0, r.stdout
+    assert "x/y" in r.stderr
