@@ -261,8 +261,11 @@ jobs:
       - name: Paket-Repo veröffentlichen
         # Updates für installierte Systeme: nur Pakete, mit denen das Desktop-ISO alle Tests bestanden hat
         if: always() && steps.desktop.outcome == 'success' && steps.desktop_test.outcome == 'success' && steps.desktop_enforcing.outcome == 'success' && steps.desktop_install.outcome == 'success'
-        # sudo: die Pakete gehören root (Hardlinks statt Kopien; fremde Dateien verbietet protected_hardlinks)
-        run: sudo -E env "PATH=$PATH" tools/publish-repo.sh out/repo/symfonos "$PWD/keys/release.key" repo-x86_64
+        # sudo: die Pakete gehören root (Hardlinks statt Kopien; fremde Dateien verbietet protected_hardlinks).
+        # Variablen ausdrücklich übergeben: sudo-rs (Ubuntu 26) reicht mit -E nicht alles durch
+        run: |
+          sudo env "PATH=$PATH" GH_TOKEN="$GH_TOKEN" GITHUB_REPOSITORY="$GITHUB_REPOSITORY" \
+            tools/publish-repo.sh out/repo/symfonos "$PWD/keys/release.key" repo-x86_64
       - name: Diagnose ablegen (Branch ci-diag)
         # Vollständige Logs und Bildschirmfotos für die Fehlersuche; enthält keine Geheimnisse
         if: always()
