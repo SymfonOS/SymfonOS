@@ -52,6 +52,7 @@ int config_load(const char *root, config *c) {
             rc->url = xstrdup(jgets(r, "url", ""));
             rc->priority = (int)jgeti(r, "priority", 50);
             rc->enabled = jgetb(r, "enabled", 1);
+            rc->flat = jgetb(r, "flat", 0);
         }
         jval *s = jget(t, "snapshots");
         c->snapshots = jgetb(s, "enabled", 1);
@@ -364,7 +365,7 @@ char *repo_fetch_package(const config *c, const pkg *p) {
     char *cache = cfg_path(c, "var/cache/syp/pkg"), *dest = path_join(cache, path_basename(p->file)), h[65];
     free(cache);
     if (sha256_file(dest, h) || strcmp(h, p->sha256)) {
-        char *url = xasprintf("%s/%s", r->url, p->file);
+        char *url = xasprintf("%s/%s", r->url, r->flat ? path_basename(p->file) : p->file);
         int rc = fetch_url(url, dest);
         free(url);
         if (rc) {

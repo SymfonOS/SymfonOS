@@ -1,7 +1,7 @@
 # symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
 [package]
 name = "syp"
-version = "1.0.0-8"
+version = "1.0.0-9"
 summary = "symfonOS-Paketmanager syp und Paket-Konverter syp-convert"
 license = "GPL-3.0-or-later"
 depends = ["glibc", "libarchive", "zstd", "libsodium", "sqlite", "curl", "bash"]
@@ -22,4 +22,8 @@ package = '''
 make -C "$SRCDIR/csrc" DESTDIR="$DESTDIR" install
 install -Dm644 "$SRCDIR/system/etc/syp/syp.toml" "$DESTDIR/etc/syp/syp.toml"
 install -d "$DESTDIR/var/lib/syp" "$DESTDIR/var/cache/syp/pkg" "$DESTDIR/etc/syp/keys"
+# täglicher Paketlisten-Abgleich (sonst sieht die Update-Benachrichtigung nie neue Versionen); per Preset an
+install -Dm644 -t "$DESTDIR/usr/lib/systemd/system" "$SRCDIR/system/usr/lib/systemd/system/syp-sync.service" \
+  "$SRCDIR/system/usr/lib/systemd/system/syp-sync.timer"
+printf 'enable syp-sync.timer\n' | install -Dm644 /dev/stdin "$DESTDIR/usr/lib/systemd/system-preset/60-syp.preset"
 '''
