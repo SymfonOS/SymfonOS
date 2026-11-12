@@ -91,6 +91,6 @@ if ((graphical && session)) && [[ -z $crashes && ( -z $fails || ${STRICT:-1} == 
   echo ":: Desktop startet: SDDM → KWin (Wayland) → Plasma"
   exit 0
 fi
-ctx=$(grep -aiE "sddm|kwin|plasma|\[FAILED\]|segfault|dumped core|error" <<<"$log" | awk '!s[$0]++' | tail -40)
+ctx=$(grep -aiE "sddm|kwin|plasma|\[FAILED\]|segfault|dumped core|error" <<<"$log" | awk '!s[$0]++' | tail -40 || true)
 echo "::error title=Desktop-Test (graphical=$graphical, Sitzung=$session)::$( { echo "$crashes"; echo "$fails"; echo "$ctx"; } | tail -c 3500 | sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g')"
 exit 1

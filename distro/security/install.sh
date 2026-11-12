@@ -12,7 +12,6 @@ i() { install -D -m "$1" "$2" "$D/$3"; }
 for f in pam.d/*; do i 644 "$f" "etc/pam.d/${f#pam.d/}"; done
 i 644 pwquality.conf etc/security/pwquality.conf.d/50-symfonos.conf
 i 644 faillock.conf etc/security/faillock.conf
-install -d -m 755 "$D/var/log/faillock"
 
 # Kernel-Laufzeitparameter und gesperrte Module (Vorgaben unter /usr/lib, lokale Änderungen in /etc)
 i 644 sysctl.d/50-symfonos-hardening.conf usr/lib/sysctl.d/50-symfonos-hardening.conf

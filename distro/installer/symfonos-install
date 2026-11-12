@@ -34,6 +34,12 @@ if [[ -z $DISK ]]; then
   DISK=$(ask "Zieldatenträger (z. B. /dev/nvme0n1):")
 fi
 [[ -b $DISK ]] || { echo "Kein Blockgerät: $DISK" >&2; exit 1; }
+# /dev/disk/by-id/… auflösen: sonst entstünden Partitionsnamen wie …abcd3, die es nicht gibt (Platte gelöscht, Abbruch)
+DISK=$(readlink -f -- "$DISK")
+# nie den Datenträger löschen, von dem das Live-System läuft oder der sonst eingehängt ist
+if lsblk -rno MOUNTPOINT "$DISK" | grep -q .; then
+  echo "$DISK ist eingehängt (Live-Medium?) – bitte einen anderen Datenträger wählen" >&2; exit 1
+fi
 [[ -z $USERNAME ]] && USERNAME=$(ask "Benutzername:")
 [[ $USERNAME =~ ^[a-z_][a-z0-9_-]{0,31}$ ]] || { echo "Ungültiger Benutzername" >&2; exit 1; }
 if ((!YES)); then
@@ -79,6 +85,18 @@ fi
 [[ -b $(part 3) ]] || { echo "Partitionen auf $DISK erscheinen nicht" >&2; exit 1; }
 EFI=$(part 2) ROOT=$(part 3) ROOTDEV=$(part 3)
 mkfs.fat -F32 -n EFI "$EFI" >/dev/null
+# Aufräumen: Hilfs-Mounts immer lösen; bei Fehlern auch das Ziel aushängen und LUKS schließen, sonst scheitert
+# ein zweiter Versuch an sfdisk (Partition durch dm-crypt belegt)
+cleanup() {
+  local rc=$?
+  for m in run sys proc dev; do mountpoint -q "$MNT/$m" && umount -l "$MNT/$m"; done
+  if ((rc)); then
+    umount -R "$MNT" 2>/dev/null
+    [[ -e /dev/mapper/cryptroot ]] && cryptsetup close cryptroot 2>/dev/null
+  fi
+  true
+}
+trap cleanup EXIT
 if ((ENCRYPT)); then
   # GRUB entsperrt LUKS2 nur mit PBKDF2; mit systemd-boot entsperrt das Initramfs (Argon2id, speicherhart)
   PBKDF=argon2id; [[ $BOOT == grub ]] && PBKDF=pbkdf2
@@ -101,8 +119,6 @@ mount -o "$OPT,subvol=@snapshots" "$ROOTDEV" "$MNT/.snapshots"
 mount -o "$OPT,subvol=@var_log" "$ROOTDEV" "$MNT/var/log"
 mount -o "$OPT,subvol=@cache" "$ROOTDEV" "$MNT/var/cache"
 mount -o umask=0077 "$EFI" "$MNT$ESPDIR"
-cleanup() { for m in run sys proc dev; do mountpoint -q "$MNT/$m" && umount -l "$MNT/$m"; done; true; }
-trap cleanup EXIT
 
 if [[ $SOURCE == repo ]]; then
   say "Pakete installieren (syp, offline)"
