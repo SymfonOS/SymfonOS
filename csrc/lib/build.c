@@ -735,6 +735,14 @@ char *build_recipe(const char *recipe, const char *outdir, const seckey *signer,
         char **env = build_env(csrc, csdir, cdest, crdir ? crdir : rdir, pk, jget(r, "options"), o->chroot != NULL);
         const char *steps[] = {"prepare", "build", "check", "package", NULL};
         jval *b = jget(r, "build");
+        /* Bauschritte ohne Netz: Quellen sind schon geladen und geprüft, ein Bau darf nichts nachladen
+         * (sonst ist er weder reproduzierbar noch prüfbar). Ausnahme im Rezept: [options] network = true.
+         * SYP_BUILD_NET=strict: Abbruch, wenn sich kein Netz-Namensraum anlegen lässt; =on: mit Netz. */
+        const char *nenv = getenv("SYP_BUILD_NET");
+        int net = 0;
+        if (jgetb(jget(r, "options"), "network", 0) || (nenv && !strcmp(nenv, "on"))) net = 1;
+        else if (nenv && !strcmp(nenv, "strict")) net = -1;
+        if (net != 1) printf("==> Bauschritte ohne Netzzugriff\n");
         for (const char **st = steps; *st && !fail; st++) {
             if (!strcmp(*st, "check") && o->nocheck) continue;
             char *gen = NULL;
@@ -761,12 +769,12 @@ char *build_recipe(const char *recipe, const char *outdir, const seckey *signer,
                 argv[k++] = "-c";
                 argv[k++] = wrapped;
                 argv[k] = NULL;
-                rc = run_cmd(argv, NULL, NULL);
+                rc = run_cmd_net(argv, NULL, NULL, net);
                 free(wrapped);
                 free(argv);
             } else {
                 char *argv[] = {"bash", "-euo", "pipefail", "-c", (char *)script, NULL};
-                rc = run_cmd(argv, src, env);
+                rc = run_cmd_net(argv, src, env, net);
             }
             free(gen);
             if (rc) {

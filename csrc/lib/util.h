@@ -95,6 +95,8 @@ int sha256_file(const char *path, char out[65]);
 
 /* Prozesse */
 int run_cmd(char *const argv[], const char *cwd, char *const envp[]);   /* Exit-Code oder -1 */
+/* net=1: normal; 0: ohne Netz (nur Loopback), sonst Warnung; -1: ohne Netz, sonst Fehler (Exit 126) */
+int run_cmd_net(char *const argv[], const char *cwd, char *const envp[], int net);
 int run_capture(char *const argv[], char **out);                        /* stdout einsammeln */
 int which(const char *prog, const char *path_env);
 
