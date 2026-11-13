@@ -1,7 +1,7 @@
 # symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
 [package]
 name = "util-linux"
-version = "2.41.1-2"
+version = "2.41.1-3"
 summary = "Systemwerkzeuge (mount, fdisk, lsblk …)"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later AND BSD-3-Clause"
 url = "https://www.kernel.org/pub/linux/utils/util-linux/v2.41/"
@@ -24,10 +24,11 @@ make
 package = '''
 cd "$S"
 make DESTDIR="$DESTDIR" install
-# util-linux wird vor systemd gebaut, configure findet dann kein systemd und installiert keine Units:
-# fstrim.service/.timer (wöchentliches TRIM für SSDs) wie upstream von Hand, per Preset aktiv
+# fstrim.service/.timer (wöchentliches TRIM für SSDs), per Preset aktiv. Upstream installiert sie nur, wenn
+# configure systemd findet – beim allerersten Bau vor systemd nicht: dann wie upstream von Hand
 u="$DESTDIR/usr/lib/systemd/system"
 install -d "$u" "$DESTDIR/usr/lib/systemd/system-preset"
+if [ ! -e "$u/fstrim.timer" ]; then
 cat > "$u/fstrim.service" <<"UNIT"
 [Unit]
 Description=Discard unused blocks on filesystems from /etc/fstab
@@ -60,5 +61,6 @@ RandomizedDelaySec=100min
 [Install]
 WantedBy=timers.target
 UNIT
+fi
 echo "enable fstrim.timer" > "$DESTDIR/usr/lib/systemd/system-preset/60-util-linux.preset"
 '''
