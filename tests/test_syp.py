@@ -804,3 +804,31 @@ package = 'install -Dm644 x "$DESTDIR/usr/share/bad/x"'
     r = syp("build", rec / "SYPBUILD.toml", "-o", tmp_path / "o", check=False)
     assert r.returncode != 0, r.stdout
     assert "x/y" in r.stderr
+
+
+def test_build_steps_without_network(tmp_path):
+    """Bauschritte laufen in einem eigenen Netz-Namensraum (nur lo); [options] network = true erlaubt Netz."""
+    if subprocess.run(["unshare", "-n", "true"], capture_output=True).returncode and \
+            subprocess.run(["unshare", "-rn", "true"], capture_output=True).returncode:
+        pytest.skip("keine Netz-Namensräume in dieser Umgebung")
+    step = ("package = 'mkdir -p \"$DESTDIR/usr/share/n\"; "
+            "tail -n +3 /proc/net/dev | cut -d: -f1 | tr -d \" \" | sort > \"$DESTDIR/usr/share/n/if\"'\n")
+
+    def build(name, opts="", env=None):
+        d = tmp_path / name
+        d.mkdir()
+        (d / "SYPBUILD.toml").write_text(f'[package]\nname = "{name}"\nversion = "1-1"\narch = "any"\n'
+                                         f"{opts}[build]\n{step}")
+        out = syp("build", d / "SYPBUILD.toml", "-o", d / "o", env=env).stdout
+        import zstandard
+        with tarfile.open(d / f"o/{name}-1-1-any.syp") as tf:
+            data = zstandard.ZstdDecompressor().decompressobj().decompress(tf.extractfile("data.tar.zst").read())
+        with tarfile.open(fileobj=io.BytesIO(data)) as tf:
+            return out, tf.extractfile("usr/share/n/if").read().decode().split()
+
+    out, ifs = build("a")
+    assert "ohne Netzzugriff" in out and ifs == ["lo"]
+    out, ifs = build("b", "[options]\nnetwork = true\n")
+    assert "ohne Netzzugriff" not in out and len(ifs) > 1
+    out, ifs = build("c", env=dict(os.environ, SYP_BUILD_NET="strict"))
+    assert ifs == ["lo"]

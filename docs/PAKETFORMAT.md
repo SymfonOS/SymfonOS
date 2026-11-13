@@ -87,6 +87,7 @@ post_install = 'install -m644 "$SRCDIR/openssl.cnf" "$DESTDIR/etc/ssl/openssl.cn
 strip = true
 hardening = "strict"                        # strict (Standard) | warn | off; warn/off nur mit Begründung
 hardening_reason = ""
+network = false                             # true: Bauschritte dürfen ins Netz (nur mit Grund)
 
 [scripts]
 post_upgrade = "/usr/bin/update-crypto-policies"
@@ -94,6 +95,11 @@ post_upgrade = "/usr/bin/update-crypto-policies"
 
 Umgebung der Schritte: `SRCDIR`, `S` (entpackte Hauptquelle), `DESTDIR`, `RECIPEDIR`, `PKGNAME`, `PKGVER`,
 `PKGREL`, `CFLAGS`/`LDFLAGS` (gehärtet), `MAKEFLAGS`, `NPROC`, `SOURCE_DATE_EPOCH`.
+
+Die Schritte laufen **ohne Netz**: syp lädt und prüft die Quellen vorher und startet jeden Schritt in einem
+eigenen Netz-Namensraum, in dem nur `lo` existiert. Ein Bau kann so nichts nachladen, was nicht im Rezept steht.
+Geht das nicht (kein Namensraum möglich), warnt syp und baut mit Netz; `SYP_BUILD_NET=strict` macht daraus
+einen Fehler (so im Bootstrap), `SYP_BUILD_NET=on` schaltet die Isolation ab.
 
 Nach `package` prüft `syp build` jede ELF-Datei (PIE, RELRO, BIND_NOW, NX-Stack, TEXTREL, RPATH) und
 alle Dateirechte (beschreibbar für alle → Fehler, setuid/setgid → Übersicht). Das Ergebnis steht

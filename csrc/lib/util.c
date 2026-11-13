@@ -12,6 +12,12 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <net/if.h>
+#include <sched.h>
+#include <stdio.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -476,12 +482,59 @@ int sha256_file(const char *path, char out[65]) {
 }
 
 /* --- Prozesse -------------------------------------------------------------- */
-int run_cmd(char *const argv[], const char *cwd, char *const envp[]) {
+static int write_str(const char *path, const char *s) {
+    int fd = open(path, O_WRONLY | O_CLOEXEC);
+    if (fd < 0) return -1;
+    ssize_t n = write(fd, s, strlen(s));
+    close(fd);
+    return n == (ssize_t)strlen(s) ? 0 : -1;
+}
+
+/* Eigener Netz-Namensraum nur mit Loopback: als root direkt, sonst über einen Benutzer-Namensraum, der die
+ * eigene uid/gid auf sich selbst abbildet (Dateien gehören weiter dem Aufrufer) */
+static int isolate_net(void) {
+    uid_t u = geteuid();
+    gid_t g = getegid();
+    if (unshare(CLONE_NEWNET)) {
+        if (unshare(CLONE_NEWUSER | CLONE_NEWNET)) return -1;
+        char m[64];
+        snprintf(m, sizeof m, "%u %u 1\n", (unsigned)u, (unsigned)u);
+        if (write_str("/proc/self/uid_map", m)) return -1;
+        write_str("/proc/self/setgroups", "deny");
+        snprintf(m, sizeof m, "%u %u 1\n", (unsigned)g, (unsigned)g);
+        if (write_str("/proc/self/gid_map", m)) return -1;
+    }
+    /* lo aktivieren: Testsuiten sprechen oft localhost an */
+    int s = socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC, 0);
+    if (s >= 0) {
+        struct ifreq ifr;
+        memset(&ifr, 0, sizeof ifr);
+        strcpy(ifr.ifr_name, "lo");
+        if (ioctl(s, SIOCGIFFLAGS, &ifr) == 0) {
+            ifr.ifr_flags |= IFF_UP | IFF_RUNNING;
+            ioctl(s, SIOCSIFFLAGS, &ifr);
+        }
+        close(s);
+    }
+    return 0;
+}
+
+int run_cmd(char *const argv[], const char *cwd, char *const envp[]) { return run_cmd_net(argv, cwd, envp, 1); }
+
+int run_cmd_net(char *const argv[], const char *cwd, char *const envp[], int net) {
     fflush(stdout);
     fflush(stderr);
     pid_t pid = fork();
     if (pid < 0) return -1;
     if (pid == 0) {
+        if (net != 1 && isolate_net()) {
+            if (net < 0) {
+                fprintf(stderr, "syp: kein Netz-Namensraum möglich (%s), Bau ohne Netz verlangt\n", strerror(errno));
+                _exit(126);
+            }
+            fprintf(stderr, "  Hinweis: kein Netz-Namensraum möglich (%s) – Bauschritt mit Netzzugriff\n",
+                    strerror(errno));
+        }
         if (cwd && chdir(cwd)) _exit(127);
         if (envp) execvpe(argv[0], argv, envp);
         else execvp(argv[0], argv);

@@ -51,6 +51,7 @@ Ein Commit auf `main` und jeder Paketbau müssen bestehen:
 - **Konfigurationsdateien** werden nie still überschrieben (`.sypnew`/`.sypsave`).
 - **Downloads** wiederholen vorübergehende Fehler (Zeitüberschreitung, 5xx, 429) bis zu dreimal und weichen bei GNU, kernel.org, CPAN und IANA auf Mirrors aus. Weil jede Quelle per sha256 geprüft wird, kann ein Spiegel nichts unterschieben.
 - **Lookaside-Cache** wie bei Fedora: Die CI legt jede Quelle unter ihrer sha256 im GitHub-Release `sources` ab (`tools/lookaside-sync.sh`). syp fragt dort zuerst (`SYP_LOOKASIDE`, im Bootstrap voreingestellt), dann den Projektserver. Ein Bau hängt so nicht davon ab, dass ein fremder Server erreichbar ist oder eine alte Version noch anbietet.
+- **Bau ohne Netz**: Jeder Bauschritt läuft in einem eigenen Netz-Namensraum (nur `lo`). Was ein Paket braucht, muss als Quelle mit Prüfsumme im Rezept stehen; im Bootstrap ist das Pflicht (`SYP_BUILD_NET=strict`).
 - **Bootstrap**: Ein Schritt gilt erst als erledigt, wenn er vollständig gelungen ist. Fehler brechen sofort ab, ein abgebrochener CI-Lauf setzt beim nächsten Mal an derselben Stelle fort (`tests/test_bootstrap.py`).
 - **Reproduzierbarkeit**: `SOURCE_DATE_EPOCH` ist bei jedem Bau gesetzt, Bauten in der Chroot sind vom Host getrennt.
 
@@ -84,6 +85,6 @@ Ein Release (z. B. 2026.10) ist ein eingefrorener Stand von stable mit Installat
 
 - Karma-Abstimmung und eine Weboberfläche für testing-Updates fehlen; bisher gibt es nur die Sperrliste.
 - Openqa-artige Tests mit Bildvergleich und Eingaben (Maus, Tastatur). Bisher prüfen die Tests Boot, Installation und den Start der Plasma-Sitzung anhand des Journals und halten Bildschirmfotos fest.
-- Bau ohne Netzzugriff (`unshare -n`) und Vergleich zweier unabhängiger Bauten (reproduzierbare Pakete).
+- Vergleich zweier unabhängiger Bauten (reproduzierbare Pakete). Ohne Netz wird bereits gebaut (siehe oben).
 - Upstream-Signaturen der Quell-Tarballs prüfen (GPG), statt Prüfsummen nur beim ersten Laden festzuhalten.
 - `/usr/bin` und `/usr/sbin` zusammenlegen (wie Fedora 42). Bis dahin legen einzelne Pakete Verweise in `/usr/sbin` an, wo Programme fest dort erwartet werden (z. B. `/sbin/modprobe` durch den Kernel).
