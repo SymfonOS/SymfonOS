@@ -652,6 +652,30 @@ def test_stale_cache_file_is_refetched(tmp_path):
     assert "lade quelle.txt neu" in r.stderr and (cache / "quelle.txt").read_text() == "richtig\n"
 
 
+def test_lookaside_before_upstream(tmp_path):
+    """SYP_LOOKASIDE: Quelle kommt als <sha256> aus dem Lookaside-Cache, auch wenn der Projektserver weg ist;
+    eine falsche Datei dort wird übergangen."""
+    import hashlib
+    import os
+    data = b"quelltext\n"
+    sum_ = hashlib.sha256(data).hexdigest()
+    bad, good = tmp_path / "kaputt", tmp_path / "lookaside"
+    bad.mkdir()
+    good.mkdir()
+    (bad / sum_).write_bytes(b"untergeschoben\n")
+    (good / sum_).write_bytes(data)
+    rec = tmp_path / "SYPBUILD.toml"
+    rec.write_text('[package]\nname = "f"\nversion = "1-1"\n\n[[source]]\n'
+                   f'url = "file://{tmp_path}/weg/quelle-1.0.tar"\nsha256 = "{sum_}"\n')
+    env = dict(os.environ, SYP_LOOKASIDE=f"file://{bad} file://{good}/")
+    r = run(SYP, "fetch", rec, "-o", tmp_path / "cache", env=env)
+    assert (tmp_path / "cache/quelle-1.0.tar").read_bytes() == data
+    assert f"Lookaside file://{good}/{sum_}" in r.stderr
+    # ohne Lookaside scheitert es am fehlenden Projektserver
+    r = run(SYP, "fetch", rec, "-o", tmp_path / "cache2", check=False)
+    assert r.returncode != 0
+
+
 def test_buildall_rebuilds_packages_signed_with_old_key(tmp_path):
     recs = tmp_path / "recipes"
     (recs / "a").mkdir(parents=True)

@@ -13,6 +13,9 @@ if [[ -d $SYM/usr/lib64 && ! -L $SYM/usr/lib64 ]]; then
   cp -a "$SYM/usr/lib64/." "$SYM/usr/lib/" && rm -rf --one-file-system "$SYM/usr/lib64" && ln -s lib "$SYM/usr/lib64"
 fi
 export SYP_SRCCACHE="$SRC" SYP_SOURCE_ROOT="$REPO_ROOT"
+# Quellen zuerst aus dem Lookaside-Cache des Projekts (tools/lookaside-sync.sh), dann vom Projektserver;
+# geprüft wird immer gegen die sha256 im Rezept. Leer setzen, um nur die Projektserver zu fragen.
+export SYP_LOOKASIDE=${SYP_LOOKASIDE-https://github.com/SymfonOS/SymfonOS/releases/download/sources}
 args=(buildall "$RECIPES" --repo "$PKGREPO" --root "$SYM" -k "$SYP_KEY" --name symfonos --nocheck)
 [[ -n "${MAX_MINUTES:-}" ]] && args+=(--max-minutes "$MAX_MINUTES")
 [[ -n "${ONLY:-}" ]] && args+=(--only "$ONLY")

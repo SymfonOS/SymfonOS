@@ -172,9 +172,35 @@ static const char *MIRRORS[][4] = {
      "https://ftp.fau.de/gnome/sources/", NULL},
 };
 
-static char *fetch_source(const char *url, const char *fname, const char *srccache) {
+/* Lookaside-Cache (wie bei Fedora): SYP_LOOKASIDE nennt eine oder mehrere Basis-URLs (durch Leerzeichen
+ * getrennt), unter denen Quellen als <sha256> liegen – für symfonOS das GitHub-Release »sources«. Wird vor
+ * dem Projektserver gefragt, damit Bauten nicht an fremden Servern hängen. Nur eine Datei mit passender
+ * Prüfsumme zählt; sonst geht es mit dem Projektserver weiter. */
+static int fetch_lookaside(const char *sum, const char *dest) {
+    const char *env = getenv("SYP_LOOKASIDE");
+    if (!sum || strlen(sum) != 64 || !env || !*env) return -1;
+    char *list = xstrdup(env), *save = NULL;
+    int rc = -1;
+    for (char *b = strtok_r(list, " \t\n", &save); b && rc; b = strtok_r(NULL, " \t\n", &save)) {
+        size_t n = strlen(b);
+        while (n > 1 && b[n - 1] == '/') b[--n] = 0;
+        char *u = xasprintf("%s/%s", b, sum), h[65] = "";
+        if (fetch_url(u, dest) == 0 && sha256_file(dest, h) == 0 && !strcmp(h, sum)) {
+            fprintf(stderr, "  Lookaside %s\n", u);
+            rc = 0;
+        } else {
+            unlink(dest);
+        }
+        free(u);
+    }
+    free(list);
+    return rc;
+}
+
+static char *fetch_source(const char *url, const char *fname, const char *srccache, const char *sum) {
     char *dest = path_join(srccache, fname);
     if (path_exists(dest)) return dest;
+    if (fetch_lookaside(sum, dest) == 0) return dest;
     /* Fortschritt auf stderr: stdout von "syp fetch" ist maschinenlesbar (ein Pfad pro Zeile) */
     fprintf(stderr, "  Lade %s\n", url);
     if (fetch_url(url, dest) == 0) return dest;
@@ -205,7 +231,7 @@ static char *fetch_verified(const char *url, const char *fname, const char *srcc
     int was_cached = path_exists(cached);
     free(cached);
     for (int attempt = 0; attempt < 2; attempt++) {
-        char *f = fetch_source(url, fname, srccache), h[65] = "";
+        char *f = fetch_source(url, fname, srccache, sum), h[65] = "";
         if (!f) return NULL;
         if (sha256_file(f, h) == 0 && !strcmp(h, sum)) return f;
         unlink(f);
@@ -256,7 +282,7 @@ int recipe_fill_sums(const char *recipe, const char *srccache) {
         const char *url = jgets(src->items[i], "url", NULL), *sum = jgets(src->items[i], "sha256", "");
         if (!url || (*sum && strcmp(sum, "TODO"))) continue;
         const char *fname = jgets(src->items[i], "filename", path_basename(url));
-        char *f = fetch_source(url, fname, srccache), h[65];
+        char *f = fetch_source(url, fname, srccache, NULL), h[65];
         if (!f || sha256_file(f, h)) {
             rc = -1;
             free(f);

@@ -50,6 +50,7 @@ Ein Commit auf `main` und jeder Paketbau müssen bestehen:
 - **Transaktionen** prüfen Dateikonflikte vor jeder Änderung, legen einen Btrfs-Snapshot an und schreiben die Historie. `syp rollback` nimmt eine Transaktion zurück, `syp rollback --system` setzt das ganze System auf einen Snapshot.
 - **Konfigurationsdateien** werden nie still überschrieben (`.sypnew`/`.sypsave`).
 - **Downloads** wiederholen vorübergehende Fehler (Zeitüberschreitung, 5xx, 429) bis zu dreimal und weichen bei GNU, kernel.org, CPAN und IANA auf Mirrors aus. Weil jede Quelle per sha256 geprüft wird, kann ein Spiegel nichts unterschieben.
+- **Lookaside-Cache** wie bei Fedora: Die CI legt jede Quelle unter ihrer sha256 im GitHub-Release `sources` ab (`tools/lookaside-sync.sh`). syp fragt dort zuerst (`SYP_LOOKASIDE`, im Bootstrap voreingestellt), dann den Projektserver. Ein Bau hängt so nicht davon ab, dass ein fremder Server erreichbar ist oder eine alte Version noch anbietet.
 - **Bootstrap**: Ein Schritt gilt erst als erledigt, wenn er vollständig gelungen ist. Fehler brechen sofort ab, ein abgebrochener CI-Lauf setzt beim nächsten Mal an derselben Stelle fort (`tests/test_bootstrap.py`).
 - **Reproduzierbarkeit**: `SOURCE_DATE_EPOCH` ist bei jedem Bau gesetzt, Bauten in der Chroot sind vom Host getrennt.
 
@@ -86,4 +87,3 @@ Ein Release (z. B. 2026.10) ist ein eingefrorener Stand von stable mit Installat
 - Bau ohne Netzzugriff (`unshare -n`) und Vergleich zweier unabhängiger Bauten (reproduzierbare Pakete).
 - Upstream-Signaturen der Quell-Tarballs prüfen (GPG), statt Prüfsummen nur beim ersten Laden festzuhalten.
 - `/usr/bin` und `/usr/sbin` zusammenlegen (wie Fedora 42). Bis dahin legen einzelne Pakete Verweise in `/usr/sbin` an, wo Programme fest dort erwartet werden (z. B. `/sbin/modprobe` durch den Kernel).
-- Ein Lookaside-Cache für Quellen, wie bei Fedora, damit Bauten nicht von der Erreichbarkeit fremder Server abhängen.
