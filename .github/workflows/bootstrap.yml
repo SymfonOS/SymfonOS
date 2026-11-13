@@ -269,6 +269,13 @@ jobs:
         run: |
           sudo env "PATH=$PATH" GH_TOKEN="$GH_TOKEN" GITHUB_REPOSITORY="$GITHUB_REPOSITORY" \
             tools/promote-release.sh out/repo/symfonos "$PWD/keys/release.key" "$PWD/keys/release.pub"
+      - name: Quellen in den Lookaside-Cache (Release sources)
+        # unabhängig von den Tests: jede Quelle mit passender Prüfsumme, je Lauf begrenzt (tools/lookaside-sync.sh)
+        if: always() && steps.build.outcome == 'success'
+        continue-on-error: true
+        run: |
+          sudo env "PATH=$PATH" GH_TOKEN="$GH_TOKEN" GITHUB_REPOSITORY="$GITHUB_REPOSITORY" \
+            tools/lookaside-sync.sh "$SYM/sources" distro/recipes sources
       - name: Diagnose ablegen (Branch ci-diag)
         # Vollständige Logs und Bildschirmfotos für die Fehlersuche; enthält keine Geheimnisse
         if: always()
