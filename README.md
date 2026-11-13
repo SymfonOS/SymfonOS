@@ -7,7 +7,7 @@ Eine schlanke, moderne Linux-Distribution für kreative Arbeit: Grafik, Illustra
 | **Basis** | Eigenständige Quellcode-Distribution: eigene Toolchain nach LFS, alle Pakete aus `distro/recipes/` mit `syp buildall` gebaut, keine fremde Distribution darunter |
 | **Sicherheit** | SELinux, erzwungene Kernel-Modulsignaturen, KSPP-Härtung, systemweite Krypto-Richtlinien, nftables (eingehend zu), auditd, LUKS2 + TPM2, Secure Boot mit eigenen Schlüsseln und UKI – siehe [SICHERHEIT.md](docs/SICHERHEIT.md) |
 | **Qualität** | Kanäle testing → stable mit Wartezeit, CI-Gates (Werror, ASan/UBSan, Härtungsprüfung je Paket), Freigabekriterien – siehe [QUALITAET.md](docs/QUALITAET.md) |
-| **Release-Modell** | Rolling Release: die CI baut, testet (Boot, Installation, Update, Rollback) und veröffentlicht ISOs und das Paket-Repo `repo-x86_64` |
+| **Release-Modell** | Rolling Release: die CI baut, testet (Boot, Installation, Update, Rollback) und veröffentlicht ISOs und Pakete nach testing; nach 7 Tagen (Sicherheitsupdates sofort) kommen sie nach stable `repo-x86_64` |
 | **Kernel** | eigener Build `linux` (gehärtet, Modulsignaturen erzwungen) |
 | **Init** | systemd |
 | **Bootloader** | GRUB (oder systemd-boot mit UKI), Live-Medium: systemd-boot/syslinux |
@@ -24,7 +24,8 @@ flowchart TB
     SRC[distro/recipes: 605 Rezepte] -->|syp buildall in der LFS-Chroot| PKGS[Signierte .syp-Pakete]
     PKGS --> ISO[50-image.sh → Basis- und Desktop-ISO]
     ISO --> TESTS[QEMU-Tests: Boot, Desktop, Installation,<br/>Update + Rollback, SELinux enforcing]
-    TESTS -->|nur wenn grün| REPO[(Paket-Repo repo-x86_64<br/>GitHub-Release)]
+    TESTS -->|nur wenn grün| TESTING[(testing<br/>repo-x86_64-testing)]
+    TESTING -->|promote.py: 7 Tage,<br/>Sicherheit sofort| REPO[(stable<br/>repo-x86_64)]
     TESTS -->|nur wenn grün| REL[source-nightly / desktop-nightly]
   end
   subgraph System["Installiertes System"]
@@ -56,7 +57,7 @@ flowchart TB
 | 4 | Live-ISO und Installer `symfonos-install` (Btrfs/LUKS2/TPM2, GRUB oder UKI) | ✅ Installationstest in CI |
 | 5 | Prüfungsmodus (nftables, Kiosk, Dienste/USB), SEB-Varianten | ✅ Trockenlauf getestet |
 | 6 | CI/CD: Bau, Tests, Paket-Repo als Release, automatische Updates mit Snapshot und Rollback | ✅ Update- und Rollback-Test im installierten System |
-| 7 | Kanäle `testing` → `stable` (`tools/promote.py`: 7 Tage, Sicherheits-Schnellspur, Sperrliste, Abhängigkeitsprüfung) | ✅ getestet, Anbindung an die Bau-CI offen |
+| 7 | Kanäle `testing` → `stable` (`tools/promote.py`: 7 Tage, Sicherheits-Schnellspur, Sperrliste, Abhängigkeitsprüfung) | ✅ in der Bau-CI: Releases `repo-x86_64-testing` → `repo-x86_64` |
 | 8 | Kern in C (`syp`, `syp-convert`), Quellcode-Distribution: LFS-Toolchain, 140 Rezepte, `syp buildall` in der Chroot, Live-/Installations-ISO | ✅ ISO `source-nightly`, Boot-Test in QEMU bestanden (Firewall, Audit, SELinux, WLAN-Dienst laufen); Test auf echter Hardware offen |
 | 8a | Sicherheit auf Fedora-Niveau: SELinux, Krypto-Richtlinien, PAM, Audit, Firewall, Secure Boot (eigene Schlüssel, UKI), TPM2 | ✅ umgesetzt; SELinux enforcing, kein MS-signierter shim |
 | 8b | Desktop aus Quellcode (LLVM, Mesa, Wayland, Qt 6, KDE Plasma 6, SDDM, PipeWire) – siehe [docs/DESKTOP.md](docs/DESKTOP.md) | 🔨 329 Rezepte, CI-Bau läuft; ISO `desktop-nightly` mit grafischem Boot-Test |

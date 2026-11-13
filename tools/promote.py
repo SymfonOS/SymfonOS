@@ -3,7 +3,7 @@
 
 Ein Paket wird übernommen, wenn
   * es mindestens --min-days Tage in testing liegt (Sicherheitsupdates: --security-days, Standard 0),
-  * es nicht gesperrt ist (Datei testing/hold: je Zeile »name« oder »name version«, # Kommentar),
+  * es nicht gesperrt ist (Datei testing/hold oder --hold: je Zeile »name« oder »name version«, # Kommentar),
   * alle Abhängigkeiten in stable plus den ebenfalls übernommenen Paketen erfüllbar sind
     (sonst würde stable brechen; das Paket wartet dann auf seine Abhängigkeiten),
   * es keine Abhängigkeit eines Pakets bricht, das schon in stable liegt, und
@@ -107,6 +107,7 @@ def main() -> int:
     ap.add_argument("--pub", help="öffentlicher Schlüssel für den testing-Index (Pflicht außer mit --insecure)")
     ap.add_argument("--insecure", action="store_true", help="testing-Index ohne Signaturprüfung lesen (nur Tests)")
     ap.add_argument("-k", "--key", help="Signaturschlüssel für den stable-Index")
+    ap.add_argument("--hold", type=Path, help="Sperrliste (Standard: TESTING/hold)")
     ap.add_argument("--name", default="symfonos")
     ap.add_argument("--arch", default="x86_64")
     ap.add_argument("--min-days", type=float, default=7)
@@ -128,7 +129,7 @@ def main() -> int:
     if not a.dry_run:
         state_file.write_text(json.dumps(seen, indent=1, sort_keys=True) + "\n")
 
-    held = read_hold(a.testing / "hold")
+    held = read_hold(a.hold or a.testing / "hold")
     have = {e["info"]["name"]: e["info"]["version"] for e in stable}
     reasons: dict[str, str] = {}
     cands = []

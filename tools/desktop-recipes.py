@@ -2022,7 +2022,7 @@ install -Dm644 /dev/stdin "$DESTDIR/etc/nftables.d/50-mdns.nft" <<'NFT'
 ip daddr 224.0.0.251 udp dport 5353 accept comment "mDNS (Avahi)"
 ip6 daddr ff02::fb udp dport 5353 accept comment "mDNS (Avahi)"
 NFT
-''', backup=["etc/xdg/kdeglobals", "etc/xdg/kwinrc", "etc/pam.d/kde", "etc/nftables.d/50-mdns.nft"], rel=10)
+''', backup=["etc/xdg/kdeglobals", "etc/xdg/kwinrc", "etc/pam.d/kde", "etc/nftables.d/50-mdns.nft"], rel=11)
 
 DESKTOP = ["symfonos-base", "symfonos-desktop-config", "plasma-desktop", "plasma-workspace", "kwin", "xwayland",
            "sddm", "sddm-kcm", "breeze", "breeze-icons", "qqc2-breeze-style", "qqc2-desktop-style",

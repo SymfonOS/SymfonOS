@@ -6,7 +6,7 @@
     "Authors": [ { "Name": "symfonOS" } ],
     "License": "CC-BY-SA-4.0",
     "Version": "1.0",
-    "Website": "https://github.com/thomasrohm23-bit/symfonOS"
+    "Website": "https://github.com/SymfonOS/SymfonOS"
   },
   "KPackageStructure": "Plasma/LookAndFeel",
   "X-Plasma-MainScript": "defaults"

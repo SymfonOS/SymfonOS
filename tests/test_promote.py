@@ -72,3 +72,81 @@ def test_promotion_requires_valid_signature(tmp_path):
     r = subprocess.run([sys.executable, PROMOTE, "--testing", testing, "--stable", tmp_path / "s",
                         "--pub", other_pub, "-k", key], capture_output=True, text=True, env=dict(os.environ, SYP_BIN=SYP))
     assert r.returncode != 0 and "Signatur" in r.stderr
+
+
+FAKE_GH = r'''#!/usr/bin/env python3
+"""Ersatz für »gh release …«: Releases sind Ordner unter $FAKE_GH_DIR/<tag>."""
+import fnmatch, os, shutil, sys
+base = os.environ["FAKE_GH_DIR"]
+a = [x for x in sys.argv[1:]]
+while "--repo" in a:
+    i = a.index("--repo"); del a[i:i + 2]
+assert a[0] == "release", a
+cmd, tag, rest = a[1], a[2], a[3:]
+d = os.path.join(base, tag)
+if cmd == "view":
+    if not os.path.isdir(d):
+        sys.exit(1)
+    if "--json" in rest:
+        print("\n".join(sorted(os.listdir(d))))
+elif cmd == "create":
+    os.makedirs(d, exist_ok=True)
+elif cmd == "download":
+    pats, out = [], "."
+    while rest:
+        x = rest.pop(0)
+        if x == "--pattern": pats.append(rest.pop(0))
+        elif x == "--dir": out = rest.pop(0)
+    hits = [f for f in (os.listdir(d) if os.path.isdir(d) else []) if any(fnmatch.fnmatch(f, p) for p in pats)]
+    if not hits:
+        sys.exit("no assets match")
+    os.makedirs(out, exist_ok=True)
+    for f in hits:
+        shutil.copy(os.path.join(d, f), out)
+elif cmd == "upload":
+    for f in rest:
+        if not f.startswith("--"):
+            shutil.copy(f, d)
+elif cmd == "delete-asset":
+    os.remove(os.path.join(d, rest[0]))
+else:
+    sys.exit(f"unbekannt: {a}")
+'''
+
+
+def test_promote_release_ci(tmp_path):
+    """tools/promote-release.sh: testing veröffentlichen, Wartezeit über Läufe hinweg, stable schrumpft nie."""
+    key, pub = keygen(tmp_path)
+    bindir, rel, src = tmp_path / "bin", tmp_path / "releases", tmp_path / "out/repo/symfonos"
+    bindir.mkdir()
+    (bindir / "gh").write_text(FAKE_GH)
+    (bindir / "gh").chmod(0o755)
+    env = dict(os.environ, PATH=f"{bindir}:{os.environ['PATH']}", FAKE_GH_DIR=str(rel), GITHUB_REPOSITORY="t/t")
+    p = lambda n, v, **kw: make_pkg(tmp_path, n, v, key=key, **kw)
+
+    def run_ci(**extra):
+        r = subprocess.run([ROOT / "tools/promote-release.sh", src, key, pub], capture_output=True, text=True,
+                           env=dict(env, **extra))
+        assert r.returncode == 0, r.stdout + r.stderr
+        return r.stdout
+
+    syp("repo-add", src, p("libfoo", "1-1"), p("app", "1-1", depends=["libfoo"]), "--name", "symfonos", "-k", key)
+    out = run_ci()                                   # erster Lauf: nur testing, Wartezeit beginnt
+    assert "stable ist leer" in out
+    assert {"index.json.zst", "promotion.json"} <= set(os.listdir(rel / "repo-x86_64-testing"))
+    assert not (rel / "repo-x86_64").exists()
+    out = run_ci(MIN_DAYS="0")                       # Wartezeit vorbei: beide nach stable
+    assert sorted(f for f in os.listdir(rel / "repo-x86_64") if f.endswith(".syp")) == \
+        ["app-1-1-x86_64.syp", "libfoo-1-1-x86_64.syp"]
+    # neue Version gebaut, alte Datei bleibt im lokalen Pool; app ist lokal verschwunden (muss vom Release kommen)
+    syp("repo-add", src, p("libfoo", "2-1"), "--name", "symfonos", "-k", key)
+    for f in src.rglob("app-1-1-*.syp"):
+        f.unlink()
+    syp("repo-add", src, "--name", "symfonos", "-k", key)
+    out = run_ci()                                   # libfoo 2-1 wartet noch
+    assert "libfoo 2-1: erst 0.0 von 7 Tagen" in out and "(1 vom Release geladen)" in out
+    out = run_ci(MIN_DAYS="0")
+    assert sorted(f for f in os.listdir(rel / "repo-x86_64") if f.endswith(".syp")) == \
+        ["app-1-1-x86_64.syp", "libfoo-2-1-x86_64.syp"]
+    assert sorted(f for f in os.listdir(rel / "repo-x86_64-testing") if f.endswith(".syp")) == ["libfoo-2-1-x86_64.syp"]
+    assert names(rel / "repo-x86_64", pub) == ["app 1-1", "libfoo 2-1"]
