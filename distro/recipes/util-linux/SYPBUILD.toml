@@ -1,7 +1,7 @@
 # symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
 [package]
 name = "util-linux"
-version = "2.41.1-1"
+version = "2.41.1-2"
 summary = "Systemwerkzeuge (mount, fdisk, lsblk …)"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later AND BSD-3-Clause"
 url = "https://www.kernel.org/pub/linux/utils/util-linux/v2.41/"
@@ -24,4 +24,41 @@ make
 package = '''
 cd "$S"
 make DESTDIR="$DESTDIR" install
+# util-linux wird vor systemd gebaut, configure findet dann kein systemd und installiert keine Units:
+# fstrim.service/.timer (wöchentliches TRIM für SSDs) wie upstream von Hand, per Preset aktiv
+u="$DESTDIR/usr/lib/systemd/system"
+install -d "$u" "$DESTDIR/usr/lib/systemd/system-preset"
+cat > "$u/fstrim.service" <<"UNIT"
+[Unit]
+Description=Discard unused blocks on filesystems from /etc/fstab
+Documentation=man:fstrim(8)
+ConditionVirtualization=!container
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/fstrim --listed-in /etc/fstab:/proc/self/mountinfo --verbose --quiet-unsupported
+PrivateNetwork=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+MemoryDenyWriteExecute=yes
+SystemCallFilter=@default @file-system @basic-io @system-service
+UNIT
+cat > "$u/fstrim.timer" <<"UNIT"
+[Unit]
+Description=Discard unused filesystem blocks once a week
+Documentation=man:fstrim(8)
+ConditionVirtualization=!container
+ConditionPathExists=!/etc/initrd-release
+
+[Timer]
+OnCalendar=weekly
+AccuracySec=1h
+Persistent=true
+RandomizedDelaySec=100min
+
+[Install]
+WantedBy=timers.target
+UNIT
+echo "enable fstrim.timer" > "$DESTDIR/usr/lib/systemd/system-preset/60-util-linux.preset"
 '''

@@ -49,7 +49,7 @@ Infrastruktur: GitHub Pages reicht für den Start. Bei vollständigen Repos (~60
 | Konfigdatei-Schutz (`.sypnew`/`.sypsave`), `syp verify`, `syp doctor` | Updates dürfen Nutzeranpassungen nicht zerstören; Manipulation/Beschädigung erkennen |
 | Trigger-System (ldconfig, Icons, initramfs, GRUB …) | Pakete brauchen Nacharbeiten (ldconfig, Icons, initramfs …), die sonst Paket-Hooks erledigen |
 | Skripte fremder Pakete standardmäßig aus, setuid-Bits entfernt | Sicherheit: fremde Maintainer-Skripte laufen als root |
-| Firewall (ufw, eingehend gesperrt), AppArmor aktiv, zram, fstrim | sichere und flotte Grundkonfiguration |
+| Firewall (nftables, eingehend gesperrt), SELinux enforcing, wöchentliches fstrim | sichere und flotte Grundkonfiguration |
 | Eigene Btrfs-Subvolumes für KI-Modelle | mehrere GB pro Modell nicht in jedem Snapshot |
 | Live-Boot mit Bildschirmleser, „sichere Grafik“, Reduzierte Bewegung | Barrierefreiheit und Hardware-Kompatibilität ab dem ersten Start |
 | Farbneutraler „Studio“-Modus, ICC-Workflow, Tablet-Treiber-Erkennung | kreative Arbeit: farbtreue Darstellung, Stiftgeräte |
