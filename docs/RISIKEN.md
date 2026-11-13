@@ -4,14 +4,12 @@
 
 | Risiko | Auswirkung | Gegenmaßnahme |
 |---|---|---|
-| **Abhängigkeit von Arch-Binärpaketen** | Upstream-Brüche (z. B. Python-/Qt-Sprünge) kommen ungefiltert an | Staging-Kanal `testing` → `stable` nach 7 Tagen und QEMU-Smoke-Tests (Roadmap Phase 7); Snapshots und `syp rollback` |
-| **Eigener Paketmanager** | Bugs treffen das ganze System; kein Ökosystem wie pacman/dnf | 54 Tests, Transaktionshistorie, Pre/Post-Snapshots, `syp doctor`; Python-Referenz später als Rust-Port mit gleichem Format |
+| **Upstream-Brüche** | Neue Versionen (z. B. Python-/Qt-Sprünge) brechen Rezepte oder Programme | Alles aus Quellcode in einer festen Toolchain; QEMU-Tests (Boot, Desktop, Installation, Update, Rollback) vor jeder Veröffentlichung; Kanal `testing` → `stable`; Snapshots und `syp rollback` |
+| **Eigener Paketmanager** | Bugs treffen das ganze System; kein Ökosystem wie pacman/dnf | ~95 Tests, Transaktionshistorie, Btrfs-Snapshot vor jedem Update, `syp doctor`, Update-/Rollback-Test im installierten System |
 | **Konvertierung fremder Binärpakete** | ABI-Mismatch (glibc/Qt/ICU-Versionen), fehlende Abhängigkeiten, Distro-Skripte (debconf, alternatives) | ELF-Sonamen-Prüfung, Mapping-Bericht mit „FEHLT“, `--strict`; Skripte standardmäßig deaktiviert; für Proprietäres Flatpak empfehlen |
-| **Pakete hinter Arch-Mechanismen** | pacman-Hooks (`/usr/share/libalpm/hooks`) laufen unter syp nicht | syp-Trigger decken die wichtigsten Hooks ab; CI vergleicht Hook-Liste mit Triggern (offen) |
-| **`/etc/os-release`, `filesystem`, `base`** | Branding überschreibt Dateien eines Arch-Pakets (`syp verify` meldet sie) | eigener `filesystem`/`base`-Rebuild (Phase 8) |
-| **Sicherheit der Signaturschlüssel** | Kompromittierter CI-Schlüssel = signierte Schadpakete | Schlüssel nur als GitHub-Secret, getrennter Offline-Root-Schlüssel + Rotation über `symfonos-keyring` (offen), reproduzierbare Pakete |
+| **Konvertierte Fremdpakete** | pacman-/dpkg-Hooks laufen unter syp nicht | syp-Trigger decken die wichtigsten Nacharbeiten ab; Skripte konvertierter Pakete nur mit `--trust-scripts` |
+| **Sicherheit der Signaturschlüssel** | Kompromittierter CI-Schlüssel = signierte Schadpakete | Schlüssel nur als GitHub-Secret, Rotation über das Paket `symfonos-keyring` (neuer Schlüssel erst verteilen, dann damit signieren), getrennter Offline-Root-Schlüssel (offen), reproduzierbare Pakete |
 | **Secure Boot** | Viele Geräte booten das ISO nicht ohne Deaktivierung von Secure Boot | shim + MOK bzw. sbctl (Phase 8) |
-| **Calamares aus dem AUR** | Build kann bei Upstream-Änderungen brechen | Version im lokalen Repo pinnen, CI-Bau |
 | **KI-Assistent** | Halluzinierte Befehle; Prompt-Injection über Logs | Befehle nur vorgeschlagen, Einzelbestätigung, Risikoklasse „gefährlich“ verlangt AUSFÜHREN; Logs als Daten markiert; nur lokale Endpunkte erlaubt |
 | **Modell-Download** | URL/Datei ändert sich, Integrität | sha256 im Skript pinnen (offen), Spiegel im eigenen Repo |
 | **SEB** | Kein offizieller Linux-Support; Prüfungsorganisationen lehnen Alternativen ab | Prüfungsmodus klar als „ohne SEB-Pflicht“ kennzeichnen; VM/Dual-Boot dokumentiert |
@@ -22,7 +20,7 @@
 | Phase | Umfang | Aufwand (Personenmonate) |
 |---|---|---|
 | 1–3 Referenzimplementierung (dieses Repo) | syp, Konverter, Store, Design-Center, Assistent | 2–3 PM bis zur Beta-Reife |
-| 4 ISO + Installer bis zum stabilen Release | Hardwaretests, Calamares-Feinschliff, Barrierefreiheit | 2 PM |
+| 4 ISO + Installer bis zum stabilen Release | Hardwaretests, Installer-Feinschliff, Barrierefreiheit | 2 PM |
 | 6–7 Repo-Infrastruktur + Staging + Smoke-Tests | ~15 000 Pakete spiegeln, Speicher/CDN, QEMU-Tests | 2 PM, laufend ca. 0,3 PM/Monat |
 | 8 Eigenständigkeit (eigene Basis, Secure Boot, Rust-Port syp) | | 4–6 PM |
 | 9 Store-Ausbau (AppStream, Screenshots, Flatpak) | | 2 PM |
@@ -43,14 +41,13 @@ Infrastruktur: GitHub Pages reicht für den Start. Bei vollständigen Repos (~60
 - **Patentbelastete Codecs** (H.264/H.265/AAC über FFmpeg/x264/x265): in der EU in der Regel unproblematisch. Für Verteilung in den USA oder mit kommerziellem Vertrieb rechtlich prüfen (Fedora liefert sie deshalb nicht aus).
 - **KI-Modell**: Qwen3-4B-Instruct-2507 und Qwen3-1.7B stehen unter Apache-2.0 und dürfen weitergegeben werden. Alternativen wie Gemma (eigene Nutzungsbedingungen) oder Llama (Community-Lizenz mit Einschränkungen) wären für die Weitergabe im ISO ungünstiger.
 - **SEB**: Der Windows-SEB steht unter MPL-2.0. Für die VM-Variante braucht jedes Gerät eine Windows-Lizenz. Community-Ports haben eigene Lizenzen und werden nicht mitgeliefert.
-- **Calamares** (GPL-3.0-or-later), **archiso** (GPL-3.0-or-later): unproblematisch.
 
 ## Eigenständig ergänzt (über die Anforderungen hinaus)
 
 | Ergänzung | Warum |
 |---|---|
 | Konfigdatei-Schutz (`.sypnew`/`.sypsave`), `syp verify`, `syp doctor` | Updates dürfen Nutzeranpassungen nicht zerstören; Manipulation/Beschädigung erkennen |
-| Trigger-System (ldconfig, Icons, initramfs, GRUB …) | konvertierte Pakete brauchen die Nacharbeiten, die sonst pacman-Hooks erledigen |
+| Trigger-System (ldconfig, Icons, initramfs, GRUB …) | Pakete brauchen Nacharbeiten (ldconfig, Icons, initramfs …), die sonst Paket-Hooks erledigen |
 | Skripte fremder Pakete standardmäßig aus, setuid-Bits entfernt | Sicherheit: fremde Maintainer-Skripte laufen als root |
 | Firewall (ufw, eingehend gesperrt), AppArmor aktiv, zram, fstrim | sichere und flotte Grundkonfiguration |
 | Eigene Btrfs-Subvolumes für KI-Modelle | mehrere GB pro Modell nicht in jedem Snapshot |

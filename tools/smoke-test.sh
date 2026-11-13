@@ -7,15 +7,9 @@ T=$(mktemp -d)
 trap 'rm -rf "$T"' EXIT
 label=$(isoinfo -d -i "$ISO" 2>/dev/null | awk -F': ' '/Volume id/ {print $2}') ||
   label=$(blkid -o value -s LABEL "$ISO")
-# Zwei Layouts: Quellcode-ISO (/boot/vmlinuz, dracut-Live) und archiso (/symfonos/boot/x86_64)
-if xorriso -osirrox on -indev "$ISO" -extract /boot/vmlinuz "$T/vmlinuz" -extract /boot/initramfs.img "$T/initrd" >/dev/null 2>&1; then
-  APPEND="root=live:CDLABEL=$label rd.live.image"
-else
-  xorriso -osirrox on -indev "$ISO" \
-    -extract /symfonos/boot/x86_64/vmlinuz-linux-zen "$T/vmlinuz" \
-    -extract /symfonos/boot/x86_64/initramfs-linux-zen.img "$T/initrd" >/dev/null 2>&1
-  APPEND="archisobasedir=symfonos archisolabel=$label"
-fi
+xorriso -osirrox on -indev "$ISO" -extract /boot/vmlinuz "$T/vmlinuz" -extract /boot/initramfs.img "$T/initrd" >/dev/null 2>&1 ||
+  { echo "Kernel/initramfs nicht im ISO gefunden" >&2; exit 1; }
+APPEND="root=live:CDLABEL=$label rd.live.image"
 accel=tcg; [[ -w /dev/kvm ]] && accel=kvm
 echo ":: Boote $ISO (Label $label, $accel)"
 timeout "${TIMEOUT:-900}" qemu-system-x86_64 -machine q35,accel=$accel -m 4096 -smp 2 \

@@ -18,7 +18,7 @@
 | **B. Community-Client seb-linux** | AppImage nach `/opt/seb-linux/SafeExamBrowser.AppImage`, dann `symfonos-exam start --seb pruefung.seb` – läuft im selben gesperrten Kiosk | nur, wenn die Prüfungsorganisation den inoffiziellen Client ausdrücklich zulässt |
 | **C. Windows-VM mit offiziellem SEB** | `symfonos-exam vm --image win11.qcow2 --allow DOMAIN` (QEMU/KVM im Kiosk) | nur, wenn die SEB-Konfiguration virtuelle Maschinen erlaubt; SEB erkennt VMs und blockiert sie sonst. Windows-Lizenz nötig |
 | **D. Wine/Proton** | – | **nicht unterstützt** (nicht lauffähig bzw. von SEB abgelehnt) |
-| **E. Dual-Boot Windows** | Calamares richtet GRUB mit os-prober ein | volle Kompatibilität, wenn eine offizielle Plattform zwingend ist |
+| **E. Dual-Boot Windows** | Windows auf eigener Partition, Start über das Firmware-Bootmenü | volle Kompatibilität, wenn eine offizielle Plattform zwingend ist |
 
 ## Was der Prüfungsmodus einschränkt (`exam/symfonos-exam`)
 
