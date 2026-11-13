@@ -1,6 +1,6 @@
 # Audio und Musikproduktion
 
-symfonOS nutzt PipeWire mit JACK-Kompatibilität (`pipewire-jack`), den Kernel `linux-zen` und Echtzeit-Rechte über die Gruppe `realtime`. Ardour, Carla und Plugins (LV2/VST3/CLAP) laufen direkt.
+symfonOS nutzt PipeWire mit JACK-Kompatibilität (`pipewire-jack`) und Echtzeit-Rechte über die Gruppe `realtime`. Ardour, Carla und Plugins (LV2/VST3/CLAP) laufen direkt.
 
 ## Knacksen und Aussetzer (XRUNs)
 1. Prüfen, ob dein Benutzer in der Gruppe `realtime` ist: `groups`. Falls nicht: `sudo usermod -aG realtime $USER`, neu anmelden.

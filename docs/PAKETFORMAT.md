@@ -47,7 +47,7 @@ Backtracking-Solver: Kandidaten sortiert nach installierter Version, Namensgleic
 3. Platzprüfung, Btrfs-Snapshot `/.snapshots/syp-<Zeit>-pre` (die letzten 10 bleiben), Historieneintrag `running`
 4. Entfernen → Entpacken in Staging → atomar platzieren (`rename`, Fallback copy+replace bei EXDEV) → alte Dateien entfernen → DB
 5. Konfigdateien (`backup`): unverändert → ersetzen; lokal geändert → `.sypnew`; beim Entfernen geändert → `.sypsave`
-6. SELinux-Kontexte der geänderten Dateien setzen (restorecon), Trigger einmalig (ldconfig, systemd, Icons, Schriften, MIME, depmod, mkinitcpio, GRUB)
+6. SELinux-Kontexte der geänderten Dateien setzen (restorecon), Trigger einmalig (ldconfig, systemd, Icons, Schriften, MIME, depmod, initramfs per dracut, GRUB)
 7. Historie `done`
 
 ## Updates und Rollbacks
