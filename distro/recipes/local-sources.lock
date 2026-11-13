@@ -1,11 +1,11 @@
 # Rezept Version sha256 der @/-Quellen – erzeugt von tools/local-sources.py
 crypto-policies 1.0-1 e0cd54b520b459365dae8ddc9446412515ec757754a4ac3b9c41db1c19c53a9f
 openssl 3.5.2-1 d6ca6f8d0e99552f3b9d0fbdca287cdbaff683d8e95cc6a7b890c2d1f043f016
-symfonos-desktop-config 1.0-10 c9c68cd5f50afdbccf7dfa0b856594e4963803784cb19a2137215b6c9aa92b0c
+symfonos-desktop-config 1.0-11 b6b2dbfc012506da7d1470e4fd049506cb82c272e0805851261aa64dab1d820b
 symfonos-exam 1.0-3 c7f9ffb3e5000687ea4b7c0732ddefe9b7722e5725ad728fece27c44efe6fe4c
 symfonos-installer 1.0-10 c1269d9a9be09997f8bfa7353ba896bc514db766c725e1d3277836d9af22ad03
 symfonos-keyring 1-1 1e2c2bad6389e638ba83569a3a221ce8c52aafeb09638a86e89b07379927a8e5
 symfonos-security 1.0-6 f723f91fe4567df6ffa0cf2649a134d8dd34641b6c4342bba3e592744bc0ed0a
 symfonos-selinux 1.0-7 f82a40681591e2eb1a25c72780cb8ee2a3cd0c96cc61e3e7579d0e1f0abbcf87
-symfonos-tools 0.1.0-9 b33da5a0f9dccca2ced47acac64ece02eedc75bb0c69da39b235810ea03f338a
-syp 1.0.0-21 d69103dcbf0e6f555cb4bb7ff7d6b93b07e0100e8afad7df6007886be6bf4a32
+symfonos-tools 0.1.0-10 53a6cdbd54685cd7d079adffaae533dbcb2f4e646f0ad29f476a1d782a326427
+syp 1.0.0-22 d5b15ad954310a4f135a1ab1b08386d7d8ed6d896e956db20bd3aab31573544b

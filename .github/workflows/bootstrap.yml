@@ -260,14 +260,15 @@ jobs:
           gh release edit "$tmp" --repo "$GITHUB_REPOSITORY" --tag desktop-nightly
           gh api -X DELETE "repos/$GITHUB_REPOSITORY/git/refs/tags/$tmp" || true
           echo "::notice title=Desktop-ISO veröffentlicht::$iso ($(du -h "$iso" | cut -f1), ${#files[@]} Datei(en))"
-      - name: Paket-Repo veröffentlichen
-        # Updates für installierte Systeme: nur Pakete, mit denen das Desktop-ISO alle Tests bestanden hat
+      - name: Paket-Repo veröffentlichen (testing → stable)
+        # Nur Pakete, mit denen das Desktop-ISO alle Tests bestanden hat, kommen nach testing (repo-x86_64-testing);
+        # nach stable (repo-x86_64, Paketquelle installierter Systeme) erst nach 7 Tagen, Sicherheitsupdates sofort
         if: always() && steps.desktop.outcome == 'success' && steps.desktop_test.outcome == 'success' && steps.desktop_enforcing.outcome == 'success' && steps.desktop_install.outcome == 'success'
         # sudo: die Pakete gehören root (Hardlinks statt Kopien; fremde Dateien verbietet protected_hardlinks).
         # Variablen ausdrücklich übergeben: sudo-rs (Ubuntu 26) reicht mit -E nicht alles durch
         run: |
           sudo env "PATH=$PATH" GH_TOKEN="$GH_TOKEN" GITHUB_REPOSITORY="$GITHUB_REPOSITORY" \
-            tools/publish-repo.sh out/repo/symfonos "$PWD/keys/release.key" repo-x86_64
+            tools/promote-release.sh out/repo/symfonos "$PWD/keys/release.key" "$PWD/keys/release.pub"
       - name: Diagnose ablegen (Branch ci-diag)
         # Vollständige Logs und Bildschirmfotos für die Fehlersuche; enthält keine Geheimnisse
         if: always()

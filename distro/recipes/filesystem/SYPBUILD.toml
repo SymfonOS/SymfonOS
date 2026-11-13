@@ -1,7 +1,7 @@
 # symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
 [package]
 name = "filesystem"
-version = "2025.10-2"
+version = "2025.10-3"
 arch = "any"
 summary = "symfonOS-Grundverzeichnisse und Systemdateien"
 license = "GPL-3.0-or-later"
@@ -102,8 +102,8 @@ PRETTY_NAME="symfonOS (Rolling)"
 ID=symfonos
 BUILD_ID=rolling
 ANSI_COLOR="38;2;124;92;255"
-HOME_URL="https://github.com/thomasrohm23-bit/symfonOS"
-BUG_REPORT_URL="https://github.com/thomasrohm23-bit/symfonOS/issues"
+HOME_URL="https://github.com/SymfonOS/SymfonOS"
+BUG_REPORT_URL="https://github.com/SymfonOS/SymfonOS/issues"
 LOGO=symfonos
 EOF
 ln -s ../usr/lib/os-release "$D/etc/os-release"

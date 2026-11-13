@@ -15,16 +15,25 @@ REPO_SLUG=${GITHUB_REPOSITORY:?GITHUB_REPOSITORY fehlt}
 pub=$(mktemp -d)/symfonos
 trap 'rm -rf "$(dirname "$pub")"' EXIT
 
-# neueste Datei je Paketname (gleicher Name, mehrere Versionen aus früheren Läufen)
+# neueste Version je Paketname (gleicher Name, mehrere Versionen aus früheren Läufen); bei gleicher Version
+# die jüngere Datei
 zstd -dc "$SRC/index.json.zst" | python3 -I -c '
-import json, os, sys
-src = sys.argv[1]
+import functools, json, os, subprocess, sys
+src, syp = sys.argv[1], sys.argv[2]
+@functools.lru_cache(None)
+def vercmp(a, b):
+    return int(subprocess.run([syp, "vercmp", a, b], capture_output=True, text=True, check=True).stdout)
 best = {}
 for e in json.load(sys.stdin)["packages"]:
-    n, f = e["info"]["name"], os.path.join(src, e["file"])
-    if os.path.exists(f) and (n not in best or os.path.getmtime(f) > os.path.getmtime(best[n])):
-        best[n] = f
-print("\n".join(sorted(best.values())))' "$SRC" > "$(dirname "$pub")/files.txt"
+    n, v, f = e["info"]["name"], e["info"]["version"], os.path.join(src, e["file"])
+    if not os.path.exists(f):
+        continue
+    if n in best:
+        c = vercmp(v, best[n][0])
+        if c < 0 or (c == 0 and os.path.getmtime(f) <= os.path.getmtime(best[n][1])):
+            continue
+    best[n] = (v, f)
+print("\n".join(sorted(f for _, f in best.values())))' "$SRC" "$SYP" > "$(dirname "$pub")/files.txt"
 mkdir -p "$pub/pool"
 while read -r f; do
   d="$pub/pool/$(basename "$(dirname "$f")")"

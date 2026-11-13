@@ -29,4 +29,4 @@ Ein Snapshot hält ersetzte Dateien fest. syp prüft deshalb vor jeder Transakti
 - Alte `@.vor-rollback-*` löschen (siehe oben).
 
 ## Automatische Aktualisierung
-Der Timer `syp-sync.timer` gleicht die Paketquellen regelmäßig ab; `syp upgrade` zeigt dann verfügbare Updates. Die Paketquelle ist das GitHub-Release `repo-x86_64` des symfonOS-Projekts. Index und Pakete sind signiert, der Schlüssel kommt mit dem Paket `symfonos-keyring`.
+Der Timer `syp-sync.timer` gleicht die Paketquellen regelmäßig ab; `syp upgrade` zeigt dann verfügbare Updates. Die Paketquelle ist das GitHub-Release `repo-x86_64` (Kanal stable) des symfonOS-Projekts: Pakete kommen dorthin erst, wenn sie 7 Tage im Testkanal lagen, Sicherheitsupdates sofort. Index und Pakete sind signiert, der Schlüssel kommt mit dem Paket `symfonos-keyring`.

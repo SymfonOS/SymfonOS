@@ -1,0 +1,3 @@
+# Sperrliste für die Übernahme testing → stable (tools/promote.py, in der CI tools/promote-release.sh).
+# Je Zeile »paketname« (alle Versionen) oder »paketname version« (nur diese), z. B. bei einem offenen Fehlerbericht:
+#   krita 6.0.0-1   # Absturz beim Speichern, Issue 123

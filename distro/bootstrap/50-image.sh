@@ -166,7 +166,7 @@ cat > "$IMG/etc/motd" <<CONF
   symfonOS Live ($([[ $VARIANT == desktop ]] && echo "Desktop" || echo "Basissystem"))
   Installieren:  sudo symfonos-install
   Netzwerk:      iwctl  (WLAN)  ·  networkctl status
-  Hilfe:         man syp  ·  https://github.com/thomasrohm23-bit/symfonOS
+  Hilfe:         man syp  ·  https://github.com/SymfonOS/SymfonOS
 
 CONF
 # Paket-Cache leeren: syp kopiert auch aus dem file://-Repo jedes Paket nach /var/cache/syp/pkg, im Live-System

@@ -14,12 +14,14 @@ Rezept-Änderung ──CI──▶ testing ──(7 Tage, Tests, keine Sperre)�
 
 | Kanal | Inhalt | Wer nutzt ihn |
 |---|---|---|
-| `testing` | jeder erfolgreiche Bau | Entwickler, Tester (`[[repo]] name = "testing"` in `/etc/syp/syp.toml`) |
-| `stable` | aus testing übernommen mit `tools/promote.py` | Standard für alle Installationen |
+| `testing` | jeder Bau, der alle ISO-Tests bestanden hat (GitHub-Release `repo-x86_64-testing`) | Entwickler, Tester (den auskommentierten Eintrag `testing` in `/etc/syp/syp.toml` aktivieren) |
+| `stable` | aus testing übernommen mit `tools/promote.py` (GitHub-Release `repo-x86_64`) | Standard für alle Installationen |
+
+Beides erledigt die Bau-CI nach jedem grünen Lauf (`tools/promote-release.sh`): erst testing veröffentlichen, dann übernehmen und stable neu signieren. Seit wann ein Paket in testing liegt, steht in `promotion.json` am testing-Release. stable verliert dabei nie Pakete; schrumpft es, bricht der Schritt ab.
 
 `tools/promote.py` (entspricht Bodhi bei Fedora) übernimmt ein Paket erst, wenn
 1. es mindestens **7 Tage** in testing liegt; Pakete mit `security`-Feld kommen über die Schnellspur sofort,
-2. niemand es gesperrt hat (`testing/hold`, z. B. bei einem offenen Fehlerbericht),
+2. niemand es gesperrt hat (`distro/channels/hold` im Repository, z. B. bei einem offenen Fehlerbericht),
 3. **alle Abhängigkeiten in stable erfüllbar** bleiben. Neue Bibliotheksversionen werden zusammen mit ihren Nutzern übernommen, nie einzeln.
 4. Außerdem wird der Index von testing nur mit gültiger Signatur gelesen.
 
