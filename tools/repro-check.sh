@@ -4,6 +4,8 @@
 #
 #   tools/repro-check.sh REPO REZEPTE BAUROOT SCHLÜSSEL [ANZAHL]     (BAUROOT »-«: auf dem Host bauen)
 #
+# Gebaut wird zweimal: unterscheiden sich die beiden Bauten, ist das Paket nicht reproduzierbar; sind sie gleich,
+# aber anders als das veröffentlichte Paket, ist dieses veraltet (ältere Bauumgebung, gleiche Version).
 # Ausgewählt werden rotierend (je Tag andere) Rezepte, deren Quellen zusammen höchstens MAX_SRC_MB (Standard 30)
 # groß sind, damit der Lauf kurz bleibt. Gebaut wird gegen eine Kopie des Repos (Pakete als Hardlinks, die
 # Zielpakete entfernt), ohne in die Bauumgebung zu installieren. Das Ergebnis steht als Hinweis im Lauf;
@@ -52,36 +54,38 @@ PY
 [ -s "$w/pick.tsv" ] || { echo "::notice title=Reproduzierbarkeit::keine passenden Rezepte"; exit 0; }
 
 # Repo-Kopie ohne die Zielpakete
-mkdir -p "$w/repo"
-(cd "$REPO" && find . -path ./pool -prune -o -type f -print) | while read -r f; do
-  mkdir -p "$w/repo/$(dirname "$f")"; cp -p "$REPO/$f" "$w/repo/$f"
-done
-cp -al "$REPO/pool" "$w/repo/pool"
-while IFS=$'\t' read -r _ orig; do rm -f "$w/repo/pool/${orig#"$REPO/pool/"}"; done < "$w/pick.tsv"
+# Zwei Repo-Kopien ohne die Zielpakete (Pakete als Hardlinks, Index und Metadaten als echte Kopien)
+copy_repo() {
+  mkdir -p "$1"
+  (cd "$REPO" && find . -path ./pool -prune -o -type f -print) | while read -r f; do
+    mkdir -p "$1/$(dirname "$f")"; cp -p "$REPO/$f" "$1/$f"
+  done
+  cp -al "$REPO/pool" "$1/pool"
+  while IFS=$'\t' read -r _ orig; do rm -f "$1/pool/${orig#"$REPO/pool/"}"; done < "$w/pick.tsv"
+}
+copy_repo "$w/repo1"
+copy_repo "$w/repo2"
 
 names=$(cut -f1 "$w/pick.tsv" | paste -sd,)
-echo ":: zweiter Bau: $names"
 rootarg=(--root "$BROOT")
 [ "$BROOT" = - ] && rootarg=()  # ohne Bauumgebung (Tests)
 # buildall richtet die Paketquelle der Bauumgebung auf die Repo-Kopie aus: danach wiederherstellen
 conf="$BROOT/etc/syp/syp.toml"
 if [ -f "$conf" ]; then cp -p "$conf" "$w/syp.toml"; trap 'cp -p "$w/syp.toml" "$conf"; rm -rf "$w"' EXIT; fi
-"$SYP" buildall "$RECIPES" --repo "$w/repo" "${rootarg[@]}" -k "$KEY" --name "$REPO_NAME" --nocheck --no-install \
-  --only "$names" --keep-going 2>&1 | tail -n 40 || true
+for n in 1 2; do
+  echo ":: Bau $n: $names"
+  "$SYP" buildall "$RECIPES" --repo "$w/repo$n" "${rootarg[@]}" -k "$KEY" --name "$REPO_NAME" --nocheck --no-install \
+    --only "$names" --keep-going 2>&1 | tail -n 20 || true
+done
 
-same=() diff=() fail=()
-: > "$OUT"
-while IFS=$'\t' read -r name orig; do
-  new="$w/repo/pool/${orig#"$REPO/pool/"}"
-  if [ ! -f "$new" ]; then fail+=("$name"); echo "$name: zweiter Bau fehlgeschlagen" >> "$OUT"; continue; fi
-  if python3 -I - "$orig" "$new" >> "$OUT" <<'PY'
+# Vergleich zweier Pakete: Inhalt laut .FILES.json, für kleine Textdateien ein unified diff
+cat > "$w/compare.py" <<'PY'
 import difflib, io, json, subprocess, sys, tarfile
 def files(p):
     with tarfile.open(p) as tf:
         return {f["path"]: {k: v for k, v in f.items() if k in ("type", "mode", "sha256", "target", "size")}
                 for f in json.loads(tf.extractfile(".FILES.json").read())}
 def content(p, want):
-    """Inhalt kleiner Textdateien aus data.tar.zst (für ein lesbares diff)"""
     with tarfile.open(p) as tf:
         raw = subprocess.run(["zstd", "-dcq"], input=tf.extractfile("data.tar.zst").read(),
                              capture_output=True, check=True).stdout
@@ -93,21 +97,36 @@ def content(p, want):
                 if b"\0" not in data:
                     out[m.name.lstrip("./")] = data.decode(errors="replace").splitlines()
     return out
-a, b = files(sys.argv[1]), files(sys.argv[2])
+pa, pb, la, lb = sys.argv[1:5]
+a, b = files(pa), files(pb)
 bad = sorted(p for p in a.keys() | b.keys() if a.get(p) != b.get(p))
 for p in bad[:20]:
     print(f"  {p}: {a.get(p)} != {b.get(p)}")
 small = {p for p in bad[:5] if all((x.get(p) or {}).get("size", 1 << 30) < 65536 for x in (a, b))}
 if small:
-    ca, cb = content(sys.argv[1], small), content(sys.argv[2], small)
+    ca, cb = content(pa, small), content(pb, small)
     for p in sorted(small & ca.keys() & cb.keys()):
-        for line in list(difflib.unified_diff(ca[p], cb[p], f"veröffentlicht/{p}", f"neu/{p}", lineterm=""))[:30]:
+        for line in list(difflib.unified_diff(ca[p], cb[p], f"{la}/{p}", f"{lb}/{p}", lineterm=""))[:30]:
             print("    " + line)
 sys.exit(1 if bad else 0)
 PY
-  then same+=("$name")
-  else diff+=("$name"); echo "$name: abweichend (siehe oben)" >> "$OUT"
+
+# gleich: beide Bauten und das veröffentlichte Paket identisch
+# veraltet: beide Bauten gleich, das veröffentlichte Paket nicht (gebaut mit älterer Bauumgebung oder syp)
+# nicht reproduzierbar: die beiden Bauten unterscheiden sich
+same=() stale=() diff=() fail=()
+: > "$OUT"
+while IFS=$'\t' read -r name orig; do
+  rel=${orig#"$REPO/pool/"} n1="$w/repo1/pool/${orig#"$REPO/pool/"}" n2="$w/repo2/pool/${orig#"$REPO/pool/"}"
+  if [ ! -f "$n1" ] || [ ! -f "$n2" ]; then fail+=("$name"); echo "$name: Bau fehlgeschlagen" >> "$OUT"; continue; fi
+  if ! python3 -I "$w/compare.py" "$n1" "$n2" bau1 bau2 >> "$OUT"; then
+    diff+=("$name"); echo "$name: NICHT reproduzierbar (zwei Bauten verschieden, siehe oben)" >> "$OUT"
+  elif ! python3 -I "$w/compare.py" "$orig" "$n1" veröffentlicht neu >> "$OUT"; then
+    stale+=("$name"); echo "$name: reproduzierbar, aber veröffentlichtes Paket veraltet ($rel, siehe oben)" >> "$OUT"
+  else
+    same+=("$name")
   fi
 done < "$w/pick.tsv"
-echo "::notice title=Reproduzierbarkeit::${#same[@]} von $(wc -l < "$w/pick.tsv") gleich (${same[*]:-–}); abweichend: ${diff[*]:-–}; zweiter Bau fehlgeschlagen: ${fail[*]:-–}"
+total=$(wc -l < "$w/pick.tsv")
+echo "::notice title=Reproduzierbarkeit::$(( ${#same[@]} + ${#stale[@]} )) von $total reproduzierbar (${same[*]} ${stale[*]}); veröffentlichtes Paket veraltet: ${stale[*]:-–}; nicht reproduzierbar: ${diff[*]:-–}; Bau fehlgeschlagen: ${fail[*]:-–}"
 cat "$OUT"
