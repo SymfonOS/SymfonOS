@@ -16,7 +16,7 @@ def test_repro_check(tmp_path):
             f"[build]\npackage = 'mkdir -p \"$DESTDIR/usr/share/{name}\"; {step} > \"$DESTDIR/usr/share/{name}/x\"'\n")
     key, _ = keygen(tmp_path)
     repo = tmp_path / "repo"
-    syp("buildall", recs, "--repo", repo, "-k", key, "--name", "t")
+    syp("buildall", recs, "--repo", repo, "-k", key, "--name", "symfonos")
     out = tmp_path / "repro.txt"
     r = subprocess.run(["bash", ROOT / "tools/repro-check.sh", repo, recs, "-", key, "5"], capture_output=True,
                        text=True, env=dict(os.environ, SYP_SRCCACHE=str(tmp_path / "cache"), OUT=str(out)))

@@ -11,7 +11,7 @@
 set -euo pipefail
 REPO=$(realpath "${1:?Repo fehlt}") RECIPES=$(realpath "${2:?Rezepte fehlen}") BROOT=${3:?Bauumgebung fehlt}
 KEY=${4:?Schlüssel fehlt} N=${5:-4}
-MAX_SRC_MB=${MAX_SRC_MB:-30} OUT=${OUT:-repro.txt}
+MAX_SRC_MB=${MAX_SRC_MB:-30} OUT=${OUT:-repro.txt} REPO_NAME=${REPO_NAME:-symfonos}  # Name wie im signierten Index
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 SYP="$ROOT/csrc/bin/syp"
 CACHE=${SYP_SRCCACHE:-$BROOT/sources}
@@ -63,7 +63,10 @@ names=$(cut -f1 "$w/pick.tsv" | paste -sd,)
 echo ":: zweiter Bau: $names"
 rootarg=(--root "$BROOT")
 [ "$BROOT" = - ] && rootarg=()  # ohne Bauumgebung (Tests)
-"$SYP" buildall "$RECIPES" --repo "$w/repo" "${rootarg[@]}" -k "$KEY" --name repro --nocheck --no-install \
+# buildall richtet die Paketquelle der Bauumgebung auf die Repo-Kopie aus: danach wiederherstellen
+conf="$BROOT/etc/syp/syp.toml"
+if [ -f "$conf" ]; then cp -p "$conf" "$w/syp.toml"; trap 'cp -p "$w/syp.toml" "$conf"; rm -rf "$w"' EXIT; fi
+"$SYP" buildall "$RECIPES" --repo "$w/repo" "${rootarg[@]}" -k "$KEY" --name "$REPO_NAME" --nocheck --no-install \
   --only "$names" --keep-going 2>&1 | tail -n 40 || true
 
 same=() diff=() fail=()
