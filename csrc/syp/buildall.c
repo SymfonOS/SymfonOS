@@ -284,7 +284,7 @@ int cmd_buildall(int argc, char **argv, const char *root, int gdry) {
     }
     printf(":: %zu Rezepte, Bauumgebung: %s\n", recipes.n, broot ? broot : "Host");
     time_t start = time(NULL);
-    int built = 0, skipped = 0, failed = 0, pending = 0;
+    int built = 0, skipped = 0, failed = 0, pending = 0, restored = 0;
     strvec failures = {0};
     hmap failed_names = {0};
     hm_init(&failed_names);
@@ -310,6 +310,10 @@ int cmd_buildall(int argc, char **argv, const char *root, int gdry) {
             if (hm_get(&failed_names, r->deps.v[j])) blocked = 1;
         /* Vorhandenes Paket mit fremdem Schlüssel signiert (Schlüsselwechsel, kompromittierter
          * Schlüssel): verwerfen und neu bauen, statt es weiterzuverwenden */
+        /* Rest eines abgebrochenen Neubaus: altes Paket zurücklegen (wird unten erneut geprüft) */
+        char *keep = xasprintf("%s.alt", target);
+        if (!path_exists(target) && path_exists(keep)) rename(keep, target);
+        int stale = 0, rebuilding = 0;
         if (path_exists(target) && k) {
             sypfile sf;
             if (syp_open_meta(target, &sf) == 0) {
@@ -320,11 +324,19 @@ int cmd_buildall(int argc, char **argv, const char *root, int gdry) {
                 } else if (legacy_layout(sf.files)) {
                     printf("   %s: Dateien außerhalb von /usr bzw. in /var/run – wird neu gebaut (usr-merge)\n", r->pkgfile);
                     unlink(target);
+                } else if (jgeti(jget(sf.info, "origin"), "build_rev", 1) < SYP_BUILD_REV) {
+                    /* ältere Bauumgebung: neu bauen, das alte Paket bleibt, falls der Neubau scheitert */
+                    printf("   %s: Bau-Revision %lld < %d – wird neu gebaut\n", r->pkgfile,
+                           jgeti(jget(sf.info, "origin"), "build_rev", 1), SYP_BUILD_REV);
+                    stale = 1;
                 }
                 syp_close(&sf);
             }
         }
-        if (path_exists(target)) {
+        /* veraltet, aber eine Abhängigkeit ist gescheitert: das bisherige Paket gilt weiter (Zeit um oder
+         * Probelauf: offen, das Paket bleibt bis zum Neubau liegen) */
+        if (stale && blocked) stale = 0;
+        if (path_exists(target) && !stale) {
             skipped++;
             /* Gebaut, aber (z. B. nach einem Abbruch) nicht in der Bauumgebung installiert: nachholen */
             if (broot && install_built &&
@@ -349,6 +361,7 @@ int cmd_buildall(int argc, char **argv, const char *root, int gdry) {
         } else {
             printf("%s==> [%zu/%zu] %s %s%s\n", col("1;34"), i + 1, order.n, r->name, r->version, col_end());
             fflush(stdout);
+            if (stale && !rename(target, keep)) rebuilding = 1;
             char *res = broot ? build_in_root(r, broot, &bo) : build_recipe(r->file, pd, NULL, &bo);
             if (res && k && syp_resign(res, k)) {
                 free(res);
@@ -375,7 +388,14 @@ int cmd_buildall(int argc, char **argv, const char *root, int gdry) {
             }
             if (res) {
                 built++;
+                if (rebuilding) unlink(keep);
                 free(res);
+            } else if (rebuilding && !rename(keep, target)) {
+                /* Neubau gescheitert: das bisherige Paket bleibt gültig, Abhängige bauen weiter */
+                restored++;
+                sv_push_own(&failures, xasprintf("%s: Neubau fehlgeschlagen, altes Paket bleibt: %s", r->name, last_error()));
+                fprintf(stderr, "%s!! %s: Neubau fehlgeschlagen, altes Paket bleibt: %s%s\n", col("33;1"), r->name,
+                        last_error(), col_end());
             } else {
                 failed++;
                 hm_set(&failed_names, r->name, (void *)1);
@@ -384,12 +404,14 @@ int cmd_buildall(int argc, char **argv, const char *root, int gdry) {
                 if (!keep_going) {
                     free(pd);
                     free(target);
+                    free(keep);
                     break;
                 }
             }
         }
         free(pd);
         free(target);
+        free(keep);
     }
     free(pool);
     if (broot && !dry) release_root(broot);
@@ -397,8 +419,10 @@ int cmd_buildall(int argc, char **argv, const char *root, int gdry) {
         unlink(pubpath);
         free(pubpath);
     }
-    printf(":: gebaut %d, vorhanden %d, fehlgeschlagen %d, offen %d (%ld min)\n", built, skipped, failed, pending,
+    printf(":: gebaut %d, vorhanden %d, fehlgeschlagen %d, offen %d (%ld min)", built, skipped, failed, pending,
            (long)(time(NULL) - start) / 60);
+    if (restored) printf("; Neubau fehlgeschlagen %d (alte Pakete behalten)", restored);
+    printf("\n");
     for (size_t i = 0; i < failures.n; i++) printf("   ✗ %s\n", failures.v[i]);
     if (failed) return 1;
     return pending && !dry ? 3 : 0;

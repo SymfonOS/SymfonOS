@@ -108,3 +108,11 @@ im Paket unter `origin.hardening`.
 Bauen: `syp build REZEPT -k SCHLÜSSEL` (`--chroot WURZEL` für einen isolierten Bau), alle Rezepte
 in Abhängigkeitsreihenfolge mit `syp buildall distro/recipes --repo REPO`. Index ansehen:
 `syp repo-show REPO --pub SCHLÜSSEL.pub`.
+
+`buildall` überspringt Pakete, die schon im Pool liegen, und baut sie nur in drei Fällen neu: mit einem
+fremden Schlüssel signiert, Dateien außerhalb von `/usr` (vor dem usr-merge) oder eine ältere Bau-Revision.
+Die Bau-Revision (`SYP_BUILD_REV` in `csrc/lib/build.h`, im Paket `origin.build_rev`, fehlt sie: 1) wird
+erhöht, wenn sich bei gleichem Rezept der Paketinhalt ändert (Vorlagen, Standardoptionen). So entspricht das
+Repo dem, was die Rezepte heute ergeben. Scheitert ein solcher Neubau, bleibt das bisherige Paket liegen
+(„Neubau fehlgeschlagen … alte Pakete behalten“) und Abhängige bauen weiter. Installierte Systeme bekommen
+neu gebaute Pakete gleicher Version nicht als Update, nur neue Installationen und Abbilder.

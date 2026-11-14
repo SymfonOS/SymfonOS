@@ -832,3 +832,55 @@ def test_build_steps_without_network(tmp_path):
     assert "ohne Netzzugriff" not in out and len(ifs) > 1
     out, ifs = build("c", env=dict(os.environ, SYP_BUILD_NET="strict"))
     assert ifs == ["lo"]
+
+
+def test_buildall_rebuilds_older_build_rev_and_keeps_old_on_failure(tmp_path):
+    # Pakete aus einer älteren Bauumgebung (origin.build_rev kleiner als die aktuelle) baut buildall neu;
+    # scheitert der Neubau, bleibt das bisherige Paket gültig und Abhängige bauen weiter
+    recs = tmp_path / "recipes"
+    for name, deps in (("a", ""), ("b", 'depends = ["a"]\n')):
+        (recs / name).mkdir(parents=True)
+        (recs / name / "SYPBUILD.toml").write_text(
+            f'[package]\nname = "{name}"\nversion = "1-1"\narch = "any"\n{deps}'
+            f'[build]\npackage = \'install -Dm644 /dev/null "$DESTDIR/usr/share/{name}/x"\'\n')
+    key, _ = keygen(tmp_path)
+    repo = tmp_path / "repo"
+    syp("buildall", recs, "--repo", repo, "-k", key, "--name", "t")
+
+    def rev(name):
+        with tarfile.open(next((repo / "pool" / name).glob(f"{name}-*.syp"))) as tf:
+            return json.loads(tf.extractfile(".SYPINFO.json").read())["origin"].get("build_rev", 1)
+
+    def make_old(name):
+        tree = tmp_path / f"tree-{name}"
+        (tree / f"usr/share/{name}").mkdir(parents=True, exist_ok=True)
+        (tree / f"usr/share/{name}/alt").write_text("alt")
+        info = tmp_path / f"info-{name}.json"
+        info.write_text(json.dumps({"name": name, "version": "1-1", "arch": "any", "summary": "s",
+                                    "origin": {"format": "native", "recipe": name}}))
+        target = next((repo / "pool" / name).glob(f"{name}-*.syp"))
+        target.unlink()
+        syp("pack", tree, info, "-o", target.parent, "-k", key)
+        return target
+
+    assert rev("a") > 1 and rev("b") > 1
+    make_old("a")
+    out = syp("buildall", recs, "--repo", repo, "-k", key, "--name", "t").stdout
+    assert "a-1-1-any.syp: Bau-Revision 1 <" in out and "gebaut 1, vorhanden 1" in out
+    assert rev("a") > 1
+
+    # Neubau scheitert: altes Paket bleibt, b ist nicht blockiert, kein Fehler-Exit
+    target = make_old("a")
+    old = target.read_bytes()
+    (recs / "a/SYPBUILD.toml").write_text('[package]\nname = "a"\nversion = "1-1"\narch = "any"\n'
+                                          "[build]\npackage = 'exit 1'\n")
+    make_old("b")
+    out = syp("buildall", recs, "--repo", repo, "-k", key, "--name", "t", "--keep-going").stdout
+    assert "Neubau fehlgeschlagen 1 (alte Pakete behalten)" in out and "gebaut 1" in out
+    assert target.read_bytes() == old and not list((repo / "pool/a").glob("*.alt"))
+    assert rev("b") > 1
+
+    # Abgebrochener Neubau (nur noch .alt vorhanden): wird zurückgelegt und nicht als fehlend behandelt
+    target.rename(str(target) + ".alt")
+    out = syp("buildall", recs, "--repo", repo, "-k", key, "--name", "t", "-n").stdout
+    assert target.exists() and "würde bauen: a" in out
