@@ -54,17 +54,14 @@ PY
 [ -s "$w/pick.tsv" ] || { echo "::notice title=Reproduzierbarkeit::keine passenden Rezepte"; exit 0; }
 
 # Repo-Kopie ohne die Zielpakete
-# Zwei Repo-Kopien ohne die Zielpakete (Pakete als Hardlinks, Index und Metadaten als echte Kopien)
-copy_repo() {
-  mkdir -p "$1"
-  (cd "$REPO" && find . -path ./pool -prune -o -type f -print) | while read -r f; do
-    mkdir -p "$1/$(dirname "$f")"; cp -p "$REPO/$f" "$1/$f"
-  done
-  cp -al "$REPO/pool" "$1/pool"
-  while IFS=$'\t' read -r _ orig; do rm -f "$1/pool/${orig#"$REPO/pool/"}"; done < "$w/pick.tsv"
-}
-copy_repo "$w/repo1"
-copy_repo "$w/repo2"
+# Repo-Kopie ohne die Zielpakete (Pakete als Hardlinks, Index und Metadaten als echte Kopien). Beide Bauten
+# gehen in dieselbe Kopie: eine zweite Kopie hätte einen älteren Index, den syp als Rollback ablehnt.
+mkdir -p "$w/repo" "$w/bau1"
+(cd "$REPO" && find . -path ./pool -prune -o -type f -print) | while read -r f; do
+  mkdir -p "$w/repo/$(dirname "$f")"; cp -p "$REPO/$f" "$w/repo/$f"
+done
+cp -al "$REPO/pool" "$w/repo/pool"
+while IFS=$'\t' read -r _ orig; do rm -f "$w/repo/pool/${orig#"$REPO/pool/"}"; done < "$w/pick.tsv"
 
 names=$(cut -f1 "$w/pick.tsv" | paste -sd,)
 rootarg=(--root "$BROOT")
@@ -74,8 +71,15 @@ conf="$BROOT/etc/syp/syp.toml"
 if [ -f "$conf" ]; then cp -p "$conf" "$w/syp.toml"; trap 'cp -p "$w/syp.toml" "$conf"; rm -rf "$w"' EXIT; fi
 for n in 1 2; do
   echo ":: Bau $n: $names"
-  "$SYP" buildall "$RECIPES" --repo "$w/repo$n" "${rootarg[@]}" -k "$KEY" --name "$REPO_NAME" --nocheck --no-install \
+  "$SYP" buildall "$RECIPES" --repo "$w/repo" "${rootarg[@]}" -k "$KEY" --name "$REPO_NAME" --nocheck --no-install \
     --only "$names" --keep-going 2>&1 | tail -n 20 || true
+  # Ergebnis des ersten Baus beiseitelegen, damit der zweite neu baut
+  if [ "$n" = 1 ]; then
+    while IFS=$'\t' read -r name orig; do
+      f="$w/repo/pool/${orig#"$REPO/pool/"}"
+      [ -f "$f" ] && mv "$f" "$w/bau1/$name.syp"
+    done < "$w/pick.tsv"
+  fi
 done
 
 # Vergleich zweier Pakete: Inhalt laut .FILES.json, für kleine Textdateien ein unified diff
@@ -117,7 +121,7 @@ PY
 same=() stale=() diff=() fail=()
 : > "$OUT"
 while IFS=$'\t' read -r name orig; do
-  rel=${orig#"$REPO/pool/"} n1="$w/repo1/pool/${orig#"$REPO/pool/"}" n2="$w/repo2/pool/${orig#"$REPO/pool/"}"
+  rel=${orig#"$REPO/pool/"} n1="$w/bau1/$name.syp" n2="$w/repo/pool/${orig#"$REPO/pool/"}"
   if [ ! -f "$n1" ] || [ ! -f "$n2" ]; then fail+=("$name"); echo "$name: Bau fehlgeschlagen" >> "$OUT"; continue; fi
   if ! python3 -I "$w/compare.py" "$n1" "$n2" bau1 bau2 >> "$OUT"; then
     diff+=("$name"); echo "$name: NICHT reproduzierbar (zwei Bauten verschieden, siehe oben)" >> "$OUT"
