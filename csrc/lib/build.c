@@ -419,7 +419,7 @@ static char *style_step(const jval *b, const char *step) {
             return xasprintf("cd \"$S\"\npip3 wheel -w dist --no-cache-dir --no-build-isolation --no-deps %s .", cf);
         if (!strcmp(step, "package"))
             return xasprintf("cd \"$S\"\npip3 install --root=\"$DESTDIR\" --no-index --no-deps --no-user "
-                             "--no-compile dist/*.whl %s\n%s",
+                             "--no-compile --ignore-installed dist/*.whl %s\n%s",
                              inf, post);
     } else if (!strcmp(style, "perl")) {
         if (!strcmp(step, "build")) return xasprintf("cd \"$S\"\nperl Makefile.PL INSTALLDIRS=vendor %s\nmake %s", cf, mf);
@@ -579,6 +579,61 @@ static void desktop_categories(const char *dest, jval *info) {
     } else {
         json_free(cats);
     }
+}
+
+/* Bibliotheken, gegen die das Paket gelinkt ist (DT_NEEDED), als Abhängigkeit eintragen: Besitzer der Datei
+ * usr/lib/<soname> in der Bauumgebung. Configure-Skripte schalten Funktionen ein, sobald eine Bibliothek
+ * dort liegt; ohne diesen Schritt fehlte sie später auf Systemen, die nur die Abhängigkeiten installieren. */
+static void auto_depends(const char *dest, jval *info, const char *root) {
+    char *dbp = path_join(root ? root : "/", "var/lib/syp/syp.db");
+    database db;
+    if (!path_exists(dbp) || db_open(dbp, &db)) {
+        free(dbp);
+        return;
+    }
+    free(dbp);
+    strvec need = {0}, added = {0}, unknown = {0};
+    elf_needed(dest, &need);
+    jval *deps = jget(info, "depends");
+    if (!deps) {
+        deps = jarr();
+        jset(info, "depends", deps);
+    }
+    const char *self = jgets(info, "name", "");
+    for (size_t i = 0; i < need.n; i++) {
+        char *rel = xasprintf("usr/lib/%s", need.v[i]);
+        strvec own = {0};
+        db_owners(&db, rel, &own);
+        free(rel);
+        if (!own.n) sv_push(&unknown, need.v[i]);
+        const char *o = own.n ? own.v[0] : NULL;
+        int have = !o || !strcmp(o, self) || sv_contains(&added, o);
+        for (size_t k = 0; !have && k < deps->n; k++) {
+            const char *d = deps->items[k]->t == J_STR ? deps->items[k]->s : "";
+            size_t l = strcspn(d, "<>=: ");
+            have = (l == strlen(o) && !strncmp(d, o, l)) ||
+                   (!strncmp(d, "so:", 3) && !strcmp(d + 3, need.v[i]));
+        }
+        if (!have) {
+            jpush(deps, jstr(o));
+            sv_push(&added, o);
+        }
+        sv_free(&own);
+    }
+    if (added.n) {
+        printf("==> Abhängigkeiten aus gelinkten Bibliotheken:");
+        for (size_t i = 0; i < added.n; i++) printf(" %s", added.v[i]);
+        printf("\n");
+    }
+    if (unknown.n) {
+        printf("    Hinweis: keinem installierten Paket zugeordnet:");
+        for (size_t i = 0; i < unknown.n; i++) printf(" %s", unknown.v[i]);
+        printf("\n");
+    }
+    sv_free(&need);
+    sv_free(&added);
+    sv_free(&unknown);
+    db_close(&db);
 }
 
 char *build_recipe(const char *recipe, const char *outdir, const seckey *signer, const build_opts *o) {
@@ -818,6 +873,7 @@ char *build_recipe(const char *recipe, const char *outdir, const seckey *signer,
             if (jgets(opts, "hardening_reason", NULL)) jset(hj, "reason", jstr(jgets(opts, "hardening_reason", "")));
             jset(origin, "hardening", hj);
             desktop_categories(dest, info);
+            if (jgetb(opts, "autodeps", 1)) auto_depends(dest, info, o->chroot ? o->chroot : getenv("SYP_DEPS_ROOT"));
             out = syp_build(dest, info, outdir, signer);
         }
         harden_free(&hr);

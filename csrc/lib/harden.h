@@ -16,5 +16,7 @@ typedef struct {
 int harden_check(const char *destdir, const char *mode, harden_report *r);
 jval *harden_json(const harden_report *r);
 void harden_free(harden_report *r);
+/* Sonamen aus DT_NEEDED der ELF-Dateien in DESTDIR, die das Paket nicht selbst mitbringt (sortiert) */
+void elf_needed(const char *destdir, strvec *out);
 
 #endif

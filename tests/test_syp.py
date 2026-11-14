@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import io
 import os
+import shutil
 import subprocess
 import json
 import tarfile
@@ -880,7 +881,49 @@ def test_buildall_rebuilds_older_build_rev_and_keeps_old_on_failure(tmp_path):
     assert target.read_bytes() == old and not list((repo / "pool/a").glob("*.alt"))
     assert rev("b") > 1
 
+    # Neubau ohne Dateien (z. B. pip »already installed«): gilt als gescheitert, altes Paket bleibt
+    (recs / "a/SYPBUILD.toml").write_text('[package]\nname = "a"\nversion = "1-1"\narch = "any"\n'
+                                          "[build]\npackage = 'true'\n")
+    out = syp("buildall", recs, "--repo", repo, "-k", key, "--name", "t", "--keep-going").stdout
+    assert "Neubau enthält keine Dateien" in out and target.read_bytes() == old
+
     # Abgebrochener Neubau (nur noch .alt vorhanden): wird zurückgelegt und nicht als fehlend behandelt
     target.rename(str(target) + ".alt")
     out = syp("buildall", recs, "--repo", repo, "-k", key, "--name", "t", "-n").stdout
     assert target.exists() and "würde bauen: a" in out
+
+
+@pytest.mark.skipif(not shutil.which("cc"), reason="kein C-Compiler")
+def test_build_adds_depends_for_linked_libraries(tmp_path):
+    # Ein Programm, das gegen eine Bibliothek aus der Bauumgebung gelinkt ist, bekommt deren Paket als
+    # Abhängigkeit, auch wenn das Rezept es nicht nennt (configure schaltet Funktionen automatisch ein)
+    key, pub = keygen(tmp_path)
+    tree = tmp_path / "tree"
+    (tree / "usr/lib").mkdir(parents=True)
+    (tmp_path / "foo.c").write_text("int foo(void) { return 0; }\n")
+    run("cc", "-shared", "-fPIC", "-Wl,-soname,libfoo.so.1", "-o", tree / "usr/lib/libfoo.so.1", tmp_path / "foo.c")
+    info = tmp_path / "info.json"
+    info.write_text(json.dumps({"name": "libfoo", "version": "1-1", "arch": "x86_64", "summary": "s"}))
+    syp("pack", tree, info, "-o", tmp_path / "pk", "-k", key)
+    root = setup_root(tmp_path, tmp_path / "repo", pub)
+    syp("-r", root, "-y", "install", next((tmp_path / "pk").glob("libfoo-*.syp")))
+
+    rec = tmp_path / "rec"
+    rec.mkdir()
+    (rec / "SYPBUILD.toml").write_text(
+        '[package]\nname = "prog"\nversion = "1-1"\ndepends = ["glibc"]\n'
+        '[options]\nhardening = "off"\nhardening_reason = "Test"\n[build]\npackage = \'\'\'\n'
+        'printf "int foo(void);\\nint main(void) { return foo(); }\\n" > m.c\n'
+        'install -d "$DESTDIR/usr/bin"\n'
+        f'cc m.c -o "$DESTDIR/usr/bin/prog" -L{root}/usr/lib -l:libfoo.so.1\n\'\'\'\n')
+    out = syp("build", rec / "SYPBUILD.toml", "-o", tmp_path / "out", env=dict(os.environ, SYP_DEPS_ROOT=str(root))).stdout
+    assert "Abhängigkeiten aus gelinkten Bibliotheken: libfoo" in out
+    assert "keinem installierten Paket zugeordnet: libc.so.6" in out  # glibc ist im Test-Root nicht installiert
+    with tarfile.open(next((tmp_path / "out").glob("prog-*.syp"))) as tf:
+        deps = json.loads(tf.extractfile(".SYPINFO.json").read())["depends"]
+    assert deps == ["glibc", "libfoo"]
+    # abschaltbar
+    (rec / "SYPBUILD.toml").write_text((rec / "SYPBUILD.toml").read_text().replace(
+        "[options]\n", "[options]\nautodeps = false\n"))
+    out = syp("build", rec / "SYPBUILD.toml", "-o", tmp_path / "out2", env=dict(os.environ, SYP_DEPS_ROOT=str(root))).stdout
+    assert "gelinkten" not in out

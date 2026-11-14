@@ -88,6 +88,7 @@ strip = true
 hardening = "strict"                        # strict (Standard) | warn | off; warn/off nur mit Begründung
 hardening_reason = ""
 network = false                             # true: Bauschritte dürfen ins Netz (nur mit Grund)
+autodeps = true                             # false: keine Abhängigkeiten aus gelinkten Bibliotheken
 
 [scripts]
 post_upgrade = "/usr/bin/update-crypto-policies"
@@ -104,6 +105,13 @@ einen Fehler (so im Bootstrap), `SYP_BUILD_NET=on` schaltet die Isolation ab.
 Nach `package` prüft `syp build` jede ELF-Datei (PIE, RELRO, BIND_NOW, NX-Stack, TEXTREL, RPATH) und
 alle Dateirechte (beschreibbar für alle → Fehler, setuid/setgid → Übersicht). Das Ergebnis steht
 im Paket unter `origin.hardening`.
+
+Danach trägt `syp build` für jede gelinkte Bibliothek (`DT_NEEDED`), die das Paket nicht selbst mitbringt, das
+Paket als Abhängigkeit ein, dem `usr/lib/<soname>` in der Bauumgebung gehört („Abhängigkeiten aus gelinkten
+Bibliotheken: …“). Configure-Skripte schalten Funktionen ein, sobald eine Bibliothek in der Bauumgebung liegt
+(systemd und libseccomp, file und libseccomp); ohne diesen Schritt fehlte sie später auf Systemen, die nur
+die Abhängigkeiten installieren. Soll eine solche Funktion nicht ins Paket, schaltet das Rezept sie ab
+(groff `--without-x`), statt die Abhängigkeit zu verschweigen.
 
 Bauen: `syp build REZEPT -k SCHLÜSSEL` (`--chroot WURZEL` für einen isolierten Bau), alle Rezepte
 in Abhängigkeitsreihenfolge mit `syp buildall distro/recipes --repo REPO`. Index ansehen:

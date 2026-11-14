@@ -39,7 +39,7 @@ static int bad_rpath(const char *rp) {
     return bad;
 }
 
-static void inspect(const char *path, elfinfo *e) {
+static void inspect(const char *path, elfinfo *e, strvec *needed) {
     memset(e, 0, sizeof *e);
     int fd = open(path, O_RDONLY | O_CLOEXEC);
     if (fd < 0) return;
@@ -82,6 +82,8 @@ static void inspect(const char *path, elfinfo *e) {
         e->has_dynamic = 1;
         Elf64_Addr strtab = 0;
         Elf64_Xword rpath = (Elf64_Xword)-1, runpath = (Elf64_Xword)-1;
+        Elf64_Xword need[256];
+        size_t nneed = 0;
         for (Elf64_Dyn *d = (Elf64_Dyn *)(m + dyn_off); (unsigned char *)(d + 1) <= m + dyn_off + dyn_sz; d++) {
             if (d->d_tag == DT_NULL) break;
             if (d->d_tag == DT_BIND_NOW) e->now = 1;
@@ -92,6 +94,7 @@ static void inspect(const char *path, elfinfo *e) {
             if (d->d_tag == DT_STRTAB) strtab = d->d_un.d_ptr;
             if (d->d_tag == DT_RPATH) rpath = d->d_un.d_val;
             if (d->d_tag == DT_RUNPATH) runpath = d->d_un.d_val;
+            if (d->d_tag == DT_NEEDED && nneed < 256) need[nneed++] = d->d_un.d_val;
         }
         /* Stringtabelle über PT_LOAD in Dateioffset umrechnen */
         size_t stroff = 0;
@@ -104,6 +107,12 @@ static void inspect(const char *path, elfinfo *e) {
         for (int k = 0; k < 2 && stroff; k++)
             if (rp[k] != (Elf64_Xword)-1 && stroff + rp[k] < sz && bad_rpath((const char *)m + stroff + rp[k]))
                 e->badrpath = 1;
+        for (size_t k = 0; needed && stroff && k < nneed; k++)
+            if (stroff + need[k] < sz) {
+                const char *nm = (const char *)m + stroff + need[k];
+                size_t l = strnlen(nm, sz - stroff - need[k]);
+                if (l && l < 256 && stroff + need[k] + l < sz && !sv_contains(needed, nm)) sv_push(needed, nm);
+            }
     }
     /* Symbole: __stack_chk_fail (Stack-Protector), *_chk (FORTIFY_SOURCE) */
     if (h->e_shoff && h->e_shoff + (size_t)h->e_shnum * sizeof(Elf64_Shdr) <= sz) {
@@ -152,7 +161,7 @@ static void walk(const char *root, const char *rel, harden_report *r) {
                 if (S_ISDIR(st.st_mode)) walk(root, r2, r);
                 else if (S_ISREG(st.st_mode) && !exempt(r2)) {
                     elfinfo e;
-                    inspect(full, &e);
+                    inspect(full, &e, NULL);
                     if (e.is_elf && e.has_text) {
                         r->elf++;
                         int exe = e.has_interp, lib = e.is_dyn && !e.has_interp;
@@ -236,4 +245,41 @@ jval *harden_json(const harden_report *r) {
 void harden_free(harden_report *r) {
     sv_free(&r->problems);
     sv_free(&r->suids);
+}
+
+/* DT_NEEDED aller ELF-Dateien unter root (ohne Kernel/Firmware) und die Namen aller Dateien und Verweise */
+static void scan_needed(const char *root, const char *rel, strvec *needed, strvec *names) {
+    char *dir = rel ? path_join(root, rel) : xstrdup(root);
+    struct dirent **list;
+    int n = scandir(dir, &list, NULL, alphasort);
+    for (int i = 0; i < n; i++) {
+        const char *d = list[i]->d_name;
+        if (strcmp(d, ".") && strcmp(d, "..")) {
+            char *r2 = rel ? xasprintf("%s/%s", rel, d) : xstrdup(d), *full = path_join(root, r2);
+            struct stat st;
+            if (lstat(full, &st) == 0) {
+                if (!S_ISDIR(st.st_mode) && !sv_contains(names, d)) sv_push(names, d);
+                if (S_ISDIR(st.st_mode)) scan_needed(root, r2, needed, names);
+                else if (S_ISREG(st.st_mode) && !exempt(r2)) {
+                    elfinfo e;
+                    inspect(full, &e, needed);
+                }
+            }
+            free(r2);
+            free(full);
+        }
+        free(list[i]);
+    }
+    if (n >= 0) free(list);
+    free(dir);
+}
+
+void elf_needed(const char *destdir, strvec *out) {
+    strvec all = {0}, names = {0};
+    scan_needed(destdir, NULL, &all, &names);
+    for (size_t i = 0; i < all.n; i++)
+        if (!sv_contains(&names, all.v[i])) sv_push(out, all.v[i]);
+    sv_sort(out);
+    sv_free(&all);
+    sv_free(&names);
 }
