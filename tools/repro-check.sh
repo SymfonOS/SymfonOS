@@ -75,15 +75,34 @@ while IFS=$'\t' read -r name orig; do
   new="$w/repo/pool/${orig#"$REPO/pool/"}"
   if [ ! -f "$new" ]; then fail+=("$name"); echo "$name: zweiter Bau fehlgeschlagen" >> "$OUT"; continue; fi
   if python3 -I - "$orig" "$new" >> "$OUT" <<'PY'
-import json, sys, tarfile
+import difflib, io, json, subprocess, sys, tarfile
 def files(p):
     with tarfile.open(p) as tf:
         return {f["path"]: {k: v for k, v in f.items() if k in ("type", "mode", "sha256", "target", "size")}
                 for f in json.loads(tf.extractfile(".FILES.json").read())}
+def content(p, want):
+    """Inhalt kleiner Textdateien aus data.tar.zst (für ein lesbares diff)"""
+    with tarfile.open(p) as tf:
+        raw = subprocess.run(["zstd", "-dcq"], input=tf.extractfile("data.tar.zst").read(),
+                             capture_output=True, check=True).stdout
+    out = {}
+    with tarfile.open(fileobj=io.BytesIO(raw)) as tf:
+        for m in tf:
+            if m.name.lstrip("./") in want and m.isfile():
+                data = tf.extractfile(m).read()
+                if b"\0" not in data:
+                    out[m.name.lstrip("./")] = data.decode(errors="replace").splitlines()
+    return out
 a, b = files(sys.argv[1]), files(sys.argv[2])
 bad = sorted(p for p in a.keys() | b.keys() if a.get(p) != b.get(p))
 for p in bad[:20]:
     print(f"  {p}: {a.get(p)} != {b.get(p)}")
+small = {p for p in bad[:5] if all((x.get(p) or {}).get("size", 1 << 30) < 65536 for x in (a, b))}
+if small:
+    ca, cb = content(sys.argv[1], small), content(sys.argv[2], small)
+    for p in sorted(small & ca.keys() & cb.keys()):
+        for line in list(difflib.unified_diff(ca[p], cb[p], f"veröffentlicht/{p}", f"neu/{p}", lineterm=""))[:30]:
+            print("    " + line)
 sys.exit(1 if bad else 0)
 PY
   then same+=("$name")

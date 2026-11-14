@@ -22,6 +22,6 @@ def test_repro_check(tmp_path):
                        text=True, env=dict(os.environ, SYP_SRCCACHE=str(tmp_path / "cache"), OUT=str(out)))
     assert r.returncode == 0, r.stdout + r.stderr
     assert "1 von 2 gleich (gleich)" in r.stdout and "abweichend: anders" in r.stdout
-    assert "usr/share/anders/x" in out.read_text()
+    assert "usr/share/anders/x" in out.read_text() and "+++ neu/usr/share/anders/x" in out.read_text()
     # Originalpakete bleiben unangetastet
     assert len(list((repo / "pool").rglob("*.syp"))) == 2
