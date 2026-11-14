@@ -101,6 +101,18 @@ static int legacy_layout(const jval *files) {
     return 0;
 }
 
+/* Zahl der regulären Dateien eines Pakets (-1: nicht lesbar) */
+static long pkg_file_count(const char *path) {
+    sypfile sf;
+    if (syp_open_meta(path, &sf)) return -1;
+    const jval *list = sf.files && sf.files->t == J_ARR ? sf.files : (sf.files ? jget(sf.files, "files") : NULL);
+    long n = 0;
+    for (size_t i = 0; list && i < list->n; i++)
+        if (!strcmp(jgets(list->items[i], "type", ""), "file")) n++;
+    syp_close(&sf);
+    return n;
+}
+
 /* Pfad dieses Programms: buildall ruft sich selbst für sync/install auf, unabhängig vom PATH
  * (in der CI und im Bootstrap liegt syp nicht in einem Standardverzeichnis). */
 static const char *self_exe(void) {
@@ -363,6 +375,14 @@ int cmd_buildall(int argc, char **argv, const char *root, int gdry) {
             fflush(stdout);
             if (stale && !rename(target, keep)) rebuilding = 1;
             char *res = broot ? build_in_root(r, broot, &bo) : build_recipe(r->file, pd, NULL, &bo);
+            /* Neubau ohne eine einzige Datei, wo das alte Paket welche hatte: fast immer ein Bau, der etwas
+             * Vorhandenes in der Bauumgebung für erledigt hielt (pip: »already installed«) */
+            if (res && rebuilding && pkg_file_count(res) == 0 && pkg_file_count(keep) > 0) {
+                set_error("Neubau enthält keine Dateien, das bisherige Paket schon");
+                unlink(res);
+                free(res);
+                res = NULL;
+            }
             if (res && k && syp_resign(res, k)) {
                 free(res);
                 res = NULL;
