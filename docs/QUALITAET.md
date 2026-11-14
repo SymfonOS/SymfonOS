@@ -86,7 +86,7 @@ Ein Release (z. B. 2026.10) ist ein eingefrorener Stand von stable mit Installat
 
 - Karma-Abstimmung und eine Weboberfläche für testing-Updates fehlen; bisher gibt es nur die Sperrliste.
 - Openqa-artige Tests mit Bildvergleich und Eingaben (Maus, Tastatur). Bisher prüfen die Tests Boot, Installation und den Start der Plasma-Sitzung anhand des Journals und halten Bildschirmfotos fest.
-- Veraltete Pakete: Ändern sich die Standardoptionen von syp (z. B. `--libdir` für autotools), werden Pakete mit unveränderter Version nicht neu gebaut. Die Stichprobe deckt das auf (erster Fund: libxaw, libxcb, libxcomposite, libxcrypt, nur `libdir=` in `.pc`-Dateien).
+- Veraltete Pakete: Ändern sich die Standardoptionen von syp (z. B. `--libdir` für autotools), wurden Pakete mit unveränderter Version nicht neu gebaut. Die Stichprobe hat das aufgedeckt (erster Fund: libxaw, libxcb, libxcomposite, libxcrypt, nur `libdir=` in `.pc`-Dateien; rund 450 der 605 Pakete stammten aus Bauläufen vor dieser Änderung). Seit Bau-Revision 2 (`SYP_BUILD_REV`) baut `buildall` solche Pakete in den Etappen des Bootstraps neu, offline und aus dem Lookaside-Cache.
 - Reproduzierbarkeit als Gate: bisher nur eine Stichprobe je Lauf (siehe oben), Abweichungen werden gemeldet, halten aber nichts auf. Zwei Bauten auf verschiedenen Maschinen werden noch nicht verglichen.
 - Upstream-Signaturen der Quell-Tarballs prüfen (GPG), statt Prüfsummen nur beim ersten Laden festzuhalten.
 - `/usr/bin` und `/usr/sbin` zusammenlegen (wie Fedora 42). Bis dahin legen einzelne Pakete Verweise in `/usr/sbin` an, wo Programme fest dort erwartet werden (z. B. `/sbin/modprobe` durch den Kernel).

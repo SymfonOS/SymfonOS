@@ -628,6 +628,7 @@ char *build_recipe(const char *recipe, const char *outdir, const seckey *signer,
     jval *origin = jobj();
     jset(origin, "format", jstr("native"));
     jset(origin, "recipe", jstr(path_basename(rdir)));
+    jset(origin, "build_rev", jint(SYP_BUILD_REV));
     jset(info, "origin", origin);
     char *out = NULL;
     if (info_validate(info)) goto done;
