@@ -1,7 +1,7 @@
 # symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
 [package]
 name = "python"
-version = "3.13.7-1"
+version = "3.13.7-2"
 summary = "Python-Interpreter"
 license = "PSF-2.0"
 url = "https://www.python.org/ftp/python/3.13.7/"
@@ -14,12 +14,18 @@ sha256 = "5462f9099dfd30e238def83c71d91897d8caa5ff6ebc7a50f14d4802cdaaa79a"
 [build]
 build = '''
 cd "$S"
-./configure --prefix=/usr --enable-shared --with-system-expat
+./configure --prefix=/usr --enable-shared --with-system-expat --with-ensurepip=no
 make
 '''
 package = '''
 cd "$S"
 make DESTDIR="$DESTDIR" install
+# pip aus dem mitgelieferten Wheel, unabhängig von der Bauumgebung: ensurepip ließe pip weg, sobald dort schon
+# eines installiert ist (»Requirement already satisfied«), und das neue Paket hätte kein pip3
+whl=$(ls Lib/ensurepip/_bundled/pip-*.whl)
+LD_LIBRARY_PATH="$S" ./python -E "$whl/pip" install --root="$DESTDIR" --prefix=/usr --ignore-installed --no-index \
+  --no-deps --no-cache-dir --no-warn-script-location "$whl"
+test -x "$DESTDIR/usr/bin/pip3"
 ln -sf python3 "$DESTDIR/usr/bin/python"
 ln -sf pip3 "$DESTDIR/usr/bin/pip" 2>/dev/null || true
 install -Dm644 /dev/stdin "$DESTDIR/etc/pip.conf" <<'EOF'
