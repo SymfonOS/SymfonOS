@@ -645,8 +645,13 @@ install -d "$DESTDIR/etc/alsa/conf.d" "$DESTDIR/usr/lib/systemd/user-preset"
 ln -s /usr/share/alsa/alsa.conf.d/50-pipewire.conf "$DESTDIR/etc/alsa/conf.d/50-pipewire.conf"
 ln -s /usr/share/alsa/alsa.conf.d/99-pipewire-default.conf "$DESTDIR/etc/alsa/conf.d/99-pipewire-default.conf"
 printf 'enable pipewire.socket\nenable pipewire-pulse.socket\nenable wireplumber.service\n' \
-  > "$DESTDIR/usr/lib/systemd/user-preset/50-pipewire.preset"''',
-    provides=["pulseaudio-server", "jack", "so:libpipewire-0.3.so.0", "so:libjack.so.0"], rel=2)
+  > "$DESTDIR/usr/lib/systemd/user-preset/50-pipewire.preset"
+# libjack liegt in einem eigenen Ordner (wie bei Arch pipewire-jack): für den Lader sichtbar machen,
+# sonst starten gegen JACK gelinkte Programme und Plugins nicht (mpg123 output_jack.so)
+install -Dm644 /dev/stdin "$DESTDIR/etc/ld.so.conf.d/pipewire-jack.conf" <<'EOF'
+/usr/lib/pipewire-0.3/jack
+EOF''',
+    provides=["pulseaudio-server", "jack", "so:libpipewire-0.3.so.0", "so:libjack.so.0"], rel=3)
 # Echtzeit-Priorität für PipeWire, KWin und Audio-Programme (Ardour) über D-Bus, ohne CAP_SYS_NICE
 pkg("rtkit", "0.13", "https://github.com/heftig/rtkit/archive/v0.13/rtkit-0.13.tar.gz",
     "RealtimeKit (Echtzeit-Priorität für Audio)", "GPL-3.0-or-later", ["dbus", "libcap", "systemd", "polkit"],
