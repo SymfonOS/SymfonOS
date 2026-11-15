@@ -279,14 +279,14 @@ jobs:
             tools/lookaside-sync.sh "$SYM/sources" distro/recipes sources
       - name: Reproduzierbarkeit (Stichprobe)
         # baut je Lauf einige kleine Pakete ein zweites Mal und vergleicht den Inhalt (tools/repro-check.sh);
-        # nur wenn das Zeitbudget des Jobs reicht, Abweichungen brechen nichts ab
+        # nur wenn das Zeitbudget des Jobs reicht. Gate: ein nicht reproduzierbares Paket macht den Lauf rot
+        # (veröffentlicht ist dann schon; der nächste Lauf und ci-diag zeigen die Unterschiede)
         if: always() && steps.build.outputs.rc == '0'
-        continue-on-error: true
         timeout-minutes: 35
         run: |
           if [ $(( $(date +%s) - JOB_START )) -gt $((250 * 60)) ]; then echo "::notice title=Reproduzierbarkeit::übersprungen (Zeitbudget)"; exit 0; fi
-          sudo env "PATH=$PATH" SYP_SRCCACHE="$SYM/sources" SYP_BUILD_NET=strict OUT="$PWD/out/repro.log" \
-            tools/repro-check.sh out/repo/symfonos distro/recipes "$SYM" "$PWD/keys/release.key" 4
+          sudo env "PATH=$PATH" SYP_SRCCACHE="$SYM/sources" SYP_BUILD_NET=strict STRICT=1 OUT="$PWD/out/repro.log" \
+            tools/repro-check.sh out/repo/symfonos distro/recipes "$SYM" "$PWD/keys/release.key" 6
       - name: Diagnose ablegen (Branch ci-diag)
         # Vollständige Logs und Bildschirmfotos für die Fehlersuche; enthält keine Geheimnisse
         if: always()

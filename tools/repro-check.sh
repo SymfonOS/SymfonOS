@@ -9,11 +9,12 @@
 # Ausgewählt werden rotierend (je Tag andere) Rezepte, deren Quellen zusammen höchstens MAX_SRC_MB (Standard 30)
 # groß sind, damit der Lauf kurz bleibt. Gebaut wird gegen eine Kopie des Repos (Pakete als Hardlinks, die
 # Zielpakete entfernt), ohne in die Bauumgebung zu installieren. Das Ergebnis steht als Hinweis im Lauf;
-# Abweichungen brechen nichts ab (noch kein Gate), die Liste steht in $OUT (Standard repro.txt).
+# die Liste steht in $OUT (Standard repro.txt). Mit STRICT=1 endet das Skript mit Exit 1, wenn ein Paket nicht
+# reproduzierbar ist (Gate); veraltete veröffentlichte Pakete sind eine Warnung (ein Neubau behebt sie).
 set -euo pipefail
 REPO=$(realpath "${1:?Repo fehlt}") RECIPES=$(realpath "${2:?Rezepte fehlen}") BROOT=${3:?Bauumgebung fehlt}
 KEY=${4:?Schlüssel fehlt} N=${5:-4}
-MAX_SRC_MB=${MAX_SRC_MB:-30} OUT=${OUT:-repro.txt} REPO_NAME=${REPO_NAME:-symfonos}  # Name wie im signierten Index
+MAX_SRC_MB=${MAX_SRC_MB:-30} OUT=${OUT:-repro.txt} STRICT=${STRICT:-0} REPO_NAME=${REPO_NAME:-symfonos}  # Name wie im signierten Index
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 SYP="$ROOT/csrc/bin/syp"
 CACHE=${SYP_SRCCACHE:-$BROOT/sources}
@@ -134,3 +135,9 @@ done < "$w/pick.tsv"
 total=$(wc -l < "$w/pick.tsv")
 echo "::notice title=Reproduzierbarkeit::$(( ${#same[@]} + ${#stale[@]} )) von $total reproduzierbar (${same[*]} ${stale[*]}); veröffentlichtes Paket veraltet: ${stale[*]:-–}; nicht reproduzierbar: ${diff[*]:-–}; Bau fehlgeschlagen: ${fail[*]:-–}"
 cat "$OUT"
+[ ${#stale[@]} -eq 0 ] || echo "::warning title=Reproduzierbarkeit::veröffentlichtes Paket veraltet: ${stale[*]} (Neubau nötig)"
+if [ ${#diff[@]} -gt 0 ]; then
+  echo "::error title=Reproduzierbarkeit::nicht reproduzierbar: ${diff[*]} (Unterschiede in $OUT)"
+  [ "$STRICT" = 1 ] && exit 1
+fi
+exit 0
