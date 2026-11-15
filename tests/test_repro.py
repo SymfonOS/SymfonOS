@@ -31,3 +31,7 @@ def test_repro_check(tmp_path):
     assert "-vorher" in log and "+nachher" in log
     # Originalpakete bleiben unangetastet
     assert len(list((repo / "pool").rglob("*.syp"))) == 3
+    # Gate: mit STRICT=1 macht ein nicht reproduzierbares Paket den Lauf rot
+    r = subprocess.run(["bash", ROOT / "tools/repro-check.sh", repo, recs, "-", key, "5"], capture_output=True,
+                       text=True, env=dict(os.environ, SYP_SRCCACHE=str(tmp_path / "cache"), OUT=str(out), STRICT="1"))
+    assert r.returncode == 1 and "::error title=Reproduzierbarkeit::nicht reproduzierbar: anders" in r.stdout
