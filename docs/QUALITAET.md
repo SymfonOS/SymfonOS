@@ -56,6 +56,10 @@ Ein Commit auf `main` und jeder Paketbau müssen bestehen:
 - **Bootstrap**: Ein Schritt gilt erst als erledigt, wenn er vollständig gelungen ist. Fehler brechen sofort ab, ein abgebrochener CI-Lauf setzt beim nächsten Mal an derselben Stelle fort (`tests/test_bootstrap.py`).
 - **Reproduzierbarkeit**: `SOURCE_DATE_EPOCH` ist bei jedem Bau gesetzt, Bauten in der Chroot sind vom Host getrennt.
 
+### Neubau bei geänderter Bauumgebung
+
+Pakete tragen die Bau-Revision (`origin.build_rev`, `SYP_BUILD_REV`); `buildall` baut ältere neu, das alte Paket bleibt, bis der Neubau gelingt. Den ersten Anlass gab die Reproduzierbarkeits-Stichprobe: rund 450 der 605 Pakete stammten aus einer älteren Bauumgebung. Der vollständige Neubau (Revisionen 2 und 3, November 2026) deckte Abhängigkeiten von der Bauumgebung auf und beseitigte sie: python ohne pip und leere Python-Pakete (pip hielt die schon installierte Version für erledigt; jetzt `--ignore-installed`, ein Neubau ohne Dateien gilt als gescheitert) und Programme, die gegen nicht genannte Bibliotheken gelinkt waren (jetzt Abhängigkeiten aus `DT_NEEDED`, auch über `so:`-Provides). Seitdem ist die Stichprobe ohne Befund.
+
 ## Update-Regeln für stable
 
 Wie Fedoras *Updates Policy* soll stable vorhersehbar bleiben:
@@ -86,7 +90,6 @@ Ein Release (z. B. 2026.10) ist ein eingefrorener Stand von stable mit Installat
 
 - Karma-Abstimmung und eine Weboberfläche für testing-Updates fehlen; bisher gibt es nur die Sperrliste.
 - Openqa-artige Tests mit Bildvergleich und Eingaben (Maus, Tastatur). Bisher prüfen die Tests Boot, Installation und den Start der Plasma-Sitzung anhand des Journals und halten Bildschirmfotos fest.
-- Veraltete Pakete: Ändern sich die Standardoptionen von syp (z. B. `--libdir` für autotools), wurden Pakete mit unveränderter Version nicht neu gebaut. Die Stichprobe hat das aufgedeckt (erster Fund: libxaw, libxcb, libxcomposite, libxcrypt, nur `libdir=` in `.pc`-Dateien; rund 450 der 605 Pakete stammten aus Bauläufen vor dieser Änderung). Seit Bau-Revision 2 (`SYP_BUILD_REV`) baut `buildall` solche Pakete in den Etappen des Bootstraps neu, offline und aus dem Lookaside-Cache. Der erste Neubau zeigte, wie sehr Pakete von der Bauumgebung abhingen: python ohne pip und leere Python-Pakete (pip hielt die schon installierte Version für erledigt), systemd, file, gettext u. a. gegen Bibliotheken gelinkt, die nicht in ihren Abhängigkeiten standen. Behoben in Revision 3 (pip `--ignore-installed`, Abhängigkeiten aus `DT_NEEDED`); ein Neubau ohne Dateien gilt als gescheitert.
 - Reproduzierbarkeit: ein Gate über eine rotierende Stichprobe (6 Pakete je Lauf, nach der Veröffentlichung); seit dem Neubau mit Revision 3 ohne Befund. Zwei Bauten auf verschiedenen Maschinen werden noch nicht verglichen, große Pakete (Quellen über 30 MB) nicht geprüft.
 - Upstream-Signaturen der Quell-Tarballs prüfen (GPG), statt Prüfsummen nur beim ersten Laden festzuhalten.
-- `/usr/bin` und `/usr/sbin` zusammenlegen (wie Fedora 42). Bis dahin legen einzelne Pakete Verweise in `/usr/sbin` an, wo Programme fest dort erwartet werden (z. B. `/sbin/modprobe` durch den Kernel).
+- `/usr/bin` und `/usr/sbin` zusammenlegen (wie Fedora 42, Arch 2025): bewusst zurückgestellt. Auf installierten Systemen müsste ein gefülltes Verzeichnis durch einen Verweis ersetzt werden, und zwar erst, wenn alle Pakete ihre Programme verschoben haben; dazu kommen SELinux-Dateikontexte und feste Pfade in Diensten. Der Gewinn ist vor allem Angleichung, das Risiko liegt im Update-Pfad. Bis dahin legen einzelne Pakete Verweise in `/usr/sbin` an, wo Programme fest dort erwartet werden (z. B. `/sbin/modprobe` durch den Kernel).
