@@ -600,11 +600,23 @@ static void auto_depends(const char *dest, jval *info, const char *root) {
         jset(info, "depends", deps);
     }
     const char *self = jgets(info, "name", "");
+    hmap inst;
+    db_installed(&db, &inst);
     for (size_t i = 0; i < need.n; i++) {
         char *rel = xasprintf("usr/lib/%s", need.v[i]);
         strvec own = {0};
         db_owners(&db, rel, &own);
         free(rel);
+        /* Bibliothek außerhalb von usr/lib (pipewire: libjack in einem eigenen Verzeichnis): Anbieter von so:… */
+        if (!own.n) {
+            char *want = xasprintf("so:%s", need.v[i]);
+            HM_FOREACH(&inst, h) {
+                const pkg *p = inst.vals[h];
+                for (size_t q = 0; q < p->nprov && !own.n; q++)
+                    if (!strcmp(p->prov_name[q], want)) sv_push(&own, p->name);
+            }
+            free(want);
+        }
         if (!own.n) sv_push(&unknown, need.v[i]);
         const char *o = own.n ? own.v[0] : NULL;
         int have = !o || !strcmp(o, self) || sv_contains(&added, o);
@@ -633,6 +645,8 @@ static void auto_depends(const char *dest, jval *info, const char *root) {
     sv_free(&need);
     sv_free(&added);
     sv_free(&unknown);
+    HM_FOREACH(&inst, h) pkg_free(inst.vals[h]);
+    hm_free(&inst);
     db_close(&db);
 }
 

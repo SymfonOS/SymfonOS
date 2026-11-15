@@ -905,8 +905,17 @@ def test_build_adds_depends_for_linked_libraries(tmp_path):
     info = tmp_path / "info.json"
     info.write_text(json.dumps({"name": "libfoo", "version": "1-1", "arch": "x86_64", "summary": "s"}))
     syp("pack", tree, info, "-o", tmp_path / "pk", "-k", key)
+    # Bibliothek außerhalb von usr/lib, nur über so:-Provides auffindbar (wie libjack aus pipewire)
+    tree2 = tmp_path / "tree2"
+    (tree2 / "usr/lib/pw").mkdir(parents=True)
+    run("cc", "-shared", "-fPIC", "-Wl,-soname,libbar.so.1", "-o", tree2 / "usr/lib/pw/libbar.so.1", tmp_path / "foo.c")
+    info2 = tmp_path / "info2.json"
+    info2.write_text(json.dumps({"name": "pw", "version": "1-1", "arch": "x86_64", "summary": "s",
+                                 "provides": ["so:libbar.so.1"]}))
+    syp("pack", tree2, info2, "-o", tmp_path / "pk", "-k", key)
     root = setup_root(tmp_path, tmp_path / "repo", pub)
-    syp("-r", root, "-y", "install", next((tmp_path / "pk").glob("libfoo-*.syp")))
+    syp("-r", root, "-y", "install", next((tmp_path / "pk").glob("libfoo-*.syp")),
+        next((tmp_path / "pk").glob("pw-*.syp")))
 
     rec = tmp_path / "rec"
     rec.mkdir()
@@ -915,13 +924,14 @@ def test_build_adds_depends_for_linked_libraries(tmp_path):
         '[options]\nhardening = "off"\nhardening_reason = "Test"\n[build]\npackage = \'\'\'\n'
         'printf "int foo(void);\\nint main(void) { return foo(); }\\n" > m.c\n'
         'install -d "$DESTDIR/usr/bin"\n'
-        f'cc m.c -o "$DESTDIR/usr/bin/prog" -L{root}/usr/lib -l:libfoo.so.1\n\'\'\'\n')
+        f'cc m.c -o "$DESTDIR/usr/bin/prog" -L{root}/usr/lib -l:libfoo.so.1 -Wl,--no-as-needed '
+        f'-L{root}/usr/lib/pw -l:libbar.so.1\n\'\'\'\n')
     out = syp("build", rec / "SYPBUILD.toml", "-o", tmp_path / "out", env=dict(os.environ, SYP_DEPS_ROOT=str(root))).stdout
-    assert "Abhängigkeiten aus gelinkten Bibliotheken: libfoo" in out
+    assert "Abhängigkeiten aus gelinkten Bibliotheken: pw libfoo" in out
     assert "keinem installierten Paket zugeordnet: libc.so.6" in out  # glibc ist im Test-Root nicht installiert
     with tarfile.open(next((tmp_path / "out").glob("prog-*.syp"))) as tf:
         deps = json.loads(tf.extractfile(".SYPINFO.json").read())["depends"]
-    assert deps == ["glibc", "libfoo"]
+    assert deps == ["glibc", "pw", "libfoo"]
     # abschaltbar
     (rec / "SYPBUILD.toml").write_text((rec / "SYPBUILD.toml").read_text().replace(
         "[options]\n", "[options]\nautodeps = false\n"))
