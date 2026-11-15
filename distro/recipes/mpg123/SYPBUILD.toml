@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "mpg123"
-version = "1.33.2-1"
+version = "1.33.2-2"
 summary = "MP3-Decoder"
 license = "LGPL-2.1-only"
 url = "https://downloads.sourceforge.net/mpg123/"

@@ -575,7 +575,7 @@ pkg("lame", "3.100", "https://downloads.sourceforge.net/lame/lame-3.100.tar.gz",
     pre="sed -i -e 's/^\\(\\s*hardcode_libdir_flag_spec\\s*=\\).*/\\1/' configure",
     flags="--enable-mp3rtp --enable-nasm")
 pkg("mpg123", "1.33.2", "https://downloads.sourceforge.net/mpg123/mpg123-1.33.2.tar.bz2", "MP3-Decoder",
-    "LGPL-2.1-only", ["alsa-lib"], style="autotools", flags="--with-default-audio=alsa")
+    "LGPL-2.1-only", ["alsa-lib"], style="autotools", flags="--with-default-audio=alsa", rel=2)  # rel 2: libjack-Plugin -> pipewire (so:-Provides)
 pkg("libsamplerate", "0.2.2", "https://github.com/libsndfile/libsamplerate/releases/download/0.2.2/libsamplerate-0.2.2.tar.xz",
     "Abtastratenwandlung", "BSD-2-Clause", ["glibc"], style="autotools")
 pkg("libsndfile", "1.2.2", "https://github.com/libsndfile/libsndfile/releases/download/1.2.2/libsndfile-1.2.2.tar.xz",
@@ -1451,7 +1451,8 @@ pl("plasma-nm", ["networkmanager-qt", "modemmanager-qt", "kcolorscheme", "kcompl
                  "kdbusaddons", "kio", "ki18n", "knotifications", "kservice", "solid", "kwallet", "kwidgetsaddons",
                  "kwindowsystem", "kcmutils", "ksvg", "libplasma", "kirigami", "qca", "qcoro", "prison",
                  "networkmanager"],
-   "Netzwerk-Applet und Einstellungen (WLAN, VPN)")
+   # OpenConnect-Plugin braucht QtWebEngine (nicht gebaut); openconnect gibt es als Befehl, siehe unten
+   "Netzwerk-Applet und Einstellungen (WLAN, VPN)", "-DBUILD_OPENCONNECT=OFF")
 pl("bluedevil", ["bluez-qt", "bluez", "kcoreaddons", "kdbusaddons", "ki18n", "kjobwidgets", "kcmutils", "kio",
                  "knotifications", "kservice", "ksvg", "kwidgetsaddons", "kwindowsystem", "libplasma", "kirigami",
                  "shared-mime-info"],
