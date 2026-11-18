@@ -1,7 +1,7 @@
 # symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
 [package]
 name = "binutils"
-version = "2.45-1"
+version = "2.45-2"
 summary = "Assembler, Linker und Binärwerkzeuge"
 license = "GPL-3.0-or-later"
 url = "https://sourceware.org/pub/binutils/releases/"
@@ -16,7 +16,8 @@ sha256 = "c50c0e7f9cb188980e2cc97e4537626b1672441815587f1eab69d2a1bfbef5d2"
 build = '''
 cd "$S"; mkdir -p build; cd build
 ../configure --prefix=/usr --sysconfdir=/etc --enable-ld=default --enable-plugins --enable-shared \
-  --disable-werror --enable-64-bit-bfd --enable-new-dtags --with-system-zlib --enable-default-hash-style=gnu
+  --disable-werror --enable-64-bit-bfd --enable-new-dtags --with-system-zlib --enable-default-hash-style=gnu \
+  --enable-deterministic-archives
 make tooldir=/usr
 '''
 package = '''

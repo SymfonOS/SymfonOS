@@ -937,3 +937,22 @@ def test_build_adds_depends_for_linked_libraries(tmp_path):
         "[options]\n", "[options]\nautodeps = false\n"))
     out = syp("build", rec / "SYPBUILD.toml", "-o", tmp_path / "out2", env=dict(os.environ, SYP_DEPS_ROOT=str(root))).stdout
     assert "gelinkten" not in out
+
+
+@pytest.mark.skipif(not shutil.which("cc"), reason="kein C-Compiler")
+def test_build_maps_random_workdir(tmp_path):
+    # Der Bauordner hat einen zufälligen Namen; __FILE__ (und Debug-Infos) dürfen ihn nicht enthalten,
+    # sonst unterscheiden sich zwei Bauten desselben Rezepts
+    rec = tmp_path / "SYPBUILD.toml"
+    rec.write_text(
+        '[package]\nname = "fp"\nversion = "1-1"\n[options]\nstrip = false\nhardening = "off"\n'
+        'hardening_reason = "Test"\n[build]\npackage = \'\'\'\n'
+        'cd "$SRCDIR"; printf "const char *f = __FILE__;\\n" > f.c\n'
+        'cc $CFLAGS -c "$SRCDIR/f.c" -o f.o\n'
+        'install -Dm644 f.o "$DESTDIR/usr/lib/fp/f.o"\n\'\'\'\n')
+    outs = []
+    for n in (1, 2):
+        syp("build", rec, "-o", tmp_path / f"o{n}")
+        with tarfile.open(next((tmp_path / f"o{n}").glob("fp-*.syp"))) as tf:
+            outs.append({f["path"]: f.get("sha256") for f in json.loads(tf.extractfile(".FILES.json").read())})
+    assert outs[0]["usr/lib/fp/f.o"] == outs[1]["usr/lib/fp/f.o"]

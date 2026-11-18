@@ -1174,7 +1174,8 @@ QTBASE_FLAGS = ("-DINSTALL_BINDIR=lib/qt6/bin -DINSTALL_PUBLICBINDIR=usr/bin -DI
 def qt(mod, deps, summary, flags="", mk=(), provides=(), rel=1):
     pkg(f"qt6-{mod.removeprefix('qt')}", QT, f"{QT_URL}{mod}-everywhere-src-{QT}.tar.xz", summary,
         "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only", deps, ["cmake", "ninja", "pkgconf"] + list(mk),
-        style="cmake", flags=("-DQT_BUILD_TESTS=OFF -DQT_BUILD_EXAMPLES=OFF " + flags).strip(), post=QT_LINKS,
+        style="cmake", flags=("-DQT_BUILD_TESTS=OFF -DQT_BUILD_EXAMPLES=OFF -DQT_GENERATE_SBOM=OFF " + flags).strip(),
+        post=QT_LINKS,
         provides=provides, rel=rel)
 
 

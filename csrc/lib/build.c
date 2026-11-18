@@ -404,11 +404,12 @@ static char *style_step(const jval *b, const char *step) {
     } else if (!strcmp(style, "cmake")) {
         if (!strcmp(step, "build"))
             /* Ninja nur, wenn vorhanden (nicht jedes Rezept führt es als Bauabhängigkeit);
-             * CMake 4 lehnt cmake_minimum_required < 3.5 ab – ältere Projekte trotzdem zulassen */
+             * CMake 4 lehnt cmake_minimum_required < 3.5 ab – ältere Projekte trotzdem zulassen;
+             * CMAKE_SYSTEM_VERSION fest statt uname -r des Bau-Rechners (Qt schreibt es in jede Modul-JSON) */
             return xasprintf("gen=Ninja; command -v ninja >/dev/null || gen='Unix Makefiles'\n"
                              "cmake -S \"$S\" -B \"$S/_build\" -G \"$gen\" -DCMAKE_INSTALL_PREFIX=/usr "
                              "-DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF "
-                             "-DCMAKE_POLICY_VERSION_MINIMUM=3.5 %s\n"
+                             "-DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_SYSTEM_VERSION=6.0 %s\n"
                              "cmake --build \"$S/_build\" %s",
                              cf, mf);
         if (!strcmp(step, "check")) return run_check ? xstrdup("ctest --test-dir \"$S/_build\" --output-on-failure") : NULL;
@@ -500,8 +501,17 @@ static char **build_env(const char *src, const char *sdir, const char *dest, con
     sv_push_own(&env, xasprintf("PKGNAME=%s", jgets(pk, "name", "")));
     sv_push_own(&env, xasprintf("PKGVER=%s", colon ? colon + 1 : v));
     sv_push_own(&env, xasprintf("PKGREL=%s", rel));
-    sv_push_own(&env, xasprintf("CFLAGS=%s", cf));
-    sv_push_own(&env, xasprintf("CXXFLAGS=%s", cf));
+    /* Der Bauordner hat einen zufälligen Namen (mkdtemp): in __FILE__, assert-Texten und Debug-Infos
+     * (auch in .a-Archiven, die nicht gestrippt werden) durch einen festen Pfad ersetzen */
+    char *work = xstrdup(src), *sl = strrchr(work, '/');
+    if (sl && !strcmp(sl, "/src")) *sl = 0;
+    char *cfl = strstr(cf, "-ffile-prefix-map") ? xstrdup(cf)
+                                                 : xasprintf("%s -ffile-prefix-map=%s=/usr/src/%s", cf, work,
+                                                             jgets(pk, "name", "x"));
+    free(work);
+    sv_push_own(&env, xasprintf("CFLAGS=%s", cfl));
+    sv_push_own(&env, xasprintf("CXXFLAGS=%s", cfl));
+    free(cfl);
     sv_push_own(&env, xasprintf("LDFLAGS=%s", lf));
     sv_push_own(&env, xasprintf("MAKEFLAGS=-j%ld", nproc > 0 ? nproc : 1));
     sv_push_own(&env, xasprintf("NPROC=%ld", nproc > 0 ? nproc : 1));
