@@ -15,7 +15,7 @@ sha256 = "bc65688d8cb588ff67d32a63a821163211452ae7cb07dd07c261230f380ec526"
 
 [build]
 style = "cmake"
-configure_flags = "-DQT_BUILD_TESTS=OFF -DQT_BUILD_EXAMPLES=OFF"
+configure_flags = "-DQT_BUILD_TESTS=OFF -DQT_BUILD_EXAMPLES=OFF -DQT_GENERATE_SBOM=OFF"
 post_install = '''
 cd "$DESTDIR"
 install -d usr/bin

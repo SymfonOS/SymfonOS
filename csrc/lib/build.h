@@ -18,8 +18,10 @@ typedef struct {
  * Pakete mit kleinerer Revision neu, damit das Repo dem entspricht, was die Rezepte heute ergeben.
  *   2: Bibliotheksverzeichnis in Meson/Autotools vorgegeben (usr/lib), Bauschritte ohne Netz
  *   3: Abhängigkeiten aus gelinkten Bibliotheken, Python-Pakete unabhängig von der Bauumgebung (pip
- *      --ignore-installed; vorher waren sie leer, wenn dieselbe Version dort schon installiert war) */
-#define SYP_BUILD_REV 3
+ *      --ignore-installed; vorher waren sie leer, wenn dieselbe Version dort schon installiert war)
+ *   4: -ffile-prefix-map für den Bauordner, CMAKE_SYSTEM_VERSION fest, deterministische ar-Archive
+ *      (binutils), Qt ohne SBOM – gefunden vom Reproduzierbarkeits-Gate */
+#define SYP_BUILD_REV 4
 
 /* Baut ein Rezept; gibt Pfad des .syp zurück (NULL + set_error) */
 char *build_recipe(const char *recipe, const char *outdir, const seckey *signer, const build_opts *o);
