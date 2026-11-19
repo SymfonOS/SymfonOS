@@ -10,6 +10,10 @@ on:
         description: "Zustand verwerfen und von vorn beginnen"
         type: boolean
         default: false
+      repro_only:
+        description: "Reproduzierbarkeit gezielt für diese Pakete prüfen (Komma-Liste, statt der Tagesauswahl)"
+        type: string
+        default: ""
   schedule:
     - cron: "41 */6 * * *"
   # Änderungen an Rezepten, Bauskripten oder syp setzen den Bau fort (laufende Etappen werden nicht
@@ -283,9 +287,12 @@ jobs:
         # (veröffentlicht ist dann schon; der nächste Lauf und ci-diag zeigen die Unterschiede)
         if: always() && steps.build.outputs.rc == '0'
         timeout-minutes: 35
+        env:
+          REPRO_ONLY: ${{ inputs.repro_only }}  # über env, nicht in den Befehl eingesetzt
         run: |
           if [ $(( $(date +%s) - JOB_START )) -gt $((250 * 60)) ]; then echo "::notice title=Reproduzierbarkeit::übersprungen (Zeitbudget)"; exit 0; fi
           sudo env "PATH=$PATH" SYP_SRCCACHE="$SYM/sources" SYP_BUILD_NET=strict STRICT=1 OUT="$PWD/out/repro.log" \
+            ONLY="$REPRO_ONLY" \
             tools/repro-check.sh out/repo/symfonos distro/recipes "$SYM" "$PWD/keys/release.key" 6
       - name: Diagnose ablegen (Branch ci-diag)
         # Vollständige Logs und Bildschirmfotos für die Fehlersuche; enthält keine Geheimnisse
