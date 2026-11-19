@@ -3,7 +3,8 @@
 # virtio-GPU, wartet auf SDDM, KWin und die Plasma-Sitzung des Live-Benutzers und hält Bildschirmfotos fest.
 #   tools/desktop-test.sh out/symfonos-desktop-*.iso [ausgabeverzeichnis]
 #   APPEND="enforcing=1" …     zusätzliche Kernel-Parameter (z. B. SELinux erzwingen)
-#   INPUTTEST=1                Eingabetest: KRunner per Tastatur, Konsole starten, Befehl tippen (QEMU sendkey)
+#   INPUTTEST=1                Eingabetest: KRunner per Tastatur, Konsole starten, Befehl tippen (QEMU sendkey);
+#                              Fehlschlag lässt den Test scheitern (INPUTTEST_STRICT=0: nur Warnung)
 # Erfolg: graphical.target erreicht, kwin_wayland und plasmashell laufen, kein Absturz (Coredump/Segfault).
 set -euo pipefail
 ISO=$(realpath "$1")
@@ -105,9 +106,17 @@ fi
 crashes=$(grep -aE "segfault at|general protection fault|Oops|BUG:|dumped core|Process [0-9]+ \(.*\) of user [0-9]+ dumped core" <<<"$log" | awk '!s[$0]++' | head -15 || true)
 fails=$(grep -a "\[FAILED\]" <<<"$log" | awk '!s[$0]++' | head -15 || true)
 echo ":: graphical=$graphical session=$session"
-# neu und noch ohne Erfahrungswerte: Fehlschlag als Warnung mit den Bildschirmfotos input-*.png
-[[ $inputtest == 0 ]] && echo "::warning title=Eingabetest::Tastatureingabe (KRunner → Konsole → logger) nicht im Journal angekommen, siehe input-*.png"
-if ((graphical && session)) && [[ -z $crashes && ( -z $fails || ${STRICT:-1} == 0 ) ]]; then
+# Gate seit drei bestandenen Läufen in Folge (INPUTTEST_STRICT=0: nur Warnung); Bildschirmfotos input-*.png
+inputfail=0
+if [[ $inputtest == 0 ]]; then
+  if [[ ${INPUTTEST_STRICT:-1} == 1 ]]; then
+    inputfail=1
+    echo "::error title=Eingabetest::Tastatureingabe (KRunner → Konsole → logger) nicht im Journal angekommen, siehe input-*.png"
+  else
+    echo "::warning title=Eingabetest::Tastatureingabe (KRunner → Konsole → logger) nicht im Journal angekommen, siehe input-*.png"
+  fi
+fi
+if ((graphical && session && !inputfail)) && [[ -z $crashes && ( -z $fails || ${STRICT:-1} == 0 ) ]]; then
   echo ":: Desktop startet: SDDM → KWin (Wayland) → Plasma"
   exit 0
 fi
