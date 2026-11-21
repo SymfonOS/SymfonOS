@@ -1,0 +1,6 @@
+Lauf 44889080336, Sat Nov 21 11:33:15 UTC 2026, rc=0
+Commit: 316cbbaf557a74fd194afc469980bc67222228fa
+ISO: ja · Desktop-ISO: success
+:: gebaut 0, vorhanden 605, fehlgeschlagen 0, offen 0 (0 min)
+-rw-r--r-- 1 runner root 1569994752 Nov 21 11:07 out/desktop/symfonos-desktop-2026.11.21-x86_64.iso
+-rw-r--r-- 1 runner root  699322368 Nov 21 10:46 out/symfonos-base-2026.11.21-x86_64.iso

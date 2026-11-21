@@ -1,0 +1,1 @@
+lrwxrwxrwx 1 root root 3 Oct 22 14:28 /mnt/symfonos/usr/lib64 -> lib

@@ -1,0 +1,4 @@
+3 verschiedene Verweigerungen
+systemd_tmpfiles_t -> uuidd_var_lib_t : dir { relabelfrom relabelto }  comm=systemd-tmpfile name=libuuid
+systemd_locale_t -> xkb_var_lib_t : lnk_file { read }  comm=systemd-localed name=xkb
+systemd_locale_t -> usr_t : file { map }  comm=systemd-localed path=/usr/share/xkeyboard-config-2/rules/evdev
