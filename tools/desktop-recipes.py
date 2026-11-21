@@ -1818,7 +1818,30 @@ PYSIDE_DIR = f"pyside-setup-everywhere-src-{PYSIDE}/sources/"
 PYSIDE_LIC = "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only"
 pkg("shiboken6", PYSIDE, PYSIDE_SRC, "Anbindungs-Generator und Laufzeit für Qt für Python", PYSIDE_LIC,
     ["python", QB, "llvm", "libxml2", "libxslt"], ["cmake", "ninja"], style="cmake", dir=PYSIDE_DIR + "shiboken6",
-    flags="-DFORCE_LIMITED_API=no -DBUILD_TESTS=OFF -DCMAKE_SKIP_RPATH=ON -Wno-dev")
+    flags="-DFORCE_LIMITED_API=no -DBUILD_TESTS=OFF -DCMAKE_SKIP_RPATH=ON -Wno-dev",
+    # libshiboken bettet ein mit »python -m zipfile« gepacktes Archiv ein: Zeitstempel der Bauzeit und
+    # Reihenfolge aus os.listdir machten die .so unreproduzierbar (Repro-Gate). Fest sortiert, Datum 1980-01-01.
+    pre=r"""python3 - libshiboken/embed/embedding_generator.py <<'PY'
+import sys
+p = sys.argv[1]
+s = open(p).read()
+old = "    runpy(f'-m zipfile -c {zip_name} {files}')\n"
+new = (
+    "    import zipfile as _zf\n"
+    "    with _zf.ZipFile(zip_name, 'w') as _z:\n"
+    "        for _r, _d, _fs in sorted(os.walk('.')):\n"
+    "            _d.sort()\n"
+    "            for _f in sorted(_fs):\n"
+    "                _p = os.path.normpath(os.path.join(_r, _f))\n"
+    "                if _p == zip_name:\n"
+    "                    continue\n"
+    "                _i = _zf.ZipInfo(_p, (1980, 1, 1, 0, 0, 0))\n"
+    "                _i.external_attr = 0o644 << 16\n"
+    "                _z.writestr(_i, open(_p, 'rb').read())\n"
+)
+assert old in s, 'zipfile-Aufruf nicht gefunden'
+open(p, 'w').write(s.replace(old, new))
+PY""", rel=2)
 pkg("pyside6", PYSIDE, PYSIDE_SRC, "Qt für Python (PySide6)", PYSIDE_LIC,
     ["python", "shiboken6", QB, QD, QS, QW], ["cmake", "ninja", "qt6-tools"], style="cmake",
     dir=PYSIDE_DIR + "pyside6",
