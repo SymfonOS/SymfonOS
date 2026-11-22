@@ -90,6 +90,10 @@ sig = ".sig"
 keys = ["6CB445A816504714AA4962579EBA155FCC12D2C0"]
 sig = ".asc"
 
+[checkpolicy]
+keys = ["68D21823342A13683AEB3E4EFB4C685B5DC1C13E"]
+sig = ".asc"
+
 [coreutils]
 keys = ["6C37DC12121A5006BC1DB804DF6FD971306037D9"]
 sig = ".sig"
@@ -212,6 +216,10 @@ sig = ".sig"
 
 [glaxnimate]
 keys = ["97B71AA02D63EA6C5C44C23B962AC48EF0501F0B"]
+sig = ".sig"
+
+[glibc]
+keys = ["35B17DF5752577CA0C541CEB94BFDF4484AD142F"]
 sig = ".sig"
 
 [gmp]
@@ -702,8 +710,24 @@ sig = ".asc"
 keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
 sig = ".sig"
 
+[libsamplerate]
+keys = ["31D95CAB6D80D262244A1750A47620E801E47E95"]
+sig = ".sig"
+
 [libseccomp]
 keys = ["7100AADFAE6E6E940D2E0AD655E45A5AE8CA7C8A"]
+sig = ".asc"
+
+[libselinux]
+keys = ["68D21823342A13683AEB3E4EFB4C685B5DC1C13E"]
+sig = ".asc"
+
+[libsemanage]
+keys = ["68D21823342A13683AEB3E4EFB4C685B5DC1C13E"]
+sig = ".asc"
+
+[libsepol]
+keys = ["68D21823342A13683AEB3E4EFB4C685B5DC1C13E"]
 sig = ".asc"
 
 [libsigsegv]
@@ -713,6 +737,10 @@ sig = ".sig"
 [libsm]
 keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
 sig = ".sig"
+
+[libsndfile]
+keys = ["31D95CAB6D80D262244A1750A47620E801E47E95"]
+sig = ".asc"
 
 [libsodium]
 keys = ["54A2B8892CC3D6A597B92B6C210627AABA709FE1"]
@@ -874,6 +902,10 @@ sig = ".sig"
 keys = ["907D226E7E13FA337F014A083672782A9BF368F3"]
 sig = ".sig"
 
+[linux-pam]
+keys = ["296D6F29A020808E8717A8842DB5BD89A340AEB7"]
+sig = ".asc"
+
 [llvm]
 keys = ["474E22316ABF4785A88C6E8EA2C794A986419D8A"]
 sig = ".sig"
@@ -888,6 +920,10 @@ sig = ".asc"
 
 [m4]
 keys = ["71C2CC22B1C4602927D2F3AAA7A16B4A2527436A"]
+sig = ".sig"
+
+[make]
+keys = ["6D4EEB02AD834703510B117680CB727A20C79BB2"]
 sig = ".sig"
 
 [man-db]
@@ -978,6 +1014,10 @@ sig = ".asc"
 keys = ["BA5473A2B0587B07FB27CF2D216094DFD0CB81EF"]
 sig = ".asc"
 
+[openvpn]
+keys = ["F554A3687412CFFEBDEFE0A312F5F7B42F2B01E7"]
+sig = ".asc"
+
 [patch]
 keys = ["259B3792B3D6D319212CC4DCD5BF9FEB0313653A"]
 sig = ".sig"
@@ -1030,6 +1070,10 @@ sig = ".sig"
 keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
 sig = ".sig"
 
+[policycoreutils]
+keys = ["68D21823342A13683AEB3E4EFB4C685B5DC1C13E"]
+sig = ".asc"
+
 [polkit-kde-agent-1]
 keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
 sig = ".sig"
@@ -1061,6 +1105,14 @@ sig = ".sig"
 [prison]
 keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
 sig = ".sig"
+
+[procps-ng]
+keys = ["5D2FB320B825D93904D205193938F96BDF50FEA5"]
+sig = ".asc"
+
+[psmisc]
+keys = ["5D2FB320B825D93904D205193938F96BDF50FEA5"]
+sig = ".asc"
 
 [pulseaudio-qt]
 keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
@@ -1102,9 +1154,17 @@ sig = ".sig"
 keys = ["1528635D8053A57F77D1E08630A59377A7763BE6"]
 sig = ".sig"
 
+[secilc]
+keys = ["68D21823342A13683AEB3E4EFB4C685B5DC1C13E"]
+sig = ".asc"
+
 [sed]
 keys = ["155D3FC500C834486D1EEA677FD9FCCB000BEEEE"]
 sig = ".sig"
+
+[semodule-utils]
+keys = ["68D21823342A13683AEB3E4EFB4C685B5DC1C13E"]
+sig = ".asc"
 
 [serd]
 keys = ["907D226E7E13FA337F014A083672782A9BF368F3"]
