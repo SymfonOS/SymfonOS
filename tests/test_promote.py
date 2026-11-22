@@ -136,6 +136,8 @@ def test_promote_release_ci(tmp_path):
     assert {"index.json.zst", "promotion.json"} <= set(os.listdir(rel / "repo-x86_64-testing"))
     assert not (rel / "repo-x86_64").exists()
     out = run_ci(MIN_DAYS="0")                       # Wartezeit vorbei: beide nach stable
+    # promotion.json überlebt das Veröffentlichen von testing (sonst begänne die Wartezeit jedes Mal neu)
+    assert "noch keine promotion.json" not in out, out
     assert sorted(f for f in os.listdir(rel / "repo-x86_64") if f.endswith(".syp")) == \
         ["app-1-1-x86_64.syp", "libfoo-1-1-x86_64.syp"]
     # neue Version gebaut, alte Datei bleibt im lokalen Pool; app ist lokal verschwunden (muss vom Release kommen)

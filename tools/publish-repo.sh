@@ -63,7 +63,7 @@ upload --clobber "$pub/index.json.zst" "$pub/index.json.zst.sig"
 old=0
 while read -r f; do
   [ -n "$f" ] || continue
-  case $f in index.json.zst|index.json.zst.sig) continue ;; esac
+  case $f in *.syp) ;; *) continue ;; esac   # nur alte Pakete; promotion.json u. a. bleiben
   gh release delete-asset "$TAG" "$f" --repo "$REPO_SLUG" --yes && old=$((old + 1))
 done < <(comm -23 <(echo "$have") <(echo "$want"))
 echo "::notice title=Paket-Repo veröffentlicht::$TAG: $n Pakete ($new neu, $old entfernt)"
