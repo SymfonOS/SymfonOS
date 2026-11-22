@@ -4,6 +4,9 @@
 Ein Paket wird übernommen, wenn
   * es mindestens --min-days Tage in testing liegt (Sicherheitsupdates: --security-days, Standard 0),
   * es nicht gesperrt ist (Datei testing/hold oder --hold: je Zeile »name« oder »name version«, # Kommentar),
+  * Tester es nicht abgelehnt haben (Karma ≤ --unstable-karma, Standard -2; Karma wie bei Bodhi: --karma
+    nennt je »name version« die Summe der Stimmen, siehe tools/testing-karma.py) – mit Karma ≥ --stable-karma
+    (Standard 3) genügt schon --karma-days (Standard 1) statt der vollen Wartezeit,
   * alle Abhängigkeiten in stable plus den ebenfalls übernommenen Paketen erfüllbar sind
     (sonst würde stable brechen; das Paket wartet dann auf seine Abhängigkeiten),
   * es keine Abhängigkeit eines Pakets bricht, das schon in stable liegt, und
@@ -112,6 +115,11 @@ def main() -> int:
     ap.add_argument("--arch", default="x86_64")
     ap.add_argument("--min-days", type=float, default=7)
     ap.add_argument("--security-days", type=float, default=0)
+    ap.add_argument("--karma", type=Path, help="JSON {\"name version\": Karma} (tools/testing-karma.py)")
+    ap.add_argument("--stable-karma", type=int, default=3)
+    ap.add_argument("--unstable-karma", type=int, default=-2)
+    ap.add_argument("--karma-days", type=float, default=1)
+    ap.add_argument("--report", type=Path, help="Stand je Paket in testing als JSON schreiben")
     ap.add_argument("--now", type=float, default=None, help=argparse.SUPPRESS)
     ap.add_argument("-n", "--dry-run", action="store_true")
     a = ap.parse_args()
@@ -130,6 +138,8 @@ def main() -> int:
         state_file.write_text(json.dumps(seen, indent=1, sort_keys=True) + "\n")
 
     held = read_hold(a.hold or a.testing / "hold")
+    karma = json.loads(a.karma.read_text()) if a.karma and a.karma.exists() else {}
+    report: dict[str, dict] = {}
     have = {e["info"]["name"]: e["info"]["version"] for e in stable}
     reasons: dict[str, str] = {}
     cands = []
@@ -140,8 +150,15 @@ def main() -> int:
         need = a.security_days if i.get("security") else a.min_days
         if i["name"] in have and vercmp(i["version"], have[i["name"]]) <= 0:
             continue
+        k = int(karma.get(tag, 0))
+        if k >= a.stable_karma:
+            need = min(need, a.karma_days)
+        report[tag] = {"name": i["name"], "version": i["version"], "days": round(days, 2), "need": need,
+                       "karma": k, "security": bool(i.get("security"))}
         if (i["name"], None) in held or (i["name"], i["version"]) in held:
             reasons[tag] = "gesperrt (hold)"
+        elif k <= a.unstable_karma:
+            reasons[tag] = f"von Testern abgelehnt (Karma {k})"
         elif days < need:
             reasons[tag] = f"erst {days:.1f} von {need:g} Tagen in testing"
         else:
@@ -192,6 +209,15 @@ def main() -> int:
         files = [a.testing / e["file"] for e in order]
         args = ["repo-add", a.stable, *files, "--name", a.name, "--arch", a.arch] + (["-k", a.key] if a.key else [])
         syp(*args)
+    if a.report:
+        for e in order:
+            report[f"{e['info']['name']} {e['info']['version']}"]["status"] = "stable"
+        for tag, why in reasons.items():
+            if tag in report:
+                report[tag].update(status="wartet", reason=why)
+        for r in report.values():
+            r.setdefault("status", "ersetzt")      # neuere Version derselben Pakets kommt nach stable
+        a.report.write_text(json.dumps(report, indent=1, sort_keys=True, ensure_ascii=False) + "\n")
     print(f":: {len(order)} übernommen, {len(reasons)} zurückgestellt{' (Trockenlauf)' if a.dry_run else ''}")
     return 0
 

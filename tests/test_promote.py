@@ -150,3 +150,105 @@ def test_promote_release_ci(tmp_path):
         ["app-1-1-x86_64.syp", "libfoo-2-1-x86_64.syp"]
     assert sorted(f for f in os.listdir(rel / "repo-x86_64-testing") if f.endswith(".syp")) == ["libfoo-2-1-x86_64.syp"]
     assert names(rel / "repo-x86_64", pub) == ["app 1-1", "libfoo 2-1"]
+
+
+def test_promotion_karma(tmp_path):
+    """Karma: ab +3 genügt ein Tag, ab -2 bleibt das Paket in testing; --report nennt den Stand je Paket."""
+    key, pub = keygen(tmp_path)
+    testing, stable = tmp_path / "testing", tmp_path / "stable"
+    p = lambda n, v, **kw: make_pkg(tmp_path, n, v, key=key, **kw)
+    syp("repo-add", testing, p("gut", "1-1"), p("kaputt", "1-1"), p("still", "1-1"), "--name", "testing", "-k", key)
+    karma, report = tmp_path / "karma.json", tmp_path / "report.json"
+    karma.write_text(json.dumps({"gut 1-1": 3, "kaputt 1-1": -2}))
+    t0 = 1_800_000_000.0
+    promote(testing, stable, pub, key, t0)
+    out = promote(testing, stable, pub, key, t0 + 1.5 * DAY, "--karma", karma, "--report", report)
+    assert "→ stable: gut 1-1" in out and "still 1-1: erst 1.5 von 7 Tagen" in out
+    assert "kaputt 1-1: von Testern abgelehnt (Karma -2)" in out
+    r = json.loads(report.read_text())
+    assert r["gut 1-1"]["status"] == "stable" and r["gut 1-1"]["karma"] == 3
+    assert r["kaputt 1-1"]["status"] == "wartet" and "abgelehnt" in r["kaputt 1-1"]["reason"]
+    # nach 8 Tagen kommt still, kaputt bleibt trotz Wartezeit draußen
+    out = promote(testing, stable, pub, key, t0 + 8 * DAY, "--karma", karma)
+    assert names(stable, pub) == ["gut 1-1", "still 1-1"]
+
+
+FAKE_GH_API = r'''#!/usr/bin/env python3
+"""Ersatz für »gh api« mit Issues, Labels und Reaktionen in $FAKE_GH_STATE (JSON)."""
+import json, os, re, sys
+path = os.environ["FAKE_GH_STATE"]
+st = json.load(open(path)) if os.path.exists(path) else {"issues": [], "labels": [], "reactions": {}}
+a = sys.argv[1:]
+assert a[0] == "api", a
+url, method = a[1], "GET"
+if "-X" in a:
+    method = a[a.index("-X") + 1]
+data = json.loads(sys.stdin.read()) if "--input" in a else None
+out = None
+if url.endswith("/labels") and method == "POST":
+    if data["name"] in st["labels"]:
+        sys.exit("422 already_exists")
+    st["labels"].append(data["name"]); out = data
+elif m := re.search(r"/issues/(\d+)/reactions", url):
+    out = st["reactions"].get(m.group(1), [])
+elif m := re.search(r"/issues/(\d+)$", url):
+    i = next(x for x in st["issues"] if x["number"] == int(m.group(1)))
+    i.update(data); out = i
+elif re.search(r"/issues$", url) and method == "POST":
+    i = {"number": len(st["issues"]) + 1, "state": "open", "title": data["title"], "body": data["body"],
+         "labels": [{"name": n} for n in data["labels"]]}
+    st["issues"].append(i); out = i
+elif "/issues?" in url:
+    page = int(re.search(r"page=(\d+)", url.split("per_page")[1]).group(1))
+    out = [x for x in st["issues"] if x["state"] == "open"][(page - 1) * 100:page * 100]
+else:
+    sys.exit(f"unbekannt: {a}")
+json.dump(st, open(path, "w"))
+print(json.dumps(out))
+'''
+
+
+def test_testing_karma_issues(tmp_path):
+    """tools/testing-karma.py: Issues je wartendem Paket, Karma aus 👍/👎 (eine Stimme je Person, ohne Bots),
+    übernommene und verschwundene Versionen werden geschlossen."""
+    bindir, state = tmp_path / "bin", tmp_path / "gh.json"
+    bindir.mkdir()
+    (bindir / "gh").write_text(FAKE_GH_API)
+    (bindir / "gh").chmod(0o755)
+    env = dict(os.environ, PATH=f"{bindir}:{os.environ['PATH']}", FAKE_GH_STATE=str(state), GITHUB_REPOSITORY="t/t")
+    tool = lambda *a: subprocess.run([sys.executable, ROOT / "tools/testing-karma.py", *map(str, a)],
+                                     capture_output=True, text=True, env=env)
+    report = tmp_path / "report.json"
+    report.write_text(json.dumps({
+        "foo 2-1": {"name": "foo", "version": "2-1", "days": 1, "need": 7, "karma": 0, "status": "wartet",
+                    "reason": "erst 1.0 von 7 Tagen in testing"},
+        "bar 1-1": {"name": "bar", "version": "1-1", "days": 0, "need": 0, "karma": 0, "status": "stable"}}))
+    r = tool("sync", report)
+    assert r.returncode == 0 and "1 neu" in r.stdout, r.stdout + r.stderr
+    s = json.loads(state.read_text())
+    assert [i["title"] for i in s["issues"]] == ["testing: foo 2-1"] and s["labels"] == ["testing"]
+    assert "erst 1.0 von 7 Tagen" in s["issues"][0]["body"]
+    # Stimmen: zwei Personen 👍, eine 👎, ein Bot 👍, eine Person mit beidem (zählt nicht)
+    u = lambda n, t="User": {"login": n, "type": t}
+    s["reactions"]["1"] = [{"content": "+1", "user": u("a")}, {"content": "+1", "user": u("b")},
+                           {"content": "-1", "user": u("c")}, {"content": "+1", "user": u("bot", "Bot")},
+                           {"content": "+1", "user": u("d")}, {"content": "-1", "user": u("d")},
+                           {"content": "heart", "user": u("e")}]
+    state.write_text(json.dumps(s))
+    karma = tmp_path / "karma.json"
+    assert tool("collect", karma).returncode == 0
+    assert json.loads(karma.read_text()) == {"foo 2-1": 1}
+    # zweiter Lauf: unverändert → nichts Neues; dann foo übernommen → Issue geschlossen
+    assert "0 neu, 0 aktualisiert, 0 geschlossen" in tool("sync", report).stdout
+    rep = json.loads(report.read_text())
+    rep["foo 2-1"]["status"] = "stable"
+    report.write_text(json.dumps(rep))
+    assert "1 geschlossen" in tool("sync", report).stdout
+    assert json.loads(state.read_text())["issues"][0]["state"] == "closed"
+    # eine Version, die nicht mehr im Bericht steht, wird ebenfalls geschlossen
+    rep = {"baz 1-1": {"name": "baz", "version": "1-1", "days": 0, "need": 7, "karma": 0, "status": "wartet"}}
+    report.write_text(json.dumps(rep))
+    tool("sync", report)
+    rep = {}
+    report.write_text(json.dumps(rep))
+    assert "1 geschlossen" in tool("sync", report).stdout

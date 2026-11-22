@@ -25,7 +25,7 @@ Beides erledigt die Bau-CI nach jedem grünen Lauf (`tools/promote-release.sh`):
 3. **alle Abhängigkeiten in stable erfüllbar** bleiben. Neue Bibliotheksversionen werden zusammen mit ihren Nutzern übernommen, nie einzeln.
 4. Außerdem wird der Index von testing nur mit gültiger Signatur gelesen.
 
-Fedora sammelt zusätzlich Karma, also Bewertungen von Testern. Bei symfonOS gibt es bisher nur die Sperrliste.
+Wie Fedoras Bodhi sammelt symfonOS Karma, also Bewertungen von Testern: Für jedes wartende Paket legt die Bau-CI ein GitHub-Issue mit dem Label `testing` an (Titel `testing: NAME VERSION`, mit Stand und Anleitung). Tester stimmen mit 👍 oder 👎 ab, je Person eine Stimme, Bots zählen nicht (`tools/testing-karma.py`). Ab Karma +3 genügt ein Tag in testing, ab -2 bleibt das Paket in testing. Übernommene oder ersetzte Versionen schließt die CI; die Issue-Liste mit dem Label `testing` ist die Weboberfläche.
 
 ## Automatische Prüfungen (Gates)
 
@@ -88,7 +88,7 @@ Ein Release (z. B. 2026.10) ist ein eingefrorener Stand von stable mit Installat
 
 ## Offene Punkte
 
-- Karma-Abstimmung und eine Weboberfläche für testing-Updates fehlen; bisher gibt es nur die Sperrliste.
+- Karma: Stimmen kommen nur über GitHub-Konten; eine eigene Weboberfläche mit Anmeldung (wie Bodhi mit FAS) gibt es nicht.
 - Openqa-artige Tests mit Bildvergleich. Seit November 2026 tippt der Desktop-Test über QEMU (KRunner, Konsole, ein Befehl, der im Journal ankommen muss) und hält dabei Bildschirmfotos fest; nach drei bestandenen Läufen in Folge lässt ein Fehlschlag den Desktop-Test scheitern. Seit November 2026 vergleicht `tools/needle.py` die Bildschirmfotos mit Referenzausschnitten aus `distro/needles` (Leiste und Dock, KRunner-Suchfeld, Konsolenfenster mit Menü; normierte Kreuzkorrelation, Verschiebung bis 30–60 Pixel erlaubt), vorerst nur als Warnung; nach drei bestandenen Läufen in Folge wird er mit `NEEDLE_STRICT=1` zum Gate. Neue Needles entstehen mit `tools/needle.py make` aus einem Bildschirmfoto eines guten Laufs.
 - Reproduzierbarkeit: ein Gate über eine rotierende Stichprobe (6 Pakete je Lauf, nach der Veröffentlichung); große Pakete (Quellen über 30 MB) prüft nur der manuelle Start mit `repro_only`. Der Vergleich mit dem veröffentlichten Paket ist zugleich einer zwischen zwei Rechnern (anderer CI-Runner, andere Kernel-Version); so wurden die Befunde behoben, die zu Revision 4 führten (Qt-Module zuletzt 4 von 4 gleich). Offen bleibt ein unabhängiger Nachbau außerhalb der eigenen CI.
 - Upstream-Signaturen (GPG): `tools/source-sigs.py` prüft sie für alle Pakete in `distro/source-keys.toml`, bei jeder Rezeptänderung (Pull Request und Push auf main) und wöchentlich vollständig (Workflow »Quellsignaturen«). Die Schlüssel werden einmal per `discover` gesucht und nur eingetragen, wenn sie das Archiv mit der schon festgeschriebenen sha256 bestätigen; danach muss jede neue Version von einem dieser Schlüssel signiert sein. Offen: Projekte ohne Signaturen (viele GitHub-Releases) bleiben bei der festgehaltenen Prüfsumme; ein neuer Schlüssel nach einem Wechsel beim Projekt muss von Hand geprüft werden.

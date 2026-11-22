@@ -28,6 +28,7 @@ concurrency:
 
 permissions:
   contents: write
+  issues: write          # Karma-Issues für testing-Updates (tools/testing-karma.py)
 
 jobs:
   bootstrap:
