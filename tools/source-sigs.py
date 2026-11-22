@@ -172,43 +172,48 @@ def keyfile(fpr: str) -> bytes:
     return (KEYDIR / f"{fpr}.asc").read_bytes()
 
 
+def check_one(name: str, e: dict) -> tuple[str, str]:
+    """Ein Paket prüfen: ("ok"|"bad"|"net", Meldung)."""
+    try:
+        r = recipe(name)
+    except FileNotFoundError:
+        return "bad", f"{name}: kein Rezept, aber Eintrag in source-keys.toml"
+    src = main_source(r)
+    if not src:
+        return "bad", f"{name}: keine Quelle im Rezept"
+    try:
+        missing = [k for k in e["keys"] if not (KEYDIR / f"{k}.asc").exists()]
+        if missing:
+            raise ValueError(f"Schlüssel fehlt in distro/keys/upstream: {', '.join(missing)}")
+        data = archive(src)
+        sig = fetch(src["url"] + e["sig"])
+        if e.get("uncompressed"):
+            data = uncompress(src["url"], data)
+        got = verify(sig, data, [keyfile(k) for k in e["keys"]])
+    except NetError as ex:
+        # fehlende Signaturdatei (404) wiegt wie eine ungültige: das Projekt hat sie bisher immer geliefert
+        return ("bad" if "HTTP 404" in str(ex) or "HTTP 410" in str(ex) else "net"), f"{name}: {ex}"
+    except (ValueError, OSError, lzma.LZMAError, EOFError) as ex:
+        return "bad", f"{name}: {ex}"
+    if got and got in e["keys"]:
+        return "ok", f"{name} ({src['url'].rsplit('/', 1)[-1]}, Schlüssel {got[-16:]})"
+    return "bad", f"{name}: Signatur von {src['url'].rsplit('/', 1)[-1]} ungültig oder von fremdem Schlüssel"
+
+
 def check(names: list[str]) -> int:
+    """Pakete parallel prüfen (SOURCE_SIGS_JOBS, Standard 16); Ausgabe in Namensreihenfolge."""
     keys = load_keys()
-    bad, neterr, ok = [], [], 0
-    for name in names:
-        e = keys.get(name)
-        if not e:
-            continue
-        try:
-            r = recipe(name)
-        except FileNotFoundError:
-            bad.append(f"{name}: kein Rezept, aber Eintrag in source-keys.toml")
-            continue
-        src = main_source(r)
-        if not src:
-            bad.append(f"{name}: keine Quelle im Rezept")
-            continue
-        try:
-            missing = [k for k in e["keys"] if not (KEYDIR / f"{k}.asc").exists()]
-            if missing:
-                raise ValueError(f"Schlüssel fehlt in distro/keys/upstream: {', '.join(missing)}")
-            data = archive(src)
-            sig = fetch(src["url"] + e["sig"])
-            if e.get("uncompressed"):
-                data = uncompress(src["url"], data)
-            got = verify(sig, data, [keyfile(k) for k in e["keys"]])
-        except NetError as ex:
-            # fehlende Signaturdatei (404) wiegt wie eine ungültige: das Projekt hat sie bisher immer geliefert
-            (bad if "HTTP 404" in str(ex) or "HTTP 410" in str(ex) else neterr).append(f"{name}: {ex}")
-            continue
-        except (ValueError, OSError, lzma.LZMAError, EOFError) as ex:
-            bad.append(f"{name}: {ex}")
-            continue
-        if got and got in e["keys"]:
+    todo = [n for n in names if n in keys]
+    jobs = max(1, int(os.environ.get("SOURCE_SIGS_JOBS", "16")))
+    with concurrent.futures.ThreadPoolExecutor(jobs) as pool:
+        results = list(pool.map(lambda n: check_one(n, keys[n]), todo))
+    bad = [m for k, m in results if k == "bad"]
+    neterr = [m for k, m in results if k == "net"]
+    ok = 0
+    for k, m in results:
+        if k == "ok":
             ok += 1
-            print(f"ok    {name} ({src['url'].rsplit('/', 1)[-1]}, Schlüssel {got[-16:]})")
-        else:
-            bad.append(f"{name}: Signatur von {src['url'].rsplit('/', 1)[-1]} ungültig oder von fremdem Schlüssel")
+            print(f"ok    {m}")
     for m in neterr:
         print(f"netz  {m}")
     for m in bad:
