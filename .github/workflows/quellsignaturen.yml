@@ -40,6 +40,7 @@ jobs:
         if: inputs.modus == 'discover'
         env:
           PAKETE: ${{ inputs.pakete }}
+          SOURCE_SIGS_BUDGET: "5400"   # 90 min suchen, Rest reicht zum Ablegen; Übriges im nächsten Lauf
         run: |
           tools/source-sigs.py discover $PAKETE | tee discover.log
           echo "::notice title=Quellsignaturen gesucht::$(tail -1 discover.log)"
