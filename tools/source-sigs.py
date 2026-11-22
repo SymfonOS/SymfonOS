@@ -96,7 +96,8 @@ def write_keys(data: dict) -> None:
     out = [head]
     for name in sorted(data):
         e = data[name]
-        out.append(f"\n[{name}]\n")
+        # Namen mit Punkt (cairomm1.0) in Anführungszeichen, sonst wären es verschachtelte Tabellen
+        out.append(f"\n[{name}]\n" if re.fullmatch(r"[A-Za-z0-9_-]+", name) else f'\n["{name}"]\n')
         out.append("keys = [" + ", ".join(f'"{k}"' for k in e["keys"]) + "]\n")
         out.append(f'sig = "{e["sig"]}"\n')
         if e.get("uncompressed"):
@@ -278,7 +279,10 @@ def discover_one(name: str) -> tuple[dict | None, bytes | None, str | None]:
                 fpr = verify(sig, payload, [key])
                 if fpr:
                     entry = {"keys": [fpr], "sig": suf, **({"uncompressed": True} if unc else {})}
-                    return entry, export_minimal(key, fpr), \
+                    # export-clean wirft bei abgelaufenen Schlüsseln die Unterschlüssel weg: dann den
+                    # Schlüssel so speichern, wie ihn der Keyserver geliefert hat
+                    small = export_minimal(key, fpr)
+                    return entry, small if verify(sig, payload, [small]) == fpr else key, \
                         f"neu   {name}: {url.rsplit('/', 1)[-1]}{suf} – Schlüssel {fpr}"
         return None, None, f"ohne  {name}: {url.rsplit('/', 1)[-1]}{suf} vorhanden, aber kein passender Schlüssel"
     return None, None, None

@@ -126,3 +126,33 @@ def test_check_changed_only(tmp_path):
     recipe(root, "x", f"file://{srv}/x-1.tar.gz", bad)
     r = tool(root, "check", "--changed", "HEAD")
     assert r.returncode == 1 and "ungültig" in r.stdout, r.stdout
+
+
+def test_expired_subkey_and_dotted_name(tmp_path):
+    """Abgelaufener Schlüssel, der mit einem Unterschlüssel signiert hat (export-clean würfe ihn weg),
+    und ein Paketname mit Punkt (wäre in TOML sonst eine verschachtelte Tabelle)."""
+    import time
+    root, srv, ks, home = tmp_path / "repo", tmp_path / "srv", tmp_path / "ks", tmp_path / "g"
+    for d in (srv, ks, root / "lookaside"):
+        d.mkdir(parents=True)
+    home.mkdir(mode=0o700)
+    g = ["gpg", "--homedir", home, "--batch", "--passphrase", ""]
+    subprocess.run([*g, "--quick-gen-key", "Alt <alt@example.invalid>", "ed25519", "cert", "seconds=4"],
+                   check=True, capture_output=True)
+    out = subprocess.run([*g, "--with-colons", "--list-keys"], capture_output=True, text=True).stdout
+    fpr = next(line.split(":")[9] for line in out.splitlines() if line.startswith("fpr:"))
+    subprocess.run([*g, "--quick-add-key", fpr, "ed25519", "sign", "seconds=4"], check=True, capture_output=True)
+    data = b"alt\n"
+    (srv / "lib1.0-1.tar").write_bytes(data)
+    sign(home, srv / "lib1.0-1.tar", srv / "lib1.0-1.tar.sig")
+    pub = subprocess.run([*g, "--armor", "--export", fpr], capture_output=True).stdout
+    out = subprocess.run([*g, "--with-colons", "--list-keys"], capture_output=True, text=True).stdout
+    for f in (line.split(":")[9] for line in out.splitlines() if line.startswith("fpr:")):
+        (ks / f).write_bytes(pub)                   # Keyserver findet den Schlüssel auch per Unterschlüssel
+    recipe(root, "lib1.0", f"file://{srv}/lib1.0-1.tar", data)
+    time.sleep(5)                                   # Schlüssel und Unterschlüssel sind jetzt abgelaufen
+    r = tool(root, "discover", SOURCE_SIGS_KEYSERVERS=f"file://{ks}/{{fpr}}")
+    assert "neu   lib1.0" in r.stdout, r.stdout + r.stderr
+    assert '["lib1.0"]' in (root / "distro/source-keys.toml").read_text()
+    r = tool(root, "check")
+    assert r.returncode == 0 and "1 gültig" in r.stdout, r.stdout + r.stderr
