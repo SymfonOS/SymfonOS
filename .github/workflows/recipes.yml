@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: syp bauen
         run: |
           tools/apt-install.sh build-essential pkg-config libarchive-dev libzstd-dev libsodium-dev libsqlite3-dev libcurl4-openssl-dev
@@ -37,6 +39,16 @@ jobs:
             echo "::warning title=Quellen nicht ladbar (${#failed[@]})::${errs:0:3800}"
           fi
           echo "Rezepte ohne Prüfsumme: $(grep -l 'sha256 = "TODO"' distro/recipes/*/SYPBUILD.toml | wc -l)"
+      - name: Upstream-Signaturen geänderter Rezepte prüfen
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          # Pakete mit festgeschriebenem Schlüssel (distro/source-keys.toml) brauchen eine gültige Signatur
+          ref=$BEFORE
+          git cat-file -e "$ref^{commit}" 2>/dev/null || ref=HEAD~1
+          rc=0; tools/source-sigs.py check --changed "$ref" || rc=$?
+          [ "$rc" -eq 2 ] && rc=0
+          exit "$rc"
       - name: Änderungen committen
         run: |
           if git diff --quiet; then echo "Keine neuen Prüfsummen"; exit 0; fi

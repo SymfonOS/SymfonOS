@@ -5,6 +5,7 @@
 #   APPEND="enforcing=1" …     zusätzliche Kernel-Parameter (z. B. SELinux erzwingen)
 #   INPUTTEST=1                Eingabetest: KRunner per Tastatur, Konsole starten, Befehl tippen (QEMU sendkey);
 #                              Fehlschlag lässt den Test scheitern (INPUTTEST_STRICT=0: nur Warnung)
+#   NEEDLE_STRICT=1            Bildvergleich mit distro/needles als Gate (sonst nur Warnung)
 # Erfolg: graphical.target erreicht, kwin_wayland und plasmashell laufen, kein Absturz (Coredump/Segfault).
 set -euo pipefail
 ISO=$(realpath "$1")
@@ -88,6 +89,18 @@ if [[ ${APPTEST:-0} == 1 ]] && ((session)); then
 fi
 kill "$qpid" 2>/dev/null || true
 qpid=""
+# Bildvergleich mit Referenzausschnitten (distro/needles, tools/needle.py) auf den unveränderten PPM-Bildern;
+# vorerst nur Warnung (NEEDLE_STRICT=1: Abweichung lässt den Test scheitern)
+needlefail=0
+if ((session)); then
+  python3 "$(dirname "$0")/needle.py" check "$T" > "$OUT/needles.txt" 2>&1 || needlefail=1
+  echo ":: $(tail -1 "$OUT/needles.txt")"
+  if ((needlefail)); then
+    lvl=error
+    [[ ${NEEDLE_STRICT:-0} == 1 ]] || { lvl=warning; needlefail=0; }
+    echo "::$lvl title=Bildvergleich::$(grep -E 'NICHT gefunden|passen' "$OUT/needles.txt" | tail -c 3000 | sed ':a;N;$!ba;s/%/%25/g;s/\n/%0A/g')"
+  fi
+fi
 clean > "$OUT/serial.log"
 log=$(cat "$OUT/serial.log")
 # SELinux-Verweigerungen je Regel (vollständig, wenn APPEND auditd maskiert und das printk-Ratenlimit abschaltet)
@@ -116,7 +129,7 @@ if [[ $inputtest == 0 ]]; then
     echo "::warning title=Eingabetest::Tastatureingabe (KRunner → Konsole → logger) nicht im Journal angekommen, siehe input-*.png"
   fi
 fi
-if ((graphical && session && !inputfail)) && [[ -z $crashes && ( -z $fails || ${STRICT:-1} == 0 ) ]]; then
+if ((graphical && session && !inputfail && !needlefail)) && [[ -z $crashes && ( -z $fails || ${STRICT:-1} == 0 ) ]]; then
   echo ":: Desktop startet: SDDM → KWin (Wayland) → Plasma"
   exit 0
 fi

@@ -74,6 +74,8 @@ security = ["CVE-2025-9230"]                # behobene Lücken → syp audit, up
 [[source]]
 url = "https://github.com/openssl/openssl/releases/download/openssl-3.5.2/openssl-3.5.2.tar.gz"
 sha256 = "c53a47e5…"                        # Pflicht; "TODO" füllt `syp sums` bzw. die CI
+# Signiert das Projekt seine Archive, steht der Schlüssel in distro/source-keys.toml (nicht im Rezept):
+# jede neue Version braucht dann eine gültige Signatur davon (tools/source-sigs.py, CI)
 [[source]]
 path = "@/distro/security/crypto/openssl.cnf"   # "@/" = Wurzel dieses Repositorys
 

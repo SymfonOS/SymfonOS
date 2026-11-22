@@ -7,7 +7,8 @@
 # testing = GitHub-Release $TESTING_TAG (Standard repo-x86_64-testing): jeder Bau, der alle ISO-Tests bestanden hat.
 # stable  = GitHub-Release $STABLE_TAG (Standard repo-x86_64): die Paketquelle installierter Systeme.
 # Seit wann ein Paket in testing liegt, steht in promotion.json am testing-Release; die Sperrliste ist
-# distro/channels/hold im Repository (Änderungen per Pull Request, nachvollziehbar).
+# distro/channels/hold im Repository (Änderungen per Pull Request, nachvollziehbar). Karma: Abstimmung per 👍/👎
+# an den Issues mit Label »testing« (tools/testing-karma.py).
 # stable wird bei jedem Lauf neu signiert, auch ohne Übernahmen: der Index läuft sonst nach 14 Tagen ab.
 set -euo pipefail
 SRC=${1:?Repo-Ordner fehlt} KEY=${2:?Signaturschlüssel fehlt} PUB=${3:?öffentlicher Schlüssel fehlt}
@@ -58,8 +59,14 @@ fi
 gh release download "$TESTING_TAG" --repo "$REPO_SLUG" --pattern promotion.json --dir "$SRC" --clobber 2>/dev/null ||
   echo ":: noch keine promotion.json am testing-Release: Wartezeit beginnt jetzt für alle Pakete"
 hold="$ROOT/distro/channels/hold"
+# Karma aus den testing-Issues (tools/testing-karma.py); ohne Zugriff zählt jedes Paket mit Karma 0
+python3 "$ROOT/tools/testing-karma.py" collect "$w/karma.json" ||
+  { echo "::warning title=Karma::testing-Issues nicht lesbar, Karma bleibt unberücksichtigt"; echo '{}' > "$w/karma.json"; }
 SYP_BIN="$SYP" python3 "$ROOT/tools/promote.py" --testing "$SRC" --stable "$st" --pub "$PUB" -k "$KEY" \
-  --hold "$hold" ${MIN_DAYS:+--min-days "$MIN_DAYS"} | tee "$w/promote.log"
+  --hold "$hold" --karma "$w/karma.json" --report "$w/report.json" ${MIN_DAYS:+--min-days "$MIN_DAYS"} | tee "$w/promote.log"
+# Issues für wartende Pakete anlegen bzw. aktualisieren, übernommene schließen
+python3 "$ROOT/tools/testing-karma.py" sync "$w/report.json" ||
+  echo "::warning title=Karma::testing-Issues nicht aktualisiert"
 # Übernahme-Stand sofort sichern: die Wartezeit zählt auch, wenn noch nichts übernommen wurde
 gh release upload "$TESTING_TAG" --repo "$REPO_SLUG" --clobber "$SRC/promotion.json"
 [ -f "$st/index.json.zst" ] || { echo ":: stable ist leer, nichts zu veröffentlichen"; exit 0; }
