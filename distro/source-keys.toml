@@ -1,0 +1,1311 @@
+# Upstream-Signaturschlüssel der Quellarchive – Format und Ablauf: tools/source-sigs.py
+# keys: Fingerabdrücke (Hauptschlüssel), öffentliche Schlüssel unter distro/keys/upstream/
+# sig: Endung der Signaturdatei neben dem Archiv; uncompressed: Signatur gilt dem entpackten .tar
+
+[acl]
+keys = ["B902B5271325F892AC251AD441633B9FE837F581"]
+sig = ".sig"
+
+[alsa-lib]
+keys = ["F04DF50737AC1A884C4B3D718380596DA6E59C91"]
+sig = ".sig"
+
+[alsa-utils]
+keys = ["F04DF50737AC1A884C4B3D718380596DA6E59C91"]
+sig = ".sig"
+
+[appstream]
+keys = ["D33A3F0CA16B0ACC51A60738494C8A5FBF4DECEB"]
+sig = ".asc"
+
+[ark]
+keys = ["CA262C6C83DE4D2FB28A332A3A6A4DB839EAA6D7"]
+sig = ".sig"
+
+[attica]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[attr]
+keys = ["B902B5271325F892AC251AD441633B9FE837F581"]
+sig = ".sig"
+
+[aurorae]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[autoconf]
+keys = ["82F854F3CE73174B8B63174091FCC32B6769AA64"]
+sig = ".sig"
+
+[automake]
+keys = ["17D3311B14BC0F248267BF020716748A30D155AD"]
+sig = ".sig"
+
+[baloo]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[bash]
+keys = ["7C0135FB088AAF6C66C650B9BB5869F064EA74AB"]
+sig = ".sig"
+
+[bc]
+keys = ["FF360647C7A7147F27DAAEC1B132F881C306590A"]
+sig = ".sig"
+
+[binutils]
+keys = ["3A24BC1E8FB409FA9F14371813FCEF89DD9E3C4F"]
+sig = ".sig"
+
+[bison]
+keys = ["7DF84374B1EE1F9764BBE25D0DDCAA3278D5264E"]
+sig = ".sig"
+
+[bluedevil]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[bluez-qt]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[breeze]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[breeze-icons]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[bubblewrap]
+keys = ["DA98F25C0871C49A59EAFF2C4DE8FF2A63C7CC90"]
+sig = ".asc"
+
+[bzip2]
+keys = ["EC3CFE88F6CA0788774F5C1D1AA44BE649DE760A"]
+sig = ".sig"
+
+["cairomm1.0"]
+keys = ["6CB445A816504714AA4962579EBA155FCC12D2C0"]
+sig = ".asc"
+
+[coreutils]
+keys = ["6C37DC12121A5006BC1DB804DF6FD971306037D9"]
+sig = ".sig"
+
+[cpio]
+keys = ["325F650C4C2B6AD58807327A3602B07F55D0C732"]
+sig = ".sig"
+
+[cracklib]
+keys = ["FCE0F8C65F5B2972C2EB55E2350D0B0705E9C3CB"]
+sig = ".asc"
+
+[cups]
+keys = ["7082A0A50A2E92640F3880E0E4522DCC9B246FF7"]
+sig = ".sig"
+
+[curl]
+keys = ["27EDEAF22F3ABCEB50DB9A125CC908FDB71E12C2"]
+sig = ".asc"
+
+[dav1d]
+keys = ["65F7C6B4206BD057A7EB73787180713BE58D1ADC"]
+sig = ".asc"
+
+[dbus]
+keys = ["DA98F25C0871C49A59EAFF2C4DE8FF2A63C7CC90"]
+sig = ".asc"
+
+[desktop-file-utils]
+keys = ["C01EDE5BB0D91E26D003662EC76BB9FEEAD12EA7"]
+sig = ".asc"
+
+[diffutils]
+keys = ["155D3FC500C834486D1EEA677FD9FCCB000BEEEE"]
+sig = ".sig"
+
+[discover]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[dolphin]
+keys = ["CA262C6C83DE4D2FB28A332A3A6A4DB839EAA6D7"]
+sig = ".sig"
+
+[dosfstools]
+keys = ["25714AECDBFDACEE1CE95FE77F6022516E869F64"]
+sig = ".sig"
+
+[dragon]
+keys = ["CA262C6C83DE4D2FB28A332A3A6A4DB839EAA6D7"]
+sig = ".sig"
+
+[e2fsprogs]
+keys = ["3AB057B7E78D945C8C5591FBD36F769BC11804F0"]
+sig = ".asc"
+
+[elisa]
+keys = ["CA262C6C83DE4D2FB28A332A3A6A4DB839EAA6D7"]
+sig = ".sig"
+
+[encodings]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[expat]
+keys = ["3176EF7DB2367F1FCA4F306B1F9B0E909AF37285"]
+sig = ".asc"
+
+[extra-cmake-modules]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[ffmpeg]
+keys = ["FCF986EA15E6E293A5644F10B4322F04D67658D8"]
+sig = ".asc"
+
+[file]
+keys = ["BE04995BA8F90ED0C0C176C471112AB16CB33B3A"]
+sig = ".asc"
+
+[findutils]
+keys = ["A5189DB69C1164D33002936646502EF796917195"]
+sig = ".sig"
+
+[flatpak-kcm]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[flex]
+keys = ["56C67868E93390AA1039AD1CE4B29C8D64885307"]
+sig = ".sig"
+
+[font-util]
+keys = ["3C2C43D9447D5938EF4551EBE23B7E70B467F0BF"]
+sig = ".sig"
+
+[frameworkintegration]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[freetype]
+keys = ["E30674707856409FF1948010BE6C3AAC63AD8E3F"]
+sig = ".sig"
+
+[gawk]
+keys = ["D1967C63788713177D861ED7DF597815937EC0D2"]
+sig = ".sig"
+
+[gcc]
+keys = ["13975A70E63C361C73AE69EF6EEB81F8981C74C7"]
+sig = ".sig"
+
+[gdbm]
+keys = ["4BE4E62655488EB92ABB468F79FFD94BFCE230B1"]
+sig = ".sig"
+
+[gettext]
+keys = ["E0FFBD975397F77A32AB76ECB6301D9E1BBEAC08"]
+sig = ".sig"
+
+[glaxnimate]
+keys = ["97B71AA02D63EA6C5C44C23B962AC48EF0501F0B"]
+sig = ".sig"
+
+[gmp]
+keys = ["343C2FF0FBEE5EC2EDBEF399F3599FF828C67298"]
+sig = ".sig"
+
+[gnupg]
+keys = ["6DAA6E64A76D2840571B4902528897B826403ADA"]
+sig = ".sig"
+
+[gnutls]
+keys = ["462225C3B46F34879FC8496CD605848ED7E69871"]
+sig = ".sig"
+
+[gperf]
+keys = ["E0FFBD975397F77A32AB76ECB6301D9E1BBEAC08"]
+sig = ".sig"
+
+[gpgme]
+keys = ["6DAA6E64A76D2840571B4902528897B826403ADA"]
+sig = ".sig"
+
+[grep]
+keys = ["155D3FC500C834486D1EEA677FD9FCCB000BEEEE"]
+sig = ".sig"
+
+[groff]
+keys = ["2D0C08D2B0AD0D3D8626670272D23FBAC99D4E75"]
+sig = ".sig"
+
+[grub]
+keys = ["BE5C23209ACDDACEB20DB0A28C8189F1988C2166"]
+sig = ".sig"
+
+[gsl]
+keys = ["DD61B7FC02790F978360F399245FB74BAE05B3E9"]
+sig = ".sig"
+
+[gst-plugins-base]
+keys = ["D637032E45B8C6585B9456565D2EEE6F6F349D7C"]
+sig = ".asc"
+
+[gstreamer]
+keys = ["D637032E45B8C6585B9456565D2EEE6F6F349D7C"]
+sig = ".asc"
+
+[gwenview]
+keys = ["CA262C6C83DE4D2FB28A332A3A6A4DB839EAA6D7"]
+sig = ".sig"
+
+[gzip]
+keys = ["155D3FC500C834486D1EEA677FD9FCCB000BEEEE"]
+sig = ".sig"
+
+[hicolor-icon-theme]
+keys = ["D33A3F0CA16B0ACC51A60738494C8A5FBF4DECEB"]
+sig = ".asc"
+
+[icu]
+keys = ["E52F07877A5805F9AF4AB0ACD46C5610D06E7001"]
+sig = ".asc"
+
+[inetutils]
+keys = ["B1D2BD1375BECB784CF4F8C4D73CF638C53C06BE"]
+sig = ".sig"
+
+[intltool]
+keys = ["9EBD001680E8C8F9FAC61A9BE1A701D4C9DE75B5"]
+sig = ".asc"
+
+[kactivitymanagerd]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[karchive]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kate]
+keys = ["CA262C6C83DE4D2FB28A332A3A6A4DB839EAA6D7"]
+sig = ".sig"
+
+[kauth]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kbookmarks]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kcalc]
+keys = ["CA262C6C83DE4D2FB28A332A3A6A4DB839EAA6D7"]
+sig = ".sig"
+
+[kcalendarcore]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kcharselect]
+keys = ["CA262C6C83DE4D2FB28A332A3A6A4DB839EAA6D7"]
+sig = ".sig"
+
+[kcmutils]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kcodecs]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kcolorscheme]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kcompletion]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kconfig]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kconfigwidgets]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kcontacts]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kcoreaddons]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kcrash]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kdav]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kdbusaddons]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kde-cli-tools]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[kdeclarative]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kdecoration]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[kded]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kdenlive]
+keys = ["CA262C6C83DE4D2FB28A332A3A6A4DB839EAA6D7"]
+sig = ".sig"
+
+[kdeplasma-addons]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[kdesu]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kdnssd]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kdoctools]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kfilemetadata]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kglobalaccel]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kglobalacceld]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[kguiaddons]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kholidays]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[ki18n]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kiconthemes]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kidletime]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kimageformats]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kinfocenter]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[kio]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kirigami]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kirigami-addons]
+keys = ["39FFA93CAE9C6AFC212AD00202325448204E452A"]
+sig = ".sig"
+
+[kitemmodels]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kitemviews]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kjobwidgets]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kmenuedit]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[knewstuff]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[knotifications]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[knotifyconfig]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[konsole]
+keys = ["CA262C6C83DE4D2FB28A332A3A6A4DB839EAA6D7"]
+sig = ".sig"
+
+[kpackage]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kparts]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kpeople]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kpipewire]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[kplotting]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kpty]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kquickcharts]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[krunner]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kscreen]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[kscreenlocker]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[kservice]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[ksshaskpass]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[kstatusnotifieritem]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[ksvg]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[ksystemstats]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[ktexteditor]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[ktexttemplate]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[ktextwidgets]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kunitconversion]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kuserfeedback]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kwallet]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kwallet-pam]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[kwayland]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[kwidgetsaddons]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kwin]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[kwindowsystem]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[kwrited]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[kxmlgui]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[layer-shell-qt]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[libaom]
+keys = ["B002F08B74A148DAA01F7123A48E86DB0B830498"]
+sig = ".asc"
+
+[libarchive]
+keys = ["DB2C7CF1B4C265FAEF56E3FC5848A18B8F14184B"]
+sig = ".asc"
+
+[libass]
+keys = ["5EE63F2A71BF132CFE3567E1DFFE615F2824C720"]
+sig = ".asc"
+
+[libassuan]
+keys = ["6DAA6E64A76D2840571B4902528897B826403ADA"]
+sig = ".sig"
+
+[libburn]
+keys = ["44BC9FD0D688EB007C4DD029E9CBDFC0ABC0A854"]
+sig = ".sig"
+
+[libclc]
+keys = ["474E22316ABF4785A88C6E8EA2C794A986419D8A"]
+sig = ".sig"
+
+[libdisplay-info]
+keys = ["34FF9526CFEF0E97A340E2E40FDE7BE0E88F5E48"]
+sig = ".sig"
+
+[libdrm]
+keys = ["34FF9526CFEF0E97A340E2E40FDE7BE0E88F5E48"]
+sig = ".sig"
+
+[libelf]
+keys = ["6C2B631563B8D330578D3CB474FD3FA2779E7073"]
+sig = ".sig"
+
+[libevdev]
+keys = ["3C2C43D9447D5938EF4551EBE23B7E70B467F0BF"]
+sig = ".sig"
+
+[libfontenc]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[libgcrypt]
+keys = ["6DAA6E64A76D2840571B4902528897B826403ADA"]
+sig = ".sig"
+
+[libgpg-error]
+keys = ["6DAA6E64A76D2840571B4902528897B826403ADA"]
+sig = ".sig"
+
+[libice]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[libisoburn]
+keys = ["44BC9FD0D688EB007C4DD029E9CBDFC0ABC0A854"]
+sig = ".sig"
+
+[libisofs]
+keys = ["44BC9FD0D688EB007C4DD029E9CBDFC0ABC0A854"]
+sig = ".sig"
+
+[libjpeg-turbo]
+keys = ["0338C8D8D9FDA62CF9C421BD7EC2DBB6F4DBF434"]
+sig = ".sig"
+
+[libksba]
+keys = ["6DAA6E64A76D2840571B4902528897B826403ADA"]
+sig = ".sig"
+
+[libkscreen]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[libksysguard]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[libmnl]
+keys = ["37D964ACC04981C75500FB9BD55D978A8A1420E4"]
+sig = ".sig"
+
+[libnftnl]
+keys = ["8C5F7146A1757A65E2422A94D70D1A666ACF2B21"]
+sig = ".sig"
+
+[libnl]
+keys = ["49EA7C670E0850E7419514F629C2366E4DFC5728"]
+sig = ".sig"
+
+[libpcap]
+keys = ["1F166A5742ABB9E0249A8D30E089DEF1D9C15D0D"]
+sig = ".sig"
+
+[libpciaccess]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[libpipeline]
+keys = ["AC0A4FF12611B6FCCF01C111393587D97D86500B"]
+sig = ".asc"
+
+[libplasma]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[libseccomp]
+keys = ["7100AADFAE6E6E940D2E0AD655E45A5AE8CA7C8A"]
+sig = ".asc"
+
+[libsigsegv]
+keys = ["E0FFBD975397F77A32AB76ECB6301D9E1BBEAC08"]
+sig = ".sig"
+
+[libsm]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[libsodium]
+keys = ["54A2B8892CC3D6A597B92B6C210627AABA709FE1"]
+sig = ".sig"
+
+[libtasn1]
+keys = ["B1D2BD1375BECB784CF4F8C4D73CF638C53C06BE"]
+sig = ".sig"
+
+[libtiff]
+keys = ["B1FA7D81EEB8E66399178B9733EBBFC47B3DD87D"]
+sig = ".sig"
+
+[libtool]
+keys = ["FA26CA784BE188927F22B99F6570EA01146F7354"]
+sig = ".sig"
+
+[libunistring]
+keys = ["9001B85AF9E1B83DF1BDA942F5BE8B267C6A406D"]
+sig = ".sig"
+
+[libusb]
+keys = ["C68187379B23DE9EFC46651E2C80FF56C6830A0E"]
+sig = ".asc"
+
+[libvorbis]
+keys = ["B7B00AEE1F960EEA0FED66FB9259A8F2D2D44C84"]
+sig = ".asc"
+
+[libwacom]
+keys = ["3C2C43D9447D5938EF4551EBE23B7E70B467F0BF"]
+sig = ".sig"
+
+[libwebp]
+keys = ["6B0E6B70976DE303EDF2F601F9C3D6BDB8232B5D"]
+sig = ".asc"
+
+[libx11]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[libxau]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[libxaw]
+keys = ["19882D92DDA4C400C22C0D56CC2AF4472167BE03"]
+sig = ".sig"
+
+[libxcb]
+keys = ["3BB639E56F861FA2E86505690FDD682D974CA72A"]
+sig = ".sig"
+
+[libxcomposite]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[libxcrypt]
+keys = ["678CE3FEE430311596DB8C16F52E98007594C21D"]
+sig = ".asc"
+
+[libxcursor]
+keys = ["19882D92DDA4C400C22C0D56CC2AF4472167BE03"]
+sig = ".sig"
+
+[libxcvt]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[libxdamage]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[libxdmcp]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[libxext]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[libxfixes]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[libxfont2]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[libxft]
+keys = ["19882D92DDA4C400C22C0D56CC2AF4472167BE03"]
+sig = ".sig"
+
+[libxi]
+keys = ["3C2C43D9447D5938EF4551EBE23B7E70B467F0BF"]
+sig = ".sig"
+
+[libxinerama]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[libxkbfile]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[libxmlb]
+keys = ["163EB50119225DB3DF8F49EA17ACBA8DFA970E17"]
+sig = ".asc"
+
+[libxmu]
+keys = ["3BB639E56F861FA2E86505690FDD682D974CA72A"]
+sig = ".sig"
+
+[libxpm]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[libxpresent]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[libxrandr]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[libxrender]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[libxres]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[libxscrnsaver]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[libxshmfence]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[libxt]
+keys = ["3BB639E56F861FA2E86505690FDD682D974CA72A"]
+sig = ".sig"
+
+[libxtst]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[libxv]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[libxxf86vm]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[lilv]
+keys = ["907D226E7E13FA337F014A083672782A9BF368F3"]
+sig = ".sig"
+
+[llvm]
+keys = ["474E22316ABF4785A88C6E8EA2C794A986419D8A"]
+sig = ".sig"
+
+[lv2]
+keys = ["907D226E7E13FA337F014A083672782A9BF368F3"]
+sig = ".sig"
+
+[lvm2]
+keys = ["D501A478440AE2FD130A1BE8B9112431E509039F"]
+sig = ".asc"
+
+[m4]
+keys = ["71C2CC22B1C4602927D2F3AAA7A16B4A2527436A"]
+sig = ".sig"
+
+[man-db]
+keys = ["AC0A4FF12611B6FCCF01C111393587D97D86500B"]
+sig = ".asc"
+
+[mesa]
+keys = ["57551DE15B968F6341C248F68D8E31AFC32428A6"]
+sig = ".sig"
+
+[meson]
+keys = ["19E2D6D9B46D8DAA6288F877C24E631BABB1FE70"]
+sig = ".asc"
+
+[milou]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[mkfontscale]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[modemmanager-qt]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[mpc]
+keys = ["AD17A21EF8AED8F1CC02DBD9F7D5C9BF765C61E3"]
+sig = ".sig"
+
+[mpfr]
+keys = ["A534BE3F83E241D918280AEB5831D11A0D4DB02A"]
+sig = ".sig"
+
+[mpg123]
+keys = ["D021FF8ECF4BE09719D61A27231C4CBC60D5CAFE"]
+sig = ".sig"
+
+[mtools]
+keys = ["51A23D9D7C4DF41AA48FA893E99CF5537790B839"]
+sig = ".sig"
+
+[nano]
+keys = ["168E6F4297BFD7A79AFD4496514BBE2EB8E1961F"]
+sig = ".asc"
+
+[ncurses]
+keys = ["19882D92DDA4C400C22C0D56CC2AF4472167BE03"]
+sig = ".asc"
+
+[nettle]
+keys = ["343C2FF0FBEE5EC2EDBEF399F3599FF828C67298"]
+sig = ".sig"
+
+[networkmanager-l2tp]
+keys = ["2B4F9EDCAE00DEE4D0D7A6E588953E6F011CDC96"]
+sig = ".asc"
+
+[networkmanager-qt]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[nftables]
+keys = ["8C5F7146A1757A65E2422A94D70D1A666ACF2B21"]
+sig = ".sig"
+
+[npth]
+keys = ["6DAA6E64A76D2840571B4902528897B826403ADA"]
+sig = ".sig"
+
+[ocean-sound-theme]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[okular]
+keys = ["CA262C6C83DE4D2FB28A332A3A6A4DB839EAA6D7"]
+sig = ".sig"
+
+[openconnect]
+keys = ["BE07D9FD54809AB2C4B0FF5F63762CDA67E2F359"]
+sig = ".asc"
+
+[openssh]
+keys = ["7168B983815A5EEF59A4ADFD2A3F414E736060BA"]
+sig = ".asc"
+
+[openssl]
+keys = ["BA5473A2B0587B07FB27CF2D216094DFD0CB81EF"]
+sig = ".asc"
+
+[patch]
+keys = ["259B3792B3D6D319212CC4DCD5BF9FEB0313653A"]
+sig = ".sig"
+
+[pcre2]
+keys = ["A95536204A3BB489715231282A98E77EB6F24CA8"]
+sig = ".sig"
+
+[phonon]
+keys = ["E0A3EB202F8E57528E13E72FD7574483BB57B18D"]
+sig = ".sig"
+
+[plasma-activities]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[plasma-activities-stats]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[plasma-desktop]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[plasma-integration]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[plasma-nm]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[plasma-pa]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[plasma-systemmonitor]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[plasma-wayland-protocols]
+keys = ["0AAC775BB6437A8D9AF7A3ACFE0784117FBCE11D"]
+sig = ".sig"
+
+[plasma-workspace]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[plasma5support]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[polkit-kde-agent-1]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[polkit-qt6]
+keys = ["D81C0CB38EB725EF6691C385BB463350D6EF31EF"]
+sig = ".sig"
+
+[poppler]
+keys = ["CA262C6C83DE4D2FB28A332A3A6A4DB839EAA6D7"]
+sig = ".sig"
+
+[poppler-data]
+keys = ["CA262C6C83DE4D2FB28A332A3A6A4DB839EAA6D7"]
+sig = ".sig"
+
+[powerdevil]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[ppp]
+keys = ["DE8E01561D8276A4DBFAEFCC040F1D49EC9DBB8C"]
+sig = ".asc"
+
+[print-manager]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[prison]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[pulseaudio-qt]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[purpose]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[python]
+keys = ["7169605F62C751356D054A26A821E680E5FA6305"]
+sig = ".asc"
+
+[qca]
+keys = ["CB9387521E1EE0127DA804843FDBB55084CC5D84"]
+sig = ".sig"
+
+[qpdf]
+keys = ["C2C96B10011FE009E6D1DF828A75D10998012C7E"]
+sig = ".asc"
+
+[qqc2-breeze-style]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[qqc2-desktop-style]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[readline]
+keys = ["7C0135FB088AAF6C66C650B9BB5869F064EA74AB"]
+sig = ".sig"
+
+[sddm-kcm]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[sdl2]
+keys = ["1528635D8053A57F77D1E08630A59377A7763BE6"]
+sig = ".sig"
+
+[sed]
+keys = ["155D3FC500C834486D1EEA677FD9FCCB000BEEEE"]
+sig = ".sig"
+
+[serd]
+keys = ["907D226E7E13FA337F014A083672782A9BF368F3"]
+sig = ".sig"
+
+[setxkbmap]
+keys = ["3C2C43D9447D5938EF4551EBE23B7E70B467F0BF"]
+sig = ".sig"
+
+[shadow]
+keys = ["66D0387DB85D320F8408166DB175CFA98F192AF2"]
+sig = ".asc"
+
+[solid]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[sonnet]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[sord]
+keys = ["907D226E7E13FA337F014A083672782A9BF368F3"]
+sig = ".sig"
+
+[spectacle]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[speexdsp]
+keys = ["D89B52F4A6B505890349ED5E127B10EED8765B47"]
+sig = ".asc"
+
+[sratom]
+keys = ["907D226E7E13FA337F014A083672782A9BF368F3"]
+sig = ".sig"
+
+[strongswan]
+keys = ["948F158A4E76A27BF3D07532DF42C170B34DBA77"]
+sig = ".sig"
+
+[sudo]
+keys = ["59D1E9CCBA2B376704FDD35BA9F4C021CEA470FB"]
+sig = ".sig"
+
+[syndication]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[syntax-highlighting]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[systemsettings]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[tar]
+keys = ["325F650C4C2B6AD58807327A3602B07F55D0C732"]
+sig = ".sig"
+
+[texinfo]
+keys = ["EAF669B31E31E1DECBD11513DDBC579DAB37FBA9"]
+sig = ".sig"
+
+[threadweaver]
+keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
+sig = ".sig"
+
+[tpm2-tss]
+keys = ["D533275B0123D0A679F51FF48F4F9A45D7FFEE74"]
+sig = ".asc"
+
+[tzdata]
+keys = ["7E3792A9D8ACF7D633BC1588ED97E90E62AA7E34"]
+sig = ".asc"
+
+[util-macros]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[wayland]
+keys = ["34FF9526CFEF0E97A340E2E40FDE7BE0E88F5E48"]
+sig = ".sig"
+
+[wayland-protocols]
+keys = ["8307C0A224BABDA1BABD0EB9A6EEEC9E0136164A"]
+sig = ".sig"
+
+[which]
+keys = ["8020B2666305EE2FD53E6827C155A4EEE4E527A2"]
+sig = ".sig"
+
+[xauth]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[xbitmaps]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[xcb-proto]
+keys = ["3BB639E56F861FA2E86505690FDD682D974CA72A"]
+sig = ".sig"
+
+[xcb-util]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[xcb-util-cursor]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[xcb-util-image]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[xcb-util-keysyms]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[xcb-util-renderutil]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[xcb-util-wm]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[xdg-desktop-portal-kde]
+keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
+sig = ".sig"
+
+[xdpyinfo]
+keys = ["3AB285232C46AE43D8E192F4DAB0F78EA6E7E2D2"]
+sig = ".sig"
+
+[xf86-input-evdev]
+keys = ["3C2C43D9447D5938EF4551EBE23B7E70B467F0BF"]
+sig = ".sig"
+
+[xf86-input-libinput]
+keys = ["3C2C43D9447D5938EF4551EBE23B7E70B467F0BF"]
+sig = ".sig"
+
+[xinput]
+keys = ["3C2C43D9447D5938EF4551EBE23B7E70B467F0BF"]
+sig = ".sig"
+
+[xkbcomp]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[xkeyboard-config]
+keys = ["FFB4CCD275AAA422F5F9808E0661D98FC933A145"]
+sig = ".sig"
+
+[xmessage]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[xorg-server]
+keys = ["67DC86F2623FC5FD4BB5225D14706DBE1E4B4540"]
+sig = ".sig"
+
+[xorgproto]
+keys = ["67DC86F2623FC5FD4BB5225D14706DBE1E4B4540"]
+sig = ".sig"
+
+[xprop]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[xrandr]
+keys = ["3BB639E56F861FA2E86505690FDD682D974CA72A"]
+sig = ".sig"
+
+[xrdb]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[xset]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[xtrans]
+keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
+sig = ".sig"
+
+[xwayland]
+keys = ["67DC86F2623FC5FD4BB5225D14706DBE1E4B4540"]
+sig = ".sig"
+
+[xz]
+keys = ["3690C240CE51B4670D30AD1C38EE757D69184620"]
+sig = ".sig"
+
+[zix]
+keys = ["907D226E7E13FA337F014A083672782A9BF368F3"]
+sig = ".sig"
+
+[zstd]
+keys = ["4EF4AC63455FC9F4545D9B7DEF8FE99528B52FFD"]
+sig = ".sig"
