@@ -225,14 +225,14 @@ jobs:
           sudo chmod 666 /dev/kvm 2>/dev/null || true
           # permissive, ohne auditd und printk-Ratenlimit: alle SELinux-Verweigerungen landen auf der Konsole (→ avc.txt)
           # dazu der Programmstart-Test (Krita, Blender, symfonOS-Programme …) mit Bildschirmfotos und der
-          # Eingabetest (Tastatur über QEMU: KRunner, Konsole, Befehl)
-          APPTEST=1 INPUTTEST=1 APPEND="enforcing=0 systemd.mask=auditd.service systemd.mask=audit-rules.service sysctl.kernel.printk_ratelimit=0 audit_backlog_limit=8192 symfonos.apptest" \
+          # Eingabetest (Tastatur über QEMU: KRunner, Konsole, Befehl); Bildvergleich (distro/needles) als Gate
+          APPTEST=1 INPUTTEST=1 NEEDLE_STRICT=1 APPEND="enforcing=0 systemd.mask=auditd.service systemd.mask=audit-rules.service sysctl.kernel.printk_ratelimit=0 audit_backlog_limit=8192 symfonos.apptest" \
             TIMEOUT=2700 tools/desktop-test.sh out/desktop/symfonos-desktop-*.iso out/desktop-test
       - name: Desktop-Test mit SELinux enforcing
         id: desktop_enforcing
         if: always() && steps.desktop.outcome == 'success'
         run: |
-          APPEND="enforcing=1 systemd.mask=auditd.service systemd.mask=audit-rules.service sysctl.kernel.printk_ratelimit=0 audit_backlog_limit=8192" \
+          NEEDLE_STRICT=1 APPEND="enforcing=1 systemd.mask=auditd.service systemd.mask=audit-rules.service sysctl.kernel.printk_ratelimit=0 audit_backlog_limit=8192" \
             TIMEOUT=600 tools/desktop-test.sh out/desktop/symfonos-desktop-*.iso out/desktop-test/enforcing
       - name: Desktop-Installationstest
         id: desktop_install
