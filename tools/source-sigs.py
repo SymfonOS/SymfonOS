@@ -23,6 +23,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import bz2
+import concurrent.futures
 import gzip
 import lzma
 import os
@@ -243,57 +244,82 @@ def export_minimal(key: bytes, fpr: str) -> bytes:
         return r.stdout if b"BEGIN PGP" in r.stdout else key
 
 
+def discover_one(name: str) -> tuple[dict | None, bytes | None, str | None]:
+    """Signatur und Schlüssel für ein Paket suchen: (Eintrag, Schlüssel, Meldung)."""
+    try:
+        src = main_source(recipe(name))
+    except FileNotFoundError:
+        return None, None, None
+    if not src or len(src.get("sha256", "")) != 64:
+        return None, None, None
+    url = src["url"]
+    for suf in SUFFIXES:
+        try:
+            sig = fetch(url + suf, tries=2)
+        except NetError:
+            continue
+        if b"PGP SIGNATURE" not in sig and (not sig or sig[0] & 0x80 == 0):
+            continue                                       # Fehlerseite statt Signatur
+        try:
+            data = archive(src)
+        except (NetError, ValueError) as ex:
+            return None, None, f"netz  {name}: {ex}"
+        for unc in (False, True) if suf == ".sign" else (False,):
+            payload = uncompress(url, data) if unc else data
+            for iss in issuers(sig):
+                key = fetch_key(iss)
+                if not key:
+                    continue
+                fpr = verify(sig, payload, [key])
+                if fpr:
+                    entry = {"keys": [fpr], "sig": suf, **({"uncompressed": True} if unc else {})}
+                    return entry, export_minimal(key, fpr), \
+                        f"neu   {name}: {url.rsplit('/', 1)[-1]}{suf} – Schlüssel {fpr}"
+        return None, None, f"ohne  {name}: {url.rsplit('/', 1)[-1]}{suf} vorhanden, aber kein passender Schlüssel"
+    return None, None, None
+
+
 def discover(names: list[str]) -> int:
+    """Pakete parallel durchsuchen (SOURCE_SIGS_JOBS, Standard 16). Nach SOURCE_SIGS_BUDGET Sekunden
+    werden keine weiteren Pakete begonnen; Gefundenes wird laufend gespeichert, ein Abbruch verliert nichts."""
     keys = load_keys()
     KEYDIR.mkdir(parents=True, exist_ok=True)
-    found = 0
-    for name in names:
-        if name in keys:
-            continue
-        try:
-            src = main_source(recipe(name))
-        except FileNotFoundError:
-            continue
-        if not src or len(src.get("sha256", "")) != 64:
-            continue
-        url = src["url"]
-        for suf in SUFFIXES:
-            try:
-                sig = fetch(url + suf, tries=2)
-            except NetError:
-                continue
-            if b"PGP SIGNATURE" not in sig and (not sig or sig[0] & 0x80 == 0):
-                continue                                   # Fehlerseite statt Signatur
-            try:
-                data = archive(src)
-            except (NetError, ValueError) as ex:
-                print(f"netz  {name}: {ex}")
+    todo = [n for n in names if n not in keys]
+    budget = float(os.environ.get("SOURCE_SIGS_BUDGET", "0") or 0)
+    deadline = time.monotonic() + budget if budget else None
+    found = skipped = 0
+    jobs = max(1, int(os.environ.get("SOURCE_SIGS_JOBS", "16")))
+    queue = list(reversed(todo))
+    with concurrent.futures.ThreadPoolExecutor(jobs) as pool:
+        futs: dict = {}
+        while queue or futs:
+            while queue and len(futs) < 2 * jobs:
+                if deadline and time.monotonic() > deadline:
+                    skipped, queue = len(queue), []
+                    break
+                n = queue.pop()
+                futs[pool.submit(discover_one, n)] = n
+            if not futs:
                 break
-            for unc in (False, True) if suf == ".sign" else (False,):
-                payload = uncompress(url, data) if unc else data
-                for iss in issuers(sig):
-                    key = fetch_key(iss)
-                    if not key:
-                        continue
-                    fpr = verify(sig, payload, [key])
-                    if fpr:
-                        (KEYDIR / f"{fpr}.asc").write_bytes(export_minimal(key, fpr))
-                        keys[name] = {"keys": [fpr], "sig": suf, **({"uncompressed": True} if unc else {})}
-                        found += 1
-                        print(f"neu   {name}: {url.rsplit('/', 1)[-1]}{suf} – Schlüssel {fpr}")
-                        break
-                else:
-                    continue
-                break
-            else:
-                print(f"ohne  {name}: {url.rsplit('/', 1)[-1]}{suf} vorhanden, aber kein passender Schlüssel")
-            break
+            done, _ = concurrent.futures.wait(futs, return_when=concurrent.futures.FIRST_COMPLETED)
+            for f in done:
+                name = futs.pop(f)
+                entry, key, msg = f.result()
+                if msg:
+                    print(msg, flush=True)
+                if entry:
+                    (KEYDIR / f"{entry['keys'][0]}.asc").write_bytes(key)
+                    keys[name] = entry
+                    found += 1
+                    write_keys(keys)
     # Schlüsseldateien, die kein Paket mehr nennt, entfernen
     used = {k for e in keys.values() for k in e["keys"]}
     for f in KEYDIR.glob("*.asc"):
         if f.stem not in used:
             f.unlink()
     write_keys(keys)
+    if skipped:
+        print(f"Zeitbudget erschöpft: {skipped} Pakete nicht durchsucht (beim nächsten Lauf)")
     print(f"{found} Pakete neu eingetragen, {len(keys)} insgesamt mit Upstream-Signatur")
     return 0
 

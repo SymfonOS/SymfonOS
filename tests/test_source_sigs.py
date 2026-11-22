@@ -66,7 +66,11 @@ def test_discover_and_check(tmp_path):
     (srv / "k-1.tar.xz").write_bytes(kx)
     recipe(root, "k", f"file://{srv}/k-1.tar.xz", kx)
 
-    r = tool(root, "discover", SOURCE_SIGS_KEYSERVERS=f"file://{ks}/{{fpr}}")
+    # Zeitbudget schon verbraucht: nichts durchsucht, nichts verloren
+    r = tool(root, "discover", SOURCE_SIGS_KEYSERVERS=f"file://{ks}/{{fpr}}", SOURCE_SIGS_BUDGET="0.000001")
+    assert r.returncode == 0 and "4 Pakete nicht durchsucht" in r.stdout, r.stdout + r.stderr
+
+    r = tool(root, "discover", SOURCE_SIGS_KEYSERVERS=f"file://{ks}/{{fpr}}", SOURCE_SIGS_JOBS="3")
     assert r.returncode == 0, r.stdout + r.stderr
     keys = (root / "distro/source-keys.toml").read_text()
     assert "[a]" in keys and "[b]" in keys and "[k]" in keys and "[c]" not in keys
