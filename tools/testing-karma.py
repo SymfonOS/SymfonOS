@@ -114,7 +114,8 @@ def sync(path: str) -> int:
         if r.get("status") in ("stable", "ersetzt"):
             if i:
                 gh(f"repos/{repo()}/issues/{i['number']}", "-X", "PATCH",
-                   data={"body": body(tag, r), "state": "closed", "state_reason": "completed"})
+                   data={"body": body(tag, r), "state": "closed",
+                         "state_reason": "completed" if r["status"] == "stable" else "not_planned"})
                 closed += 1
             continue
         if not i:

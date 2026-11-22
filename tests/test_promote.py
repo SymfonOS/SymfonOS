@@ -173,6 +173,27 @@ def test_promotion_karma(tmp_path):
     assert names(stable, pub) == ["gut 1-1", "still 1-1"]
 
 
+def test_promotion_report_superseded(tmp_path):
+    """Ältere wartende Versionen, zu denen testing eine neuere hat, gelten als überholt (kein eigenes Issue)."""
+    key, pub = keygen(tmp_path)
+    testing, stable = tmp_path / "testing", tmp_path / "stable"
+    p = lambda n, v: make_pkg(tmp_path, n, v, key=key)
+    syp("repo-add", testing, p("x", "1-1"), "--name", "testing", "-k", key)
+    t0 = 1_800_000_000.0
+    promote(testing, stable, pub, key, t0)
+    syp("repo-add", testing, p("x", "1-2"), p("x", "1-3"), "--name", "testing", "-k", key)
+    report = tmp_path / "report.json"
+    out = promote(testing, stable, pub, key, t0 + DAY, "--report", report)
+    assert "x 1-3: erst" in out and "x 1-1:" not in out and "x 1-2:" not in out, out
+    assert "1 zurückgestellt, 2 ältere Versionen überholt" in out
+    r = json.loads(report.read_text())
+    assert r["x 1-3"]["status"] == "wartet"
+    assert r["x 1-1"]["status"] == r["x 1-2"]["status"] == "ersetzt"
+    # die älteste hat ihre Wartezeit hinter sich und kommt trotzdem nach stable
+    out = promote(testing, stable, pub, key, t0 + 7.5 * DAY, "--report", report)
+    assert "→ stable: x 1-1" in out and json.loads(report.read_text())["x 1-1"]["status"] == "stable"
+
+
 FAKE_GH_API = r'''#!/usr/bin/env python3
 """Ersatz für »gh api« mit Issues, Labels und Reaktionen in $FAKE_GH_STATE (JSON)."""
 import json, os, re, sys
