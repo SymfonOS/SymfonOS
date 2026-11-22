@@ -76,11 +76,19 @@ def test_promotion_requires_valid_signature(tmp_path):
 
 FAKE_GH = r'''#!/usr/bin/env python3
 """Ersatz für »gh release …«: Releases sind Ordner unter $FAKE_GH_DIR/<tag>."""
-import fnmatch, os, shutil, sys
+import fnmatch, hashlib, os, re, shutil, sys
 base = os.environ["FAKE_GH_DIR"]
 a = [x for x in sys.argv[1:]]
 while "--repo" in a:
     i = a.index("--repo"); del a[i:i + 2]
+if a[0] == "api":                       # nur, was publish-repo.sh braucht (Ausgabe wie nach -q)
+    if m := re.search(r"/releases/tags/([^/?]+)$", a[-3] if "-q" in a else a[-1]):
+        sys.exit(0 if os.path.isdir(os.path.join(base, m.group(1))) and print(m.group(1)) is None else 1)
+    m = re.search(r"/releases/([^/?]+)/assets", next(x for x in a if "/assets" in x))
+    d = os.path.join(base, m.group(1))
+    for f in sorted(os.listdir(d)):
+        print(f, "sha256:" + hashlib.sha256(open(os.path.join(d, f), "rb").read()).hexdigest(), sep="\t")
+    sys.exit(0)
 assert a[0] == "release", a
 cmd, tag, rest = a[1], a[2], a[3:]
 d = os.path.join(base, tag)
@@ -152,6 +160,18 @@ def test_promote_release_ci(tmp_path):
         ["app-1-1-x86_64.syp", "libfoo-2-1-x86_64.syp"]
     assert sorted(f for f in os.listdir(rel / "repo-x86_64-testing") if f.endswith(".syp")) == ["libfoo-2-1-x86_64.syp"]
     assert names(rel / "repo-x86_64", pub) == ["app 1-1", "libfoo 2-1"]
+    # Neubau mit gleicher Version (neue Bau-Revision): gleicher Dateiname, anderer Inhalt – das Release muss
+    # die neue Datei bekommen, sonst passt die Prüfsumme im signierten Index nicht zur Datei
+    for f in src.rglob("libfoo-2-1-*.syp"):
+        f.unlink()
+    syp("repo-add", src, p("libfoo", "2-1", files={"usr/share/libfoo/VERSION": "2-1 neu gebaut"}),
+        "--name", "symfonos", "-k", key)
+    out = run_ci(MIN_DAYS="0")
+    idx = json.loads(syp("repo-show", rel / "repo-x86_64-testing", "--pub", pub).stdout)
+    import hashlib
+    for e in idx["packages"]:
+        got = hashlib.sha256((rel / "repo-x86_64-testing" / os.path.basename(e["file"])).read_bytes()).hexdigest()
+        assert got == e["sha256"], f"{e['file']}: Release-Datei passt nicht zum Index"
 
 
 def test_promotion_karma(tmp_path):

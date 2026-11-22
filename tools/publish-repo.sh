@@ -8,6 +8,7 @@
 # Veröffentlicht wird je Paketname nur die neueste Datei; erst Pakete, dann der frisch signierte Index (neue
 # Ablaufzeit), zuletzt werden Pakete entfernt, die der Index nicht mehr nennt.
 set -euo pipefail
+export LC_ALL=C   # sort/comm mit gleicher Ordnung
 SRC=${1:?Repo-Ordner fehlt} KEY=${2:?Signaturschlüssel fehlt} TAG=${3:-repo-x86_64}
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 SYP="$ROOT/csrc/bin/syp"
@@ -47,23 +48,33 @@ echo ":: $n Pakete für $TAG"
 gh release view "$TAG" --repo "$REPO_SLUG" >/dev/null 2>&1 ||
   gh release create "$TAG" --repo "$REPO_SLUG" --prerelease --title "symfonOS Paket-Repo (x86_64)" \
     --notes "Paketquelle für »syp sync«/»syp upgrade« installierter Systeme. Wird automatisch aktualisiert; nicht von Hand ändern."
-have=$(gh release view "$TAG" --repo "$REPO_SLUG" --json assets -q '.assets[].name' | sort)
-want=$(find "$pub/pool" -name '*.syp' -printf '%f\n' | sort)
+# Stand des Releases: Name und sha256 je Asset (REST, »digest«). Hochgeladen wird jedes Paket, das fehlt ODER
+# dessen Inhalt abweicht: ein Neubau mit gleicher Version (neue Bau-Revision) hat denselben Dateinamen, und der
+# signierte Index nennt die neue Prüfsumme – bliebe die alte Datei liegen, schlüge jede Installation fehl.
+w=$(dirname "$pub")
+rid=$(gh api "repos/$REPO_SLUG/releases/tags/$TAG" -q .id)
+gh api --paginate "repos/$REPO_SLUG/releases/$rid/assets?per_page=100" -q '.[]|[.name, (.digest // "")]|@tsv' |
+  sort > "$w/have.tsv"
+(cd "$pub/pool" && find . -name '*.syp' -exec sha256sum {} +) |
+  awk '{n=$2; sub(".*/", "", n); print n "\tsha256:" $1}' | sort > "$w/want.tsv"
+# hochladen: Zeilen (Name + Prüfsumme) aus want, die es in have so nicht gibt
+comm -13 "$w/have.tsv" "$w/want.tsv" | cut -f1 > "$w/upload.txt"
+# entfernen: Pakete im Release, deren Name der Index nicht mehr nennt (promotion.json u. a. bleiben)
+comm -23 <(cut -f1 "$w/have.tsv" | sort -u) <(cut -f1 "$w/want.tsv") | grep '\.syp$' > "$w/delete.txt" || true
 
 upload() {  # GitHub antwortet gelegentlich mit 502: bis zu drei Versuche
   for _ in 1 2 3; do gh release upload "$TAG" --repo "$REPO_SLUG" "$@" && return 0; sleep 30; done; return 1
 }
-new=0
+new=0 changed=0
 while read -r f; do
   [ -n "$f" ] || continue
-  upload "$(find "$pub/pool" -name "$f" -print -quit)"
-  new=$((new + 1))
-done < <(comm -13 <(echo "$have") <(echo "$want"))
+  if grep -q "^$f	" "$w/have.tsv"; then changed=$((changed + 1)); else new=$((new + 1)); fi
+  upload --clobber "$(find "$pub/pool" -name "$f" -print -quit)"
+done < "$w/upload.txt"
 upload --clobber "$pub/index.json.zst" "$pub/index.json.zst.sig"
 old=0
 while read -r f; do
   [ -n "$f" ] || continue
-  case $f in *.syp) ;; *) continue ;; esac   # nur alte Pakete; promotion.json u. a. bleiben
   gh release delete-asset "$TAG" "$f" --repo "$REPO_SLUG" --yes && old=$((old + 1))
-done < <(comm -23 <(echo "$have") <(echo "$want"))
-echo "::notice title=Paket-Repo veröffentlicht::$TAG: $n Pakete ($new neu, $old entfernt)"
+done < "$w/delete.txt"
+echo "::notice title=Paket-Repo veröffentlicht::$TAG: $n Pakete ($new neu, $changed neu gebaut ersetzt, $old entfernt)"
