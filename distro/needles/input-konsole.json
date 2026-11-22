@@ -1,0 +1,20 @@
+{
+  "areas": [
+    {
+      "x": 560,
+      "y": 141,
+      "w": 160,
+      "h": 18,
+      "label": "Fenstertitel ~ : bash — Konsole"
+    },
+    {
+      "x": 30,
+      "y": 4,
+      "w": 180,
+      "h": 18,
+      "label": "Menü Datei Bearbeiten Ansicht"
+    }
+  ],
+  "shift": 60,
+  "match": 0.8
+}

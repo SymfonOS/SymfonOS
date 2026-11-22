@@ -1,0 +1,13 @@
+{
+  "areas": [
+    {
+      "x": 360,
+      "y": 28,
+      "w": 560,
+      "h": 34,
+      "label": "KRunner-Suchfeld"
+    }
+  ],
+  "shift": 30,
+  "match": 0.8
+}
