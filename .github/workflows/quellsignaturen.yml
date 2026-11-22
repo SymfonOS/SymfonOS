@@ -1,0 +1,51 @@
+name: Quellsignaturen
+
+# Upstream-Signaturen (GPG) der Quellarchive – tools/source-sigs.py, distro/source-keys.toml.
+#   check:    alle Pakete mit festgeschriebenem Schlüssel prüfen (wöchentlich)
+#   discover: Signaturen und Schlüssel für weitere Pakete suchen; das Ergebnis landet auf dem Branch
+#             »quellsignaturen« und kommt per Pull Request (mit Prüfung) nach main
+on:
+  schedule:
+    - cron: "23 4 * * 1"
+  workflow_dispatch:
+    inputs:
+      modus:
+        description: "check oder discover"
+        type: choice
+        options: [check, discover]
+        default: check
+      pakete:
+        description: "nur diese Pakete (leer = alle)"
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  signaturen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prüfen
+        if: inputs.modus != 'discover'
+        env:
+          PAKETE: ${{ inputs.pakete }}
+        run: |
+          rc=0; tools/source-sigs.py check $PAKETE || rc=$?
+          # 2 = nur Netzfehler (Projektserver nicht erreichbar): Warnung, kein Fehlschlag
+          [ "$rc" -eq 2 ] && rc=0
+          exit "$rc"
+      - name: Suchen und auf Branch »quellsignaturen« ablegen
+        if: inputs.modus == 'discover'
+        env:
+          PAKETE: ${{ inputs.pakete }}
+        run: |
+          tools/source-sigs.py discover $PAKETE | tee discover.log
+          echo "::notice title=Quellsignaturen gesucht::$(tail -1 discover.log)"
+          git add distro/source-keys.toml distro/keys/upstream
+          if git diff --cached --quiet; then echo "nichts Neues"; exit 0; fi
+          git config user.name "symfonOS CI"
+          git config user.email "ci@users.noreply.github.com"
+          git commit -qm "Quellen: Upstream-Signaturschlüssel eingetragen (tools/source-sigs.py discover)"
+          git push -f -q origin HEAD:quellsignaturen
