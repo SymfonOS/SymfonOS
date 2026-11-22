@@ -201,9 +201,18 @@ def main() -> int:
         cands = [e for e in cands if id(e) not in drop]
 
     order = sorted(cands, key=lambda e: e["info"]["name"])
+    # Wartende ältere Versionen, zu denen testing schon eine neuere hat, sind überholt: kein eigenes Issue,
+    # keine eigene Zeile (die neueste Version vertritt sie; liegt eine ältere lange genug, kommt sie trotzdem).
+    newest: dict[str, str] = {}
+    for r in report.values():
+        if r["name"] not in newest or vercmp(r["version"], newest[r["name"]]) > 0:
+            newest[r["name"]] = r["version"]
+    superseded = {t for t in reasons if t in report and report[t]["version"] != newest[report[t]["name"]]}
     for e in order:
         print(f"  → stable: {e['info']['name']} {e['info']['version']}{'  [Sicherheit]' if e['info'].get('security') else ''}")
     for tag, why in sorted(reasons.items()):
+        if tag in superseded:
+            continue
         print(f"  ⏸ {tag}: {why}")
     if order and not a.dry_run:
         files = [a.testing / e["file"] for e in order]
@@ -213,12 +222,14 @@ def main() -> int:
         for e in order:
             report[f"{e['info']['name']} {e['info']['version']}"]["status"] = "stable"
         for tag, why in reasons.items():
-            if tag in report:
+            if tag in report and tag not in superseded:
                 report[tag].update(status="wartet", reason=why)
         for r in report.values():
             r.setdefault("status", "ersetzt")      # neuere Version derselben Pakets kommt nach stable
         a.report.write_text(json.dumps(report, indent=1, sort_keys=True, ensure_ascii=False) + "\n")
-    print(f":: {len(order)} übernommen, {len(reasons)} zurückgestellt{' (Trockenlauf)' if a.dry_run else ''}")
+    print(f":: {len(order)} übernommen, {len(reasons) - len(superseded)} zurückgestellt"
+          + (f", {len(superseded)} ältere Versionen überholt" if superseded else "")
+          + (" (Trockenlauf)" if a.dry_run else ""))
     return 0
 
 
