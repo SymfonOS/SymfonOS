@@ -295,7 +295,7 @@ jobs:
         run: |
           if [ $(( $(date +%s) - JOB_START )) -gt $((250 * 60)) ]; then echo "::notice title=Reproduzierbarkeit::übersprungen (Zeitbudget)"; exit 0; fi
           sudo env "PATH=$PATH" SYP_SRCCACHE="$SYM/sources" SYP_BUILD_NET=strict STRICT=1 OUT="$PWD/out/repro.log" \
-            ONLY="$REPRO_ONLY" \
+            ONLY="$REPRO_ONLY" GITHUB_RUN_NUMBER="$GITHUB_RUN_NUMBER" \
             tools/repro-check.sh out/repo/symfonos distro/recipes "$SYM" "$PWD/keys/release.key" 6
       - name: Diagnose ablegen (Branch ci-diag)
         # Vollständige Logs und Bildschirmfotos für die Fehlersuche; enthält keine Geheimnisse

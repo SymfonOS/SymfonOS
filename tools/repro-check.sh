@@ -6,7 +6,7 @@
 #
 # Gebaut wird zweimal: unterscheiden sich die beiden Bauten, ist das Paket nicht reproduzierbar; sind sie gleich,
 # aber anders als das veröffentlichte Paket, ist dieses veraltet (ältere Bauumgebung, gleiche Version).
-# Ausgewählt werden rotierend (je Tag andere) Rezepte, deren Quellen zusammen höchstens MAX_SRC_MB (Standard 30)
+# Ausgewählt werden rotierend (je CI-Lauf andere, GITHUB_RUN_NUMBER; sonst je Tag) Rezepte, deren Quellen zusammen höchstens MAX_SRC_MB (Standard 30)
 # groß sind, damit der Lauf kurz bleibt; ONLY=a,b prüft genau diese Pakete (ohne Größengrenze). Gebaut wird gegen eine Kopie des Repos (Pakete als Hardlinks, die
 # Zielpakete entfernt), ohne in die Bauumgebung zu installieren. Das Ergebnis steht als Hinweis im Lauf;
 # die Liste steht in $OUT (Standard repro.txt). Mit STRICT=1 endet das Skript mit Exit 1, wenn ein Paket nicht
@@ -52,7 +52,8 @@ if only:
     for c in cand:
         print(*c, sep="\t")
 elif cand:
-    start = (int(time.time()) // 86400 * n) % len(cand)
+    slot = int(os.environ.get("GITHUB_RUN_NUMBER") or int(time.time()) // 86400)   # je Lauf eine neue Stichprobe
+    start = (slot * n) % len(cand)
     for i in range(min(n, len(cand))):
         print(*cand[(start + i) % len(cand)], sep="\t")
 PY
