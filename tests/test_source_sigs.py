@@ -156,3 +156,42 @@ def test_expired_subkey_and_dotted_name(tmp_path):
     assert '["lib1.0"]' in (root / "distro/source-keys.toml").read_text()
     r = tool(root, "check")
     assert r.returncode == 0 and "1 gültig" in r.stdout, r.stdout + r.stderr
+
+
+def test_signed_checksum_list(tmp_path):
+    """Projekt signiert nur SHA256SUMS: Schlüssel eintragen, wenn die Liste das Archiv nennt; danach prüfen."""
+    root, srv, ks = tmp_path / "repo", tmp_path / "srv", tmp_path / "ks"
+    for d in (srv / "v1", srv / "v2", ks, root / "lookaside"):
+        d.mkdir(parents=True)
+    fpr, pub = mkkey(tmp_path / "g", "Rel <rel@example.invalid>")
+    (ks / fpr).write_bytes(pub)
+    data = b"projekt 1\n"
+    (srv / "v1/p-1.tar.gz").write_bytes(data)
+    (srv / "v1/SHA256SUMS").write_text(f"{hashlib.sha256(b'anderes').hexdigest()}  q-1.tar.gz\n"
+                                       f"{hashlib.sha256(data).hexdigest()}  p-1.tar.gz\n")
+    sign(tmp_path / "g", srv / "v1/SHA256SUMS", srv / "v1/SHA256SUMS.asc", armor=True)
+    recipe(root, "p", f"file://{srv}/v1/p-1.tar.gz", data)
+    r = tool(root, "discover", SOURCE_SIGS_KEYSERVERS=f"file://{ks}/{{fpr}}")
+    assert "neu   p: SHA256SUMS.asc" in r.stdout, r.stdout + r.stderr
+    assert 'sums = "SHA256SUMS"' in (root / "distro/source-keys.toml").read_text()
+    r = tool(root, "check")
+    assert r.returncode == 0 and "1 gültig" in r.stdout, r.stdout + r.stderr
+
+    # neue Version: Liste gültig signiert, nennt das Archiv aber mit anderer Summe – abgelehnt
+    data2 = b"projekt 2\n"
+    (srv / "v2/p-2.tar.gz").write_bytes(data2)
+    (srv / "v2/SHA256SUMS").write_text(f"{hashlib.sha256(b'etwas anderes').hexdigest()}  p-2.tar.gz\n")
+    sign(tmp_path / "g", srv / "v2/SHA256SUMS", srv / "v2/SHA256SUMS.asc", armor=True)
+    shutil.rmtree(root / "distro/recipes/p")
+    recipe(root, "p", f"file://{srv}/v2/p-2.tar.gz", data2)
+    r = tool(root, "check", "p")
+    assert r.returncode == 1 and "Summe falsch" in r.stdout, r.stdout
+    # richtige Liste, aber von fremdem Schlüssel signiert – abgelehnt
+    (srv / "v2/SHA256SUMS").write_text(f"SHA256 (p-2.tar.gz) = {hashlib.sha256(data2).hexdigest()}\n")
+    mkkey(tmp_path / "f", "Fremd <f@example.invalid>")
+    sign(tmp_path / "f", srv / "v2/SHA256SUMS", srv / "v2/SHA256SUMS.asc", armor=True)
+    r = tool(root, "check", "p")
+    assert r.returncode == 1 and "fremdem Schlüssel" in r.stdout, r.stdout
+    # vom richtigen Schlüssel (BSD-Format): gültig
+    sign(tmp_path / "g", srv / "v2/SHA256SUMS", srv / "v2/SHA256SUMS.asc", armor=True)
+    assert tool(root, "check", "p").returncode == 0

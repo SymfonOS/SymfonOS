@@ -10,7 +10,8 @@ Signatur eines dieser Schlüssel mitbringen – ein neuer Schlüssel ist eine be
     tools/source-sigs.py check --changed REF      # nur Pakete, deren Rezept sich seit REF geändert hat
     tools/source-sigs.py discover [PAKET ...]     # Signaturen suchen, Schlüssel holen und eintragen
 
-discover sucht neben der ersten Quelle eines Rezepts nach .sig/.asc/.sign, holt den Schlüssel zum
+discover sucht neben der ersten Quelle eines Rezepts nach .sig/.asc/.sign (sonst nach einer signierten
+Prüfsummenliste wie SHA256SUMS{.asc,.sig,.gpg}, in der das Archiv stehen muss), holt den Schlüssel zum
 Aussteller der Signatur vom Keyserver und trägt ihn nur ein, wenn er die Signatur des Archivs bestätigt,
 dessen sha256 schon im Rezept steht. Zwei unabhängige Wege (die früher festgehaltene Prüfsumme und die
 Signatur) stimmen dann überein; jede spätere Version wird gegen den so festgeschriebenen Schlüssel geprüft.
@@ -43,6 +44,9 @@ KEYS_TOML = ROOT / "distro" / "source-keys.toml"
 KEYDIR = ROOT / "distro" / "keys" / "upstream"
 LOOKASIDE = os.environ.get("SYP_LOOKASIDE", "https://github.com/SymfonOS/SymfonOS/releases/download/sources")
 SUFFIXES = (".sig", ".asc", ".sign")
+# signierte Prüfsummenlisten neben dem Archiv (viele GitHub-Releases signieren nur diese)
+SUMS_FILES = ("SHA256SUMS", "SHA256SUMS.txt", "sha256sums.txt", "checksums.txt", "SHA512SUMS")
+SUMS_SIGS = (".asc", ".sig", ".gpg")
 KEYSERVERS = tuple(os.environ.get("SOURCE_SIGS_KEYSERVERS", "").split()) or (
     "https://keyserver.ubuntu.com/pks/lookup?op=get&options=mr&search=0x{fpr}",
     "https://keys.openpgp.org/vks/v1/by-fingerprint/{fpr}")
@@ -92,7 +96,8 @@ def load_keys() -> dict:
 def write_keys(data: dict) -> None:
     head = ("# Upstream-Signaturschlüssel der Quellarchive – Format und Ablauf: tools/source-sigs.py\n"
             "# keys: Fingerabdrücke (Hauptschlüssel), öffentliche Schlüssel unter distro/keys/upstream/\n"
-            "# sig: Endung der Signaturdatei neben dem Archiv; uncompressed: Signatur gilt dem entpackten .tar\n")
+            "# sig: Endung der Signaturdatei neben dem Archiv; uncompressed: Signatur gilt dem entpackten .tar\n"
+            "# sums: signiert ist eine Prüfsummenliste dieses Namens neben dem Archiv (sig gilt ihr)\n")
     out = [head]
     for name in sorted(data):
         e = data[name]
@@ -100,6 +105,8 @@ def write_keys(data: dict) -> None:
         out.append(f"\n[{name}]\n" if re.fullmatch(r"[A-Za-z0-9_-]+", name) else f'\n["{name}"]\n')
         out.append("keys = [" + ", ".join(f'"{k}"' for k in e["keys"]) + "]\n")
         out.append(f'sig = "{e["sig"]}"\n')
+        if e.get("sums"):
+            out.append(f'sums = "{e["sums"]}"\n')
         if e.get("uncompressed"):
             out.append("uncompressed = true\n")
     KEYS_TOML.write_text("".join(out))
@@ -138,6 +145,26 @@ def uncompress(name: str, data: bytes) -> bytes:
     if name.endswith(".bz2"):
         return bz2.decompress(data)
     return data
+
+
+def sums_lookup(text: str, fname: str) -> str | None:
+    """Prüfsumme für fname aus einer Liste im GNU- (»hex  name«) oder BSD-Format (»SHA256 (name) = hex«)."""
+    for line in text.splitlines():
+        m = re.match(r"^([0-9a-fA-F]{64}|[0-9a-fA-F]{128})\s+\*?(\S+)$", line.strip())
+        if m and m.group(2).rsplit("/", 1)[-1] == fname:
+            return m.group(1).lower()
+        m = re.match(r"^SHA(?:256|512) \((.+)\) = ([0-9a-fA-F]+)$", line.strip())
+        if m and m.group(1).rsplit("/", 1)[-1] == fname:
+            return m.group(2).lower()
+    return None
+
+
+def sums_match(sums: bytes, url: str, data: bytes) -> bool:
+    want = sums_lookup(sums.decode(errors="replace"), url.rsplit("/", 1)[-1])
+    if not want:
+        return False
+    h = hashlib.sha256 if len(want) == 64 else hashlib.sha512
+    return h(data).hexdigest() == want
 
 
 def gpg(home: str, *args: str, data: bytes | None = None) -> subprocess.CompletedProcess:
@@ -187,10 +214,19 @@ def check_one(name: str, e: dict) -> tuple[str, str]:
         if missing:
             raise ValueError(f"Schlüssel fehlt in distro/keys/upstream: {', '.join(missing)}")
         data = archive(src)
-        sig = fetch(src["url"] + e["sig"])
-        if e.get("uncompressed"):
-            data = uncompress(src["url"], data)
-        got = verify(sig, data, [keyfile(k) for k in e["keys"]])
+        if e.get("sums"):
+            # signierte Prüfsummenliste: Signatur über die Liste, Archiv muss darin mit seiner Summe stehen
+            base = src["url"].rsplit("/", 1)[0]
+            sums = fetch(f"{base}/{e['sums']}")
+            sig = fetch(f"{base}/{e['sums']}{e['sig']}")
+            got = verify(sig, sums, [keyfile(k) for k in e["keys"]])
+            if got and not sums_match(sums, src["url"], data):
+                return "bad", f"{name}: {src['url'].rsplit('/', 1)[-1]} fehlt in {e['sums']} oder Summe falsch"
+        else:
+            sig = fetch(src["url"] + e["sig"])
+            if e.get("uncompressed"):
+                data = uncompress(src["url"], data)
+            got = verify(sig, data, [keyfile(k) for k in e["keys"]])
     except NetError as ex:
         # fehlende Signaturdatei (404) wiegt wie eine ungültige: das Projekt hat sie bisher immer geliefert
         return ("bad" if "HTTP 404" in str(ex) or "HTTP 410" in str(ex) else "net"), f"{name}: {ex}"
@@ -285,6 +321,43 @@ def discover_one(name: str) -> tuple[dict | None, bytes | None, str | None]:
                     return entry, small if verify(sig, payload, [small]) == fpr else key, \
                         f"neu   {name}: {url.rsplit('/', 1)[-1]}{suf} – Schlüssel {fpr}"
         return None, None, f"ohne  {name}: {url.rsplit('/', 1)[-1]}{suf} vorhanden, aber kein passender Schlüssel"
+    return discover_sums(name, src)
+
+
+def discover_sums(name: str, src: dict) -> tuple[dict | None, bytes | None, str | None]:
+    """Signierte Prüfsummenliste neben dem Archiv: Schlüssel nur, wenn er die Liste bestätigt UND die Liste
+    das Archiv mit der schon festgeschriebenen sha256 nennt."""
+    url = src["url"]
+    base = url.rsplit("/", 1)[0]
+    for sf in SUMS_FILES:
+        try:
+            sums = fetch(f"{base}/{sf}", tries=2)
+        except NetError:
+            continue
+        for suf in SUMS_SIGS:
+            try:
+                sig = fetch(f"{base}/{sf}{suf}", tries=2)
+            except NetError:
+                continue
+            if b"PGP SIGNATURE" not in sig and (not sig or sig[0] & 0x80 == 0):
+                continue
+            try:
+                data = archive(src)
+            except (NetError, ValueError) as ex:
+                return None, None, f"netz  {name}: {ex}"
+            if not sums_match(sums, url, data):
+                return None, None, f"ohne  {name}: {sf}{suf} signiert, nennt {url.rsplit('/', 1)[-1]} aber nicht passend"
+            for iss in issuers(sig):
+                key = fetch_key(iss)
+                if not key:
+                    continue
+                fpr = verify(sig, sums, [key])
+                if fpr:
+                    small = export_minimal(key, fpr)
+                    return ({"keys": [fpr], "sig": suf, "sums": sf},
+                            small if verify(sig, sums, [small]) == fpr else key,
+                            f"neu   {name}: {sf}{suf} – Schlüssel {fpr}")
+            return None, None, f"ohne  {name}: {sf}{suf} vorhanden, aber kein passender Schlüssel"
     return None, None, None
 
 
