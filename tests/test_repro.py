@@ -53,3 +53,25 @@ def test_repro_check_only(tmp_path):
                                            OUT=str(tmp_path / "r.txt"), ONLY="zwei,drei", MAX_SRC_MB="0"))
     assert r.returncode == 0, r.stdout + r.stderr
     assert "2 von 2 reproduzierbar" in r.stdout and "eins" not in r.stdout
+
+
+def test_repro_sample_rotates_per_run(tmp_path):
+    # je CI-Lauf (GITHUB_RUN_NUMBER) eine andere Stichprobe, nicht den ganzen Tag dieselbe
+    recs = tmp_path / "recipes"
+    names = ("a1", "b2", "c3")
+    for name in names:
+        (recs / name).mkdir(parents=True)
+        (recs / name / "SYPBUILD.toml").write_text(
+            f'[package]\nname = "{name}"\nversion = "1-1"\narch = "any"\n[build]\n'
+            f'package = \'install -Dm644 /dev/null "$DESTDIR/usr/share/{name}/x"\'\n')
+    key, _ = keygen(tmp_path)
+    repo = tmp_path / "repo"
+    syp("buildall", recs, "--repo", repo, "-k", key, "--name", "symfonos")
+    seen = []
+    for run in ("7", "8", "9"):
+        r = subprocess.run(["bash", ROOT / "tools/repro-check.sh", repo, recs, "-", key, "1"], capture_output=True,
+                           text=True, env=dict(os.environ, SYP_SRCCACHE=str(tmp_path / "cache"),
+                                               OUT=str(tmp_path / "r.txt"), GITHUB_RUN_NUMBER=run))
+        assert r.returncode == 0, r.stdout + r.stderr
+        seen.append(next(n for n in names if f"({n} " in r.stdout))
+    assert sorted(seen) == sorted(names), seen
