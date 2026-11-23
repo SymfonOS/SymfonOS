@@ -112,8 +112,8 @@ elif cmd == "download":
     for f in hits:
         shutil.copy(os.path.join(d, f), out)
 elif cmd == "upload":
-    for f in rest:
-        if not f.startswith("--"):
+    for f in rest:   # FAKE_GH_DROP: Upload solcher Dateien geht stillschweigend verloren
+        if not f.startswith("--") and not fnmatch.fnmatch(os.path.basename(f), os.environ.get("FAKE_GH_DROP", "-")):
             shutil.copy(f, d)
 elif cmd == "delete-asset":
     os.remove(os.path.join(d, rest[0]))
@@ -172,6 +172,14 @@ def test_promote_release_ci(tmp_path):
     for e in idx["packages"]:
         got = hashlib.sha256((rel / "repo-x86_64-testing" / os.path.basename(e["file"])).read_bytes()).hexdigest()
         assert got == e["sha256"], f"{e['file']}: Release-Datei passt nicht zum Index"
+    # geht ein Upload verloren, merkt es die Gegenprobe nach dem Veröffentlichen
+    for f in src.rglob("libfoo-2-1-*.syp"):
+        f.unlink()
+    syp("repo-add", src, p("libfoo", "2-1", files={"usr/share/libfoo/VERSION": "2-1 noch einmal"}),
+        "--name", "symfonos", "-k", key)
+    r = subprocess.run([ROOT / "tools/promote-release.sh", src, key, pub], capture_output=True, text=True,
+                       env=dict(env, FAKE_GH_DROP="libfoo-*"))
+    assert r.returncode == 1 and "passen nicht zum Index: libfoo-2-1-x86_64.syp" in r.stdout, r.stdout + r.stderr
 
 
 def test_promotion_karma(tmp_path):

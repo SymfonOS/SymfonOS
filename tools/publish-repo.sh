@@ -77,4 +77,11 @@ while read -r f; do
   [ -n "$f" ] || continue
   gh release delete-asset "$TAG" "$f" --repo "$REPO_SLUG" --yes && old=$((old + 1))
 done < "$w/delete.txt"
+# Gegenprobe: jede Paketdatei im Release muss jetzt genau der lokalen (= im signierten Index genannten) gleichen
+gh api --paginate "repos/$REPO_SLUG/releases/$rid/assets?per_page=100" -q '.[]|[.name, (.digest // "")]|@tsv' |
+  sort > "$w/after.tsv"
+if bad=$(comm -13 "$w/after.tsv" "$w/want.tsv" | cut -f1) && [ -n "$bad" ]; then
+  echo "::error title=Paket-Repo $TAG::Release-Dateien passen nicht zum Index: $(echo "$bad" | head -20 | paste -sd' ')"
+  exit 1
+fi
 echo "::notice title=Paket-Repo veröffentlicht::$TAG: $n Pakete ($new neu, $changed neu gebaut ersetzt, $old entfernt)"
