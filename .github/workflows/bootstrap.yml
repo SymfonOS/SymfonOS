@@ -39,7 +39,7 @@ jobs:
       STATE_TAG: bootstrap-state
       GH_TOKEN: ${{ github.token }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Speicherplatz und Host-Werkzeuge
         run: |
           echo "JOB_START=$(date +%s)" >> "$GITHUB_ENV"
