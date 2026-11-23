@@ -1,6 +1,8 @@
 # Upstream-Signaturschlüssel der Quellarchive – Format und Ablauf: tools/source-sigs.py
 # keys: Fingerabdrücke (Hauptschlüssel), öffentliche Schlüssel unter distro/keys/upstream/
 # sig: Endung der Signaturdatei neben dem Archiv; uncompressed: Signatur gilt dem entpackten .tar
+# tar_sig: die Signatur liegt neben dem entpackten Namen (NAME.tar.sign statt NAME.tar.xz.sign)
+# sums: signiert ist eine Prüfsummenliste dieses Namens neben dem Archiv (sig gilt ihr)
 
 [acl]
 keys = ["B902B5271325F892AC251AD441633B9FE837F581"]
@@ -66,6 +68,12 @@ sig = ".sig"
 keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
 sig = ".sig"
 
+[bluez]
+keys = ["E932D120BC2AEC444E558F0106CA9F5D1DCF2659"]
+sig = ".sign"
+uncompressed = true
+tar_sig = true
+
 [bluez-qt]
 keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
 sig = ".sig"
@@ -77,6 +85,12 @@ sig = ".sig"
 [breeze-icons]
 keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
 sig = ".sig"
+
+[btrfs-progs]
+keys = ["F2B41200C54EFB30380C1756C565D5F9D76D583B"]
+sig = ".sign"
+uncompressed = true
+tar_sig = true
 
 [bubblewrap]
 keys = ["DA98F25C0871C49A59EAFF2C4DE8FF2A63C7CC90"]
@@ -105,6 +119,12 @@ sig = ".sig"
 [cracklib]
 keys = ["FCE0F8C65F5B2972C2EB55E2350D0B0705E9C3CB"]
 sig = ".asc"
+
+[cryptsetup]
+keys = ["2A2918243FDE46648D0686F9D9B0577BD93E98FC"]
+sig = ".sign"
+uncompressed = true
+tar_sig = true
 
 [cups]
 keys = ["7082A0A50A2E92640F3880E0E4522DCC9B246FF7"]
@@ -290,6 +310,18 @@ sig = ".sig"
 keys = ["9EBD001680E8C8F9FAC61A9BE1A701D4C9DE75B5"]
 sig = ".asc"
 
+[iproute2]
+keys = ["9F6FC345B05BE7E766B83C8F80A77F6095CDE47E"]
+sig = ".sign"
+uncompressed = true
+tar_sig = true
+
+[iwd]
+keys = ["E932D120BC2AEC444E558F0106CA9F5D1DCF2659"]
+sig = ".sign"
+uncompressed = true
+tar_sig = true
+
 [kactivitymanagerd]
 keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
 sig = ".sig"
@@ -305,6 +337,12 @@ sig = ".sig"
 [kauth]
 keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
 sig = ".sig"
+
+[kbd]
+keys = ["7F2A3D07298149A0793C9A4EA45ABA544CFFD434"]
+sig = ".sign"
+uncompressed = true
+tar_sig = true
 
 [kbookmarks]
 keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
@@ -470,6 +508,12 @@ sig = ".sig"
 keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
 sig = ".sig"
 
+[kmod]
+keys = ["EAB33C9690013C733916AC839BA2A5A630CBEA53"]
+sig = ".sign"
+uncompressed = true
+tar_sig = true
+
 [knewstuff]
 keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
 sig = ".sig"
@@ -621,6 +665,12 @@ sig = ".sig"
 [libburn]
 keys = ["44BC9FD0D688EB007C4DD029E9CBDFC0ABC0A854"]
 sig = ".sig"
+
+[libcap]
+keys = ["38A644698C69787344E954CE29EE848AE2CCF3F4"]
+sig = ".sign"
+uncompressed = true
+tar_sig = true
 
 [libclc]
 keys = ["474E22316ABF4785A88C6E8EA2C794A986419D8A"]
@@ -902,6 +952,24 @@ sig = ".sig"
 keys = ["907D226E7E13FA337F014A083672782A9BF368F3"]
 sig = ".sig"
 
+[linux]
+keys = ["647F28654894E3BD457199BE38DBBDC86092693E"]
+sig = ".sign"
+uncompressed = true
+tar_sig = true
+
+[linux-api-headers]
+keys = ["647F28654894E3BD457199BE38DBBDC86092693E"]
+sig = ".sign"
+uncompressed = true
+tar_sig = true
+
+[linux-firmware]
+keys = ["4CDE8575E547BF835FE15807A31B6BD72486CFD6"]
+sig = ".sign"
+uncompressed = true
+tar_sig = true
+
 [linux-pam]
 keys = ["296D6F29A020808E8717A8842DB5BD89A340AEB7"]
 sig = ".asc"
@@ -929,6 +997,12 @@ sig = ".sig"
 [man-db]
 keys = ["AC0A4FF12611B6FCCF01C111393587D97D86500B"]
 sig = ".asc"
+
+[man-pages]
+keys = ["A9348594CE31283A826FBDD8D57633D441E25BB5"]
+sig = ".sign"
+uncompressed = true
+tar_sig = true
 
 [mesa]
 keys = ["57551DE15B968F6341C248F68D8E31AFC32428A6"]
@@ -1021,6 +1095,12 @@ sig = ".asc"
 [patch]
 keys = ["259B3792B3D6D319212CC4DCD5BF9FEB0313653A"]
 sig = ".sig"
+
+[pciutils]
+keys = ["C466A56CADA981F4297D20C31F3D0761D9B65F0B"]
+sig = ".sign"
+uncompressed = true
+tar_sig = true
 
 [pcre2]
 keys = ["A95536204A3BB489715231282A98E77EB6F24CA8"]
@@ -1146,6 +1226,12 @@ sig = ".sig"
 keys = ["7C0135FB088AAF6C66C650B9BB5869F064EA74AB"]
 sig = ".sig"
 
+[sbc]
+keys = ["E932D120BC2AEC444E558F0106CA9F5D1DCF2659"]
+sig = ".sign"
+uncompressed = true
+tar_sig = true
+
 [sddm-kcm]
 keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
 sig = ".sig"
@@ -1242,6 +1328,18 @@ sig = ".asc"
 keys = ["7E3792A9D8ACF7D633BC1588ED97E90E62AA7E34"]
 sig = ".asc"
 
+[usbutils]
+keys = ["647F28654894E3BD457199BE38DBBDC86092693E"]
+sig = ".sign"
+uncompressed = true
+tar_sig = true
+
+[util-linux]
+keys = ["B0C64D14301CC6EFAEDF60E4E4B71D5EEC39C284"]
+sig = ".sign"
+uncompressed = true
+tar_sig = true
+
 [util-macros]
 keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
 sig = ".sig"
@@ -1257,6 +1355,12 @@ sig = ".sig"
 [which]
 keys = ["8020B2666305EE2FD53E6827C155A4EEE4E527A2"]
 sig = ".sig"
+
+[wireless-regdb]
+keys = ["B3F2469D78D78BD09D366F37C94035C21B4F2AEB"]
+sig = ".sign"
+uncompressed = true
+tar_sig = true
 
 [xauth]
 keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
