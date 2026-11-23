@@ -97,6 +97,7 @@ def write_keys(data: dict) -> None:
     head = ("# Upstream-Signaturschlüssel der Quellarchive – Format und Ablauf: tools/source-sigs.py\n"
             "# keys: Fingerabdrücke (Hauptschlüssel), öffentliche Schlüssel unter distro/keys/upstream/\n"
             "# sig: Endung der Signaturdatei neben dem Archiv; uncompressed: Signatur gilt dem entpackten .tar\n"
+            "# tar_sig: die Signatur liegt neben dem entpackten Namen (NAME.tar.sign statt NAME.tar.xz.sign)\n"
             "# sums: signiert ist eine Prüfsummenliste dieses Namens neben dem Archiv (sig gilt ihr)\n")
     out = [head]
     for name in sorted(data):
@@ -109,6 +110,8 @@ def write_keys(data: dict) -> None:
             out.append(f'sums = "{e["sums"]}"\n')
         if e.get("uncompressed"):
             out.append("uncompressed = true\n")
+        if e.get("tar_sig"):
+            out.append("tar_sig = true\n")
     KEYS_TOML.write_text("".join(out))
 
 
@@ -145,6 +148,14 @@ def uncompress(name: str, data: bytes) -> bytes:
     if name.endswith(".bz2"):
         return bz2.decompress(data)
     return data
+
+
+def tar_url(url: str) -> str:
+    """URL ohne Kompressionsendung (…tar.xz → …tar), sonst unverändert."""
+    for ext in (".xz", ".gz", ".bz2"):
+        if url.endswith(".tar" + ext):
+            return url[:-len(ext)]
+    return url
 
 
 def sums_lookup(text: str, fname: str) -> str | None:
@@ -223,7 +234,7 @@ def check_one(name: str, e: dict) -> tuple[str, str]:
             if got and not sums_match(sums, src["url"], data):
                 return "bad", f"{name}: {src['url'].rsplit('/', 1)[-1]} fehlt in {e['sums']} oder Summe falsch"
         else:
-            sig = fetch(src["url"] + e["sig"])
+            sig = fetch((tar_url(src["url"]) if e.get("tar_sig") else src["url"]) + e["sig"])
             if e.get("uncompressed"):
                 data = uncompress(src["url"], data)
             got = verify(sig, data, [keyfile(k) for k in e["keys"]])
@@ -295,9 +306,15 @@ def discover_one(name: str) -> tuple[dict | None, bytes | None, str | None]:
     if not src or len(src.get("sha256", "")) != 64:
         return None, None, None
     url = src["url"]
-    for suf in SUFFIXES:
+    # Kandidaten: Signatur neben dem Archiv; bei komprimierten Archiven auch neben dem entpackten Namen
+    # (kernel.org: bluez-5.83.tar.sign gilt bluez-5.83.tar, ausgeliefert wird bluez-5.83.tar.xz)
+    cands = [(url + suf, suf, False) for suf in SUFFIXES]
+    tar = tar_url(url)
+    if tar != url:
+        cands += [(tar + suf, suf, True) for suf in SUFFIXES]
+    for sigurl, suf, on_tar in cands:
         try:
-            sig = fetch(url + suf, tries=2)
+            sig = fetch(sigurl, tries=2)
         except NetError:
             continue
         if b"PGP SIGNATURE" not in sig and (not sig or sig[0] & 0x80 == 0):
@@ -306,7 +323,7 @@ def discover_one(name: str) -> tuple[dict | None, bytes | None, str | None]:
             data = archive(src)
         except (NetError, ValueError) as ex:
             return None, None, f"netz  {name}: {ex}"
-        for unc in (False, True) if suf == ".sign" else (False,):
+        for unc in (True,) if on_tar else (False, True) if suf == ".sign" else (False,):
             payload = uncompress(url, data) if unc else data
             for iss in issuers(sig):
                 key = fetch_key(iss)
@@ -314,13 +331,14 @@ def discover_one(name: str) -> tuple[dict | None, bytes | None, str | None]:
                     continue
                 fpr = verify(sig, payload, [key])
                 if fpr:
-                    entry = {"keys": [fpr], "sig": suf, **({"uncompressed": True} if unc else {})}
+                    entry = {"keys": [fpr], "sig": suf, **({"uncompressed": True} if unc else {}),
+                             **({"tar_sig": True} if on_tar else {})}
                     # export-clean wirft bei abgelaufenen Schlüsseln die Unterschlüssel weg: dann den
                     # Schlüssel so speichern, wie ihn der Keyserver geliefert hat
                     small = export_minimal(key, fpr)
                     return entry, small if verify(sig, payload, [small]) == fpr else key, \
-                        f"neu   {name}: {url.rsplit('/', 1)[-1]}{suf} – Schlüssel {fpr}"
-        return None, None, f"ohne  {name}: {url.rsplit('/', 1)[-1]}{suf} vorhanden, aber kein passender Schlüssel"
+                        f"neu   {name}: {sigurl.rsplit('/', 1)[-1]} – Schlüssel {fpr}"
+        return None, None, f"ohne  {name}: {sigurl.rsplit('/', 1)[-1]} vorhanden, aber kein passender Schlüssel"
     return discover_sums(name, src)
 
 

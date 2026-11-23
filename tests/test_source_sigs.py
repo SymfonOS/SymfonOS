@@ -195,3 +195,32 @@ def test_signed_checksum_list(tmp_path):
     # vom richtigen Schlüssel (BSD-Format): gültig
     sign(tmp_path / "g", srv / "v2/SHA256SUMS", srv / "v2/SHA256SUMS.asc", armor=True)
     assert tool(root, "check", "p").returncode == 0
+
+
+def test_signature_next_to_uncompressed_name(tmp_path):
+    """kernel.org: NAME.tar.sign signiert das entpackte NAME.tar, ausgeliefert wird NAME.tar.xz."""
+    import lzma
+    root, srv, ks = tmp_path / "repo", tmp_path / "srv", tmp_path / "ks"
+    for d in (srv, ks, root / "lookaside"):
+        d.mkdir(parents=True)
+    fpr, pub = mkkey(tmp_path / "g", "Kern <k@example.invalid>")
+    (ks / fpr).write_bytes(pub)
+    (srv / "bz-1.tar").write_bytes(b"bluez\n")
+    sign(tmp_path / "g", srv / "bz-1.tar", srv / "bz-1.tar.sign")
+    (srv / "bz-1.tar").unlink()                    # nur die komprimierte Fassung wird ausgeliefert
+    data = lzma.compress(b"bluez\n")
+    (srv / "bz-1.tar.xz").write_bytes(data)
+    recipe(root, "bz", f"file://{srv}/bz-1.tar.xz", data)
+    r = tool(root, "discover", SOURCE_SIGS_KEYSERVERS=f"file://{ks}/{{fpr}}")
+    assert "neu   bz: bz-1.tar.sign" in r.stdout, r.stdout + r.stderr
+    keys = (root / "distro/source-keys.toml").read_text()
+    assert "tar_sig = true" in keys and "uncompressed = true" in keys
+    r = tool(root, "check")
+    assert r.returncode == 0 and "1 gültig" in r.stdout, r.stdout + r.stderr
+    # manipulierter Inhalt (gleicher Name, neue Prüfsumme im Rezept): abgelehnt
+    bad = lzma.compress(b"bluez, manipuliert\n")
+    (srv / "bz-1.tar.xz").write_bytes(bad)
+    shutil.rmtree(root / "distro/recipes/bz")
+    recipe(root, "bz", f"file://{srv}/bz-1.tar.xz", bad)
+    r = tool(root, "check")
+    assert r.returncode == 1 and "ungültig" in r.stdout, r.stdout
