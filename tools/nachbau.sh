@@ -16,6 +16,7 @@
 #   NACHBAU_PUB    öffentlicher Schlüssel des Repos (Standard distro/keys/symfonos-release.pub)
 #   WORK           Arbeitsordner (Standard ~/.cache/symfonos-nachbau; Quellen und Bauumgebung bleiben erhalten)
 #   N              Größe der Stichprobe (Standard 5), MAX_MB Obergrenze der installierten Größe (Standard 30)
+#   SYP_LOOKASIDE  Lookaside-Cache für Quellen (Standard: Release »sources«; leer = nur Projektserver)
 #   OUT            Ergebnisdatei (Standard nachbau.txt): Abschnitt zum Einfügen in ein Issue »nachbau: …«
 #
 # Rückgabe: 0 = alle nachgebauten Pakete gleich, 1 = mindestens eines weicht ab, 2 = nichts nachgebaut.
@@ -35,6 +36,9 @@ for t in curl zstd python3; do command -v "$t" >/dev/null || { echo "!! $t fehlt
 mkdir -p "$WORK/repo" "$WORK/pkgs" "$WORK/out" "$WORK/sources"
 WORK=$(cd "$WORK" && pwd)
 export SYP_SRCCACHE="$WORK/sources"
+# Quellen zuerst aus dem Lookaside-Cache (GitHub-Release »sources«), dann vom Projektserver; zählt nur mit der
+# sha256 aus dem Rezept, ist also nicht mehr Vertrauen als der Projektserver. SYP_LOOKASIDE= schaltet ab.
+export SYP_LOOKASIDE=${SYP_LOOKASIDE-https://github.com/SymfonOS/SymfonOS/releases/download/sources}
 
 # Datei aus dem Repo holen: von einer URL flach (GitHub-Release), aus einem Ordner mit Pfad
 case $REPO in
