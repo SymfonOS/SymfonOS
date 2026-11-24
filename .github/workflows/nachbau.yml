@@ -58,4 +58,5 @@ jobs:
             nachbau.txt
             ${{ runner.temp }}/nachbau/out/*.log
             ${{ runner.temp }}/nachbau/out/*.diff
+            ${{ runner.temp }}/nachbau/out/*.syp
           if-no-files-found: ignore
