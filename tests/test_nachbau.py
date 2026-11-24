@@ -8,7 +8,7 @@ from helpers import ROOT, keygen, syp
 
 
 def run(tmp_path, repo, recs, pub, *pkgs, **env):
-    e = dict(os.environ, NACHBAU_REPO=str(repo), NACHBAU_ROOT="-", NACHBAU_PUB=str(pub), NACHBAU_RECIPES=str(recs),
+    e = dict(os.environ, NACHBAU_REPO=str(repo), NACHBAU_ROOT=env.pop("NACHBAU_ROOT", "-"), NACHBAU_PUB=str(pub), NACHBAU_RECIPES=str(recs),
              WORK=str(tmp_path / "work"), OUT=str(tmp_path / "nachbau.txt"), **env)
     return subprocess.run(["bash", ROOT / "tools/nachbau.sh", *pkgs], capture_output=True, text=True, env=e)
 
@@ -45,3 +45,12 @@ def test_nachbau(tmp_path):
     _, other = keygen(tmp_path, "fremd")
     r = run(tmp_path, repo, recs, other, "zufall")
     assert r.returncode == 2 and "Index-Signatur ungültig" in r.stderr, r.stdout + r.stderr
+
+    # eigenes Repo für die Bauumgebung (z. B. testing): dessen Index wird ebenfalls nur mit gültiger Signatur geglaubt
+    if os.geteuid() == 0:
+        fremd = tmp_path / "fremd-repo"
+        syp("buildall", recs, "--repo", fremd, "-k", tmp_path / "fremd.key", "--name", "symfonos",
+            env=dict(os.environ, SYP_SRCCACHE=str(tmp_path / "cache")))
+        r = run(tmp_path, repo, recs, pub, "zufall", NACHBAU_ROOT=str(tmp_path / "root"), NACHBAU_ENV_REPO=str(fremd))
+        assert r.returncode == 2 and "Index-Signatur der Bauumgebung ungültig" in r.stderr, r.stdout + r.stderr
+        assert not (tmp_path / "root/proc").exists()
