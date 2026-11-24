@@ -1,0 +1,21 @@
+{
+  "areas": [
+    {
+      "x": 566,
+      "y": 32,
+      "w": 148,
+      "h": 18,
+      "label": "titel"
+    },
+    {
+      "x": 52,
+      "y": 56,
+      "w": 240,
+      "h": 34,
+      "label": "reiter"
+    }
+  ],
+  "shift": 60,
+  "match": 0.8,
+  "strict": false
+}

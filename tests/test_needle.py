@@ -59,6 +59,14 @@ def test_needle_match(tmp_path, monkeypatch):
     ppm(screen(seed=1, box=(160, 120)), shots / "fenster.ppm")    # zu weit weg (shift 20)
     assert run("check", shots).returncode == 1
 
+    # neue Needle (--soft, »strict«: false): Abweichung nur als Warnung, der Test scheitert nicht
+    assert run("make", tmp_path / "ref.png", "neu", "100,50,60,20", "--soft").returncode == 0
+    assert json.loads((nd / "neu.json").read_text())["strict"] is False
+    (nd / "fenster.json").unlink()
+    ppm(screen(seed=1), shots / "neu.ppm")
+    r = run("check", shots)
+    assert r.returncode == 0 and "nur Warnung: neu" in r.stdout, r.stdout
+
 
 def test_repo_needles_match_their_crops():
     """Jede Needle im Repo: Ausschnitte lesbar, Bereichsgrößen stimmen mit den Bildern überein."""

@@ -202,6 +202,7 @@ def main() -> int:
     mk.add_argument("areas", nargs="+", help="x,y,w,h oder x,y,w,h=Bezeichnung")
     mk.add_argument("--shift", type=int, default=40)
     mk.add_argument("--match", type=float, default=0.8)
+    mk.add_argument("--soft", action="store_true", help="neue Needle: Abweichung nur als Warnung (strict: false)")
     m = sub.add_parser("match")
     m.add_argument("screen")
     m.add_argument("name")
@@ -219,14 +220,14 @@ def main() -> int:
             write_png(ref.crop(x, y, w, h), NEEDLES / f"{a.name}-{i}.png")
             areas.append({"x": x, "y": y, "w": w, "h": h, **({"label": label} if label else {})})
         (NEEDLES / f"{a.name}.json").write_text(json.dumps(
-            {"areas": areas, "shift": a.shift, "match": a.match}, indent=2, ensure_ascii=False) + "\n")
+            {"areas": areas, "shift": a.shift, "match": a.match, **({"strict": False} if a.soft else {})}, indent=2, ensure_ascii=False) + "\n")
         return 0
     if a.cmd == "match":
         ok, msgs = match(a.screen, a.name)
         print("\n".join(msgs))
         return 0 if ok else 1
     # check: jede Needle gegen <dir>/<name>.png (oder .ppm); fehlendes Bild = nicht geprüft
-    failed, checked = [], 0
+    failed, soft, checked = [], [], 0
     for j in sorted(NEEDLES.glob("*.json")):
         name = j.stem
         img = next((p for p in (Path(a.dir) / f"{name}.png", Path(a.dir) / f"{name}.ppm") if p.exists()), None)
@@ -237,9 +238,11 @@ def main() -> int:
         ok, msgs = match(img, name)
         print("\n".join(msgs))
         if not ok:
-            failed.append(name)
-    print(f"Bildvergleich: {checked - len(failed)} von {checked} Bildschirmfotos passen"
-          + (f" (abweichend: {', '.join(failed)})" if failed else ""))
+            # neue Needles (»strict«: false) melden eine Abweichung nur, bis sie sich in Läufen bewährt haben
+            (failed if load(name).get("strict", True) else soft).append(name)
+    print(f"Bildvergleich: {checked - len(failed) - len(soft)} von {checked} Bildschirmfotos passen"
+          + (f" (abweichend: {', '.join(failed)})" if failed else "")
+          + (f" (abweichend, nur Warnung: {', '.join(soft)})" if soft else ""))
     return 1 if failed else 0
 
 

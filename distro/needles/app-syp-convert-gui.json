@@ -1,0 +1,21 @@
+{
+  "areas": [
+    {
+      "x": 542,
+      "y": 64,
+      "w": 196,
+      "h": 18,
+      "label": "titel"
+    },
+    {
+      "x": 122,
+      "y": 108,
+      "w": 200,
+      "h": 30,
+      "label": "ueberschrift"
+    }
+  ],
+  "shift": 60,
+  "match": 0.8,
+  "strict": false
+}
