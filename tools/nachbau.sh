@@ -12,6 +12,9 @@
 #
 # Umgebung:
 #   NACHBAU_REPO   Repo-URL oder -Ordner (Standard: das stable-Release auf GitHub, Dateien flach)
+#   NACHBAU_ENV_REPO  Repo, aus dem die Bauumgebung entsteht (Standard: NACHBAU_REPO). Die CI baut gegen den Stand
+#                  von testing; mit dem testing-Repo (…/repo-x86_64-testing) gleicht die Umgebung der der CI, auch wenn
+#                  eine neuere Bauabhängigkeit (z. B. binutils) noch nicht in stable angekommen ist.
 #   NACHBAU_ROOT   Bauumgebung; Standard $WORK/root (wird angelegt, braucht Root-Rechte); »-«: auf dem Host bauen
 #   NACHBAU_PUB    öffentlicher Schlüssel des Repos (Standard distro/keys/symfonos-release.pub)
 #   WORK           Arbeitsordner (Standard ~/.cache/symfonos-nachbau; Quellen und Bauumgebung bleiben erhalten)
@@ -27,29 +30,35 @@ ROOT=$(cd "$(dirname "$0")/.." && pwd)
 SYP="$ROOT/csrc/bin/syp"
 RECIPES=${NACHBAU_RECIPES:-$ROOT/distro/recipes}
 REPO=${NACHBAU_REPO:-https://github.com/SymfonOS/SymfonOS/releases/download/repo-x86_64}
+ENVREPO=${NACHBAU_ENV_REPO:-$REPO}
 PUB=${NACHBAU_PUB:-$ROOT/distro/keys/symfonos-release.pub}
 WORK=${WORK:-${XDG_CACHE_HOME:-$HOME/.cache}/symfonos-nachbau}
 N=${N:-5} MAX_MB=${MAX_MB:-30} OUT=${OUT:-nachbau.txt}
 BROOT=${NACHBAU_ROOT:-$WORK/root}
 [ -x "$SYP" ] || make -s -C "$ROOT/csrc"
 for t in curl zstd python3; do command -v "$t" >/dev/null || { echo "!! $t fehlt" >&2; exit 2; }; done
-mkdir -p "$WORK/repo" "$WORK/pkgs" "$WORK/out" "$WORK/sources"
+mkdir -p "$WORK/repo" "$WORK/envrepo" "$WORK/pkgs" "$WORK/out" "$WORK/sources"
 WORK=$(cd "$WORK" && pwd)
 export SYP_SRCCACHE="$WORK/sources"
 # Quellen zuerst aus dem Lookaside-Cache (GitHub-Release »sources«), dann vom Projektserver; zählt nur mit der
 # sha256 aus dem Rezept, ist also nicht mehr Vertrauen als der Projektserver. SYP_LOOKASIDE= schaltet ab.
 export SYP_LOOKASIDE=${SYP_LOOKASIDE-https://github.com/SymfonOS/SymfonOS/releases/download/sources}
 
-# Datei aus dem Repo holen: von einer URL flach (GitHub-Release), aus einem Ordner mit Pfad
-case $REPO in
-  http://*|https://*) remote=1 ;;
-  file://*) REPO=${REPO#file://}; remote=0 ;;
-  *) remote=0 ;;
-esac
-[ "$remote" = 1 ] || REPO=$(cd "$REPO" && pwd)
-get() {
-  if [ "$remote" = 1 ]; then curl -fsSL --retry 3 -o "$2" "$REPO/$(basename "$1")"; else cp "$REPO/$1" "$2"; fi
+# Datei aus einem Repo holen: von einer URL flach (GitHub-Release), aus einem Ordner mit Pfad
+canon() {   # Repo-Angabe vereinheitlichen: URL bleibt, Ordner (auch file://) wird absolut
+  case $1 in
+    http://*|https://*) echo "$1" ;;
+    *) (cd "${1#file://}" && pwd) ;;
+  esac
 }
+REPO=$(canon "$REPO") ENVREPO=$(canon "$ENVREPO")
+fetch() {   # fetch REPO DATEI ZIEL
+  case $1 in
+    http://*|https://*) curl -fsSL --retry 3 -o "$3" "$1/$(basename "$2")" ;;
+    *) cp "$1/$2" "$3" ;;
+  esac
+}
+get() { fetch "$REPO" "$@"; }
 
 # 1. Index laden, Signatur prüfen
 echo ":: Index von $REPO"
@@ -101,6 +110,18 @@ PY
 chroot=()
 if [ "$BROOT" != - ]; then
   [ "$(id -u)" = 0 ] || { echo "!! die Bauumgebung braucht Root-Rechte (sudo -E $0 …) oder NACHBAU_ROOT=-" >&2; exit 2; }
+  case $ENVREPO in http://*|https://*) url=$ENVREPO flat=true ;; *) url="file://$ENVREPO" flat=false ;; esac
+  envidx="$WORK/repo/index.json.zst"
+  if [ "$ENVREPO" != "$REPO" ]; then   # eigener Index für die Bauumgebung, ebenfalls mit Signaturprüfung
+    echo ":: Bauumgebung aus $ENVREPO"
+    fetch "$ENVREPO" index.json.zst "$WORK/envrepo/index.json.zst"
+    fetch "$ENVREPO" index.json.zst.sig "$WORK/envrepo/index.json.zst.sig"
+    "$SYP" repo-show "$WORK/envrepo" --pub "$PUB" > "$WORK/envindex.json" ||
+      { echo "!! Index-Signatur der Bauumgebung ungültig (Schlüssel $PUB)" >&2; exit 2; }
+    envidx="$WORK/envrepo/index.json.zst"
+  else
+    cp "$WORK/index.json" "$WORK/envindex.json"
+  fi
   mkdir -p "$BROOT/etc/syp/keys"
   cp "$PUB" "$BROOT/etc/syp/keys/symfonos-release.pub"
   # Paketskripte und Bauten im chroot brauchen /dev, /proc und /sys (syp build --chroot hängt nichts ein)
@@ -109,19 +130,18 @@ if [ "$BROOT" != - ]; then
   mountpoint -q "$BROOT/proc" || mount -t proc proc "$BROOT/proc"
   mountpoint -q "$BROOT/sys" || mount --bind /sys "$BROOT/sys"
   trap 'for m in sys proc dev; do mountpoint -q "$BROOT/$m" && umount -l "$BROOT/$m"; done' EXIT
-  url=$REPO; [ "$remote" = 1 ] || url="file://$REPO"
   write_conf() {   # Paketquelle der Bauumgebung (syp bringt eine eigene syp.toml mit: nach der Installation erneut)
     printf 'arch = "x86_64"\n[[repo]]\nname = "symfonos"\nurl = "%s"\nflat = %s\n[snapshots]\nenabled = false\n' \
-      "$url" "$([ "$remote" = 1 ] && echo true || echo false)" > "$BROOT/etc/syp/syp.toml"
+      "$url" "$flat" > "$BROOT/etc/syp/syp.toml"
     cp "$PUB" "$BROOT/etc/syp/keys/symfonos-release.pub"
   }
   write_conf
-  stamp=$(sha256sum "$WORK/repo/index.json.zst" | cut -c1-64)
+  stamp=$(sha256sum "$envidx" | cut -c1-64)
   if [ "$(cat "$BROOT/.nachbau-index" 2>/dev/null)" != "$stamp" ]; then
     echo ":: Bauumgebung $BROOT aus dem Repo aufsetzen (einmalig groß, danach nur Aktualisierungen)"
     "$SYP" -r "$BROOT" -y sync
     python3 -I -c 'import json,sys; print("\n".join(sorted({e["info"]["name"] for e in json.load(open(sys.argv[1]))["packages"]})))' \
-      "$WORK/index.json" | xargs "$SYP" -r "$BROOT" -y install --overwrite '/etc/syp/*'
+      "$WORK/envindex.json" | xargs "$SYP" -r "$BROOT" -y install --overwrite '/etc/syp/*'
     write_conf
     "$SYP" -r "$BROOT" -y upgrade --no-sync
     echo "$stamp" > "$BROOT/.nachbau-index"
@@ -134,7 +154,7 @@ fi
 same=() diff=() fail=()
 {
   echo "### Nachbau $(date -u +%Y-%m-%d)"
-  echo "Rechner: $(uname -srm); syp $("$SYP" --version 2>/dev/null | head -1 || echo ?); Index $(sha256sum "$WORK/repo/index.json.zst" | cut -c1-16)"
+  echo "Rechner: $(uname -srm); syp $("$SYP" --version 2>/dev/null | head -1 || echo ?); Index $(sha256sum "$WORK/repo/index.json.zst" | cut -c1-16)$([ "$ENVREPO" = "$REPO" ] || echo "; Bauumgebung aus $ENVREPO")"
   echo
 } > "$OUT"
 while IFS=$'\t' read -r name dir ver file sha; do

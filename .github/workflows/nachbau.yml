@@ -37,7 +37,10 @@ jobs:
         run: |
           rc=0
           # shellcheck disable=SC2086
+          # Bauumgebung aus testing: gegen diesen Stand baut die CI (sonst weichen Pakete ab, deren Bauabhängigkeit
+          # – etwa binutils – in testing schon neuer ist als in stable); verglichen wird mit den stable-Paketen
           sudo env "PATH=$PATH" WORK="$RUNNER_TEMP/nachbau" OUT="$PWD/nachbau.txt" N=8 \
+            NACHBAU_ENV_REPO=https://github.com/SymfonOS/SymfonOS/releases/download/repo-x86_64-testing \
             GITHUB_RUN_NUMBER="$GITHUB_RUN_NUMBER" tools/nachbau.sh $PAKETE || rc=$?
           [ -f nachbau.txt ] && cat nachbau.txt >> "$GITHUB_STEP_SUMMARY"
           case $rc in
