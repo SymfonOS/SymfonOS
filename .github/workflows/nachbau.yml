@@ -43,7 +43,8 @@ jobs:
           case $rc in
             0) echo "::notice title=Nachbau::$(tail -1 nachbau.txt)" ;;
             1) echo "::error title=Nachbau::$(tail -1 nachbau.txt)"; exit 1 ;;
-            *) echo "::warning title=Nachbau::nichts nachgebaut (rc $rc)" ;;
+            2) echo "::warning title=Nachbau::nichts nachgebaut" ;;
+            *) echo "::error title=Nachbau::Bauumgebung oder Nachbau gescheitert (rc $rc)"; exit 1 ;;
           esac
       - name: Protokolle
         if: always()
