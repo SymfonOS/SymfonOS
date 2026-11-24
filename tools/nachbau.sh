@@ -110,14 +110,19 @@ if [ "$BROOT" != - ]; then
   mountpoint -q "$BROOT/sys" || mount --bind /sys "$BROOT/sys"
   trap 'for m in sys proc dev; do mountpoint -q "$BROOT/$m" && umount -l "$BROOT/$m"; done' EXIT
   url=$REPO; [ "$remote" = 1 ] || url="file://$REPO"
-  printf 'arch = "x86_64"\n[[repo]]\nname = "symfonos"\nurl = "%s"\nflat = %s\n[snapshots]\nenabled = false\n' \
-    "$url" "$([ "$remote" = 1 ] && echo true || echo false)" > "$BROOT/etc/syp/syp.toml"
+  write_conf() {   # Paketquelle der Bauumgebung (syp bringt eine eigene syp.toml mit: nach der Installation erneut)
+    printf 'arch = "x86_64"\n[[repo]]\nname = "symfonos"\nurl = "%s"\nflat = %s\n[snapshots]\nenabled = false\n' \
+      "$url" "$([ "$remote" = 1 ] && echo true || echo false)" > "$BROOT/etc/syp/syp.toml"
+    cp "$PUB" "$BROOT/etc/syp/keys/symfonos-release.pub"
+  }
+  write_conf
   stamp=$(sha256sum "$WORK/repo/index.json.zst" | cut -c1-64)
   if [ "$(cat "$BROOT/.nachbau-index" 2>/dev/null)" != "$stamp" ]; then
     echo ":: Bauumgebung $BROOT aus dem Repo aufsetzen (einmalig groß, danach nur Aktualisierungen)"
     "$SYP" -r "$BROOT" -y sync
     python3 -I -c 'import json,sys; print("\n".join(sorted({e["info"]["name"] for e in json.load(open(sys.argv[1]))["packages"]})))' \
-      "$WORK/index.json" | xargs "$SYP" -r "$BROOT" -y install
+      "$WORK/index.json" | xargs "$SYP" -r "$BROOT" -y install --overwrite '/etc/syp/*'
+    write_conf
     "$SYP" -r "$BROOT" -y upgrade --no-sync
     echo "$stamp" > "$BROOT/.nachbau-index"
   fi
