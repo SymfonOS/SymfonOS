@@ -16,6 +16,5 @@
     }
   ],
   "shift": 60,
-  "match": 0.8,
-  "strict": false
+  "match": 0.8
 }
