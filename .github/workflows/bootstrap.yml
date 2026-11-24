@@ -289,14 +289,14 @@ jobs:
         # (veröffentlicht ist dann schon; der nächste Lauf und ci-diag zeigen die Unterschiede)
         if: always() && steps.build.outputs.rc == '0'
         # gezielte Prüfung (repro_only) baut auch große Pakete zweimal: mehr Zeit
-        timeout-minutes: ${{ inputs.repro_only != '' && 150 || 35 }}
+        timeout-minutes: ${{ inputs.repro_only != '' && 150 || 50 }}
         env:
           REPRO_ONLY: ${{ inputs.repro_only }}  # über env, nicht in den Befehl eingesetzt
         run: |
           if [ $(( $(date +%s) - JOB_START )) -gt $((250 * 60)) ]; then echo "::notice title=Reproduzierbarkeit::übersprungen (Zeitbudget)"; exit 0; fi
           sudo env "PATH=$PATH" SYP_SRCCACHE="$SYM/sources" SYP_BUILD_NET=strict STRICT=1 OUT="$PWD/out/repro.log" \
             ONLY="$REPRO_ONLY" GITHUB_RUN_NUMBER="$GITHUB_RUN_NUMBER" \
-            tools/repro-check.sh out/repo/symfonos distro/recipes "$SYM" "$PWD/keys/release.key" 6
+            tools/repro-check.sh out/repo/symfonos distro/recipes "$SYM" "$PWD/keys/release.key" 12
       - name: Diagnose ablegen (Branch ci-diag)
         # Vollständige Logs und Bildschirmfotos für die Fehlersuche; enthält keine Geheimnisse
         if: always()
