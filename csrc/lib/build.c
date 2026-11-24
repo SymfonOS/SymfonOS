@@ -7,8 +7,10 @@
 #include <archive_entry.h>
 #include <dirent.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/file.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -771,13 +773,32 @@ char *build_recipe(const char *recipe, const char *outdir, const seckey *signer,
     jset(info, "origin", origin);
     char *out = NULL;
     if (info_validate(info)) goto done;
-    char *work;
+    char *work = NULL;
+    int worklock = -1;
     if (o->chroot) {
+        /* Fester Bauordner je Paket (/var/tmp/syp-build/NAME): Pfade, die Builds trotz -ffile-prefix-map
+         * festhalten (bash: CFLAGS in bashbug, BUILD_DIR in Makefile.inc), sind so bei jedem Bau gleich.
+         * Ein zweiter gleichzeitiger Bau desselben Pakets in diesem chroot (Sperre belegt) weicht auf einen
+         * zufälligen Namen aus. Im Host-/tmp bleibt der Name zufällig (vorhersagbare Namen dort sind angreifbar). */
         char *base = path_join(o->chroot, "var/tmp/syp-build");
         mkdir_p(base, 0755);
-        work = xasprintf("%s/%s-XXXXXX", base, jgets(pk, "name", "x"));
+        const char *nm = jgets(pk, "name", "x");
+        char *lk = xasprintf("%s/.%s.lock", base, nm);
+        worklock = open(lk, O_RDWR | O_CREAT | O_CLOEXEC | O_NOFOLLOW, 0600);
+        free(lk);
+        if (worklock >= 0 && flock(worklock, LOCK_EX | LOCK_NB) == 0) {
+            work = xasprintf("%s/%s", base, nm);
+            rm_rf(work); /* Rest eines abgebrochenen oder mit --keep-work behaltenen Baus */
+            if (mkdir(work, 0755)) {
+                free(work);
+                work = NULL;
+            }
+        }
+        if (!work) {
+            work = xasprintf("%s/%s-XXXXXX", base, nm);
+            if (!mkdtemp(work)) die("mkdtemp %s", work);
+        }
         free(base);
-        if (!mkdtemp(work)) die("mkdtemp %s", work);
     } else {
         work = make_tempdir("syp-build-");
     }
@@ -963,6 +984,7 @@ char *build_recipe(const char *recipe, const char *outdir, const seckey *signer,
         harden_free(&hr);
     }
     if (!o->keep_work) rm_rf(work);
+    if (worklock >= 0) close(worklock);
     else printf("   Arbeitsverzeichnis: %s\n", work);
     free(src);
     free(dest);
