@@ -7,14 +7,14 @@
 # Gebaut wird zweimal: unterscheiden sich die beiden Bauten, ist das Paket nicht reproduzierbar; sind sie gleich,
 # aber anders als das veröffentlichte Paket, ist dieses veraltet (ältere Bauumgebung, gleiche Version).
 # Ausgewählt werden rotierend (je CI-Lauf andere, GITHUB_RUN_NUMBER; sonst je Tag) Rezepte, deren Quellen zusammen höchstens MAX_SRC_MB (Standard 30)
-# groß sind, damit der Lauf kurz bleibt; ONLY=a,b prüft genau diese Pakete (ohne Größengrenze). Gebaut wird gegen eine Kopie des Repos (Pakete als Hardlinks, die
+# groß sind und deren veröffentlichtes Paket höchstens MAX_PKG_MB (Standard 5) groß ist, damit der Lauf kurz bleibt; ONLY=a,b prüft genau diese Pakete (ohne Größengrenze). Gebaut wird gegen eine Kopie des Repos (Pakete als Hardlinks, die
 # Zielpakete entfernt), ohne in die Bauumgebung zu installieren. Das Ergebnis steht als Hinweis im Lauf;
 # die Liste steht in $OUT (Standard repro.txt). Mit STRICT=1 endet das Skript mit Exit 1, wenn ein Paket nicht
 # reproduzierbar ist (Gate); veraltete veröffentlichte Pakete sind eine Warnung (ein Neubau behebt sie).
 set -euo pipefail
 REPO=$(realpath "${1:?Repo fehlt}") RECIPES=$(realpath "${2:?Rezepte fehlen}") BROOT=${3:?Bauumgebung fehlt}
 KEY=${4:?Schlüssel fehlt} N=${5:-4}
-MAX_SRC_MB=${MAX_SRC_MB:-30} OUT=${OUT:-repro.txt} STRICT=${STRICT:-0} ONLY=${ONLY:-} REPO_NAME=${REPO_NAME:-symfonos}  # Name wie im signierten Index
+MAX_SRC_MB=${MAX_SRC_MB:-30} MAX_PKG_MB=${MAX_PKG_MB:-5} OUT=${OUT:-repro.txt} STRICT=${STRICT:-0} ONLY=${ONLY:-} REPO_NAME=${REPO_NAME:-symfonos}  # Name wie im signierten Index
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 SYP="$ROOT/csrc/bin/syp"
 CACHE=${SYP_SRCCACHE:-$BROOT/sources}
@@ -23,10 +23,11 @@ w=$(mktemp -d)
 trap 'rm -rf "$w"' EXIT
 
 # Auswahl: Name, Paketdatei (wie im Pool)
-python3 -I - "$RECIPES" "$CACHE" "$REPO/pool" "$N" "$MAX_SRC_MB" "$ONLY" > "$w/pick.tsv" <<'PY'
+python3 -I - "$RECIPES" "$CACHE" "$REPO/pool" "$N" "$MAX_SRC_MB" "$ONLY" "$MAX_PKG_MB" > "$w/pick.tsv" <<'PY'
 import os, sys, time, tomllib
 recipes, cache, pool, n, max_mb = sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4]), int(sys.argv[5])
 only = [x for x in sys.argv[6].split(",") if x]
+max_pkg = float(sys.argv[7])
 have = {f: os.path.join(d, f) for d, _, fs in os.walk(pool) for f in fs if f.endswith(".syp")}
 cand = []
 for d in sorted(os.listdir(recipes)):
@@ -46,7 +47,10 @@ for d in sorted(os.listdir(recipes)):
         fn = s.get("filename") or s.get("url", "").rsplit("/", 1)[-1]
         q = os.path.join(cache, fn)
         size += os.path.getsize(q) if os.path.exists(q) else 10**12
-    if (name in only) if only else size <= max_mb * 1048576:
+    # Bauzeit: neben den Quellen auch die Größe des gebauten Pakets begrenzen (kdenlive: 17 MB Paket,
+    # zwei Bauten dauerten länger als die 35 Minuten des Schritts)
+    small = size <= max_mb * 1048576 and os.path.getsize(have[pkg]) <= max_pkg * 1048576
+    if (name in only) if only else small:
         cand.append((name, have[pkg]))
 if only:
     for c in cand:
