@@ -82,7 +82,8 @@ if [[ ${APPTEST:-0} == 1 ]] && ((session)); then
       [[ -n $app && -z ${shotdone[$app]:-} ]] || continue
       shotdone[$app]=1; shot "app-$app"
     done < <(grep -aoE "symfonos-apptest\[[0-9]+\]: läuft [a-z0-9-]+" <<<"$log" | awk '{print $3}')
-    grep -aqE "symfonos-apptest\[[0-9]+\]: ende" <<<"$log" && break
+    # Ende: Meldung des Skripts, oder der Dienst ist beendet (falls eine Kernel-Meldung die Zeile zerrissen hat)
+    grep -aqE "symfonos-apptest\[[0-9]+\]: ende|apptest@autostart\.service: (Consumed|Deactivated)" <<<"$log" && break
     kill -0 "$qpid" 2>/dev/null || break
     sleep 1
   done
@@ -108,7 +109,12 @@ python3 "$(dirname "$0")/avc-summary.py" "$OUT/serial.log" > "$OUT/avc.txt" 2>&1
 echo ":: SELinux: $(tail -1 "$OUT/avc.txt")"
 if [[ ${APPTEST:-0} == 1 ]]; then
   grep -aE "symfonos-apptest\[[0-9]+\]: " <<<"$log" | sed -E 's/.*symfonos-apptest\[[0-9]+\]: //' > "$OUT/apptest.txt" || true
-  grep -q '^ende' "$OUT/apptest.txt" || echo "::warning title=Programmstart-Test::nicht vollständig durchgelaufen"
+  # vollständig: »ende« gelesen, oder der Dienst ist beendet und alle zehn Programme sind abgehandelt
+  # (eine Kernel-Meldung auf der Konsole kann die Zeile mit »ende« zerreißen)
+  done_n=$(grep -cE '^(läuft|beendet|fehlt) ' "$OUT/apptest.txt" || true)
+  grep -q '^ende' "$OUT/apptest.txt" ||
+    { ((done_n >= 10)) && grep -aqE 'apptest@autostart\.service: (Consumed|Deactivated)' <<<"$log"; } ||
+    echo "::warning title=Programmstart-Test::nicht vollständig durchgelaufen"
   ok=$(grep -c '^läuft ' "$OUT/apptest.txt" || true)
   echo ":: Programmstart-Test: $ok gestartet"
   # Vorschau-Programme sollen das ISO nicht blockieren: Fehlschläge als Warnung mit der Programmausgabe

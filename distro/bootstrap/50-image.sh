@@ -142,7 +142,8 @@ for app in krita blender kdenlive ardour9 symfonos-store symfonos-design syp-con
   rm -f "$out"
   sleep 3
 done
-log "ende"
+# zweimal: eine Kernel-Meldung auf der seriellen Konsole kann eine Zeile zerreißen (desktop-test.sh liest dort mit)
+log "ende"; sleep 2; log "ende"
 SH
   chmod 755 "$IMG/usr/lib/symfonos/apptest"
   cat > "$IMG/etc/xdg/autostart/symfonos-apptest.desktop" <<'CONF'
