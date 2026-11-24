@@ -20,8 +20,11 @@ typedef struct {
  *   3: Abhängigkeiten aus gelinkten Bibliotheken, Python-Pakete unabhängig von der Bauumgebung (pip
  *      --ignore-installed; vorher waren sie leer, wenn dieselbe Version dort schon installiert war)
  *   4: -ffile-prefix-map für den Bauordner, CMAKE_SYSTEM_VERSION fest, deterministische ar-Archive
- *      (binutils), Qt ohne SBOM – gefunden vom Reproduzierbarkeits-Gate */
-#define SYP_BUILD_REV 4
+ *      (binutils), Qt ohne SBOM – gefunden vom Reproduzierbarkeits-Gate
+ *   5: fester Bauordner im chroot (/var/tmp/syp-build/NAME), ar-Kopfzeilen deterministisch – der zufällige
+ *      Ordnername stand in CFLAGS-Kopien (curl-config, bashbug) und verschob ELF-Abschnitte (von CMake
+ *      genullte Bau-RPATHs behalten ihre Länge); 45 Pakete enthielten ihn wörtlich */
+#define SYP_BUILD_REV 5
 
 /* Baut ein Rezept; gibt Pfad des .syp zurück (NULL + set_error) */
 int ar_normalize(const char *path); /* .a-Kopfzeilen deterministisch; Zahl der Änderungen oder -1 */
