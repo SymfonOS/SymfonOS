@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "python-numpy"
-version = "2.3.4-1"
+version = "2.3.4-2"
 summary = "Numerik für Python (NumPy, ohne externes BLAS)"
 license = "BSD-3-Clause"
 url = "https://files.pythonhosted.org/packages/source/n/numpy/"

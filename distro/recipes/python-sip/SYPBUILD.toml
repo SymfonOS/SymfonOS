@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "python-sip"
-version = "6.17.2-1"
+version = "6.17.2-2"
 arch = "any"
 summary = "Generator für Python-Anbindungen an C/C++ (SIP)"
 license = "BSD-2-Clause"

@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "icu"
-version = "77.1-1"
+version = "77.1-2"
 summary = "Unicode-Bibliothek (ICU)"
 license = "Unicode-3.0"
 url = "https://github.com/unicode-org/icu/releases/download/release-77-1/"

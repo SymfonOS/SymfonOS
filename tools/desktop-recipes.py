@@ -2099,6 +2099,20 @@ def old_sums(path: Path) -> dict:
     return sums
 
 
+# Neu gebaut am 24.11.2026 mit festem Bauordner (syp 1.0.0-30): die veröffentlichten Pakete hielten den
+# zufällig benannten Bauordner fest (CFLAGS in *-config, Python-Metadaten, Debug-Pfade) – je eine Revision mehr.
+NEUBAU_BAUORDNER = {
+    "ardour", "boost", "fftw", "icu", "krita", "libaom", "llvm", "opencv", "python-cython", "python-docutils",
+    "python-mako", "python-meson-python", "python-numpy", "python-ply", "python-pyparsing",
+    "python-pyproject-metadata", "python-pyqt-builder", "python-pyqt6", "python-pyqt6-sip", "python-pyyaml",
+    "python-setuptools-scm", "python-sip", "qt6-base", "qt6-declarative", "udisks2"
+}
+for _p in PKGS:
+    if _p["name"] in NEUBAU_BAUORDNER:
+        _v, _r = _p["version"].rsplit("-", 1)
+        _p["version"] = f"{_v}-{int(_r) + 1}"
+
+
 def render(p: dict, sums: dict) -> str:
     L = ["# symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md", GENERATED, "[package]",
          f"name = {q(p['name'])}", f"version = {q(p['version'])}"]

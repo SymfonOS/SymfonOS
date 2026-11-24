@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "udisks2"
-version = "2.10.1-2"
+version = "2.10.1-3"
 summary = "Laufwerksverwaltung (UDisks2)"
 license = "GPL-2.0-or-later AND LGPL-2.0-or-later"
 url = "https://github.com/storaged-project/udisks/releases/download/udisks-2.10.1/"

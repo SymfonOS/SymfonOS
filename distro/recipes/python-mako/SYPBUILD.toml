@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "python-mako"
-version = "1.3.10-1"
+version = "1.3.10-2"
 arch = "any"
 summary = "Mako-Templates (für Mesa)"
 license = "MIT"

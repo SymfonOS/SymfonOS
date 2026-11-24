@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "python-pyyaml"
-version = "6.0.2-1"
+version = "6.0.2-2"
 summary = "YAML für Python"
 license = "MIT"
 url = "https://files.pythonhosted.org/packages/source/P/PyYAML/"

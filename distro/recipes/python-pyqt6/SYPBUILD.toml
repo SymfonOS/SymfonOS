@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "python-pyqt6"
-version = "6.9.1-2"
+version = "6.9.1-3"
 summary = "Python-Anbindung an Qt 6 (PyQt6)"
 license = "GPL-3.0-only"
 url = "https://files.pythonhosted.org/packages/source/p/pyqt6/"

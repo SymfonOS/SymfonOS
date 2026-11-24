@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "python-pyproject-metadata"
-version = "0.9.1-1"
+version = "0.9.1-2"
 arch = "any"
 summary = "Projektmetadaten aus pyproject.toml (PEP 621)"
 license = "MIT"

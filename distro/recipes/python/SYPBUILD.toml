@@ -1,7 +1,7 @@
 # symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
 [package]
 name = "python"
-version = "3.13.7-2"
+version = "3.13.7-3"
 summary = "Python-Interpreter"
 license = "PSF-2.0"
 url = "https://www.python.org/ftp/python/3.13.7/"

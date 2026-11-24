@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "python-docutils"
-version = "0.21.2-1"
+version = "0.21.2-2"
 arch = "any"
 summary = "Dokumentationswerkzeuge (Handbuchseiten)"
 license = "BSD-2-Clause AND GPL-3.0-or-later AND Python-2.0"

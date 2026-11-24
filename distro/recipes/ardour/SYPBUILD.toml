@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "ardour"
-version = "9.8-5"
+version = "9.8-6"
 summary = "Digitale Audio-Workstation (Ardour)"
 license = "GPL-2.0-or-later"
 url = "https://github.com/SymfonOS/SymfonOS/releases/download/quellen/"
