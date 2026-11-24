@@ -313,6 +313,65 @@ static int is_elf(const char *p) {
     return n == 4 && !memcmp(m, "\x7f" "ELF", 4);
 }
 
+/* ar-Archive (.a) deterministisch machen, wie `ar D` bzw. binutils mit --enable-deterministic-archives:
+ * Zeitstempel, uid und gid 0, Modus 644 (Symboltabelle "/" und "/SYM64/": Modus 0). Nur die Kopfzeilen
+ * (feste 60 Byte) werden überschrieben; Längen und Offsets bleiben, die Symboltabelle bleibt gültig.
+ * Sonst trägt jedes mit einem nicht deterministischen ar gebaute Archiv die Bauzeit (so bison, glibc,
+ * libsepol vom 18.11.2026). Rückgabe: Zahl geänderter Kopfzeilen, -1 bei Fehler oder fremdem Format. */
+int ar_normalize(const char *p) {
+    FILE *f = fopen(p, "r+b");
+    if (!f) return -1;
+    char magic[8];
+    if (fread(magic, 1, 8, f) != 8 || memcmp(magic, "!<arch>\n", 8)) {
+        fclose(f);
+        return -1;
+    }
+    int changed = 0;
+    for (;;) {
+        long off = ftell(f);
+        char h[60];
+        size_t n = fread(h, 1, 60, f);
+        if (n == 0) break;
+        if (n != 60 || h[58] != '`' || h[59] != '\n') {
+            changed = -1;
+            break;
+        }
+        char sz[11];
+        memcpy(sz, h + 48, 10);
+        sz[10] = 0;
+        char *end;
+        long size = strtol(sz, &end, 10);
+        if (end == sz || size < 0) {
+            changed = -1;
+            break;
+        }
+        int symtab = !memcmp(h, "/               ", 16) || !memcmp(h, "/SYM64/         ", 16);
+        int strtab = !memcmp(h, "//              ", 16);
+        if (!strtab) {
+            char nh[60];
+            memcpy(nh, h, 60);
+            snprintf(nh + 16, 13, "%-12s", "0");
+            snprintf(nh + 28, 7, "%-6s", "0");
+            snprintf(nh + 34, 7, "%-6s", "0");
+            snprintf(nh + 40, 9, "%-8s", symtab ? "0" : "644");
+            nh[48] = h[48]; /* snprintf schreibt eine abschließende 0 in das nächste Feld */
+            if (memcmp(nh, h, 60)) {
+                if (fseek(f, off, SEEK_SET) || fwrite(nh, 1, 60, f) != 60) {
+                    changed = -1;
+                    break;
+                }
+                changed++;
+            }
+        }
+        if (fseek(f, off + 60 + size + (size & 1), SEEK_SET)) {
+            changed = -1;
+            break;
+        }
+    }
+    if (fclose(f)) changed = -1;
+    return changed;
+}
+
 /* Paketinhalt an das Dateisystem-Layout anpassen (wie Fedora/Arch): /bin, /sbin, /lib, /lib64 sind
  * Symlinks nach /usr, /var/run und /var/lock zeigen nach /run. Rezepte, die dorthin installieren,
  * würden sonst mit dem Paket filesystem kollidieren. Laufzeitverzeichnisse legt systemd-tmpfiles an. */
@@ -354,6 +413,7 @@ static void post_process(const char *dir, int strip) {
                 if (S_ISDIR(st.st_mode)) post_process(p, strip);
                 else if (S_ISREG(st.st_mode) && str_ends(d, ".la")) unlink(p); /* libtool-Archive */
                 else if (S_ISREG(st.st_mode) && !strcmp(d, "dir") && strstr(p, "/share/info/")) unlink(p);
+                else if (S_ISREG(st.st_mode) && str_ends(d, ".a")) ar_normalize(p);
                 else if (strip && S_ISREG(st.st_mode) && is_elf(p)) {
                     const char *mode = str_ends(d, ".a") || str_ends(d, ".o") ? "--strip-debug" : "--strip-unneeded";
                     if (strstr(p, "/lib/modules/") || strstr(p, "/usr/lib/debug/")) mode = NULL;
