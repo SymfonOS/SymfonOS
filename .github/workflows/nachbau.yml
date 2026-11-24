@@ -1,0 +1,57 @@
+name: Nachbau
+
+# Unabhängiger Nachbau (tools/nachbau.sh): auf einem frischen Runner – nicht in der Bauumgebung des Bootstraps –
+# eine Bauumgebung allein aus dem veröffentlichten stable-Repo aufsetzen, eine Stichprobe veröffentlichter
+# Pakete aus den Rezepten neu bauen und inhaltlich mit dem Veröffentlichten vergleichen. Prüft damit auch, dass
+# sich symfonOS aus seinen eigenen Paketen heraus bauen lässt (Selbstbau).
+on:
+  schedule:
+    - cron: "37 3 * * 3"
+  workflow_dispatch:
+    inputs:
+      pakete:
+        description: "nur diese Pakete (leer = Stichprobe)"
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  nachbau:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v5
+      - name: syp bauen
+        run: |
+          tools/apt-install.sh build-essential pkg-config libarchive-dev libzstd-dev libsodium-dev libsqlite3-dev \
+            libcurl4-openssl-dev zstd
+          make -s -C csrc
+      - name: Speicherplatz
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          df -h /
+      - name: Nachbau
+        env:
+          PAKETE: ${{ inputs.pakete }}   # über env, nicht in den Befehl eingesetzt
+        run: |
+          rc=0
+          # shellcheck disable=SC2086
+          sudo env "PATH=$PATH" WORK="$RUNNER_TEMP/nachbau" OUT="$PWD/nachbau.txt" N=8 \
+            GITHUB_RUN_NUMBER="$GITHUB_RUN_NUMBER" tools/nachbau.sh $PAKETE || rc=$?
+          [ -f nachbau.txt ] && cat nachbau.txt >> "$GITHUB_STEP_SUMMARY"
+          case $rc in
+            0) echo "::notice title=Nachbau::$(tail -1 nachbau.txt)" ;;
+            1) echo "::error title=Nachbau::$(tail -1 nachbau.txt)"; exit 1 ;;
+            *) echo "::warning title=Nachbau::nichts nachgebaut (rc $rc)" ;;
+          esac
+      - name: Protokolle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nachbau
+          path: |
+            nachbau.txt
+            ${{ runner.temp }}/nachbau/out/*.log
+            ${{ runner.temp }}/nachbau/out/*.diff
+          if-no-files-found: ignore

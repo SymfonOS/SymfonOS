@@ -89,7 +89,8 @@ for name in (want or sorted(pub)):
         continue
     rows.append((name, d, e["info"]["version"], e["file"], e["sha256"]))
 if not want and rows:
-    start = (int(time.time()) // 86400 * n) % len(rows)
+    slot = int(os.environ.get("GITHUB_RUN_NUMBER") or int(time.time()) // 86400)   # je CI-Lauf eine neue Stichprobe
+    start = (slot * n) % len(rows)
     rows = [rows[(start + i) % len(rows)] for i in range(min(n, len(rows)))]
 for row in rows:
     print(*row, sep="\t")
@@ -102,6 +103,12 @@ if [ "$BROOT" != - ]; then
   [ "$(id -u)" = 0 ] || { echo "!! die Bauumgebung braucht Root-Rechte (sudo -E $0 …) oder NACHBAU_ROOT=-" >&2; exit 2; }
   mkdir -p "$BROOT/etc/syp/keys"
   cp "$PUB" "$BROOT/etc/syp/keys/symfonos-release.pub"
+  # Paketskripte und Bauten im chroot brauchen /dev, /proc und /sys (syp build --chroot hängt nichts ein)
+  for m in dev proc sys; do mkdir -p "$BROOT/$m"; done
+  mountpoint -q "$BROOT/dev" || mount --bind /dev "$BROOT/dev"
+  mountpoint -q "$BROOT/proc" || mount -t proc proc "$BROOT/proc"
+  mountpoint -q "$BROOT/sys" || mount --bind /sys "$BROOT/sys"
+  trap 'for m in sys proc dev; do mountpoint -q "$BROOT/$m" && umount -l "$BROOT/$m"; done' EXIT
   url=$REPO; [ "$remote" = 1 ] || url="file://$REPO"
   printf 'arch = "x86_64"\n[[repo]]\nname = "symfonos"\nurl = "%s"\nflat = %s\n[snapshots]\nenabled = false\n' \
     "$url" "$([ "$remote" = 1 ] && echo true || echo false)" > "$BROOT/etc/syp/syp.toml"
