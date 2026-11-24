@@ -376,13 +376,21 @@ path = "hello.c"
 [build]
 build = 'cc -o hello hello.c; test ! -e "$RECIPEDIR/../../../../../home/user/symfonos"; test -f "$RECIPEDIR/hello.c"'
 check = './hello | grep -q chroot'
-package = 'install -Dm755 hello "$DESTDIR/usr/bin/hello"'
+package = 'install -Dm755 hello "$DESTDIR/usr/bin/hello"; echo "$SRCDIR $CFLAGS" > "$DESTDIR/usr/bin/.pfad"'
 ''')
         syp("build", rec / "SYPBUILD.toml", "--chroot", r, "-o", tmp_path / "out")
+        # fester Bauordner je Paket: Pfade, die ein Build festhält, sind bei jedem Bau gleich
+        with tarfile.open(tmp_path / "out/hello-1.0-1-x86_64.syp") as tf:
+            raw = subprocess.run(["zstd", "-dcq"], input=tf.extractfile("data.tar.zst").read(),
+                                 capture_output=True, check=True).stdout
+        with tarfile.open(fileobj=io.BytesIO(raw)) as tf:
+            pfad = tf.extractfile("usr/bin/.pfad").read().decode()
+        assert pfad.startswith("/var/tmp/syp-build/hello/src ")
+        assert "-ffile-prefix-map=/var/tmp/syp-build/hello=/usr/src/hello" in pfad
     finally:
         for _, dst in reversed(mounts):
             subprocess.run(["umount", str(dst)])
-    assert not list((r / "var/tmp/syp-build").iterdir())
+    assert not [p for p in (r / "var/tmp/syp-build").iterdir() if not p.name.startswith(".")]
     key, pub = keygen(tmp_path)
     root = setup_root(tmp_path, tmp_path / "repo", pub)
     syp("-r", root, "-y", "install", "--allow-unsigned", tmp_path / "out/hello-1.0-1-x86_64.syp")
