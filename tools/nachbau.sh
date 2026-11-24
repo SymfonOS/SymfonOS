@@ -174,7 +174,8 @@ while IFS=$'\t' read -r name dir ver file sha; do
   if python3 -I "$ROOT/tools/pkg-compare.py" "$pub" "$new" veröffentlicht nachgebaut > "$WORK/out/$name.diff"; then
     same+=("$name"); echo "- $name $ver: gleich" >> "$OUT"
   else
-    diff+=("$name"); { echo "- $name $ver: **ABWEICHEND**"; echo '```'; head -40 "$WORK/out/$name.diff"; echo '```'; } >> "$OUT"
+    diff+=("$name"); cp "$new" "$WORK/out/"   # zum Nachsehen (Workflow lädt es als Artefakt hoch)
+    { echo "- $name $ver: **ABWEICHEND**"; echo '```'; head -40 "$WORK/out/$name.diff"; echo '```'; } >> "$OUT"
   fi
 done < "$WORK/pick.tsv"
 {
