@@ -104,7 +104,11 @@ eigenen Netz-Namensraum, in dem nur `lo` existiert. Ein Bau kann so nichts nachl
 Geht das nicht (kein Namensraum möglich), warnt syp und baut mit Netz; `SYP_BUILD_NET=strict` macht daraus
 einen Fehler (so im Bootstrap), `SYP_BUILD_NET=on` schaltet die Isolation ab.
 
-Nach `package` prüft `syp build` jede ELF-Datei (PIE, RELRO, BIND_NOW, NX-Stack, TEXTREL, RPATH) und
+Nach `package` räumt `syp build` auf: libtool-Archive (`.la`) fallen weg, ELF-Dateien werden gestrippt
+(`strip = false` schaltet das ab), und die Kopfzeilen von ar-Archiven (`.a`) werden deterministisch gemacht
+(Zeit, uid, gid 0, Modus 644 – wie `ar D`), damit ein Paket nicht vom ar der Bauumgebung abhängt.
+
+Danach prüft `syp build` jede ELF-Datei (PIE, RELRO, BIND_NOW, NX-Stack, TEXTREL, RPATH) und
 alle Dateirechte (beschreibbar für alle → Fehler, setuid/setgid → Übersicht). Das Ergebnis steht
 im Paket unter `origin.hardening`.
 

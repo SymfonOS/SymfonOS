@@ -24,6 +24,7 @@ typedef struct {
 #define SYP_BUILD_REV 4
 
 /* Baut ein Rezept; gibt Pfad des .syp zurück (NULL + set_error) */
+int ar_normalize(const char *path); /* .a-Kopfzeilen deterministisch; Zahl der Änderungen oder -1 */
 char *build_recipe(const char *recipe, const char *outdir, const seckey *signer, const build_opts *o);
 jval *recipe_load(const char *recipe); /* geparstes TOML */
 char *recipe_pkgfile(const jval *recipe); /* erwarteter Dateiname des Pakets */

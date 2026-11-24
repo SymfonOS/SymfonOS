@@ -258,6 +258,34 @@ post_install = "echo installiert"
     assert "makedepends" not in info and info["scripts"]["post_install"] == "echo installiert"
 
 
+def test_build_makes_ar_archives_deterministic(tmp_path):
+    # wie ein nicht deterministisches ar: Symboltabelle mit Bauzeit, Glieder mit Zeit, uid/gid und Modus 100644
+    def hdr(name, date, uid, mode, size):
+        return f"{name:<16}{date:<12}{uid:<6}{uid:<6}{mode:<8}{size:<10}`\n".encode()
+    arch = (b"!<arch>\n" + hdr("/", 1794987313, 0, 0, 4) + b"\0\0\0\0"
+            + hdr("a.o/", 1700000000, 1000, 100644, 3) + b"abc\n" + hdr("b.o/", 1700000001, 1000, 100600, 2) + b"de")
+    (tmp_path / "libx.a").write_bytes(arch)
+    (tmp_path / "SYPBUILD.toml").write_text('''
+[package]
+name = "arx"
+version = "1-1"
+arch = "any"
+[[source]]
+path = "libx.a"
+[build]
+package = 'install -Dm644 libx.a "$DESTDIR/usr/lib/libx.a"'
+''')
+    syp("build", tmp_path / "SYPBUILD.toml", "-o", tmp_path / "o")
+    with tarfile.open(tmp_path / "o/arx-1-1-any.syp") as tf:
+        raw = subprocess.run(["zstd", "-dcq"], input=tf.extractfile("data.tar.zst").read(),
+                             capture_output=True, check=True).stdout
+    with tarfile.open(fileobj=io.BytesIO(raw)) as tf:
+        got = tf.extractfile("usr/lib/libx.a").read()
+    want = (b"!<arch>\n" + hdr("/", 0, 0, 0, 4) + b"\0\0\0\0"
+            + hdr("a.o/", 0, 0, 644, 3) + b"abc\n" + hdr("b.o/", 0, 0, 644, 2) + b"de")
+    assert got == want
+
+
 def test_build_takes_categories_from_desktop_files(tmp_path):
     (tmp_path / "SYPBUILD.toml").write_text('''
 [package]
