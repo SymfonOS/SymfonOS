@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "python-pyqt6-sip"
-version = "13.13.0-1"
+version = "13.13.0-2"
 summary = "sip-Laufzeitmodul für PyQt6"
 license = "BSD-2-Clause"
 url = "https://files.pythonhosted.org/packages/source/p/pyqt6_sip/"

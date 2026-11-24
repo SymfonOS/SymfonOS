@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "python-pyqt-builder"
-version = "1.21.0-1"
+version = "1.21.0-2"
 arch = "any"
 summary = "Bau-Backend für PyQt und PyQt-Erweiterungen"
 license = "BSD-2-Clause"

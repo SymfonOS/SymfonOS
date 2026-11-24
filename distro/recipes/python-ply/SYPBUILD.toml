@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "python-ply"
-version = "3.11-1"
+version = "3.11-2"
 arch = "any"
 summary = "Lex/Yacc für Python (Intel-Vulkan-Treiber)"
 license = "BSD-3-Clause"

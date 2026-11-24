@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "python-pyparsing"
-version = "3.2.3-1"
+version = "3.2.3-2"
 arch = "any"
 summary = "Parser-Bibliothek für Python (GVariant-Schema-Compiler von Flatpak)"
 license = "MIT"

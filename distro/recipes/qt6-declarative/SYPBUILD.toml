@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "qt6-declarative"
-version = "6.9.2-1"
+version = "6.9.2-2"
 summary = "Qt 6 QML und Qt Quick"
 license = "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only"
 url = "https://download.qt.io/archive/qt/6.9/6.9.2/submodules/"

@@ -1,7 +1,7 @@
 # symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
 [package]
 name = "gawk"
-version = "5.3.2-1"
+version = "5.3.2-2"
 summary = "GNU awk"
 license = "GPL-3.0-or-later"
 url = "https://ftp.gnu.org/gnu/gawk/"

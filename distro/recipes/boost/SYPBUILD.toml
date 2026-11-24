@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "boost"
-version = "1.89.0-1"
+version = "1.89.0-2"
 summary = "C++-Bibliotheken (Boost)"
 license = "BSL-1.0"
 url = "https://github.com/boostorg/boost/releases/download/boost-1.89.0/"

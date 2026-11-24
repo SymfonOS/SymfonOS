@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "python-meson-python"
-version = "0.18.0-1"
+version = "0.18.0-2"
 arch = "any"
 summary = "Bau-Backend für Python-Pakete mit Meson"
 license = "MIT"

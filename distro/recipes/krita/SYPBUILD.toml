@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "krita"
-version = "6.0.4.1-2"
+version = "6.0.4.1-3"
 summary = "Malprogramm (Krita 6, Vorschau auf Qt 6)"
 license = "GPL-3.0-or-later"
 url = "https://github.com/KDE/krita/archive/v6.0.4.1/"

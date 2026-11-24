@@ -1,7 +1,7 @@
 # symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
 [package]
 name = "gcc"
-version = "15.2.0-1"
+version = "15.2.0-2"
 summary = "GNU Compiler Collection (C, C++)"
 license = "GPL-3.0-or-later WITH GCC-exception-3.1"
 url = "https://ftp.gnu.org/gnu/gcc/gcc-15.2.0/"

@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "libaom"
-version = "3.12.1-1"
+version = "3.12.1-2"
 summary = "AV1-Video (Referenz)"
 license = "BSD-2-Clause"
 url = "https://storage.googleapis.com/aom-releases/"
