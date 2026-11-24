@@ -1,7 +1,7 @@
 # symfonOS-Rezept – Format: siehe docs/PAKETFORMAT.md
 [package]
 name = "bison"
-version = "3.8.2-1"
+version = "3.8.2-2"
 summary = "Parser-Generator"
 license = "GPL-3.0-or-later"
 url = "https://ftp.gnu.org/gnu/bison/"
