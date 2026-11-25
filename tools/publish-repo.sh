@@ -62,8 +62,13 @@ comm -13 "$w/have.tsv" "$w/want.tsv" | cut -f1 > "$w/upload.txt"
 # entfernen: Pakete im Release, deren Name der Index nicht mehr nennt (promotion.json u. a. bleiben)
 comm -23 <(cut -f1 "$w/have.tsv" | sort -u) <(cut -f1 "$w/want.tsv") | grep '\.syp$' > "$w/delete.txt" || true
 
-upload() {  # GitHub antwortet gelegentlich mit 502: bis zu drei Versuche
-  for _ in 1 2 3; do gh release upload "$TAG" --repo "$REPO_SLUG" "$@" && return 0; sleep 30; done; return 1
+upload() {  # GitHub antwortet gelegentlich mit 500/502, bei Störungen auch minutenlang: fünf Versuche, wachsende Pause
+  local d
+  for d in 30 60 120 240 0; do
+    gh release upload "$TAG" --repo "$REPO_SLUG" "$@" && return 0
+    [ "$d" = 0 ] || { echo "   Hochladen fehlgeschlagen, neuer Versuch in ${d}s" >&2; sleep "${PUBLISH_RETRY_SLEEP:-$d}"; }
+  done
+  return 1
 }
 new=0 changed=0
 while read -r f; do

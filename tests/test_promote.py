@@ -112,6 +112,11 @@ elif cmd == "download":
     for f in hits:
         shutil.copy(os.path.join(d, f), out)
 elif cmd == "upload":
+    fail = os.environ.get("FAKE_GH_FAIL")   # Datei mit Zahl: so viele Uploads scheitern (wie HTTP 500)
+    n = int(open(fail).read() or 0) if fail else 0
+    if n > 0:
+        open(fail, "w").write(str(n - 1))
+        sys.exit("HTTP 500")
     for f in rest:   # FAKE_GH_DROP: Upload solcher Dateien geht stillschweigend verloren
         if not f.startswith("--") and not fnmatch.fnmatch(os.path.basename(f), os.environ.get("FAKE_GH_DROP", "-")):
             shutil.copy(f, d)
@@ -172,6 +177,18 @@ def test_promote_release_ci(tmp_path):
     for e in idx["packages"]:
         got = hashlib.sha256((rel / "repo-x86_64-testing" / os.path.basename(e["file"])).read_bytes()).hexdigest()
         assert got == e["sha256"], f"{e['file']}: Release-Datei passt nicht zum Index"
+    # scheitern Uploads vorübergehend (GitHub-Störung mit HTTP 500), helfen weitere Versuche
+    for f in src.rglob("libfoo-2-1-*.syp"):
+        f.unlink()
+    syp("repo-add", src, p("libfoo", "2-1", files={"usr/share/libfoo/VERSION": "2-1 nach Störung"}),
+        "--name", "symfonos", "-k", key)
+    fail = tmp_path / "fail"
+    fail.write_text("3")
+    run_ci(MIN_DAYS="0", FAKE_GH_FAIL=str(fail), PUBLISH_RETRY_SLEEP="0")
+    assert fail.read_text() == "0"
+    assert b"nach St" in subprocess.run(["zstd", "-dcq"], input=__import__("tarfile").open(
+        rel / "repo-x86_64-testing/libfoo-2-1-x86_64.syp").extractfile("data.tar.zst").read(),
+        capture_output=True).stdout
     # geht ein Upload verloren, merkt es die Gegenprobe nach dem Veröffentlichen
     for f in src.rglob("libfoo-2-1-*.syp"):
         f.unlink()
