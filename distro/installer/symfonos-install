@@ -101,6 +101,7 @@ mkfs.fat -F32 -n EFI "$EFI" >/dev/null
 # ein zweiter Versuch an sfdisk (Partition durch dm-crypt belegt)
 cleanup() {
   local rc=$?
+  mountpoint -q "$MNT/sys/firmware/efi/efivars" && umount -l "$MNT/sys/firmware/efi/efivars"
   for m in run sys proc dev; do mountpoint -q "$MNT/$m" && umount -l "$MNT/$m"; done
   if ((rc)); then
     umount -R "$MNT" 2>/dev/null
@@ -159,6 +160,11 @@ fi
 
 say "System konfigurieren"
 for m in dev proc sys run; do mount --bind "/$m" "$MNT/$m"; done
+# UEFI: efivarfs ist ein eigener Mount unter /sys und kommt mit --bind nicht mit; ohne ihn scheitern
+# grub-install (efibootmgr) und bootctl beim Eintragen des Starteintrags (»No such file or directory«)
+if ((UEFI)) && mountpoint -q /sys/firmware/efi/efivars; then
+  mount --bind /sys/firmware/efi/efivars "$MNT/sys/firmware/efi/efivars"
+fi
 uuid() { blkid -s UUID -o value "$1"; }
 RU=$(uuid "$ROOTDEV")
 {
@@ -185,7 +191,10 @@ if ((ENCRYPT)); then
     echo 'GRUB_ENABLE_CRYPTODISK=y' >> "$MNT/etc/default/grub"
   fi
 fi
-sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"$CMDLINE\"|" "$MNT/etc/default/grub"
+# GRUB: rootflags=subvol=@ setzt grub-mkconfig bei Btrfs selbst (sonst stünde es doppelt in der Kommandozeile)
+GRUB_LINE=${CMDLINE/rootflags=subvol=@/}
+GRUB_LINE=${GRUB_LINE% }
+sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"$GRUB_LINE\"|" "$MNT/etc/default/grub"
 # Gemeinsame Härtungsparameter (Paket symfonos-security), für UKI fest eingebettet
 HARDEN=$(cat "$MNT/usr/lib/symfonos/kernel-cmdline" 2>/dev/null || true)
 install -d "$MNT/etc/kernel"
