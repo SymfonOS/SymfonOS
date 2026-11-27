@@ -224,3 +224,105 @@ def test_signature_next_to_uncompressed_name(tmp_path):
     recipe(root, "bz", f"file://{srv}/bz-1.tar.xz", bad)
     r = tool(root, "check")
     assert r.returncode == 1 and "ungültig" in r.stdout, r.stdout
+
+
+def mktag_repo(forge, path, gpghome, fpr, tag, files, sign_tag=True):
+    """Repo unter forge/path mit (signiertem) Tag; files: {Pfad: Inhalt}, Pfad mit »*« am Ende = ausführbar."""
+    repo = forge / path
+    repo.mkdir(parents=True)
+    env = dict(os.environ, GNUPGHOME=str(gpghome), GIT_CONFIG_GLOBAL="/dev/null", GIT_AUTHOR_NAME="Up", GIT_AUTHOR_EMAIL="up@example.invalid",
+               GIT_COMMITTER_NAME="Up", GIT_COMMITTER_EMAIL="up@example.invalid")
+    run = lambda *a: subprocess.run(["git", "-C", repo, *a], check=True, capture_output=True, env=env)
+    run("init", "-q")
+    for p, content in files.items():
+        f = repo / p.rstrip("*")
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_bytes(content)
+        if p.endswith("*"):
+            f.chmod(0o755)
+    (repo / "link").symlink_to("README")
+    run("add", "-A")
+    run("commit", "-qm", "release")
+    run("-c", f"user.signingkey={fpr}", "tag", *(["-s"] if sign_tag else ["-a"]), tag, "-m", f"release {tag}")
+    return repo, run
+
+
+def test_signed_git_tag(tmp_path):
+    """GitHub-Tag-Archiv ohne Signaturdatei: der signierte Release-Tag zählt, wenn das Archiv dem Baum entspricht."""
+    import io
+    import tarfile
+    root, ks, forge = tmp_path / "repo", tmp_path / "ks", tmp_path / "forge"
+    for d in (ks, root / "lookaside"):
+        d.mkdir(parents=True)
+    fpr, pub = mkkey(tmp_path / "g", "Upstream <up@example.invalid>")
+    other, _ = mkkey(tmp_path / "g2", "Fremd <evil@example.invalid>")
+    (ks / fpr).write_bytes(pub)
+    files = {"README": b"hallo\n", "src/main.c": b"int main(){return 0;}\n", "configure*": b"#!/bin/sh\n"}
+    repo, _ = mktag_repo(forge, "up/tool", tmp_path / "g", fpr, "v1.0", files)
+    mktag_repo(forge, "up/plain", tmp_path / "g", fpr, "v2", files, sign_tag=False)
+
+    def archive(repo, tag, prefix):
+        return subprocess.run(["git", "-C", repo, "archive", "--format=tar.gz", f"--prefix={prefix}/", tag],
+                              check=True, capture_output=True).stdout
+
+    def put(name, url, data):
+        if (root / "distro/recipes" / name).exists():
+            shutil.rmtree(root / "distro/recipes" / name)
+        recipe(root, name, url, data)
+        (root / "lookaside" / hashlib.sha256(data).hexdigest()).write_bytes(data)
+
+    good = archive(repo, "v1.0", "tool-1.0")
+    put("tool", "https://github.com/up/tool/archive/v1.0/tool-1.0.tar.gz", good)
+    put("plain", "https://github.com/up/plain/archive/refs/tags/v2.tar.gz", archive(forge / "up/plain", "v2", "plain-2"))
+    env = dict(SOURCE_SIGS_KEYSERVERS=f"file://{ks}/{{fpr}}", SOURCE_SIGS_FORGE_GITHUB=f"file://{forge}")
+    r = tool(root, "discover", **env)
+    assert r.returncode == 0 and "neu   tool: signierter Tag v1.0" in r.stdout, r.stdout + r.stderr
+    keys = (root / "distro/source-keys.toml").read_text()
+    assert 'sig = "git-tag"' in keys and "[plain]" not in keys        # unsignierter Tag: nichts eingetragen
+    r = tool(root, "check", **env)
+    assert r.returncode == 0 and "ok    tool (signierter Tag v1.0" in r.stdout, r.stdout + r.stderr
+
+    # Archiv mit untergeschobener bzw. veränderter Datei: abgelehnt, obwohl der Tag gültig signiert ist
+    for change in ({"tool-1.0/src/extra.c": b"evil\n"}, {"tool-1.0/src/main.c": b"int main(){return 1;}\n"}):
+        buf = io.BytesIO()
+        with tarfile.open(fileobj=io.BytesIO(good)) as src, tarfile.open(fileobj=buf, mode="w:gz") as dst:
+            for m in src:
+                if m.name in change:
+                    continue
+                dst.addfile(m, src.extractfile(m) if m.isfile() else None)
+            for n, content in change.items():
+                ti = tarfile.TarInfo(n)
+                ti.size = len(content)
+                dst.addfile(ti, io.BytesIO(content))
+        put("tool", "https://github.com/up/tool/archive/v1.0/tool-1.0.tar.gz", buf.getvalue())
+        r = tool(root, "check", **env)
+        assert r.returncode == 1 and "FEHL  tool: src/" in r.stdout, r.stdout + r.stderr
+
+    # neue Version, Tag von einem fremden Schlüssel signiert: abgelehnt
+    subprocess.run(["git", "-C", repo, "commit", "-q", "--allow-empty", "-m", "2"], check=True, capture_output=True,
+                   env=dict(os.environ, GIT_CONFIG_GLOBAL="/dev/null", GIT_AUTHOR_NAME="X", GIT_AUTHOR_EMAIL="x@x", GIT_COMMITTER_NAME="X",
+                            GIT_COMMITTER_EMAIL="x@x"))
+    subprocess.run(["git", "-C", repo, "-c", f"user.signingkey={other}", "tag", "-s", "v1.1", "-m", "1.1"], check=True,
+                   capture_output=True, env=dict(os.environ, GNUPGHOME=str(tmp_path / "g2"), GIT_CONFIG_GLOBAL="/dev/null",
+                                                  GIT_COMMITTER_NAME="X",
+                                                  GIT_COMMITTER_EMAIL="x@x"))
+    put("tool", "https://github.com/up/tool/archive/v1.1/tool-1.1.tar.gz", archive(repo, "v1.1", "tool-1.1"))
+    r = tool(root, "check", **env)
+    assert r.returncode == 1 and "fremdem Schlüssel" in r.stdout, r.stdout + r.stderr
+
+
+def test_tag_source_urls():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("ss", TOOL)
+    ss = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(ss)
+    t = ss.tag_source
+    assert t("https://github.com/systemd/systemd/archive/v257.8/systemd-257.8.tar.gz") == \
+        ("https://github.com/systemd/systemd", "v257.8")
+    assert t("https://github.com/o/r/archive/refs/tags/v1.2.tar.gz") == ("https://github.com/o/r", "v1.2")
+    assert t("https://github.com/rhboot/efivar/archive/39.tar.gz") == ("https://github.com/rhboot/efivar", "39")
+    assert t("https://gitlab.freedesktop.org/pipewire/pipewire/-/archive/1.4.7/pipewire-1.4.7.tar.bz2") == \
+        ("https://gitlab.freedesktop.org/pipewire/pipewire", "1.4.7")
+    assert t("https://gitlab.com/o/r/-/archive/" + "a" * 40 + "/r.tar.gz") is None      # Commit, kein Tag
+    assert t("https://github.com/o/r/releases/download/v1/r-1.tar.gz") is None          # Release-Datei
+    assert t("https://example.org/r-1.tar.gz") is None
