@@ -1,0 +1,72 @@
+name: VM-Tests
+
+# Die veröffentlichten ISOs wie auf echter Hardware prüfen (tools/vm-test.py): Start über die Firmware
+# (SeaBIOS bzw. UEFI/OVMF) statt qemu -kernel, Installation im laufenden Live-System, Neustart von der Platte
+# über den installierten Bootloader, bei Verschlüsselung mit eingetippter LUKS-Passphrase.
+# Läuft nach jedem erfolgreichen Bootstrap (frisches ISO) und von Hand; baut nichts neu.
+on:
+  workflow_run:
+    workflows: ["Bootstrap (aus Quellcode)"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      variante:
+        description: "ISO"
+        type: choice
+        options: [base, desktop]
+        default: base
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vm-tests
+  cancel-in-progress: false
+
+jobs:
+  vm:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: bios-grub, firmware: bios, boot: grub, encrypt: "" }
+          - { name: uefi-grub, firmware: uefi, boot: grub, encrypt: "" }
+          - { name: uefi-systemd-boot-luks, firmware: uefi, boot: systemd-boot, encrypt: "--encrypt" }
+    name: ${{ matrix.name }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: QEMU und OVMF
+        run: |
+          tools/apt-install.sh qemu-system-x86 qemu-utils ovmf xorriso imagemagick
+          sudo chmod 666 /dev/kvm 2>/dev/null || true
+          ls -l /dev/kvm || echo "::warning::kein KVM – der Test läuft emuliert und sehr langsam"
+      - name: ISO laden
+        env:
+          VARIANTE: ${{ inputs.variante || 'base' }}
+        run: |
+          tag=source-nightly; [ "$VARIANTE" = desktop ] && tag=desktop-nightly
+          iso=$(curl -fsSL "https://api.github.com/repos/${{ github.repository }}/releases/tags/$tag" \
+                  -H "Authorization: Bearer ${{ github.token }}" |
+                python3 -c 'import json,sys; print(next(a["name"] for a in json.load(sys.stdin)["assets"] if a["name"].endswith(".iso")))')
+          base="https://github.com/${{ github.repository }}/releases/download/$tag"
+          for f in "$iso" "$iso.sha256"; do curl -fsSL --retry 5 -o "$f" "$base/$f"; done
+          sha256sum -c "$iso.sha256"
+          echo "ISO=$PWD/$iso" >> "$GITHUB_ENV"
+          echo "::notice title=ISO::$iso"
+      - name: VM-Test ${{ matrix.name }}
+        run: |
+          # shellcheck disable=SC2086
+          tools/vm-test.py "$ISO" --firmware ${{ matrix.firmware }} --boot ${{ matrix.boot }} ${{ matrix.encrypt }} \
+            --strict --out "$RUNNER_TEMP/vm"
+      - name: Protokolle und Bildschirmfotos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vm-${{ matrix.name }}
+          path: |
+            ${{ runner.temp }}/vm/*.log
+            ${{ runner.temp }}/vm/*.png
+          if-no-files-found: ignore
