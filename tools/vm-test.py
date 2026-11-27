@@ -140,7 +140,9 @@ class VM:
             if on_wait:
                 on_wait()
             time.sleep(0.2)
-        raise Fail(f"{self.name}: Zeitüberschreitung beim Warten auf {[p.pattern for p in pats]}")
+        tail = self.buf[-1500:].decode(errors="replace")
+        raise Fail(f"{self.name}: Zeitüberschreitung beim Warten auf {[p.pattern for p in pats]}\n"
+                   f"--- Ende der seriellen Ausgabe ---\n{tail}")
 
     def send(self, text):
         self.cur.sock.setblocking(True)
@@ -380,7 +382,9 @@ def main():
                 vm.shot("grub-passphrase")
                 vm.type(LUKS_PW)
                 vm.key("ret")
-            vm.expect([rb"(?i)passphrase[^\n]*: *$"], 600)
+            # systemd: »Please enter passphrase for disk …: (press TAB for no echo)« – nach dem Doppelpunkt folgt
+            # noch ein Hinweis, die Zeile endet also nicht mit »:«
+            vm.expect([rb"(?i)passphrase for[^\n]*:"], 600)
             vm.shot("initramfs-passphrase")
             time.sleep(1)
             vm.send(LUKS_PW + "\n")
