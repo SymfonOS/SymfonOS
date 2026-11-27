@@ -185,7 +185,10 @@ if ((ENCRYPT)); then
     echo 'GRUB_ENABLE_CRYPTODISK=y' >> "$MNT/etc/default/grub"
   fi
 fi
-sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"$CMDLINE\"|" "$MNT/etc/default/grub"
+# GRUB: rootflags=subvol=@ setzt grub-mkconfig bei Btrfs selbst (sonst stünde es doppelt in der Kommandozeile)
+GRUB_LINE=${CMDLINE/rootflags=subvol=@/}
+GRUB_LINE=${GRUB_LINE% }
+sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"$GRUB_LINE\"|" "$MNT/etc/default/grub"
 # Gemeinsame Härtungsparameter (Paket symfonos-security), für UKI fest eingebettet
 HARDEN=$(cat "$MNT/usr/lib/symfonos/kernel-cmdline" 2>/dev/null || true)
 install -d "$MNT/etc/kernel"
