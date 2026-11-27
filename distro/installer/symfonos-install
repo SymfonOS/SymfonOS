@@ -62,6 +62,18 @@ if ((TPM)); then
   fi
 fi
 
+# SELinux (Live-System im Modus enforcing): Programme im Zielsystem wechseln beim Start in ihre Domänen
+# (depmod → kmod_t, useradd → useradd_t, systemd-tmpfiles …) und dürfen dann die Arbeitsdateien von dracut und
+# die noch ungelabelten Zieldateien nicht anfassen – die Kontexte setzt setfiles erst am Ende. Für die Dauer der
+# Installation deshalb permissive; beim Beenden (auch bei Fehlern) wieder wie vorher.
+ENFORCE_WAS=0
+if [[ -w /sys/fs/selinux/enforce && $(cat /sys/fs/selinux/enforce 2>/dev/null) == 1 ]]; then
+  echo 0 > /sys/fs/selinux/enforce && ENFORCE_WAS=1
+  say "SELinux für die Installation auf permissive (danach wieder enforcing)"
+fi
+restore_enforce() { ((ENFORCE_WAS)) && echo 1 > /sys/fs/selinux/enforce; ENFORCE_WAS=0; true; }
+trap restore_enforce EXIT
+
 say "Partitionieren ($( ((UEFI)) && echo UEFI || echo BIOS ))"
 wipefs -af "$DISK" >/dev/null
 sfdisk --quiet "$DISK" <<PARTS
@@ -94,6 +106,7 @@ cleanup() {
     umount -R "$MNT" 2>/dev/null
     [[ -e /dev/mapper/cryptroot ]] && cryptsetup close cryptroot 2>/dev/null
   fi
+  restore_enforce
   true
 }
 trap cleanup EXIT
