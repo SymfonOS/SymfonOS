@@ -9,12 +9,6 @@ on:
     workflows: ["Bootstrap (aus Quellcode)"]
     types: [completed]
   workflow_dispatch:
-    inputs:
-      variante:
-        description: "ISO"
-        type: choice
-        options: [base, desktop]
-        default: base
 
 permissions:
   contents: read
@@ -32,20 +26,23 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: bios-grub, firmware: bios, boot: grub, encrypt: "" }
-          - { name: uefi-grub, firmware: uefi, boot: grub, encrypt: "" }
-          - { name: uefi-systemd-boot-luks, firmware: uefi, boot: systemd-boot, encrypt: "--encrypt" }
+          - { name: bios-grub, iso: base, firmware: bios, boot: grub, encrypt: "" }
+          - { name: uefi-grub, iso: base, firmware: uefi, boot: grub, encrypt: "" }
+          - { name: uefi-systemd-boot-luks, iso: base, firmware: uefi, boot: systemd-boot, encrypt: "--encrypt" }
+          # Desktop wie auf einem Laptop: UEFI, systemd-boot, verschlüsselt
+          - { name: desktop-uefi-systemd-boot-luks, iso: desktop, firmware: uefi, boot: systemd-boot, encrypt: "--encrypt" }
     name: ${{ matrix.name }}
     steps:
       - uses: actions/checkout@v5
       - name: QEMU und OVMF
         run: |
           tools/apt-install.sh qemu-system-x86 qemu-utils ovmf xorriso imagemagick
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc   # Platz für ISO und virtuelle Platte
           sudo chmod 666 /dev/kvm 2>/dev/null || true
           ls -l /dev/kvm || echo "::warning::kein KVM – der Test läuft emuliert und sehr langsam"
       - name: ISO laden
         env:
-          VARIANTE: ${{ inputs.variante || 'base' }}
+          VARIANTE: ${{ matrix.iso }}
         run: |
           tag=source-nightly; [ "$VARIANTE" = desktop ] && tag=desktop-nightly
           iso=$(curl -fsSL "https://api.github.com/repos/${{ github.repository }}/releases/tags/$tag" \
@@ -60,7 +57,8 @@ jobs:
         run: |
           # shellcheck disable=SC2086
           tools/vm-test.py "$ISO" --firmware ${{ matrix.firmware }} --boot ${{ matrix.boot }} ${{ matrix.encrypt }} \
-            --strict --out "$RUNNER_TEMP/vm"
+            --strict --out "$RUNNER_TEMP/vm" \
+            --memory ${{ matrix.iso == 'desktop' && '6144' || '4096' }}
       - name: Protokolle und Bildschirmfotos
         if: always()
         uses: actions/upload-artifact@v4
