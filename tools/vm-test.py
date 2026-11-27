@@ -349,7 +349,7 @@ def main():
             rc, outp = vm.run(("sudo cryptsetup open /dev/vda3 vmtest; " if a.encrypt else "") +
                               f"sudo mount -o subvol=@ {dev} /mnt && "
                               "sudo sed -i -E 's@^([[:space:]]*linux[[:space:]].*)$@\\1 console=ttyS0,115200@' "
-                              "/mnt/boot/grub/grub.cfg && grep -c console=ttyS0 /mnt/boot/grub/grub.cfg; "
+                              "/mnt/boot/grub/grub.cfg && sudo grep -c console=ttyS0 /mnt/boot/grub/grub.cfg; "
                               "r=$?; sudo umount /mnt; " + ("sudo cryptsetup close vmtest; " if a.encrypt else "") +
                               "test $r = 0", 120,
                               {rb"(?i)passphrase[^\n]*: *$": LUKS_PW + "\n"} if a.encrypt else None)
