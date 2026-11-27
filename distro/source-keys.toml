@@ -3,6 +3,7 @@
 # sig: Endung der Signaturdatei neben dem Archiv; uncompressed: Signatur gilt dem entpackten .tar
 # tar_sig: die Signatur liegt neben dem entpackten Namen (NAME.tar.sign statt NAME.tar.xz.sign)
 # sums: signiert ist eine Prüfsummenliste dieses Namens neben dem Archiv (sig gilt ihr)
+# sig = "git-tag": signiert ist der Release-Tag; das Archiv muss dem signierten Baum entsprechen
 
 [acl]
 keys = ["B902B5271325F892AC251AD441633B9FE837F581"]
@@ -31,6 +32,10 @@ sig = ".sig"
 [attr]
 keys = ["B902B5271325F892AC251AD441633B9FE837F581"]
 sig = ".sig"
+
+[aubio]
+keys = ["B88A5072D4915AECF81A24346A49B19728ABDD92"]
+sig = "git-tag"
 
 [aurorae]
 keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
@@ -170,6 +175,14 @@ sig = ".sig"
 keys = ["3AB057B7E78D945C8C5591FBD36F769BC11804F0"]
 sig = ".asc"
 
+[efibootmgr]
+keys = ["039A9CEA19DE9508C36875AA2532F9176A95A442"]
+sig = "git-tag"
+
+[efivar]
+keys = ["B00B48BC731AA8840FED9FB0EED266B70F4FEF10"]
+sig = "git-tag"
+
 [elisa]
 keys = ["CA262C6C83DE4D2FB28A332A3A6A4DB839EAA6D7"]
 sig = ".sig"
@@ -177,6 +190,10 @@ sig = ".sig"
 [encodings]
 keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]
 sig = ".sig"
+
+[exiv2]
+keys = ["506293AC9C60CD8B050B22399DD01852EE40366E"]
+sig = "git-tag"
 
 [expat]
 keys = ["3176EF7DB2367F1FCA4F306B1F9B0E909AF37285"]
@@ -294,9 +311,17 @@ sig = ".sig"
 keys = ["155D3FC500C834486D1EEA677FD9FCCB000BEEEE"]
 sig = ".sig"
 
+[haruna]
+keys = ["4E421C6554B89766DF9B7A37E12AB207C8755905"]
+sig = "git-tag"
+
 [hicolor-icon-theme]
 keys = ["D33A3F0CA16B0ACC51A60738494C8A5FBF4DECEB"]
 sig = ".asc"
+
+[hwdata]
+keys = ["3C40194FB79138CE0F78FD4919C2F062574F5403"]
+sig = "git-tag"
 
 [icu]
 keys = ["E52F07877A5805F9AF4AB0ACD46C5610D06E7001"]
@@ -676,6 +701,10 @@ tar_sig = true
 keys = ["474E22316ABF4785A88C6E8EA2C794A986419D8A"]
 sig = ".sig"
 
+[libdeflate]
+keys = ["EB397C1FF130EC7D01ED644502C7A73D84B0447C"]
+sig = "git-tag"
+
 [libdisplay-info]
 keys = ["34FF9526CFEF0E97A340E2E40FDE7BE0E88F5E48"]
 sig = ".sig"
@@ -744,6 +773,10 @@ sig = ".sig"
 keys = ["49EA7C670E0850E7419514F629C2366E4DFC5728"]
 sig = ".sig"
 
+[libnvme]
+keys = ["5BF67BC5082672CABB45ACAE587C5ECA5D0A306C"]
+sig = "git-tag"
+
 [libpcap]
 keys = ["1F166A5742ABB9E0249A8D30E089DEF1D9C15D0D"]
 sig = ".sig"
@@ -755,6 +788,10 @@ sig = ".sig"
 [libpipeline]
 keys = ["AC0A4FF12611B6FCCF01C111393587D97D86500B"]
 sig = ".asc"
+
+[libplacebo]
+keys = ["1DDB8076B14D5B4832FC99D9EB52DA9C02BA6FB4"]
+sig = "git-tag"
 
 [libplasma]
 keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
@@ -819,6 +856,10 @@ sig = ".asc"
 [libvorbis]
 keys = ["B7B00AEE1F960EEA0FED66FB9259A8F2D2D44C84"]
 sig = ".asc"
+
+[libvpx]
+keys = ["8DA70C3B2338B012BAB30EE51C1C1A9A2A45D4D4"]
+sig = "git-tag"
 
 [libwacom]
 keys = ["3C2C43D9447D5938EF4551EBE23B7E70B467F0BF"]
@@ -1036,6 +1077,14 @@ sig = ".sig"
 keys = ["D021FF8ECF4BE09719D61A27231C4CBC60D5CAFE"]
 sig = ".sig"
 
+[mpv]
+keys = ["145077D82501AA20152CACCE8D769208D5E31419"]
+sig = "git-tag"
+
+[mpvqt]
+keys = ["4E421C6554B89766DF9B7A37E12AB207C8755905"]
+sig = "git-tag"
+
 [mtools]
 keys = ["51A23D9D7C4DF41AA48FA893E99CF5537790B839"]
 sig = ".sig"
@@ -1226,6 +1275,10 @@ sig = ".sig"
 keys = ["7C0135FB088AAF6C66C650B9BB5869F064EA74AB"]
 sig = ".sig"
 
+[rtkit]
+keys = ["8218F88849AAC522E94CF470A5E9288C4FA415FA"]
+sig = "git-tag"
+
 [sbc]
 keys = ["E932D120BC2AEC444E558F0106CA9F5D1DCF2659"]
 sig = ".sign"
@@ -1303,6 +1356,10 @@ sig = ".sig"
 [syntax-highlighting]
 keys = ["90A968ACA84537CC27B99EAF2C8DF587A6D4AAC1"]
 sig = ".sig"
+
+[systemd]
+keys = ["A9EA9081724FFAE0484C35A1A81CEA22BC8C7E2E"]
+sig = "git-tag"
 
 [systemsettings]
 keys = ["D07BD8662C56CB291B316EB2F5675605C74E02CF"]
@@ -1425,6 +1482,10 @@ sig = ".sig"
 [xkeyboard-config]
 keys = ["FFB4CCD275AAA422F5F9808E0661D98FC933A145"]
 sig = ".sig"
+
+[xl2tpd]
+keys = ["9A9A392AA8D738BA263458AAF51005129FC816CA"]
+sig = "git-tag"
 
 [xmessage]
 keys = ["4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E"]

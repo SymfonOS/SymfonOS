@@ -16,6 +16,12 @@ Aussteller der Signatur vom Keyserver und trägt ihn nur ein, wenn er die Signat
 dessen sha256 schon im Rezept steht. Zwei unabhängige Wege (die früher festgehaltene Prüfsumme und die
 Signatur) stimmen dann überein; jede spätere Version wird gegen den so festgeschriebenen Schlüssel geprüft.
 
+Signierte Git-Tags (sig = "git-tag"): viele Projekte auf GitHub/GitLab signieren keine Archive, wohl aber ihre
+Release-Tags. Ist die Quelle ein Tag-Archiv der Forge (…/archive/TAG…, …/-/archive/TAG/…), holt discover das
+Tag-Objekt (git fetch --depth=1, ohne Dateiinhalte), prüft dessen Signatur und vergleicht das Archiv Datei für
+Datei mit dem signierten Baum: jede Datei im Archiv muss dort mit gleichem Git-Hash und gleicher Art (Datei,
+ausführbar, Verweis) stehen. Fehlen dürfen Dateien (export-ignore), hinzukommen oder abweichen nicht.
+
 Archive kommen zuerst aus dem Lookaside-Cache (SYP_LOOKASIDE, benannt nach der sha256), Signaturen vom
 Projektserver. Rückgabewert von check: 0 = alles gültig, 1 = ungültig oder fehlend, 2 = nur Netzfehler.
 """
@@ -51,6 +57,9 @@ KEYSERVERS = tuple(os.environ.get("SOURCE_SIGS_KEYSERVERS", "").split()) or (
     "https://keyserver.ubuntu.com/pks/lookup?op=get&options=mr&search=0x{fpr}",
     "https://keys.openpgp.org/vks/v1/by-fingerprint/{fpr}")
 UA = {"User-Agent": "symfonOS-source-sigs/1"}
+# Forge-Adressen für Tag-Archive (Tests leiten sie auf lokale Repos um)
+FORGES = {h: os.environ.get(f"SOURCE_SIGS_FORGE_{h.split('.')[-2].upper()}", f"https://{h}")
+          for h in ("github.com", "gitlab.com", "gitlab.freedesktop.org", "invent.kde.org", "gitlab.gnome.org")}
 FPR = re.compile(r"^[0-9A-F]{40}$")
 
 
@@ -98,7 +107,8 @@ def write_keys(data: dict) -> None:
             "# keys: Fingerabdrücke (Hauptschlüssel), öffentliche Schlüssel unter distro/keys/upstream/\n"
             "# sig: Endung der Signaturdatei neben dem Archiv; uncompressed: Signatur gilt dem entpackten .tar\n"
             "# tar_sig: die Signatur liegt neben dem entpackten Namen (NAME.tar.sign statt NAME.tar.xz.sign)\n"
-            "# sums: signiert ist eine Prüfsummenliste dieses Namens neben dem Archiv (sig gilt ihr)\n")
+            "# sums: signiert ist eine Prüfsummenliste dieses Namens neben dem Archiv (sig gilt ihr)\n"
+            "# sig = \"git-tag\": signiert ist der Release-Tag; das Archiv muss dem signierten Baum entsprechen\n")
     out = [head]
     for name in sorted(data):
         e = data[name]
@@ -211,6 +221,119 @@ def keyfile(fpr: str) -> bytes:
     return (KEYDIR / f"{fpr}.asc").read_bytes()
 
 
+def tag_source(url: str) -> tuple[str, str] | None:
+    """(Repo-URL, Tag) für ein Tag-Archiv der Forge, sonst None.
+    github.com/O/R/archive/[refs/tags/]TAG(.tar.gz|/NAME.tar.gz) · HOST/GRUPPE/R/-/archive/TAG/NAME.tar.*"""
+    m = re.match(r"^https://(github\.com)/([^/]+/[^/]+)/archive/(?:refs/tags/)?([^/]+?)(?:\.tar\.(?:gz|xz|bz2)|\.zip)?(?:/[^/]+)?$", url)
+    if not m:
+        m = re.match(r"^https://([^/]+)/(.+?)/-/archive/([^/]+)/[^/]+$", url)
+    if not m or m.group(1) not in FORGES:
+        return None
+    tag = m.group(3)
+    if re.fullmatch(r"[0-9a-f]{40}", tag):
+        return None                                        # Commit statt Tag: nichts Signiertes
+    return f"{FORGES[m.group(1)]}/{m.group(2)}", tag
+
+
+def git(d: str, *args: str) -> bytes:
+    r = subprocess.run(["git", "-C", d, *args], capture_output=True, timeout=600,
+                       env=dict(os.environ, GIT_TERMINAL_PROMPT="0", GIT_CONFIG_NOSYSTEM="1"))
+    if r.returncode:
+        raise NetError(f"git {args[0]}: {r.stderr.decode(errors='replace').strip()[-300:]}")
+    return r.stdout
+
+
+def fetch_tag(repo: str, tag: str, d: str) -> tuple[bytes, bytes, dict]:
+    """Signierten Tag holen: (Nutzdaten, Signatur, {Pfad: (Modus, Blob-Hash)} des Baums)."""
+    git(d, "init", "-q")
+    git(d, "fetch", "-q", "--depth=1", "--filter=blob:none", "--no-tags", repo, f"refs/tags/{tag}:refs/tags/t")
+    if git(d, "cat-file", "-t", "t").strip() != b"tag":
+        raise ValueError(f"{tag} ist kein annotierter Tag")
+    raw = git(d, "cat-file", "tag", "t")
+    i = raw.find(b"-----BEGIN PGP SIGNATURE-----")
+    if i < 0:
+        raise ValueError(f"Tag {tag} ist nicht (mit OpenPGP) signiert")
+    payload, sig = raw[:i], raw[i:]
+    head = dict(line.split(b" ", 1) for line in payload.split(b"\n\n", 1)[0].splitlines() if b" " in line)
+    # der signierte Inhalt muss genau diesen Tag auf einen Commit nennen (kein umbenannter fremder Tag)
+    if head.get(b"tag") != tag.encode() or head.get(b"type") != b"commit":
+        raise ValueError(f"Tag-Objekt nennt {head.get(b'tag')!r}/{head.get(b'type')!r} statt {tag}/commit")
+    tree = {}
+    for line in git(d, "ls-tree", "-r", "-z", "--full-tree", head[b"object"].decode()).split(b"\0"):
+        if not line:
+            continue
+        meta, path = line.split(b"\t", 1)
+        mode, typ, sha = meta.split()
+        if typ == b"blob":
+            tree[path.decode(errors="surrogateescape")] = (mode.decode(), sha.decode())
+    return payload, sig, tree
+
+
+def archive_matches_tree(url: str, data: bytes, tree: dict) -> str | None:
+    """None, wenn jede Datei des Archivs im signierten Baum gleich vorkommt; sonst die erste Abweichung."""
+    import io
+    import tarfile
+    import zipfile
+    files = []                                             # (Pfad, Modus, Inhalt)
+    if url.endswith(".zip"):
+        with zipfile.ZipFile(io.BytesIO(data)) as z:
+            for i in z.infolist():
+                if i.is_dir():
+                    continue
+                attr = i.external_attr >> 16
+                mode = "120000" if attr & 0o170000 == 0o120000 else "100755" if attr & 0o111 else "100644"
+                files.append((i.filename, mode, z.read(i)))
+    else:
+        with tarfile.open(fileobj=io.BytesIO(data)) as t:
+            for m in t:
+                if m.isdir() or m.name == "pax_global_header":
+                    continue
+                if m.issym():
+                    files.append((m.name, "120000", m.linkname.encode(errors="surrogateescape")))
+                elif m.isfile():
+                    files.append((m.name, "100755" if m.mode & 0o111 else "100644", t.extractfile(m).read()))
+                else:
+                    return f"{m.name}: weder Datei noch Verweis"
+    if not files:
+        return "Archiv ist leer"
+    # oberstes Verzeichnis (NAME-VERSION/) abschneiden; alle Einträge müssen darunter liegen
+    top = files[0][0].split("/", 1)[0] + "/"
+    for path, mode, content in files:
+        if not path.startswith(top):
+            return f"{path}: außerhalb von {top}"
+        rel = path[len(top):]
+        want = tree.get(rel)
+        if not want:
+            return f"{rel}: nicht im signierten Tag"
+        sha = hashlib.sha1(b"blob %d\0" % len(content) + content).hexdigest()
+        if want != (mode, sha):
+            return f"{rel}: weicht vom signierten Tag ab ({mode} {sha[:12]} statt {want[0]} {want[1][:12]})"
+    return None
+
+
+def verify_tag(src: dict, keyfiles: list[bytes] | None) -> tuple[str | None, list[str], str | None]:
+    """Signierten Tag zur Quelle prüfen: (Fingerabdruck, Aussteller, Fehler). Ohne keyfiles: Schlüssel vom
+    Keyserver zu den Ausstellern der Signatur (discover)."""
+    repo, tag = tag_source(src["url"])
+    with tempfile.TemporaryDirectory() as d:
+        payload, sig, tree = fetch_tag(repo, tag, d)
+    data = archive(src)
+    bad = archive_matches_tree(src["url"], data, tree)
+    if bad:
+        return None, [], bad
+    iss = issuers(sig)
+    if keyfiles is not None:
+        return verify(sig, payload, keyfiles), iss, None
+    for i in iss:
+        key = fetch_key(i)
+        if key:
+            fpr = verify(sig, payload, [key])
+            if fpr:
+                small = export_minimal(key, fpr)
+                return fpr, [small if verify(sig, payload, [small]) == fpr else key], None
+    return None, iss, None
+
+
 def check_one(name: str, e: dict) -> tuple[str, str]:
     """Ein Paket prüfen: ("ok"|"bad"|"net", Meldung)."""
     try:
@@ -224,6 +347,15 @@ def check_one(name: str, e: dict) -> tuple[str, str]:
         missing = [k for k in e["keys"] if not (KEYDIR / f"{k}.asc").exists()]
         if missing:
             raise ValueError(f"Schlüssel fehlt in distro/keys/upstream: {', '.join(missing)}")
+        if e["sig"] == "git-tag":
+            if not tag_source(src["url"]):
+                return "bad", f"{name}: Quelle ist kein Tag-Archiv der Forge mehr ({src['url']})"
+            got, _, err = verify_tag(src, [keyfile(k) for k in e["keys"]])
+            if err:
+                return "bad", f"{name}: {err}"
+            if got and got in e["keys"]:
+                return "ok", f"{name} (signierter Tag {tag_source(src['url'])[1]}, Schlüssel {got[-16:]})"
+            return "bad", f"{name}: Tag {tag_source(src['url'])[1]} ungültig oder von fremdem Schlüssel signiert"
         data = archive(src)
         if e.get("sums"):
             # signierte Prüfsummenliste: Signatur über die Liste, Archiv muss darin mit seiner Summe stehen
@@ -339,7 +471,27 @@ def discover_one(name: str) -> tuple[dict | None, bytes | None, str | None]:
                     return entry, small if verify(sig, payload, [small]) == fpr else key, \
                         f"neu   {name}: {sigurl.rsplit('/', 1)[-1]} – Schlüssel {fpr}"
         return None, None, f"ohne  {name}: {sigurl.rsplit('/', 1)[-1]} vorhanden, aber kein passender Schlüssel"
-    return discover_sums(name, src)
+    entry, key, msg = discover_sums(name, src)
+    if entry or msg or not tag_source(url):
+        return entry, key, msg
+    return discover_tag(name, src)
+
+
+def discover_tag(name: str, src: dict) -> tuple[dict | None, bytes | None, str | None]:
+    """Signierter Release-Tag: Schlüssel nur, wenn er den Tag bestätigt UND das Archiv (mit der schon
+    festgeschriebenen sha256) dem signierten Baum entspricht."""
+    tag = tag_source(src["url"])[1]
+    try:
+        fpr, keys, err = verify_tag(src, None)
+    except NetError as ex:
+        return None, None, (f"netz  {name}: {ex}" if "HTTP" in str(ex) else None)
+    except ValueError:
+        return None, None, None                            # Tag unsigniert oder nicht annotiert
+    if err:
+        return None, None, f"ohne  {name}: Tag {tag} signiert, Archiv passt nicht ({err})"
+    if not fpr:
+        return None, None, f"ohne  {name}: Tag {tag} signiert, aber kein passender Schlüssel"
+    return {"keys": [fpr], "sig": "git-tag"}, keys[0], f"neu   {name}: signierter Tag {tag} – Schlüssel {fpr}"
 
 
 def discover_sums(name: str, src: dict) -> tuple[dict | None, bytes | None, str | None]:
