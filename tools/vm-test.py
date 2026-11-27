@@ -79,6 +79,9 @@ class VM:
         for _ in range(100):
             if all(os.path.exists(p) for p in [self.mon_path] + [p.path for p in self.ports]):
                 break
+            if self.proc.poll() is not None:
+                with open(os.path.join(out, f"{name}-qemu.log")) as f:
+                    raise Fail(f"{name}: QEMU startet nicht: {f.read()[-1500:]}")
             time.sleep(0.1)
         for p in self.ports:
             p.connect()
@@ -366,7 +369,8 @@ def main():
         # --- 3. Start von der Platte ---
         extra = []
         if a.boot == "systemd-boot":
-            extra = ["-smbios", "type=11,value=io.systemd.stub.kernel-cmdline-extra=console=ttyS0,115200"]
+            # »,,« steht in QEMU-Optionen für ein Komma im Wert
+            extra = ["-smbios", "type=11,value=io.systemd.stub.kernel-cmdline-extra=console=ttyS0,,115200"]
         vm = VM(out, f"{name}-installiert", base + extra, scale)
         log("Installiertes System startet über die Firmware")
         if a.encrypt:
