@@ -871,9 +871,13 @@ pkg("nspr", "4.37", "https://archive.mozilla.org/pub/nspr/releases/v4.37/src/nsp
     build='''cd "$S/nspr"
 sed -i '/^RELEASE/s|^|#|' pr/src/misc/Makefile.in
 sed -i 's|$(LIBRARY) ||' config/rules.mk
+# Bauzeit (date bzw. config/now mit time()) steht sonst in libnspr4/libplc4/libplds4: SOURCE_DATE_EPOCH nehmen
+sde=${SOURCE_DATE_EPOCH:-0}
+sed -i -e "s|^SH_DATE = .*|SH_DATE = $(date -u -d "@$sde" '+%Y-%m-%d %T')|" -e "s|^SH_NOW = .*|SH_NOW = ${sde}000000|" \\
+  pr/src/Makefile.in lib/ds/Makefile.in lib/libc/src/Makefile.in
 ./configure --prefix=/usr --with-mozilla --with-pthreads --enable-64bit
 make''',
-    package='cd "$S/nspr"\nmake DESTDIR="$DESTDIR" install\nrm -f "$DESTDIR"/usr/lib/lib*.a "$DESTDIR/usr/bin/compile-et.pl" "$DESTDIR/usr/bin/prerr.properties"')
+    package='cd "$S/nspr"\nmake DESTDIR="$DESTDIR" install\nrm -f "$DESTDIR"/usr/lib/lib*.a "$DESTDIR/usr/bin/compile-et.pl" "$DESTDIR/usr/bin/prerr.properties"', rel=2)
 pkg("nss", "3.115", "https://archive.mozilla.org/pub/security/nss/releases/NSS_3_115_RTM/src/nss-3.115.tar.gz",
     "Network Security Services (Mozilla-Kryptobibliothek)", "MPL-2.0", ["nspr", "sqlite", "zlib"],
     # eigenes Make-System ohne Installationsziel (wie BLFS); parallel nicht zuverlässig
