@@ -1,0 +1,12 @@
+beginn
+läuft krita
+läuft blender
+läuft kdenlive
+läuft ardour9
+läuft symfonos-store
+läuft symfonos-design
+läuft syp-convert-gui
+läuft symfonos-assist-gui
+läuft dolphin
+läuft okular
+ende

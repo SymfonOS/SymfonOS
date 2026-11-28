@@ -1,0 +1,11 @@
+app-dolphin: kein Bildschirmfoto
+app-okular: kein Bildschirmfoto
+app-symfonos-assist-gui: kein Bildschirmfoto
+app-symfonos-design: kein Bildschirmfoto
+app-symfonos-store: kein Bildschirmfoto
+app-syp-convert-gui: kein Bildschirmfoto
+desktop[0] Symbolleiste rechts: 1.000 bei 1135,2 (gefunden, nötig 0.8)
+desktop[1] Dock: Dateien, Konsole, Browser: 1.000 bei 470,748 (gefunden, nötig 0.8)
+input-konsole: kein Bildschirmfoto
+input-krunner: kein Bildschirmfoto
+Bildvergleich: 1 von 1 Bildschirmfotos passen

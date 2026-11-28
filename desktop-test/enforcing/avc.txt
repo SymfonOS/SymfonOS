@@ -1,0 +1,2 @@
+1 verschiedene Verweigerungen
+systemd_locale_t -> xkb_var_lib_t : lnk_file { read }  comm=systemd-localed name=xkb

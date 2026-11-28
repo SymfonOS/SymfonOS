@@ -1,0 +1,1701 @@
+[    0.000000] Linux version 6.16.1-symfonos (root@runnervm0hi8g) (gcc (GCC) 15.2.0, GNU ld (GNU Binutils) 2.45) #1 SMP PREEMPT_DYNAMIC Wed Nov 25 12:58:20 CET 2026
+[    0.000000] Command line: root=live:CDLABEL=SYMFONOS rd.live.image console=ttyS0,115200 systemd.journald.forward_to_console=1 enforcing=1 systemd.mask=auditd.service systemd.mask=audit-rules.service sysctl.kernel.printk_ratelimit=0 audit_backlog_limit=8192
+[    0.000000] BIOS-provided physical RAM map:
+[    0.000000] BIOS-e820: [mem 0x0000000000000000-0x000000000009fbff] usable
+[    0.000000] BIOS-e820: [mem 0x000000000009fc00-0x000000000009ffff] reserved
+[    0.000000] BIOS-e820: [mem 0x00000000000f0000-0x00000000000fffff] reserved
+[    0.000000] BIOS-e820: [mem 0x0000000000100000-0x000000007ffdefff] usable
+[    0.000000] BIOS-e820: [mem 0x000000007ffdf000-0x000000007fffffff] reserved
+[    0.000000] BIOS-e820: [mem 0x00000000b0000000-0x00000000bfffffff] reserved
+[    0.000000] BIOS-e820: [mem 0x00000000fed1c000-0x00000000fed1ffff] reserved
+[    0.000000] BIOS-e820: [mem 0x00000000feffc000-0x00000000feffffff] reserved
+[    0.000000] BIOS-e820: [mem 0x00000000fffc0000-0x00000000ffffffff] reserved
+[    0.000000] BIOS-e820: [mem 0x0000000100000000-0x00000001ffffffff] usable
+[    0.000000] BIOS-e820: [mem 0x000000fd00000000-0x000000ffffffffff] reserved
+[    0.000000] NX (Execute Disable) protection: active
+[    0.000000] APIC: Static calls initialized
+[    0.000000] SMBIOS 2.8 present.
+[    0.000000] DMI: QEMU Standard PC (Q35 + ICH9, 2009), BIOS 1.17.0-debian-1.17.0-1ubuntu1 04/01/2014
+[    0.000000] DMI: Memory slots populated: 1/1
+[    0.000000] Hypervisor detected: KVM
+[    0.000000] kvm-clock: Using msrs 4b564d01 and 4b564d00
+[    0.000000] kvm-clock: using sched offset of 193514049 cycles
+[    0.000002] clocksource: kvm-clock: mask: 0xffffffffffffffff max_cycles: 0x1cd42e4dffb, max_idle_ns: 881590591483 ns
+[    0.000004] tsc: Detected 2596.150 MHz processor
+[    0.000566] last_pfn = 0x200000 max_arch_pfn = 0x400000000
+[    0.000723] MTRR map: 4 entries (3 fixed + 1 variable; max 19), built from 8 variable MTRRs
+[    0.000729] x86/PAT: Configuration [0-7]: WB  WC  UC- UC  WB  WP  UC- WT  
+[    0.000917] last_pfn = 0x7ffdf max_arch_pfn = 0x400000000
+[    0.002400] found SMP MP-table at [mem 0x000f5440-0x000f544f]
+[    0.002589] RAMDISK: [mem 0x7edf9000-0x7ffcffff]
+[    0.002602] ACPI: Early table checksum verification disabled
+[    0.002604] ACPI: RSDP 0x00000000000F5250 000014 (v00 BOCHS )
+[    0.002613] ACPI: RSDT 0x000000007FFE2480 000038 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.002617] ACPI: FACP 0x000000007FFE2260 0000F4 (v03 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.002620] ACPI: DSDT 0x000000007FFE0040 002220 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.002621] ACPI: FACS 0x000000007FFE0000 000040
+[    0.002622] ACPI: APIC 0x000000007FFE2354 000090 (v03 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.002624] ACPI: HPET 0x000000007FFE23E4 000038 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.002625] ACPI: MCFG 0x000000007FFE241C 00003C (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.002626] ACPI: WAET 0x000000007FFE2458 000028 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.002627] ACPI: Reserving FACP table memory at [mem 0x7ffe2260-0x7ffe2353]
+[    0.002628] ACPI: Reserving DSDT table memory at [mem 0x7ffe0040-0x7ffe225f]
+[    0.002628] ACPI: Reserving FACS table memory at [mem 0x7ffe0000-0x7ffe003f]
+[    0.002628] ACPI: Reserving APIC table memory at [mem 0x7ffe2354-0x7ffe23e3]
+[    0.002629] ACPI: Reserving HPET table memory at [mem 0x7ffe23e4-0x7ffe241b]
+[    0.002629] ACPI: Reserving MCFG table memory at [mem 0x7ffe241c-0x7ffe2457]
+[    0.002629] ACPI: Reserving WAET table memory at [mem 0x7ffe2458-0x7ffe247f]
+[    0.003081] No NUMA configuration found
+[    0.003082] Faking a node at [mem 0x0000000000000000-0x00000001ffffffff]
+[    0.003084] NODE_DATA(0) allocated [mem 0x1ffffa800-0x1ffffdfff]
+[    0.003094] Zone ranges:
+[    0.003095]   DMA      [mem 0x0000000000001000-0x0000000000ffffff]
+[    0.003096]   DMA32    [mem 0x0000000001000000-0x00000000ffffffff]
+[    0.003096]   Normal   [mem 0x0000000100000000-0x00000001ffffffff]
+[    0.003097] Movable zone start for each node
+[    0.003097] Early memory node ranges
+[    0.003098]   node   0: [mem 0x0000000000001000-0x000000000009efff]
+[    0.003098]   node   0: [mem 0x0000000000100000-0x000000007ffdefff]
+[    0.003099]   node   0: [mem 0x0000000100000000-0x00000001ffffffff]
+[    0.003100] Initmem setup node 0 [mem 0x0000000000001000-0x00000001ffffffff]
+[    0.003182] On node 0, zone DMA: 1 pages in unavailable ranges
+[    0.003195] On node 0, zone DMA: 97 pages in unavailable ranges
+[    0.012941] On node 0, zone Normal: 33 pages in unavailable ranges
+[    0.013621] ACPI: PM-Timer IO Port: 0x608
+[    0.013644] ACPI: LAPIC_NMI (acpi_id[0xff] dfl dfl lint[0x1])
+[    0.013720] IOAPIC[0]: apic_id 0, version 17, address 0xfec00000, GSI 0-23
+[    0.013723] ACPI: INT_SRC_OVR (bus 0 bus_irq 0 global_irq 2 dfl dfl)
+[    0.013724] ACPI: INT_SRC_OVR (bus 0 bus_irq 5 global_irq 5 high level)
+[    0.013725] ACPI: INT_SRC_OVR (bus 0 bus_irq 9 global_irq 9 high level)
+[    0.013725] ACPI: INT_SRC_OVR (bus 0 bus_irq 10 global_irq 10 high level)
+[    0.013726] ACPI: INT_SRC_OVR (bus 0 bus_irq 11 global_irq 11 high level)
+[    0.013728] ACPI: Using ACPI (MADT) for SMP configuration information
+[    0.013729] ACPI: HPET id: 0x8086a201 base: 0xfed00000
+[    0.013735] CPU topo: Max. logical packages:   1
+[    0.013736] CPU topo: Max. logical dies:       1
+[    0.013736] CPU topo: Max. dies per package:   1
+[    0.013739] CPU topo: Max. threads per core:   1
+[    0.013739] CPU topo: Num. cores per package:     4
+[    0.013739] CPU topo: Num. threads per package:   4
+[    0.013740] CPU topo: Allowing 4 present CPUs plus 0 hotplug CPUs
+[    0.013766] kvm-guest: APIC: eoi() replaced with kvm_guest_apic_eoi_write()
+[    0.013792] PM: hibernation: Registered nosave memory: [mem 0x00000000-0x00000fff]
+[    0.013793] PM: hibernation: Registered nosave memory: [mem 0x0009f000-0x000fffff]
+[    0.013794] PM: hibernation: Registered nosave memory: [mem 0x7ffdf000-0xffffffff]
+[    0.013795] [mem 0xc0000000-0xfed1bfff] available for PCI devices
+[    0.013796] Booting paravirtualized kernel on KVM
+[    0.013798] clocksource: refined-jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 1910969940391419 ns
+[    0.017749] setup_percpu: NR_CPUS:64 nr_cpumask_bits:4 nr_cpu_ids:4 nr_node_ids:1
+[    0.017889] percpu: Embedded 73 pages/cpu s173208 r8192 d117608 u524288
+[    0.017929] Kernel command line: root=live:CDLABEL=SYMFONOS rd.live.image console=ttyS0,115200 systemd.journald.forward_to_console=1 enforcing=1 systemd.mask=auditd.service systemd.mask=audit-rules.service sysctl.kernel.printk_ratelimit=0 audit_backlog_limit=8192
+[    0.018008] audit: audit_backlog_limit: 8192
+[    0.018013] printk: log buffer data + meta data: 262144 + 917504 = 1179648 bytes
+[    0.018486] Dentry cache hash table entries: 1048576 (order: 11, 8388608 bytes, linear)
+[    0.018734] Inode-cache hash table entries: 524288 (order: 10, 4194304 bytes, linear)
+[    0.018787] software IO TLB: area num 4.
+[    0.024933] Fallback order for Node 0: 0 
+[    0.024940] Built 1 zonelists, mobility grouping on.  Total pages: 1572733
+[    0.024941] Policy zone: Normal
+[    0.025114] mem auto-init: stack:all(zero), heap alloc:on, heap free:off
+[    0.049691] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=4, Nodes=1
+[    0.050538] allocated 12582912 bytes of page_ext
+[    0.050692] Dynamic Preempt: full
+[    0.050868] rcu: Preemptible hierarchical RCU implementation.
+[    0.050869] rcu: 	RCU event tracing is enabled.
+[    0.050869] rcu: 	RCU restricting CPUs from NR_CPUS=64 to nr_cpu_ids=4.
+[    0.050871] 	Trampoline variant of Tasks RCU enabled.
+[    0.050871] 	Tracing variant of Tasks RCU enabled.
+[    0.050872] rcu: RCU calculated value of scheduler-enlistment delay is 100 jiffies.
+[    0.050872] rcu: Adjusting geometry for rcu_fanout_leaf=16, nr_cpu_ids=4
+[    0.050879] RCU Tasks: Setting shift to 2 and lim to 1 rcu_task_cb_adjust=1 rcu_task_cpu_ids=4.
+[    0.050881] RCU Tasks Trace: Setting shift to 2 and lim to 1 rcu_task_cb_adjust=1 rcu_task_cpu_ids=4.
+[    0.053059] NR_IRQS: 4352, nr_irqs: 456, preallocated irqs: 16
+[    0.053340] rcu: srcu_init: Setting srcu_struct sizes based on contention.
+[    0.053422] kfence: initialized - using 2097152 bytes for 255 objects at 0x(____ptrval____)-0x(____ptrval____)
+[    0.063828] Console: colour VGA+ 80x25
+[    0.063912] printk: legacy console [ttyS0] enabled
+[    0.220025] ACPI: Core revision 20250404
+[    0.221099] clocksource: hpet: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604467 ns
+[    0.223225] APIC: Switch to symmetric I/O mode setup
+[    0.224844] x2apic enabled
+[    0.226065] APIC: Switched APIC routing to: physical x2apic
+[    0.229904] ..TIMER: vector=0x30 apic1=0 pin1=2 apic2=-1 pin2=-1
+[    0.231210] clocksource: tsc-early: mask: 0xffffffffffffffff max_cycles: 0x256c0731a4e, max_idle_ns: 440795333312 ns
+[    0.233424] Calibrating delay loop (skipped) preset value.. 5192.30 BogoMIPS (lpj=2596150)
+[    0.236081] Last level iTLB entries: 4KB 512, 2MB 255, 4MB 127
+[    0.236422] Last level dTLB entries: 4KB 512, 2MB 255, 4MB 127, 1GB 0
+[    0.237428] Spectre V2 : Mitigation: Retpolines
+[    0.238422] Spectre V1 : Mitigation: usercopy/swapgs barriers and __user pointer sanitization
+[    0.239422] Spectre V2 : Spectre v2 / SpectreRSB: Filling RSB on context switch and VMEXIT
+[    0.240429] x86/fpu: x87 FPU will use FXSAVE
+[    0.259260] Freeing SMP alternatives memory: 52K
+[    0.259425] pid_max: default: 32768 minimum: 301
+[    0.261562] LSM: initializing lsm=lockdown,capability,yama,selinux,landlock,ima,evm
+[    0.262477] Yama: becoming mindful.
+[    0.263429] SELinux:  Initializing.
+[    0.264863] landlock: Up and running.
+[    0.265605] Mount-cache hash table entries: 16384 (order: 5, 131072 bytes, linear)
+[    0.266427] Mountpoint-cache hash table entries: 16384 (order: 5, 131072 bytes, linear)
+[    0.370247] smpboot: CPU0: AMD QEMU Virtual CPU version 2.5+ (family: 0xf, model: 0x6b, stepping: 0x1)
+[    0.371631] Performance Events: PMU not available due to virtualization, using software events only.
+[    0.372500] signal: max sigframe size: 1440
+[    0.373460] rcu: Hierarchical SRCU implementation.
+[    0.374423] rcu: 	Max phase no-delay instances is 400.
+[    0.375469] Timer migration: 1 hierarchy levels; 8 children per group; 1 crossnode level
+[    0.377519] smp: Bringing up secondary CPUs ...
+[    0.378542] smpboot: x86: Booting SMP configuration:
+[    0.379427] .... node  #0, CPUs:      #1 #2 #3
+[    0.386484] smp: Brought up 1 node, 4 CPUs
+[    0.388422] smpboot: Total of 4 processors activated (20769.20 BogoMIPS)
+[    0.390521] Memory: 6035032K/6290932K available (17957K kernel code, 2753K rwdata, 6732K rodata, 2704K init, 1768K bss, 238352K reserved, 0K cma-reserved)
+[    0.391658] devtmpfs: initialized
+[    0.392658] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 1911260446275000 ns
+[    0.393430] posixtimers hash table entries: 2048 (order: 3, 32768 bytes, linear)
+[    0.394427] futex hash table entries: 1024 (65536 bytes on 1 NUMA nodes, total 64 KiB, linear).
+[    0.395727] PM: RTC time: 11:07:14, date: 2026-11-28
+[    0.396702] NET: Registered PF_NETLINK/PF_ROUTE protocol family
+[    0.397515] audit: initializing netlink subsys (disabled)
+[    0.398481] audit: type=2000 audit(1795864034.804:1): state=initialized audit_enabled=0 res=1
+[    0.398518] thermal_sys: Registered thermal governor 'step_wise'
+[    0.399441] cpuidle: using governor menu
+[    0.402819] PCI: ECAM [mem 0xb0000000-0xbfffffff] (base 0xb0000000) for domain 0000 [bus 00-ff]
+[    0.403424] PCI: ECAM [mem 0xb0000000-0xbfffffff] reserved as E820 entry
+[    0.404429] PCI: Using configuration type 1 for base access
+[    0.405504] kprobes: kprobe jump-optimization is enabled. All kprobes are optimized if possible.
+[    0.409918] HugeTLB: allocation took 0ms with hugepage_allocation_threads=1
+[    0.411438] HugeTLB: registered 2.00 MiB page size, pre-allocated 0 pages
+[    0.412422] HugeTLB: 28 KiB vmemmap can be freed for a 2.00 MiB page
+[    0.433422] raid6: sse2x4   gen() 15487 MB/s
+[    0.451422] raid6: sse2x2   gen() 27546 MB/s
+[    0.469422] raid6: sse2x1   gen()  6927 MB/s
+[    0.470422] raid6: using algorithm sse2x2 gen() 27546 MB/s
+[    0.488421] raid6: .... xor() 19345 MB/s, rmw enabled
+[    0.489423] raid6: using intx1 recovery algorithm
+[    0.490504] ACPI: Added _OSI(Module Device)
+[    0.491422] ACPI: Added _OSI(Processor Device)
+[    0.492422] ACPI: Added _OSI(Processor Aggregator Device)
+[    0.494790] ACPI: 1 ACPI AML tables successfully acquired and loaded
+[    0.497504] ACPI: Interpreter enabled
+[    0.498433] ACPI: PM: (supports S0 S3 S4 S5)
+[    0.499422] ACPI: Using IOAPIC for interrupt routing
+[    0.500441] PCI: Using host bridge windows from ACPI; if necessary, use "pci=nocrs" and report a bug
+[    0.501422] PCI: Using E820 reservations for host bridge windows
+[    0.502487] ACPI: Enabled 2 GPEs in block 00 to 3F
+[    0.505593] ACPI: PCI Root Bridge [PCI0] (domain 0000 [bus 00-ff])
+[    0.506426] acpi PNP0A08:00: _OSC: OS supports [ExtendedConfig ASPM ClockPM Segments MSI HPX-Type3]
+[    0.507449] acpi PNP0A08:00: _OSC: platform does not support [LTR]
+[    0.508455] acpi PNP0A08:00: _OSC: OS now controls [PME PCIeCapability]
+[    0.509480] PCI host bridge to bus 0000:00
+[    0.510425] pci_bus 0000:00: root bus resource [io  0x0000-0x0cf7 window]
+[    0.511423] pci_bus 0000:00: root bus resource [io  0x0d00-0xffff window]
+[    0.512423] pci_bus 0000:00: root bus resource [mem 0x000a0000-0x000bffff window]
+[    0.513422] pci_bus 0000:00: root bus resource [mem 0x80000000-0xafffffff window]
+[    0.514422] pci_bus 0000:00: root bus resource [mem 0xc0000000-0xfebfffff window]
+[    0.515422] pci_bus 0000:00: root bus resource [mem 0xc000000000-0xc7ffffffff window]
+[    0.516422] pci_bus 0000:00: root bus resource [bus 00-ff]
+[    0.517519] pci 0000:00:00.0: [8086:29c0] type 00 class 0x060000 conventional PCI endpoint
+[    0.519905] pci 0000:00:01.0: [8086:10d3] type 00 class 0x020000 PCIe Root Complex Integrated Endpoint
+[    0.523443] pci 0000:00:01.0: BAR 0 [mem 0xfeb80000-0xfeb9ffff]
+[    0.524440] pci 0000:00:01.0: BAR 1 [mem 0xfeba0000-0xfebbffff]
+[    0.525439] pci 0000:00:01.0: BAR 2 [io  0xc040-0xc05f]
+[    0.526438] pci 0000:00:01.0: BAR 3 [mem 0xfebd0000-0xfebd3fff]
+[    0.527469] pci 0000:00:01.0: ROM [mem 0xfeb00000-0xfeb7ffff pref]
+[    0.528533] pci 0000:00:01.0: enabling Extended Tags
+[    0.531113] pci 0000:00:02.0: [1af4:1050] type 00 class 0x030000 conventional PCI endpoint
+[    0.534452] pci 0000:00:02.0: BAR 0 [mem 0xfe000000-0xfe7fffff pref]
+[    0.535482] pci 0000:00:02.0: BAR 2 [mem 0xc000000000-0xc000003fff 64bit pref]
+[    0.536438] pci 0000:00:02.0: BAR 4 [mem 0xfebd8000-0xfebd8fff]
+[    0.538437] pci 0000:00:02.0: ROM [mem 0xfebc0000-0xfebcffff pref]
+[    0.539521] pci 0000:00:02.0: Video device with shadowed ROM at [mem 0x000c0000-0x000dffff]
+[    0.542631] pci 0000:00:03.0: [1af4:1052] type 00 class 0x098000 conventional PCI endpoint
+[    0.545114] pci 0000:00:03.0: BAR 1 [mem 0xfebd9000-0xfebd9fff]
+[    0.545497] pci 0000:00:03.0: BAR 4 [mem 0xc000004000-0xc000007fff 64bit pref]
+[    0.548664] pci 0000:00:04.0: [1af4:1052] type 00 class 0x090000 conventional PCI endpoint
+[    0.551147] pci 0000:00:04.0: BAR 1 [mem 0xfebda000-0xfebdafff]
+[    0.551501] pci 0000:00:04.0: BAR 4 [mem 0xc000008000-0xc00000bfff 64bit pref]
+[    0.553842] pci 0000:00:05.0: [8086:293e] type 00 class 0x040300 conventional PCI endpoint
+[    0.556034] pci 0000:00:05.0: BAR 0 [mem 0xfebd4000-0xfebd7fff]
+[    0.557589] pci 0000:00:1f.0: [8086:2918] type 00 class 0x060100 conventional PCI endpoint
+[    0.559160] pci 0000:00:1f.0: quirk: [io  0x0600-0x067f] claimed by ICH6 ACPI/GPIO/TCO
+[    0.560557] pci 0000:00:1f.2: [8086:2922] type 00 class 0x010601 conventional PCI endpoint
+[    0.563130] pci 0000:00:1f.2: BAR 4 [io  0xc060-0xc07f]
+[    0.564421] pci 0000:00:1f.2: BAR 5 [mem 0xfebdb000-0xfebdbfff]
+[    0.566506] pci 0000:00:1f.3: [8086:2930] type 00 class 0x0c0500 conventional PCI endpoint
+[    0.568500] pci 0000:00:1f.3: BAR 4 [io  0x0700-0x073f]
+[    0.569874] ACPI: PCI: Interrupt link LNKA configured for IRQ 10
+[    0.570540] ACPI: PCI: Interrupt link LNKB configured for IRQ 10
+[    0.571504] ACPI: PCI: Interrupt link LNKC configured for IRQ 11
+[    0.572514] ACPI: PCI: Interrupt link LNKD configured for IRQ 11
+[    0.573501] ACPI: PCI: Interrupt link LNKE configured for IRQ 10
+[    0.574514] ACPI: PCI: Interrupt link LNKF configured for IRQ 10
+[    0.575500] ACPI: PCI: Interrupt link LNKG configured for IRQ 11
+[    0.576502] ACPI: PCI: Interrupt link LNKH configured for IRQ 11
+[    0.577461] ACPI: PCI: Interrupt link GSIA configured for IRQ 16
+[    0.578426] ACPI: PCI: Interrupt link GSIB configured for IRQ 17
+[    0.579429] ACPI: PCI: Interrupt link GSIC configured for IRQ 18
+[    0.580426] ACPI: PCI: Interrupt link GSID configured for IRQ 19
+[    0.581479] ACPI: PCI: Interrupt link GSIE configured for IRQ 20
+[    0.582427] ACPI: PCI: Interrupt link GSIF configured for IRQ 21
+[    0.583425] ACPI: PCI: Interrupt link GSIG configured for IRQ 22
+[    0.584426] ACPI: PCI: Interrupt link GSIH configured for IRQ 23
+[    0.586522] iommu: Default domain type: Translated
+[    0.587423] iommu: DMA domain TLB invalidation policy: strict mode
+[    0.589462] SCSI subsystem initialized
+[    0.590461] ACPI: bus type USB registered
+[    0.591439] usbcore: registered new interface driver usbfs
+[    0.592428] usbcore: registered new interface driver hub
+[    0.593428] usbcore: registered new device driver usb
+[    0.594435] pps_core: LinuxPPS API ver. 1 registered
+[    0.595422] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+[    0.596425] PTP clock support registered
+[    0.597559] NetLabel: Initializing
+[    0.598423] NetLabel:  domain hash size = 128
+[    0.599422] NetLabel:  protocols = UNLABELED CIPSOv4 CALIPSO
+[    0.600437] NetLabel:  unlabeled traffic allowed by default
+[    0.601475] PCI: Using ACPI for IRQ routing
+[    0.729126] pci 0000:00:02.0: vgaarb: setting as boot VGA device
+[    0.729421] pci 0000:00:02.0: vgaarb: bridge control possible
+[    0.729421] pci 0000:00:02.0: vgaarb: VGA device added: decodes=io+mem,owns=io+mem,locks=none
+[    0.729426] vgaarb: loaded
+[    0.730497] hpet: 3 channels of 0 reserved for per-cpu timers
+[    0.731446] hpet0: at MMIO 0xfed00000, IRQs 2, 8, 0
+[    0.732422] hpet0: 3 comparators, 64-bit 100.000000 MHz counter
+[    0.736501] clocksource: Switched to clocksource kvm-clock
+[    0.738420] VFS: Disk quotas dquot_6.6.0
+[    0.739427] VFS: Dquot-cache hash table entries: 512 (order 0, 4096 bytes)
+[    0.741215] pnp: PnP ACPI init
+[    0.742123] system 00:05: [mem 0xb0000000-0xbfffffff window] has been reserved
+[    0.744147] pnp: PnP ACPI: found 6 devices
+[    0.752367] clocksource: acpi_pm: mask: 0xffffff max_cycles: 0xffffff, max_idle_ns: 2085701024 ns
+[    0.754590] NET: Registered PF_INET protocol family
+[    0.755843] IP idents hash table entries: 131072 (order: 8, 1048576 bytes, linear)
+[    0.759218] tcp_listen_portaddr_hash hash table entries: 4096 (order: 4, 65536 bytes, linear)
+[    0.761350] Table-perturb hash table entries: 65536 (order: 6, 262144 bytes, linear)
+[    0.763207] TCP established hash table entries: 65536 (order: 7, 524288 bytes, linear)
+[    0.765271] TCP bind hash table entries: 65536 (order: 9, 2097152 bytes, linear)
+[    0.767157] TCP: Hash tables configured (established 65536 bind 65536)
+[    0.768770] UDP hash table entries: 4096 (order: 6, 262144 bytes, linear)
+[    0.770430] UDP-Lite hash table entries: 4096 (order: 6, 262144 bytes, linear)
+[    0.772265] NET: Registered PF_UNIX/PF_LOCAL protocol family
+[    0.773964] RPC: Registered named UNIX socket transport module.
+[    0.775420] RPC: Registered udp transport module.
+[    0.776554] RPC: Registered tcp transport module.
+[    0.777676] RPC: Registered tcp-with-tls transport module.
+[    0.779000] RPC: Registered tcp NFSv4.1 backchannel transport module.
+[    0.780558] pci_bus 0000:00: resource 4 [io  0x0000-0x0cf7 window]
+[    0.782037] pci_bus 0000:00: resource 5 [io  0x0d00-0xffff window]
+[    0.783573] pci_bus 0000:00: resource 6 [mem 0x000a0000-0x000bffff window]
+[    0.785219] pci_bus 0000:00: resource 7 [mem 0x80000000-0xafffffff window]
+[    0.786853] pci_bus 0000:00: resource 8 [mem 0xc0000000-0xfebfffff window]
+[    0.788563] pci_bus 0000:00: resource 9 [mem 0xc000000000-0xc7ffffffff window]
+[    0.790457] PCI: CLS 0 bytes, default 64
+[    0.791494] PCI-DMA: Using software bounce buffering for IO (SWIOTLB)
+[    0.791578] Unpacking initramfs...
+[    0.793043] software IO TLB: mapped [mem 0x000000007adf9000-0x000000007edf9000] (64MB)
+[    0.793127] clocksource: tsc: mask: 0xffffffffffffffff max_cycles: 0x256c0731a4e, max_idle_ns: 440795333312 ns
+[    0.802367] Initialise system trusted keyrings
+[    0.803494] Key type blacklist registered
+[    0.806544] workingset: timestamp_bits=40 max_order=21 bucket_order=0
+[    0.809902] squashfs: version 4.0 (2009/01/31) Phillip Lougher
+[    0.812033] NFS: Registering the id_resolver key type
+[    0.813907] Key type id_resolver registered
+[    0.815297] Key type id_legacy registered
+[    0.816747] 9p: Installing v9fs 9p2000 file system support
+[    0.828059] NET: Registered PF_ALG protocol family
+[    0.829273] xor: measuring software checksum speed
+[    0.830537]    prefetch64-sse  : 31409 MB/sec
+[    0.831716]    generic_sse     : 29850 MB/sec
+[    0.832797] xor: using function: prefetch64-sse (31409 MB/sec)
+[    0.834197] Key type asymmetric registered
+[    0.835198] Asymmetric key parser 'x509' registered
+[    0.836389] Asymmetric key parser 'pkcs8' registered
+[    0.837637] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 249)
+[    0.839444] io scheduler mq-deadline registered
+[    0.840554] io scheduler kyber registered
+[    0.841966] input: Power Button as /devices/LNXSYSTM:00/LNXPWRBN:00/input/input0
+[    0.844319] ACPI: button: Power Button [PWRF]
+[    0.846125] ACPI: \_SB_.GSIG: Enabled at IRQ 22
+[    0.849506] ACPI: \_SB_.GSIH: Enabled at IRQ 23
+[    0.852588] ACPI: \_SB_.GSIE: Enabled at IRQ 20
+[    0.857905] input: QEMU Virtio Tablet as /devices/pci0000:00/0000:00:03.0/virtio1/input/input1
+[    0.862007] input: QEMU Virtio Keyboard as /devices/pci0000:00/0000:00:04.0/virtio2/input/input2
+[    0.864311] Serial: 8250/16550 driver, 4 ports, IRQ sharing enabled
+[    0.866195] 00:03: ttyS0 at I/O 0x3f8 (irq = 4, base_baud = 115200) is a 16550A
+[    0.868780] Non-volatile memory driver v1.3
+[    0.869845] Linux agpgart interface v0.103
+[    0.870933] ACPI: bus type drm_connector registered
+[    0.873999] loop: module loaded
+[    0.875636] ACPI: \_SB_.GSIA: Enabled at IRQ 16
+[    0.877963] ahci 0000:00:1f.2: AHCI vers 0001.0000, 32 command slots, 1.5 Gbps, SATA mode
+[    0.880025] ahci 0000:00:1f.2: 6/6 ports implemented (port mask 0x3f)
+[    0.880951] Freeing initrd memory: 18268K
+[    0.881594] ahci 0000:00:1f.2: flags: 64bit ncq only 
+[    0.883336] scsi host0: ahci
+[    0.885139] scsi host1: ahci
+[    0.886067] scsi host2: ahci
+[    0.887179] scsi host3: ahci
+[    0.888268] scsi host4: ahci
+[    0.889314] scsi host5: ahci
+[    0.890104] ata1: SATA max UDMA/133 abar m4096@0xfebdb000 port 0xfebdb100 irq 28 lpm-pol 0
+[    0.892140] ata2: SATA max UDMA/133 abar m4096@0xfebdb000 port 0xfebdb180 irq 28 lpm-pol 0
+[    0.894144] ata3: SATA max UDMA/133 abar m4096@0xfebdb000 port 0xfebdb200 irq 28 lpm-pol 0
+[    0.896148] ata4: SATA max UDMA/133 abar m4096@0xfebdb000 port 0xfebdb280 irq 28 lpm-pol 0
+[    0.898159] ata5: SATA max UDMA/133 abar m4096@0xfebdb000 port 0xfebdb300 irq 28 lpm-pol 0
+[    0.900167] ata6: SATA max UDMA/133 abar m4096@0xfebdb000 port 0xfebdb380 irq 28 lpm-pol 0
+[    0.902440] e100: Intel(R) PRO/100 Network Driver
+[    0.903976] e100: Copyright(c) 1999-2006 Intel Corporation
+[    0.905441] e1000: Intel(R) PRO/1000 Network Driver
+[    0.906619] e1000: Copyright (c) 1999-2006 Intel Corporation.
+[    0.908001] e1000e: Intel(R) PRO/1000 Network Driver
+[    0.909213] e1000e: Copyright(c) 1999 - 2015 Intel Corporation.
+[    0.910866] ACPI: \_SB_.GSIF: Enabled at IRQ 21
+[    0.912932] e1000e 0000:00:01.0: Interrupt Throttling Rate (ints/sec) set to dynamic conservative mode
+[    0.955114] e1000e 0000:00:01.0 0000:00:01.0 (uninitialized): registered PHC clock
+[    1.007613] e1000e 0000:00:01.0 eth0: (PCI Express:2.5GT/s:Width x1) 52:54:00:12:34:56
+[    1.009561] e1000e 0000:00:01.0 eth0: Intel(R) PRO/1000 Network Connection
+[    1.011282] e1000e 0000:00:01.0 eth0: MAC: 3, PHY: 8, PBA No: 000000-000
+[    1.012928] sky2: driver version 1.30
+[    1.014092] usbcore: registered new interface driver usblp
+[    1.015487] i8042: PNP: PS/2 Controller [PNP0303:KBD,PNP0f13:MOU] at 0x60,0x64 irq 1,12
+[    1.018596] serio: i8042 KBD port at 0x60,0x64 irq 1
+[    1.019845] serio: i8042 AUX port at 0x60,0x64 irq 12
+[    1.021736] rtc_cmos 00:04: RTC can wake from S4
+[    1.023757] rtc_cmos 00:04: registered as rtc0
+[    1.024949] rtc_cmos 00:04: alarms up to one day, y3k, 242 bytes nvram, hpet irqs
+[    1.026767] input: AT Translated Set 2 keyboard as /devices/platform/i8042/serio0/input/input3
+[    1.027379] i801_smbus 0000:00:1f.3: SMBus using PCI interrupt
+[    1.029008] device-mapper: core: CONFIG_IMA_DISABLE_HTABLE is disabled. Duplicate IMA measurements will not be recorded in the IMA log.
+[    1.030787] i2c i2c-0: Memory type 0x07 not supported yet, not instantiating SPD
+[    1.033832] device-mapper: ioctl: 4.50.0-ioctl (2025-04-28) initialised: dm-devel@lists.linux.dev
+[    1.037646] amd_pstate: the _CPC object is not present in SBIOS or ACPI disabled
+[    1.039309] hid: raw HID events driver (C) Jiri Kosina
+[    1.043209] usbcore: registered new interface driver usbhid
+[    1.045344] usbhid: USB HID core driver
+[    1.046409] Initializing XFRM netlink socket
+[    1.047608] NET: Registered PF_INET6 protocol family
+[    1.049200] Segment Routing with IPv6
+[    1.050157] In-situ OAM (IOAM) with IPv6
+[    1.051126] sit: IPv6, IPv4 and MPLS over IPv4 tunneling driver
+[    1.052628] NET: Registered PF_PACKET protocol family
+[    1.053898] 9pnet: Installing 9P2000 support
+[    1.054949] Key type dns_resolver registered
+[    1.056551] IPI shorthand broadcast: enabled
+[    1.058855] sched_clock: Marking stable (883013319, 175069432)->(1131520611, -73437860)
+[    1.060986] registered taskstats version 1
+[    1.061995] Loading compiled-in X.509 certificates
+[    1.064568] modprobe (84) used greatest stack depth: 12488 bytes left
+[    1.066473] Loaded X.509 cert 'Build time autogenerated kernel key: 4065d69cedf1df95751354a9298c061711a743e9'
+[    1.071383] Demotion targets for Node 0: null
+[    1.073225] Btrfs loaded, zoned=no, fsverity=no
+[    1.075383] modprobe (87) used greatest stack depth: 12376 bytes left
+[    1.077210] modprobe (88) used greatest stack depth: 12280 bytes left
+[    1.078724] modprobe (91) used greatest stack depth: 12200 bytes left
+[    1.083327] Key type encrypted registered
+[    1.084368] ima: No TPM chip found, activating TPM-bypass!
+[    1.085725] ima: Allocated hash algorithm: sha256
+[    1.086927] ima: No architecture policies found
+[    1.088061] evm: Initialising EVM extended attributes:
+[    1.089351] evm: security.selinux
+[    1.090172] evm: security.SMACK64 (disabled)
+[    1.091248] evm: security.SMACK64EXEC (disabled)
+[    1.092390] evm: security.SMACK64TRANSMUTE (disabled)
+[    1.093724] evm: security.SMACK64MMAP (disabled)
+[    1.095086] evm: security.apparmor (disabled)
+[    1.096182] evm: security.ima
+[    1.096907] evm: security.capability
+[    1.097808] evm: HMAC attrs: 0x1
+[    1.098724] PM:   Magic number: 2:367:126
+[    1.099784] acpi device:01: hash matches
+[    1.100778] netconsole: network logging started
+[    1.210276] ata6: SATA link down (SStatus 0 SControl 300)
+[    1.211499] ata2: SATA link down (SStatus 0 SControl 300)
+[    1.212783] ata3: SATA link up 1.5 Gbps (SStatus 113 SControl 300)
+[    1.214117] ata5: SATA link down (SStatus 0 SControl 300)
+[    1.215421] ata4: SATA link down (SStatus 0 SControl 300)
+[    1.216690] ata1: SATA link down (SStatus 0 SControl 300)
+[    1.217670] ata3.00: ATAPI: QEMU DVD-ROM, 2.5+, max UDMA/100
+[    1.218546] ata3.00: applying bridge limits
+[    1.219359] ata3.00: configured for UDMA/100
+[    1.220360] scsi 2:0:0:0: CD-ROM            QEMU     QEMU DVD-ROM     2.5+ PQ: 0 ANSI: 5
+[    1.238576] sr 2:0:0:0: [sr0] scsi3-mmc drive: 4x/4x cd/rw xa/form2 tray
+[    1.239686] cdrom: Uniform CD-ROM driver Revision: 3.20
+[    1.251821] sr 2:0:0:0: Attached scsi generic sg0 type 5
+[    1.253191] Freeing unused kernel image (initmem) memory: 2704K
+[    1.254351] Write protecting the kernel read-only data: 26624k
+[    1.255460] Freeing unused kernel image (text/rodata gap) memory: 472K
+[    1.256626] Freeing unused kernel image (rodata/data gap) memory: 1460K
+[    1.284491] x86/mm: Checked W+X mappings: passed, no W+X pages found.
+[    1.295098] Run /init as init process
+[    1.301043] systemd[1]: Successfully made /usr/ read-only.
+[!p]104[?7h[    1.302358] systemd[1]: systemd 257.8 running in system mode (+PAM +AUDIT +SELINUX -APPARMOR +IMA +IPE +SMACK +SECCOMP +GCRYPT +GNUTLS +OPENSSL +ACL +BLKID +CURL -ELFUTILS -FIDO2 -IDN2 -IDN -IPTC +KMOD +LIBCRYPTSETUP +LIBCRYPTSETUP_PLUGINS +LIBFDISK +PCRE2 +PWQUALITY -P11KIT +QRENCODE +TPM2 +BZIP2 +LZ4 +XZ +ZLIB +ZSTD -BPF_FRAMEWORK -BTF +XKBCOMMON +UTMP +SYSVINIT +LIBARCHIVE)
+[    1.306960] systemd[1]: Detected virtualization kvm.
+[    1.307717] systemd[1]: Detected architecture x86-64.
+[    1.308484] systemd[1]: Running in initrd.
+Booting initrd of symfonOS (Rolling) dracut-107 (Initramfs).
+[    1.310962] systemd[1]: No hostname configured, using default hostname.
+[    1.311981] systemd[1]: Hostname set to <localhost>.
+[    1.312788] systemd[1]: Initializing machine ID from random generator.
+[    1.336353] systemd-cryptse (103) used greatest stack depth: 12152 bytes left
+[    1.338981] mkdir (111) used greatest stack depth: 11912 bytes left
+[    1.367254] systemd[1]: Queued start job for default target Initrd Default Target.
+[    1.377546] systemd[1]: Started Dispatch Password Requests to Console Directory Watch.
+[  OK  ] Started Dispatch Password Requests to Console Directory Watch.
+[    1.380594] systemd[1]: Expecting device /dev/mapper/live-rw...
+         Expecting device /dev/mapper/live-rw...
+[    1.382656] systemd[1]: Reached target Initrd /usr File System.
+[  OK  ] Reached target Initrd /usr File System.
+[    1.384862] systemd[1]: Reached target Path Units.
+[  OK  ] Reached target Path Units.
+[    1.386664] systemd[1]: Reached target Slice Units.
+[  OK  ] Reached target Slice Units.
+[    1.388544] systemd[1]: Reached target Swaps.
+[  OK  ] Reached target Swaps.
+[    1.390225] systemd[1]: Reached target Timer Units.
+[  OK  ] Reached target Timer Units.
+[    1.392163] systemd[1]: Listening on Journal Socket (/dev/log).
+[  OK  ] Listening on Journal Socket (/dev/log).
+[    1.394421] systemd[1]: Listening on Journal Sockets.
+[  OK  ] Listening on Journal Sockets.
+[    1.396424] systemd[1]: Listening on udev Control Socket.
+[  OK  ] Listening on udev Control Socket.
+[    1.398494] systemd[1]: Listening on udev Kernel Socket.
+[  OK  ] Listening on udev Kernel Socket.
+[    1.400504] systemd[1]: Reached target Socket Units.
+[  OK  ] Reached target Socket Units.
+[    1.403148] systemd[1]: Starting Create List of Static Device Nodes...
+         Starting Create List of Static Device Nodes...
+[    1.405416] systemd[1]: Check battery level during early boot was skipped because of an unmet condition check (ConditionDirectoryNotEmpty=/sys/class/power_supply).
+[    1.407784] systemd[1]: Reached target Initrd Root Device.
+[  OK  ] Reached target Initrd Root Device.
+[    1.409963] systemd[1]: systemd-journald.service: unit configures an IP firewall, but the local system does not support BPF/cgroup firewalling.
+[    1.411996] systemd[1]: systemd-journald.service: (This warning is only shown for the first unit using IP firewalling.)
+[    1.429809] systemd[1]: Starting Journal Service...
+         Starting Journal Service...
+[    1.432021] kmod (152) used greatest stack depth: 11880 bytes left
+[    1.432326] systemd[1]: Starting Load Kernel Modules...
+         Starting Load Kernel Modules[[    1.435070] systemd[1]: TPM PCR Barrier (initrd) was skipped because of an unmet condition check (ConditionSecurity=measured-uki).
+0m...
+[    1.437512] systemd[1]: Reached target Local Encrypted Volumes.
+[  OK  ] Reached target Local Encrypted Volumes.
+[    1.444770] systemd[1]: Starting Virtual Console Setup...
+         Starting Virtual Console Setup...
+[    1.447862] systemd[1]: Finished Create List of Static Device Nodes.
+[  OK  ] Finished Create List of Static Device Nodes.
+[    1.451175] systemd[1]: Finished Load Kernel Modules.
+[  OK  ] Finished Load Kernel Modules.
+[    1.454340] systemd[1]: Starting Apply Kernel Variables...
+         Starting Apply Kernel Variables...
+[    1.456929] systemd[1]: Starting Create Static Device Nodes in /dev gracefully...
+         Starting Create Static Device Nodes in /dev gracefully...
+[    1.466040] systemd-journald[154]: Collecting audit messages is disabled.
+[    1.468715] input: ImExPS/2 Generic Explorer Mouse as /devices/platform/i8042/serio1/input/input5
+[    1.472631] systemd-tmpfile (162) used greatest stack depth: 11864 bytes left
+[    1.473628] systemd[1]: Finished Create Static Device Nodes in /dev gracefully.
+[  OK  ] Finished Create Static Device Nodes in /dev gracefully.
+[    1.311876] systemd-modules-load[155]: Module 'pkcs8_key_parser' is built in
+[    1.550649] systemd[1]: Started Journal Service.
+[  OK  ] Started Journal Service.
+[  OK  ] Finished Virtual Console Setup.
+[    1.380632] systemd[1]: Finished Virtual Console Setup.
+         Starting dracut ask for additional cmdline parameters...
+[    1.384469] systemd[1]: Starting dracut ask for additional cmdline parameters...
+[    1.386380] systemd[1]: Starting Create Static Device Nodes in /dev...
+         Starting Create Static Device Nodes in /dev...
+[    1.389196] systemd-sysctl[160]: [0;1;38:5:185mCouldn't write '1' to 'kernel/unprivileged_bpf_disabled', ignoring: No such file or directory
+[    1.391695] systemd-sysctl[160]: [0;1;38:5:185mCouldn't write '2' to 'net/core/bpf_jit_harden', ignoring: No such file or directory
+[    1.394119] systemd-sysctl[160]: [0;1;38:5:185mCouldn't write '0' to 'vm/unprivileged_userfaultfd', ignoring: No such file or directory
+[  OK  ] Finished Apply Kernel Variables.
+[    1.397979] systemd[1]: Finished Apply Kernel Variables.
+[  OK  ] Finished Create Static Device Nodes in /dev.
+[    1.401739] systemd[1]: Finished Create Static Device Nodes in /dev.
+[  OK  ] Reached target Preparation for Local File Systems.
+[  OK  ] Reached target Local File Systems.
+[    1.402894] systemd[1]: Reached target Preparation for Local File Systems.
+[    1.403967] systemd[1]: Reached target Local File Systems.
+         Starting Create System Files and Directories...
+[    1.404536] systemd[1]: Starting Create System Files and Directories...
+[    1.414627] systemd-tmpfiles[182]: /usr/lib/tmpfiles.d/var.conf:14: Duplicate line for path "/var/log", ignoring.
+[  OK  ] Finished Create System Files and Directories.
+[    1.417426] systemd[1]: Finished Create System Files and Directories.
+[  OK  ] Finished dracut ask for additional cmdline parameters.
+[    1.420535] systemd[1]: Finished dracut ask for additional cmdline parameters.
+         Starting dracut cmdline hook...
+[    1.425098] systemd[1]: Starting dracut cmdline hook...
+[    1.436751] dracut-cmdline[191]: dracut-107
+[    1.438858] dracut-cmdline[191]: Using kernel command line parameters:  rd.driver.pre=btrfs   root=live:CDLABEL=SYMFONOS rd.live.image console=ttyS0,115200 systemd.journald.forward_to_console=1 enforcing=1 systemd.mask=auditd.service systemd.mask=audit-rules.service sysctl.kernel.printk_ratelimit=0 audit_backlog_limit=8192
+[    1.470657] dracut-cmdline[191]: root was live:CDLABEL=SYMFONOS, is now live:/dev/disk/by-label/SYMFONOS
+[  OK  ] Finished dracut cmdline hook.
+[    1.484984] systemd[1]: Finished dracut cmdline hook.
+         Starting dracut pre-udev hook...
+[    1.488214] systemd[1]: Starting dracut pre-udev hook...
+[    1.517682] systemd[1]: Finished dracut pre-udev hook.
+[  OK  ] Finished dracut pre-udev hook.
+         Starting Rule-based Manager for Device Events and Files...
+[    1.520941] systemd[1]: Starting Rule-based Manager for Device Events and Files...
+[    1.551982] systemd-udevd[314]: Using default interface naming scheme 'v257'.
+[  OK  ] Started Rule-based Manager for Device Events and Files.
+[    1.554998] systemd[1]: Started Rule-based Manager for Device Events and Files.
+         Starting dracut pre-trigger hook...
+[    1.558838] systemd[1]: Starting dracut pre-trigger hook...
+[  OK  ] Finished dracut pre-trigger hook.
+[    1.580639] systemd[1]: Finished dracut pre-trigger hook.
+         Starting Coldplug All udev Devices...
+[    1.584648] systemd[1]: Starting Coldplug All udev Devices...
+[  OK  ] Finished Coldplug All udev Devices.
+[  OK  ] Reached target System Initialization.
+[  OK  ] Reached target Basic System.
+[    1.635052] systemd[1]: Finished Coldplug All udev Devices.
+[    1.641399] systemd[1]: Reached target System Initialization.
+[    1.642918] systemd[1]: Reached target Basic System.
+[    1.646871] systemd[1]: System is tainted: unmerged-bin
+         Starting dracut initqueue hook...
+[    1.650267] systemd[1]: Starting dracut initqueue hook...
+[  OK  ] Stopped Virtual Console Setup.
+[    1.694514] systemd[1]: systemd-vconsole-setup.service: Deactivated successfully.
+[    1.697438] systemd[1]: Stopped Virtual Console Setup.
+         Stopping Virtual Console Setup...
+[    1.698777] systemd[1]: Stopping Virtual Console Setup...
+         Starting Virtual Console Setup...
+[    1.702649] systemd[1]: Starting Virtual Console Setup...
+[    1.946809] loop0: detected capacity change from 0 to 2988960
+[  OK  ] Finished Virtual Console Setup.
+[    1.812255] systemd[1]: Finished Virtual Console Setup.
+[    1.823723] systemd[1]: Reload requested from client PID 444 ('systemctl') (unit dracut-initqueue.service)...
+[    1.825857] systemd[1]: Reloading...
+[    1.873966] systemd[1]: Reloading finished in 50 ms.
+[    1.875087] systemd[1]: Unnecessary job was removed for /dev/mapper/live-rw.
+[    1.900543] systemd[1]: Finished dracut initqueue hook.
+[  OK  ] Finished dracut initqueue hook.
+[  OK  ] Reached target Preparation for Remote File Systems.
+[    1.903099] systemd[1]: Reached target Preparation for Remote File Systems.
+[  OK  ] Reached target Remote Encrypted Volumes.
+[    1.905570] systemd[1]: Reached target Remote Encrypted Volumes.
+[  OK  ] Reached target Remote File Systems.
+[    1.907832] systemd[1]: Reached target Remote File Systems.
+         Starting dracut pre-mount hook...
+[    1.910283] systemd[1]: Starting dracut pre-mount hook...
+[  OK  ] Finished dracut pre-mount hook.
+[    1.932669] systemd[1]: Finished dracut pre-mount hook.
+[    2.273484] systemd[1]: run-initramfs-squashfs.mount: Deactivated successfully.
+         Mounting /sysroot...
+[    2.276088] systemd[1]: Mounting /sysroot...
+[  OK  ] Mounted /sysroot.
+[    2.288642] systemd[1]: Mounted /sysroot.
+[  OK  ] Reached target Initrd Root File System.
+[    2.291460] systemd[1]: Reached target Initrd Root File System.
+         Starting Mountpoints Configured in the Real Root...
+[    2.293779] systemd[1]: Starting Mountpoints Configured in the Real Root...
+[    2.340195] systemd[1]: initrd-parse-etc.service: Deactivated successfully.
+[  OK  ] Finished Mountpoints Configured in the Real Root.
+[    2.343051] systemd[1]: Finished Mountpoints Configured in the Real Root.
+[  OK  ] Reached target Initrd File Systems.
+[  OK  ] Reached target Initrd Default Target.
+[    2.345627] systemd[1]: Reached target Initrd File Systems.
+         Starting dracut mount hook...
+[    2.349384] systemd[1]: Reached target Initrd Default Target.
+[    2.350869] systemd[1]: Starting dracut mount hook...
+[  OK  ] Finished dracut mount hook.
+[    2.382387] systemd[1]: Finished dracut mount hook.
+         Starting dracut pre-pivot and cleanup hook...
+[    2.383571] systemd[1]: Starting dracut pre-pivot and cleanup hook...
+[  OK  ] Finished dracut pre-pivot and cleanup hook.
+[    2.419894] systemd[1]: Finished dracut pre-pivot and cleanup hook.
+         Starting Cleaning Up and Shutting Down Daemons...
+[    2.423882] systemd[1]: Starting Cleaning Up and Shutting Down Daemons...
+[  OK  ] Stopped target Remote Encrypted Volumes.
+[  OK  ] Stopped target Timer Units.
+[  OK  ] Stopped dracut pre-pivot and cleanup hook.
+[  OK  ] Stopped target Initrd Default Target.
+[  OK  ] Stopped target Basic System.
+[  OK  ] Stopped target Initrd Root Device.
+[  OK  ] Stopped target Initrd /usr File System.
+[  OK  ] Stopped target Path Units.
+[  OK  ] Stopped target Remote File Systems.
+[  OK  ] Stopped target Preparation for Remote File Systems.
+[  OK  ] Stopped target Slice Units.
+[  OK  ] Stopped target Socket Units.
+[  OK  ] Stopped target System Initialization.
+[  OK  ] Stopped target Swaps.
+[  OK  ] Stopped dracut mount hook.
+[  OK  ] Stopped dracut pre-mount hook.
+[  OK  ] Stopped target Local Encrypted Volumes.
+[  OK  ] Stopped Dispatch Password Requests to Console Directory Watch.
+[  OK  ] Stopped dracut initqueue hook.
+[  OK  ] Stopped Apply Kernel Variables.
+[  OK  ] Stopped Load Kernel Modules.
+[  OK  ] Stopped Create System Files and Directories.
+[  OK  ] Stopped target Local File Systems.
+[  OK  ] Stopped target Preparation for Local File Systems.
+[  OK  ] Stopped Coldplug All udev Devices.
+[  OK  ] Stopped dracut pre-trigger hook.
+         Stopping Rule-based Manager for Device Events and Files...
+[    2.449199] systemd[1]: Stopped target Remote Encrypted Volumes.
+[  OK  ] Finished Cleaning Up and Shutting Down Daemons.
+[    2.482398] systemd[1]: Stopped target Timer Units.
+[    2.483488] systemd[1]: dracut-pre-pivot.service: Deactivated successfully.
+[    2.484831] systemd[1]: Stopped dracut pre-pivot and cleanup hook.
+[    2.486132] systemd[1]: Stopped target Initrd Default Target.
+[    2.487281] systemd[1]: Stopped target Basic System.
+[    2.488262] systemd[1]: Stopped target Initrd Root Device.
+[    2.489348] systemd[1]: Stopped target Initrd /usr File System.
+[    2.491252] systemd[1]: Stopped target Path Units.
+[    2.492504] systemd[1]: Stopped target Remote File Systems.
+[    2.493534] systemd[1]: Stopped target Preparation for Remote File Systems.
+[    2.495110] systemd[1]: Stopped target Slice Units.
+[    2.496457] systemd[1]: Stopped target Socket Units.
+[  OK  ] Stopped Rule-based Manager for Device Events and Files.
+[    2.498759] systemd[1]: Stopped target System Initialization.
+[  OK  ] Closed udev Control Socket.
+[    2.500772] systemd[1]: Stopped target Swaps.
+[  OK  ] Closed udev Kernel Socket.
+[    2.502550] systemd[1]: dracut-mount.service: Deactivated successfully.
+[  OK  ] Stopped dracut pre-udev hook.
+[    2.504699] systemd[1]: Stopped dracut mount hook.
+[  OK  ] Stopped dracut cmdline hook.
+[    2.506565] systemd[1]: dracut-pre-mount.service: Deactivated successfully.
+[  OK  ] Stopped dracut ask for additional cmdline parameters.
+[    2.509099] systemd[1]: Stopped dracut pre-mount hook.
+         Starting Cleanup udev Database...
+[    2.510983] systemd[1]: Stopped target Local Encrypted Volumes.
+[  OK  ] Stopped Create Static Device Nodes in /dev.
+[    2.513342] systemd[1]: systemd-ask-password-console.path: Deactivated successfully.
+[  OK  ] Stopped Create Static Device Nodes in /dev gracefully.
+[    2.516063] systemd[1]: Stopped Dispatch Password Requests to Console Directory Watch.
+[  OK  ] Stopped Create List of Static Device Nodes.
+[    2.518596] systemd[1]: dracut-initqueue.service: Deactivated successfully.
+[  OK  ] Stopped Virtual Console Setup.
+[    2.520861] systemd[1]: Stopped dracut initqueue hook.
+[    2.521832] systemd[1]: systemd-sysctl.service: Deactivated successfully.
+[    2.523059] systemd[1]: Stopped Apply Kernel Variables.
+[    2.524062] systemd[1]: systemd-modules-load.service: Deactivated successfully.
+[    2.525368] systemd[1]: Stopped Load Kernel Modules.
+[    2.526290] systemd[1]: systemd-tmpfiles-setup.service: Deactivated successfully.
+[    2.527614] systemd[1]: Stopped Create System Files and Directories.
+[    2.528764] systemd[1]: Stopped target Local File Systems.
+[    2.529782] systemd[1]: Stopped target Preparation for Local File Systems.
+[    2.530985] systemd[1]: systemd-udev-trigger.service: Deactivated successfully.
+[    2.532327] systemd[1]: Stopped Coldplug All udev Devices.
+[    2.533331] systemd[1]: dracut-pre-trigger.service: Deactivated successfully.
+[    2.534570] systemd[1]: Stopped dracut pre-trigger hook.
+[    2.535572] systemd[1]: Stopping Rule-based Manager for Device Events and Files...
+[    2.536918] systemd[1]: initrd-cleanup.service: Deactivated successfully.
+[    2.538218] systemd[1]: Finished Cleaning Up and Shutting Down Daemons.
+[    2.539463] systemd[1]: systemd-udevd.service: Deactivated successfully.
+[  OK  ] Finished Cleanup udev Database.
+[    2.541883] systemd[1]: Stopped Rule-based Manager for Device Events and Files.
+[  OK  ] Reached target Switch Root.
+[    2.544571] systemd[1]: systemd-udevd-control.socket: Deactivated successfully.
+         Starting Switch Root...
+[    2.547092] systemd[1]: Closed udev Control Socket.
+[    2.548597] systemd[1]: systemd-udevd-kernel.socket: Deactivated successfully.
+[    2.549962] systemd[1]: Closed udev Kernel Socket.
+[    2.550932] systemd[1]: dracut-pre-udev.service: Deactivated successfully.
+[    2.552230] systemd[1]: Stopped dracut pre-udev hook.
+[    2.553231] systemd[1]: dracut-cmdline.service: Deactivated successfully.
+[    2.554886] systemd[1]: Stopped dracut cmdline hook.
+[    2.556227] systemd[1]: dracut-cmdline-ask.service: Deactivated successfully.
+[    2.557542] systemd[1]: Stopped dracut ask for additional cmdline parameters.
+[    2.558971] systemd[1]: Starting Cleanup udev Database...
+[    2.560475] systemd[1]: systemd-tmpfiles-setup-dev.service: Deactivated successfully.
+[    2.562090] systemd[1]: Stopped Create Static Device Nodes in /dev.
+[    2.563458] systemd[1]: systemd-tmpfiles-setup-dev-early.service: Deactivated successfully.
+[    2.565135] systemd[1]: Stopped Create Static Device Nodes in /dev gracefully.
+[    2.566594] systemd[1]: kmod-static-nodes.service: Deactivated successfully.
+[    2.568076] systemd[1]: Stopped Create List of Static Device Nodes.
+[    2.569375] systemd[1]: systemd-vconsole-setup.service: Deactivated successfully.
+[    2.570864] systemd[1]: Stopped Virtual Console Setup.
+[    2.571938] systemd[1]: initrd-udevadm-cleanup-db.service: Deactivated successfully.
+[    2.573500] systemd[1]: Finished Cleanup udev Database.
+[    2.574580] systemd[1]: Reached target Switch Root.
+[    2.575603] systemd[1]: Starting Switch Root...
+[    2.576574] systemd[1]: Switching root.
+[    2.758926] systemd-journald[154]: Received SIGTERM from PID 1 (systemd).
+[    3.350240] SELinux:  Permission firmware_load in class system not defined in policy.
+[    3.351522] SELinux:  Permission kexec_image_load in class system not defined in policy.
+[    3.352803] SELinux:  Permission kexec_initramfs_load in class system not defined in policy.
+[    3.354129] SELinux:  Permission policy_load in class system not defined in policy.
+[    3.355344] SELinux:  Permission x509_certificate_load in class system not defined in policy.
+[    3.356678] SELinux:  Permission watch_mountns in class file not defined in policy.
+[    3.357947] SELinux:  Permission watch_mountns in class dir not defined in policy.
+[    3.359180] SELinux:  Permission watch_mountns in class lnk_file not defined in policy.
+[    3.360483] SELinux:  Permission watch_mountns in class chr_file not defined in policy.
+[    3.361807] SELinux:  Permission watch_mountns in class blk_file not defined in policy.
+[    3.363083] SELinux:  Permission watch_mountns in class sock_file not defined in policy.
+[    3.364380] SELinux:  Permission watch_mountns in class fifo_file not defined in policy.
+[    3.365698] SELinux:  Permission watch_mountns in class anon_inode not defined in policy.
+[    3.367027] SELinux:  Permission allowed in class io_uring not defined in policy.
+[    3.368226] SELinux: the above unknown classes and permissions will be allowed
+[    3.371117] SELinux:  policy capability network_peer_controls=1
+[    3.372130] SELinux:  policy capability open_perms=1
+[    3.372979] SELinux:  policy capability extended_socket_class=1
+[    3.373958] SELinux:  policy capability always_check_network=0
+[    3.374912] SELinux:  policy capability cgroup_seclabel=1
+[    3.375807] SELinux:  policy capability nnp_nosuid_transition=1
+[    3.376776] SELinux:  policy capability genfs_seclabel_symlinks=0
+[    3.377763] SELinux:  policy capability ioctl_skip_cloexec=0
+[    3.378697] SELinux:  policy capability userspace_initial_context=0
+[    3.379725] SELinux:  policy capability netlink_xperm=0
+[    3.380591] SELinux:  policy capability netif_wildcard=0
+[    3.381460] SELinux:  policy capability genfs_seclabel_wildcard=0
+[    3.411289] audit: type=1403 audit(1795864037.816:2): auid=4294967295 ses=4294967295 lsm=selinux res=1
+[    3.411894] systemd[1]: Successfully loaded SELinux policy in 131.705ms.
+[    3.564651] systemd[1]: Relabeled /dev/, /dev/shm/, /run/ in 4.852ms.
+[!p]104[?7h[    3.581752] systemd[1]: systemd 257.8 running in system mode (+PAM +AUDIT +SELINUX -APPARMOR +IMA +IPE +SMACK +SECCOMP +GCRYPT +GNUTLS +OPENSSL +ACL +BLKID +CURL -ELFUTILS -FIDO2 -IDN2 -IDN -IPTC +KMOD +LIBCRYPTSETUP +LIBCRYPTSETUP_PLUGINS +LIBFDISK +PCRE2 +PWQUALITY -P11KIT +QRENCODE +TPM2 +BZIP2 +LZ4 +XZ +ZLIB +ZSTD -BPF_FRAMEWORK -BTF +XKBCOMMON +UTMP +SYSVINIT +LIBARCHIVE)
+[    3.586300] systemd[1]: Detected virtualization kvm.
+[    3.587016] systemd[1]: Detected architecture x86-64.
+
+Welcome to symfonOS (Rolling)!
+
+[    3.614714] systemd[1]: Hostname set to <symfonos>.
+[    3.616654] systemd[1]: Initializing machine ID from random generator.
+[    3.617606] evm: overlay not supported
+[    4.568443] flatpak (561) used greatest stack depth: 11528 bytes left
+[    4.824128] systemd[1]: Failed to put bus name to hashmap: File exists
+[    4.825255] systemd[1]: NetworkManager-initrd.service: Two services allocated for the same bus name org.freedesktop.NetworkManager, refusing operation.
+[    4.922008] systemd[1]: initrd-switch-root.service: Deactivated successfully.
+[    4.923369] systemd[1]: Stopped Switch Root.
+[  OK  ] Stopped Switch Root.
+[    4.925622] systemd[1]: systemd-journald.service: Scheduled restart job, restart counter is at 1.
+[    4.927471] systemd[1]: Created slice CUPS Slice.
+[  OK  ] Created slice CUPS Slice.
+[    4.929485] systemd[1]: Created slice Slice /system/getty.
+[  OK  ] Created slice Slice /system/getty.
+[    4.931732] systemd[1]: Created slice Slice /system/modprobe.
+[  OK  ] Created slice Slice /system/modprobe.
+[    4.934161] systemd[1]: Created slice Slice /system/serial-getty.
+[  OK  ] Created slice Slice /system/serial-getty.
+[    4.936555] systemd[1]: Created slice User and Session Slice.
+[  OK  ] Created slice User and Session Slice.
+[    4.938842] systemd[1]: Started Dispatch Password Requests to Console Directory Watch.
+[  OK  ] Started Dispatch Password Requests to Console Directory Watch.
+[    4.941622] systemd[1]: Started Forward Password Requests to Wall Directory Watch.
+[  OK  ] Started Forward Password Requests to Wall Directory Watch.
+[    4.944616] systemd[1]: Set up automount Arbitrary Executable File Formats File System Automount Point.
+[  OK  ] Set up automount Arbitrary Executa…ormats File System Automount Point.
+[    4.947750] systemd[1]: Expecting device /dev/ttyS0...
+         Expecting device /dev/ttyS0...
+[    4.949542] systemd[1]: Reached target Local Encrypted Volumes.
+[  OK  ] Reached target Local Encrypted Volumes.
+[    4.951878] systemd[1]: Stopped target Switch Root.
+[  OK  ] Stopped target Switch Root.
+[    4.953670] systemd[1]: Stopped target Initrd File Systems.
+[  OK  ] Stopped target Initrd File Systems.
+[    4.955670] systemd[1]: Stopped target Initrd Root File System.
+[  OK  ] Stopped target Initrd Root File System.
+[    4.957792] systemd[1]: Reached target Local Integrity Protected Volumes.
+[  OK  ] Reached target Local Integrity Protected Volumes.
+[    4.960207] systemd[1]: Reached target User and Group Name Lookups.
+[  OK  ] Reached target User and Group Name Lookups.
+[    4.962410] systemd[1]: Reached target Remote Encrypted Volumes.
+[  OK  ] Reached target Remote Encrypted Volumes.
+[    4.964522] systemd[1]: Reached target Remote File Systems.
+[  OK  ] Reached target Remote File Systems.
+[    4.966524] systemd[1]: Reached target Remote Verity Protected Volumes.
+[  OK  ] Reached target Remote Verity Protected Volumes.
+[    4.968847] systemd[1]: Reached target Slice Units.
+[  OK  ] Reached target Slice Units.
+[    4.970657] systemd[1]: Reached target Swaps.
+[  OK  ] Reached target Swaps.
+[    4.972302] systemd[1]: Reached target Local Verity Protected Volumes.
+[  OK  ] Reached target Local Verity Protected Volumes.
+[    4.977520] systemd[1]: Listening on Process Core Dump Socket.
+[  OK  ] Listening on Process Core Dump Socket.
+[    4.980356] systemd[1]: Listening on Credential Encryption/Decryption.
+[  OK  ] Listening on Credential Encryption/Decryption.
+[    4.982794] systemd[1]: Listening on initctl Compatibility Named Pipe.
+[  OK  ] Listening on initctl Compatibility Named Pipe.
+[    4.985735] systemd[1]: Listening on Journal Audit Socket.
+[  OK  ] Listening on Journal Audit Socket.
+[    4.988808] systemd[1]: Listening on DDI File System Mounter Socket.
+[  OK  ] Listening on DDI File System Mounter Socket.
+[    4.991381] systemd[1]: Listening on Namespace Resource Manager Socket.
+[  OK  ] Listening on Namespace Resource Manager Socket.
+[    4.993959] systemd[1]: Listening on Userspace Out-Of-Memory (OOM) Killer Socket.
+[  OK  ] Listening on Userspace Out-Of-Memory (OOM) Killer Socket.
+[    4.996581] systemd[1]: TPM PCR Measurements was skipped because of an unmet condition check (ConditionSecurity=measured-uki).
+[    4.998444] systemd[1]: Make TPM PCR Policy was skipped because of an unmet condition check (ConditionSecurity=measured-uki).
+[    5.001824] systemd[1]: Listening on udev Control Socket.
+[  OK  ] Listening on udev Control Socket.
+[    5.003966] systemd[1]: Listening on udev Kernel Socket.
+[  OK  ] Listening on udev Kernel Socket.
+[    5.023848] systemd[1]: Mounting Huge Pages File System...
+         Mounting Huge Pages File System...
+[    5.027042] systemd[1]: Mounting POSIX Message Queue File System...
+         Mounting POSIX Message Queue File System...
+[    5.050920] systemd[1]: Mounting Kernel Debug File System...
+         Mounting Kernel Debug File System...
+[    5.054595] systemd[1]: Mounting Kernel Trace File System...
+         Mounting Kernel Trace File System...
+[    5.057974] systemd[1]: Mounting Temporary Directory /tmp...
+         Mounting Temporary Directory /tmp...
+[    5.077895] systemd[1]: Starting Create List of Static Device Nodes...
+         Starting Create List of Static Device Nodes...
+[    5.081148] systemd[1]: Starting Load Kernel Module configfs...
+         Starting Load Kernel Module configfs...
+[    5.089733] systemd[1]: Starting Load Kernel Module dm_mod...
+         Starting Load Kernel Module dm_mod...
+[    5.093148] systemd[1]: Starting Load Kernel Module drm...
+         Starting Load Kernel Module drm...
+[    5.095664] systemd[1]: Starting Load Kernel Module efi_pstore...
+         Starting Load Kernel Module efi_pstore...
+[    5.101402] systemd[1]: Starting Load Kernel Module fuse...
+         Starting Load Kernel Module fuse...
+[    5.104142] systemd[1]: Starting Load Kernel Module loop...
+         Starting Load Kernel Module loop...
+[    5.106566] systemd[1]: Clear Stale Hibernate Storage Info was skipped because of an unmet condition check (ConditionPathExists=/sys/firmware/efi/efivars/HibernateLocation-8cf2644b-4b0b-428f-9387-6d876050dc67).
+[    5.110372] systemd[1]: systemd-journald.service: unit configures an IP firewall, but the local system does not support BPF/cgroup firewalling.
+[    5.112590] systemd[1]: systemd-journald.service: (This warning is only shown for the first unit using IP firewalling.)
+[    5.114942] systemd[1]: Starting Journal Service...
+         Starting Journal Service...
+[    5.125461] systemd[1]: Starting Load Kernel Modules...
+         Starting Load Kernel Modules...
+[    5.128167] systemd[1]: TPM PCR Machine ID Measurement was skipped because of an unmet condition check (ConditionSecurity=measured-uki).
+[    5.131755] fuse: init (API version 7.44)
+[    5.131996] systemd[1]: Starting Remount Root and Kernel File Systems...
+         Starting Remount Root and Kernel File Systems...
+[    5.136239] systemd[1]: Early TPM SRK Setup was skipped because of an unmet condition check (ConditionSecurity=measured-uki).
+[    5.139244] systemd[1]: Starting Load udev Rules from Credentials...
+         Starting Load udev Rules from Credentials...
+[    5.142606] systemd[1]: Starting Coldplug All udev Devices...
+         Starting Coldplug All udev Devices...
+[    5.147706] systemd[1]: Mounted Huge Pages File System.
+[  OK  ] Mounted Huge Pages File System.[    5.149650] systemd[1]: Mounted POSIX Message Queue File System.
+
+[  OK  ] Mounted POSIX Messa[    5.151691] systemd[1]: Mounted Kernel Debug File System.
+ge Queue File System.
+[  OK  ] Mounted Kernel Debu[    5.153985] systemd[1]: Mounted Kernel Trace File System.
+g File System.
+[  O[    5.155511] systemd[1]: Mounted Temporary Directory /tmp.
+K  ] Mounted Kernel Trace File Syst[    5.157207] systemd[1]: Finished Create List of Static Device Nodes.
+em.
+[  OK  ] Mounted T[    5.159168] systemd[1]: modprobe@configfs.service: Deactivated successfully.
+emporary Directo[    5.160922] systemd[1]: Finished Load Kernel Module configfs.
+ry /tmp.
+[  OK  [0[    5.162627] systemd[1]: modprobe@dm_mod.service: Deactivated successfully.
+m] Finished [0;[    5.164129] systemd[1]: Finished Load Kernel Module dm_mod.
+1;39mCreate List of Static Devic[    5.165726] systemd[1]: modprobe@drm.service: Deactivated successfully.
+e Nodes.
+[[    5.167232] systemd[1]: Finished Load Kernel Module drm.
+  OK  ] Finished [0;[    5.168768] systemd[1]: modprobe@efi_pstore.service: Deactivated successfully.
+1;39mLoad Kernel[    5.170434] systemd[1]: Finished Load Kernel Module efi_pstore.
+ Module configfs.
+[  OK  ] Fini[    5.172122] systemd[1]: modprobe@fuse.service: Deactivated successfully.
+shed Lo[    5.173802] systemd[1]: Finished Load Kernel Module fuse.
+ad Kernel Module dm_mod.
+[  OK  [0[    5.175668] systemd[1]: modprobe@loop.service: Deactivated successfully.
+m] Finished [0;[    5.177214] systemd[1]: Finished Load Kernel Module loop.
+1;39mLoad Kernel Module drm.
+[  OK [    5.178982] systemd[1]: Finished Remount Root and Kernel File Systems.
+ ] Finished Load Kernel Module efi_pstore.
+[  OK  ] Finished Load Kernel Module fuse.
+[  OK  ] Finished Load Kernel Module loop.
+[  OK  ] Fini[    5.183738] systemd[1]: Mounting FUSE Control File System...
+shed Remount Root and Kernel File Syste[    5.185534] systemd[1]: Kernel Configuration File System was skipped because of an unmet condition check (ConditionPathExists=/sys/kernel/config).
+ms.
+      [    5.188242] systemd[1]: OSTree Remount OS/ Bind Mounts was skipped because of an unmet condition check (ConditionKernelCommandLine=ostree).
+   Mounting FUSE Control File System...
+[    5.203191] systemd-modules (600) used greatest stack depth: 11392 bytes left
+[    5.226210] systemd[1]: Starting Rebuild Hardware Database...
+         Starting Rebuild Hardware Database...
+[    5.228415] systemd[1]: Lock File Systems to TPM PCR Policy was skipped because of an unmet condition check (ConditionSecurity=measured-uki).
+[    5.230537] systemd[1]: Lock Machine ID to TPM PCR Policy was skipped because of an unmet condition check (ConditionSecurity=measured-uki).
+[    5.232579] systemd[1]: Platform Persistent Storage Archival was skipped because of an unmet condition check (ConditionDirectoryNotEmpty=/sys/fs/pstore).
+[    5.246201] systemd[1]: Starting Load/Save OS Random Seed...
+         Starting Load/Save OS Random Seed...
+[    5.255814] systemd-journald[597]: Collecting audit messages is enabled.
+[    5.259559] systemd[1]: Repartition Root Disk was skipped because no trigger condition checks were met.
+[    5.086300] systemd[1]: Queued start job for default target Graphical Interface.
+[    5.263445] systemd[1]: Starting Create Static Device Nodes in /dev gracefully...
+[    5.090103] systemd[1]: systemd-journald.service: Deactivated successfully.
+[    5.092100] systemd-modules-load[600]: Module 'pkcs8_key_parser' is built in
+         Starting Create Static Device Nodes in /dev gracefully...
+[    5.271517] systemd[1]: TPM SRK Setup was skipped because of an unmet condition check (ConditionSecurity=measured-uki).
+[    5.273878] systemd[1]: Lock Firmware Code to TPM PCR Policy was skipped because of an unmet condition check (ConditionSecurity=measured-uki).
+[    5.276151] systemd[1]: Lock Firmware Configuration to TPM PCR Policy was skipped because of an unmet condition check (ConditionSecurity=measured-uki).
+[    5.278584] systemd[1]: Lock UEFI SecureBoot Authority to TPM PCR Policy was skipped because of an unmet condition check (ConditionSecurity=measured-uki).
+[    5.281046] systemd[1]: Lock UEFI SecureBoot Policy to TPM PCR Policy was skipped because of an unmet condition check (ConditionSecurity=measured-uki).
+[    5.283591] systemd[1]: Make TPM PCR Policy was skipped because of an unmet condition check (ConditionSecurity=measured-uki).
+[    5.287003] systemd[1]: Started Journal Service.
+[  OK  ] Started Journal Service.
+[    5.290113] audit: type=1130 audit(1795864039.694:3): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=systemd-journald comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[  OK  ] Finished Load Kernel Modules.[    5.294514] audit: type=1130 audit(1795864039.699:4): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=systemd-modules-load comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+
+[    5.115162] systemd[1]: Finished Load Kernel Modules.
+[  OK  ] Finished Load udev [    5.300095] audit: type=1130 audit(1795864039.704:5): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=systemd-udev-load-credentials comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+Rules from Credentials.
+[    5.124437] systemd[1]: Finished Load udev Rules from Credentials.
+[  OK  ] Finished Coldplug All udev Devices[    5.306662] audit: type=1130 audit(1795864039.711:6): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=systemd-udev-trigger comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[0m.
+[    5.130812] systemd[1]: Finished Coldplug All udev Devices.
+[  OK  ] Mounted FUSE Control File System.
+[    5.136468] systemd[1]: Mounted FUSE Control File System.
+         Starting Flush Journal to Persistent Storage...
+[    5.146649] systemd[1]: Starting Flush Journal to Persistent Storage...
+         Starting Apply Kernel Variables...
+[    5.152483] systemd-random-seed[607]: Kernel entropy pool is not initialized yet, waiting until it is.
+[    5.153409] systemd[1]: Starting Apply Kernel Variables...
+[    5.437961] systemd-journald[597]: Received client request to flush runtime journal.
+[  OK  ] Finished Flush Journal to Persistent Storage.
+[    5.502396] audit: type=1130 audit(1795864039.907:7): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=systemd-journal-flush comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[    5.324981] systemd[1]: Finished Flush Journal to Persistent Storage.
+[    5.333788] systemd-sysctl[62[    5.509507] systemd-sysctl (628) used greatest stack depth: 11352 bytes left
+8]: [0;1;38:5:185mCouldn't write '1' to 'kernel/unprivileged_bpf_disabled', ignoring: No such file or directory
+[    5.338453] systemd-sysctl[628]: [0;1;38:5:185mCouldn't write '2' to 'net/core/bpf_jit_harden', ignoring: No such file or directory
+[  OK  ] Finished Apply Kernel Variables.
+[    5.518021] audit: type=1130 audit(1795864039.922:8): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=systemd-sysctl comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[    5.342570] systemd-sysctl[628]: [0;1;38:5:185mCouldn't write '0' to 'vm/unprivileged_userfaultfd', ignoring: No such file or directory
+[  OK  ] Finished Create Static Device Nodes in /dev gracefully.
+[    5.352191] s[    5.527366] audit: type=1130 audit(1795864039.932:9): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=systemd-tmpfiles-setup-dev-early comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+ystemd[1]: Finished Apply Kernel Variables.
+[    5.357318] systemd[1]: Finished Create Static Device Nodes in /dev gracefully.
+[    5.359146] systemd[1]: Starting Create System Users...
+         Starting Create System Users...
+[    5.636113] random: crng init done
+[  OK  ] Finished Load/Save OS Random Seed.
+[    5.463774] systemd[1]: Finished Load/Save OS Random Seed.
+[    5.641637] audit: type=1130 audit(1795864040.046:10): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=systemd-random-seed comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+         Starting Namespace Resource Manager...
+[    5.468048] systemd[1]: Starting Namespace Resource Manager...
+[    5.531661] systemd-nsresourced[639]: Not setting up BPF subsystem, as functionality has been disabled at compile time.
+[    5.534773] systemd[1]: Started Namespace Resource Manager.
+[  OK  ] Started Namespace Resource Manager.
+[    5.716146] audit: type=1130 audit(1795864040.117:11): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=systemd-nsresourced comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[    5.546857] systemd[1]: Finished Create System Users.
+[  OK  ] Finished Create System Users.
+[    5.724305] audit: type=1130 audit(1795864040.129:12): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=systemd-sysusers comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[    5.550480] systemd[1]: Starting Userspace Out-Of-Memory (OOM) Killer...
+         Starting Userspace Out-Of-Memory (OOM) Killer...
+         Starting Network Name Resolution...
+[    5.557733] systemd[1]: Starting Network Name Resolution...
+[    5.560195] systemd[1]: Starting Network Time Synchronization...
+         Starting Network Time Synchronization...
+         Starting Create Static Device Nodes in /dev...
+[    5.565058] systemd[1]: Starting Create Static Device Nodes in /dev...
+[    5.609362] systemd[1]: Finished Create Static Device Nodes in /dev.
+[  OK  ] Finished Create Static Device Nodes in /dev.
+[    5.787870] audit: type=1130 audit(1795864040.193:13): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=systemd-tmpfiles-setup-dev comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[    5.613072] systemd[1]: Reached target Preparation for Local File Systems.
+[  OK  ] Reached target Preparation for Local File Systems.
+[  OK  ] Started Network Time Synchronization.
+[    5.690272] systemd-oomd[647]: [0;1;38:5:185mNo swap; memory pressure usage will be degraded
+[    5.693473] systemd[1]: Started Network Time Synchronization.
+[    5.869839] audit: type=1130 audit(1795864040.274:14): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=systemd-timesyncd comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[  OK  ] Started Userspace Out-Of-Memory (OOM) Killer.
+[    5.695029] systemd[1]: Started Userspace Out-Of-Memory (OOM) Killer.
+[    5.877491] audit: type=1130 audit(1795864040.282:15): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=systemd-oomd comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[    5.702704] systemd[1]: Reached target System Time Set.
+[  OK  ] Reached target System Time Set.
+[    5.897570] systemd-hwdb (606) used greatest stack depth: 11184 bytes left
+[    5.723142] systemd[1]: Finished Rebuild Hardware Database.
+[  OK  ] Finished Rebuild Hardware Database.
+[    5.901338] audit: type=1130 audit(1795864040.306:16): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=systemd-hwdb-update comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+         Starting Rule-based Manager for Device Events and Files...
+[    5.731265] systemd[1]: Starting Rule-based Manager for Device Events and Files...
+[    5.760113] systemd[1]: Virtual Machine and Container Storage (Compatibility) was skipped because of an unmet condition check (ConditionPathExists=/var/lib/machines.raw).
+[  OK  ] Reached target Local File Systems.
+[  OK  ] Reached target Containers.
+[    5.760847] systemd[1]: Reached target Local File Systems.
+[    5.770100] systemd[1]: Reached target Containers.
+[    5.795834] systemd-udevd[659]: Using default interface naming scheme 'v257'.
+[    5.797553] systemd-resolved[648]: Positive Trust Anchors:
+[    5.798742] systemd-resolved[648]: . IN DS 20326 8 2 e06d44b80b8f1d39a95c0b0d7c65d08458e880409bbc683457104237c7f8ec8d
+[    5.801002] systemd-resolved[648]: . IN DS 38696 8 2 683d2d0acb8c9b712a1948b27f741219298d0a450d612c483af444a4c0fb2b16
+[    5.803191] systemd-resolved[648]: Negative trust anchors: home.arpa 10.in-addr.arpa 16.172.in-addr.arpa 17.172.in-addr.arpa 18.172.in-addr.arpa 19.172.in-addr.arpa 20.172.in-addr.arpa 21.172.in-addr.arpa 22.172.in-addr.arpa 23.172.in-addr.arpa 24.172.in-addr.arpa 25.172.in-addr.arpa 26.172.in-addr.arpa 27.172.in-addr.arpa 28.172.in-addr.arpa 29.172.in-addr.arpa 30.172.in-addr.arpa 31.172.in-addr.arpa 170.0.0.192.in-addr.arpa 171.0.0.192.in-addr.arpa 168.192.in-addr.arpa d.f.ip6.arpa ipv4only.arpa resolver.arpa corp home internal intranet lan local private test
+[  OK  ] Listening on Boot Entries Service Socket.
+[    5.812986] systemd[1]: Listening on Boot Entries Service Socket.
+[  OK  ] Listening on Disk Image Download Service Socket.
+[    5.817730] systemd[1]: Listening on Disk Image Download Service Socket.
+[  OK  ] Listening on System Extension Image Management.
+[    5.833507] systemd[1]: Listening on System Extension Image Management.
+[    5.836394] systemd[1]: SELinux-Dateikontexte neu setzen was skipped because of an unmet condition check (ConditionPathExists=/.autorelabel).
+[    5.912500] systemd[1]: Set Up Additional Binary Formats was skipped because no trigger condition checks were met.
+[    5.914894] systemd[1]: Update Boot Loader Random Seed was skipped because no trigger condition checks were met.
+         Starting Automatic Boot Loader Update...
+[    5.917127] systemd[1]: Starting Automatic Boot Loader Update...
+[    5.919719] systemd[1]: Merge System Configuration Images into /etc/ was skipped because no trigger condition checks were met.
+[    5.921832] systemd[1]: Merge System Extension Images into /usr/ and /opt/ was skipped because no trigger condition checks were met.
+[    5.927824] systemd[1]: Starting Create System Files and Directories...
+         Starting Create System Files and Directories...
+[    5.985698] bootctl[663]: Couldn't find EFI system partition, skipping.
+[  OK  ] Finished Automatic Boot Loader Update.
+[    6.163481] audit: type=1130 audit(1795864040.568:17): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=systemd-boot-update comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[    5.986473] systemd[1]: Finished Automatic Boot Loader Update.
+[    6.010682] systemd-resolved[648]: Using system hostname 'symfonos'.
+[  OK  ] Started Network Nam[    6.188071] audit: type=1130 audit(1795864040.592:18): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=systemd-resolved comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+e Resolution.
+[    6.012334] systemd[1]: Started Network Name Resolution.
+[  OK  ] Reached target Host and Network Name Lookups.
+[    6.018096] systemd[1]: Reached target Host and Network Name Lookups.
+[    6.071714] systemd-udevd[659]: /usr/lib/udev/rules.d/tpm-udev.rules:3 Unknown user 'tss', ignoring.
+[    6.074320] systemd-udevd[659]: /usr/lib/udev/rules.d/tpm-udev.rules:4 Unknown group 'tss', ignoring.
+[  OK  ] Started Rule-based Manager for Device Events and Files.
+[    6.076582] systemd[1]: Started Rule-based Ma[    6.254004] audit: type=1130 audit(1795864040.658:19): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=systemd-udevd comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+nager for Device Events and Files.
+[    6.113413] systemd-timesyncd[649]: Network configuration changed, trying to establish connection.
+[    6.116921] systemd-timesyncd[    6.292832] e1000e 0000:00:01.0 enp0s1: renamed from eth0
+[649]: Network configuration changed, trying to establish connection.
+[    6.131676] systemd[1]: Condition check resulted in /dev/ttyS0 being skipped.
+[    6.160643] systemd-tmpfiles[664]: Failed to fstat(/var/lib/libuuid): Permission denied
+[  OK  ] Listening on Load/Save RF Kill Switch Status /dev/rfkill Watch.
+[    6.172764] systemd[1]: Condition check resulted in /sys/devices/virtual/misc/rfkill being skipped.
+[    6.174907] systemd[1]: Listening on Load/Save RF Kill Switch Status /dev/rfkill Watch.
+[    6.407871] systemd-tmpfile (664) used greatest stack depth: 10960 bytes left
+[  OK  ] Finished Create System Files and Directories.
+[    6.235449] systemd[1]: Finished Create System Files and Directories.[    6.413492] audit: type=1130 audit(1795864040.818:20): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=systemd-tmpfiles-setup comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+
+         Starting Firewall (nftables)...
+[    6.243984] systemd[1]: Starting Firewall (nftables)...
+[    6.245489] systemd[1]: First Boot Wizard was skipped because of an unmet condition check (ConditionFirstBoot=yes).
+[    6.247627] systemd[1]: First Boot Complete was skipped because of an unmet condition check (ConditionFirstBoot=yes).
+         Starting Rebuild Journal Catalog...
+[    6.257954] systemd[1]: Starting Rebuild Journal Catalog...
+[    6.260475] systemd[1]: Save Transient machine-id to Disk was skipped because of an unmet condition check (ConditionPathIsMountPoint=/etc/machine-id).
+         Starting Record System Boot/Shutdown in UTMP...
+[    6.265838] systemd[1]: Starting Record System Boot/Shutdown in UTMP...
+         Starting Virtual Console Setup...
+[    6.318598] systemd[1]: Starting Virtual Console Setup...
+[    6.499139] audit: type=1127 audit(1795864040.904:21): pid=709 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:initrc_t:s0 msg=' comm="systemd-update-utmp" exe="/usr/lib/systemd/systemd-update-utmp" hostname=? addr=? terminal=? res=success'
+[    6.525376] [drm] pci: virtio-vga detected at 0000:00:02.0
+[    6.526362] virtio-pci 0000:00:02.0: vgaarb: deactivate vga console
+[    6.532624] Console: switching to colour dummy device 80x25
+[    6.533647] [drm] features: -virgl +edid -resource_blob -host_visible
+[    6.533649] [drm] features: -context_init
+[    6.536654] [drm] number of scanouts: 1
+[    6.537350] [drm] number of cap sets: 0
+[    6.538951] [drm] Initialized virtio_gpu 0.1.0 for 0000:00:02.0 on minor 0
+[  OK  ] Finished Record System Boot/Shutdow[    6.625397] audit: type=1130 audit(1795864041.030:22): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=systemd-update-utmp comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+n in UTMP.
+[    6.449456] systemd[1]: Finished Record System Boot/Shutdown in UTMP.
+[    6.461668] systemd[1]: systemd-vconsole-setup.service: Deactivated successfully.
+[    6.463425] systemd[1]: Stopped Virtual Console Setup.
+[  OK  ] Stopped Virtual Console Setup.
+[    6.640842] audit: type=1130 audit(1795864041.045:23): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=systemd-vconsole-setup comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[    6.645020] audit: type=1131 audit(1795864041.045:24): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=systemd-vconsole-setup comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+         Starting Virtual Console Setup...
+[    6.475552] systemd[1]: Starting Virtual Console Setup...
+[    6.841444] kvm_amd: Nested Virtualization enabled
+[    6.842443] kvm_amd: Nested Paging disabled
+[    6.843279] kvm_amd: PMU virtualization is disabled
+[    7.061067] snd_hda_codec_generic hdaudioC0D0: autoconfig for Generic: line_outs=1 (0x3/0x0/0x0/0x0/0x0) type:line
+[    7.063058] snd_hda_codec_generic hdaudioC0D0:    speaker_outs=0 (0x0/0x0/0x0/0x0/0x0)
+[    7.064566] snd_hda_codec_generic hdaudioC0D0:    hp_outs=0 (0x0/0x0/0x0/0x0/0x0)
+[    7.066065] snd_hda_codec_generic hdaudioC0D0:    mono: mono_out=0x0
+[    7.067338] snd_hda_codec_generic hdaudioC0D0:    inputs:
+[    6.935611] systemd[1]: Finished Rebuild Journal Catalog.
+[  OK  [    7.112124] audit: type=1130 audit(1795864041.516:25): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=systemd-journal-catalog-update comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+] Finished Rebuild Journal Catalog.
+[    6.943676] systemd[1]: Starting Update is Completed...
+         Starting Update is Completed...
+[  OK  ] Finished Update is Completed.
+[    7.045729] systemd[1]: Finished Update is Completed.
+[    7.224364] audit: type=1130 audit(1795864041.628:26): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=systemd-update-done comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[    7.084728] (udev-worker)[676]: [0;1;38:5:185mcontrolC0: Process '/usr/sbin/alsactl restore 0' failed with exit code 99.
+         Starting Load Kernel Module configfs...
+[    7.169416] systemd[1]: Starting Load Kernel Module configfs...
+         Starting Load Kernel Module dm_mod...
+[    7.171279] systemd[1]: Starting Load Kernel Module dm_mod...
+[    7.171635] systemd[1]: Starting Load Kernel Module efi_pstore...
+         Starting Load Kernel Module efi_pstore...
+         Starting Load Kernel Module loop...
+[    7.176055] systemd[1]: Starting Load Kernel Module loop...
+[    7.177032] systemd[1]: SELinux-Dateikontexte neu setzen was skipped because of an unmet condition check (ConditionPathExists=/.autorelabel).
+[    7.177297] systemd[1]: Set Up Additional Binary Formats was skipped because no trigger condition checks were met.
+[    7.177552] systemd[1]: Update Boot Loader Random Seed was skipped because no trigger condition checks were met.
+[    7.177827] systemd[1]: Merge System Configuration Images into /etc/ was skipped because no trigger condition checks were met.
+[    7.178386] systemd[1]: Clear Stale Hibernate Storage Info was skipped because of an unmet condition check (ConditionPathExists=/sys/firmware/efi/efivars/HibernateLocation-8cf2644b-4b0b-428f-9387-6d876050dc67).
+[    7.178652] systemd[1]: Lock File Systems to TPM PCR Policy was skipped because of an unmet condition check (ConditionSecurity=measured-uki).
+[    7.178938] systemd[1]: Lock Machine ID to TPM PCR Policy was skipped because of an unmet condition check (ConditionSecurity=measured-uki).
+[    7.179488] systemd[1]: TPM PCR Machine ID Measurement was skipped because of an unmet condition check (ConditionSecurity=measured-uki).
+[    7.179764] systemd[1]: Merge System Extension Images into /usr/ and /opt/ was skipped because no trigger condition checks were met.
+[    7.180333] systemd[1]: Early TPM SRK Setup was skipped because of an unmet condition check (ConditionSecurity=measured-uki).
+[    7.180594] systemd[1]: TPM SRK Setup was skipped because of an unmet condition check (ConditionSecurity=measured-uki).
+[    7.180877] systemd[1]: Lock Firmware Code to TPM PCR Policy was skipped because of an unmet condition check (ConditionSecurity=measured-uki).
+[    7.181436] systemd[1]: Lock Firmware Configuration to TPM PCR Policy was skipped because of an unmet condition check (ConditionSecurity=measured-uki).
+[    7.181694] systemd[1]: Lock UEFI SecureBoot Authority to TPM PCR Policy was skipped because of an unmet condition check (ConditionSecurity=measured-uki).
+[    7.181987] systemd[1]: Lock UEFI SecureBoot Policy to TPM PCR Policy was skipped because of an unmet condition check (ConditionSecurity=measured-uki).
+[    7.182545] systemd[1]: Make TPM PCR Policy was skipped because of an unmet condition check (ConditionSecurity=measured-uki).
+[  OK  ] Finished Load Kernel Module configfs.
+[    7.398976] audit: type=1130 audit(1795864041.803:27): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=modprobe@configfs comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[    7.224206] s[    7.403325] audit: type=1131 audit(1795864041.803:28): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=modprobe@configfs comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+ystemd[1]: modprobe@configfs.service: Deactivate[    7.408043] audit: type=1130 audit(1795864041.808:29): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=modprobe@dm_mod comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+d successfully.[    7.412354] audit: type=1131 audit(1795864041.808:30): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=modprobe@dm_mod comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+
+[  OK  ] Finished Load Kernel Module dm_mod.
+[  OK  ] Finished Load Kernel Module[    7.418537] audit: type=1130 audit(1795864041.823:31): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=modprobe@efi_pstore comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+ efi_pstore.[    7.422696] audit: type=1131 audit(1795864041.823:32): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=modprobe@efi_pstore comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+
+[    7.233680] systemd[1]: Finished Load Kernel Module config[    7.427372] audit: type=1130 audit(1795864041.828:33): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=modprobe@loop comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+fs.
+[    7.2421[    7.431471] audit: type=1131 audit(1795864041.828:34): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=modprobe@loop comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+83] systemd[1]: modprobe@dm_mod.service: Deactivated successfully.
+[    7.242325] systemd[1]: Finished Load Kernel Module dm_mod.
+[    7.242552] systemd[1]: modprobe@efi_pstore.service: Deactivated successfully.
+[    7.242837] systemd[1]: Finished Load Kernel Module efi_pstore.
+[    7.243899] systemd[1]: modprobe@loop.service: Deactivated successfully.
+[  OK  ] Finished Load Kernel Module loop.
+[    7.268054] systemd[1]: Finished Load Kernel Module loop.
+[  OK  ] Finished Virtual Co[    7.445629] audit: type=1130 audit(1795864041.850:35): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=systemd-vconsole-setup comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+nsole Setup.
+[    7.269881] systemd[1]: Finished Virtual Console Setup.
+[  OK  ] Reached target System Initialization.
+[    7.275352] systemd[1]: Kernel Configuration File System was skipped because of an unmet condition check (ConditionPathExists=/sys/kernel/config).
+[  OK  ] Started CUPS Scheduler.
+[    7.279763] systemd[1]: First Boot Wizard was skipped because of an unmet condition check (ConditionFirstBoot=yes).
+[  OK  ] Started Periodic ext4 Online Metadata Check for All Filesystems.
+[    7.282957] systemd[1]: First Boot Complete was skipped because of an unmet condition check (ConditionFirstBoot=yes).
+[  OK  ] Started Discard unused filesystem blocks once a week.
+[    7.286616] systemd[1]: Save Transient machine-id to Disk was skipped because of an unmet condition check (ConditionPathIsMountPoint=/etc/machine-id).
+[  OK  ] Started Daily man-db regeneration.
+[    7.287821] systemd[1]: Platform Persistent Storage Archival was skipped because of an unmet condition check (ConditionDirectoryNotEmpty=/sys/fs/pstore).
+[  OK  ] Started Tägliche symfonOS-Sicherheitsprüfung.
+[    7.292563] systemd[1]: Reached target System Initialization.
+[  OK  ] Started Tägliche Sicherheitsupdates.
+[    7.297551] systemd[1]: Started CUPS Scheduler.
+[  OK  ] Started Daily Cleanup of Temporary Directories.
+[    7.299554] systemd[1]: Started Periodic ext4 Online Metadata Check for All Filesystems.
+[  OK  ] Reached target Path Units.
+[    7.302059] systemd[1]: Started Discard unused filesystem blocks once a week.
+[  OK  ] Reached target Timer Units.
+[    7.304856] systemd[1]: Started Daily man-db regeneration.
+[    7.308181] systemd[1]: Started Tägliche symfonOS-Sicherheitsprüfung.
+[    7.309768] systemd[1]: Started Tägliche Sicherheitsupdates.
+[  OK  ] Listening on Avahi mDNS/DNS-SD Stack Activation Socket.
+[    7.311155] systemd[1]: Täglich nach Updates suchen was skipped because of an unmet condition check (ConditionKernelCommandLine=!rd.live.image).
+[    7.315524] systemd[1]: Started Daily Cleanup of Temporary Directories.
+[    7.317036] systemd[1]: Reached target Path Units.
+[    7.318212] systemd[1]: Reached target Timer Units.
+[    7.319368] systemd[1]: Listening on Avahi mDNS/DNS-SD Stack Activation Socket.
+[  OK  ] Listening on CUPS LPD Server Socket.
+[    7.344749] systemd[1]: Listening on CUPS LPD Server Socket.
+[  OK  ] Listening on CUPS Scheduler.
+[    7.347311] systemd[1]: Listening on CUPS Scheduler.
+[  OK  ] Listening on D-Bus System Message Bus Socket.
+[    7.350990] systemd[1]: Listening on D-Bus System Message Bus Socket.
+[  OK  ] Listening on OpenSSH Server Socket…temd-ssh-generator, AF_UNIX Local).
+[    7.354160] systemd[1]: Listening on OpenSSH Server Socket (systemd-ssh-generator, AF_UNIX Local).
+[  OK  ] Listening on Hostname Service Socket.
+[    7.358067] systemd[1]: Listening on Hostname Service Socket.
+[  OK  ] Listening on UUID daemon activation socket.
+[    7.360703] systemd[1]: Listening on UUID daemon activation socket.
+[  OK  ] Reached target Socket Units.
+[    7.363553] systemd[1]: Reached target Socket Units.
+[  OK  ] Reached target Basic System.
+[    7.365746] systemd[1]: TPM PCR Barrier (Initialization) was skipped because of an unmet condition check (ConditionSecurity=measured-uki).
+[    7.369785] systemd[1]: Reached target Basic System.
+         Starting Accounts Service...
+[    7.372064] systemd[1]: Starting Accounts Service...
+         Starting Save/Restore Sound Card State...
+[    7.388053] systemd[1]: Starting Save/Restore Sound Card State...
+         Starting Avahi mDNS/DNS-SD Stack...
+[    7.390111] systemd[1]: Manage Sound Card State (restore and store) was skipped because of an unmet condition check (ConditionPathExists=/etc/alsa/state-daemon.conf).
+[    7.394794] systemd[1]: Starting Avahi mDNS/DNS-SD Stack...
+[  OK  ] Started Avahi DNS Configuration Daemon.
+[    7.572675] audit: type=1130 audit(1795864041.977:36): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=avahi-dnsconfd comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[    7.395492] systemd[1]: Started Avahi DNS Configuration Daemon.
+         Starting D-Bus System Message Bus...
+[    7.403472] systemd[1]: Starting D-Bus System Message Bus...
+[    7.415614] alsactl[746]: /usr/sbin/alsactl: load_state:1715: Cannot open /var/lib/alsa/asound.state for reading: No such file or directory
+         Starting Restore /run/initramfs on shutdown...
+[    7.416349] systemd[1]: Starting Restore /run/initramfs on shutdown...
+[    7.420548] systemd[1]: Starting Remove Stale Online ext4 Metadata Check Snapshots...
+         Starting Remove Stale Online ext4 Metadata Check Snapshots...
+[    7.425029] systemd[1]: Starting Authorization Manager...
+         Starting Authorization Manager...
+         Starting RealtimeKit Scheduling Policy Service...
+[    7.431596] systemd[1]: Starting RealtimeKit Scheduling Policy Service...
+[    7.437062] systemd[1]: Starting User Login Management...
+         Starting User Login Management...
+[    7.440066] systemd[1]: TPM PCR Barrier (User) was skipped because of an unmet condition check (ConditionSecurity=measured-uki).
+[    7.442400] systemd[1]: Repartition Root Disk was skipped because no trigger condition checks were met.
+[    7.444699] alsactl[746]: Found hardware: "HDA-Intel" "QEMU Generic" "HDA:1af40012,1af40012,00100101" "0x1af4" "0x1100"
+         Starting Disk Manager...
+[    7.452216] alsactl[746]: Hardware is initialized using a generic method
+[    7.454112] systemd[1]: Starting Disk Manager...
+         Starting Daemon for power management...
+[    7.469485] systemd[1]: Starting Daemon for power management...
+[    7.476203] systemd[1]: Finished Save/Restore Sound Card State.
+[  OK  ] Finished Save/Restore Sound Card State.
+[    7.653904] audit: type=1130 audit(1795864042.058:37): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=alsa-restore comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[  OK  ] Finished Restore /run/initramfs on shutdown.
+[    7.479252] systemd[1]: Finished Restore /run/initramfs on shutdown.
+[    7.660121] audit: type=1130 audit(1795864042.062:38): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=dracut-shutdown comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[  OK  ] Reached target Sound Card.
+[    7.485756] systemd[1]: Reached target Sound Card.
+[    7.634366] systemd[1]: Play Bootup Sound was skipped because of an unmet condition check (ConditionPathExists=/usr/share/sounds/freedesktop/stereo/system-bootup.oga).
+[    7.719704] systemd-logind[760]: New seat seat0.
+[  OK  ] Started User Login Management.
+[    7.722576] s[    7.899038] audit: type=1130 audit(1795864042.304:39): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=systemd-logind comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+ystemd-logind[760]: Watching system buttons on /dev/input/event0 (Power Button)
+[    7.729696] systemd-logind[760]: Watching system buttons on /dev/input/event2 (QEMU Virtio Keyboard)
+[    7.731488] systemd-logind[760]: Watching system buttons on /dev/input/event3 (AT Translated Set 2 keyboard)
+[    7.733406] systemd[1]: Started User Login Management.
+[    7.833881] polkitd[758]: Started polkitd version 126
+[    7.859701] systemd[1]: e2scrub_reap.service: Deactivated successfully.
+[  OK  ] Finished Remove Stale Online ext4 Metadata Check Snapshots.
+[    8.038370] audit: type=1130 audit(1795864042.443:40): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=e2scrub_reap comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[    7.864210] s[    8.042065] audit: type=1131 audit(1795864042.443:41): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=e2scrub_reap comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+ystemd[1]: Finished Remove Stale Online ext4 Metadata Check Snapshots.
+[    7.887185] avahi-daemon[750]: Found user 'avahi' (UID 995) and group 'avahi' (GID 995).
+[    7.889179] avahi-daemon[750]: Successfully dropped root privileges.
+[    7.890508] avahi-daemon[750]: avahi-daemon 0.8 starting up.
+[    8.105000] audit: type=1325 audit(1795864041.649:42): table=symfonos:2 family=1 entries=27 op=nft_register_chain pid=707 subj=system_u:system_r:iptables_t:s0 comm="nft"
+[    8.107881] audit: type=1325 audit(1795864041.649:42): table=symfonos:2 family=1 entries=2 op=nft_unregister_table pid=707 subj=system_u:system_r:iptables_t:s0 comm="nft"
+[    8.110716] audit: type=1300 audit(1795864041.649:42): arch=c000003e syscall=46 success=yes exit=4368 a0=3 a1=7ffc9868ca10 a2=0 a3=0 items=0 ppid=1 pid=707 auid=4294967295 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=(none) ses=4294967295 comm="nft" exe="/usr/sbin/nft" subj=system_u:system_r:iptables_t:s0 key=(null)
+[    8.116069] audit: type=1327 audit(1795864041.649:42): proctitle=2F7573722F7362696E2F6E6674002D66002F6574632F6E667461626C65732E636F6E66
+[  OK  ] Finished Firewall ([    8.136002] audit: type=1130 audit(1795864042.540:43): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=nftables comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+nftables).
+[    7.960201] systemd[1]: Finished Firewall (nftables).
+[  OK  ] Reached target Preparation for Network.
+[    7.965939] systemd[1]: Reached target Preparation for Network.
+         Starting Wireless service...
+[    7.974309] systemd[1]: Starting Wireless service...
+[    7.990192] systemd[1]: Prüfungsmodus nach einem Neustart fortsetzen (Firewall, USB-Sperre, Kiosk-Sitzung) was skipped because no trigger condition checks were met.
+[    8.013604] dbus-daemon[754]: dbus[754]: Unknown group "netdev" in message bus configuration file
+[    8.035435] udisksd[762]: udisks daemon version 2.10.1 starting
+[    8.091616] dbus-daemon[754]: dbus[754]: Unknown group "netdev" in message bus configuration file
+[    8.099900] dbus-daemon[754]: [0;1;38:5:185mFailed to drop supplementary groups: Operation not permitted
+[  OK  ] Started D-Bus System Message Bus.
+[    8.100628] dbus-daemon[754]: [system] SELinux support is enabled
+[    8.105443] systemd[1]: Started D-Bus System [    8.281488] audit: type=1130 audit(1795864042.686:44): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=dbus comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+Message Bus.
+[    8.111222] avahi-daemon[750]: Successfully called chroot().
+[    8.112720] avahi-daemon[750]: Successfully dropped remaining capabilities.
+[    8.114537] systemd[1]: Starting Network Manager...
+         Starting Network Manager...
+[  OK  ] Started Avahi mDNS/DNS-SD Stack.
+[    8.118282] dbus-daemon[754]: [system] Activating systemd to hand-off: service name='org.freedesktop.PolicyKit1' unit='polkit.service' requested by ':1.9' (uid=0 pid=764 comm="/usr/lib/upowerd" label="system_u:system_r:init_t:s0")
+[    8.122711] systemd[1]: Start[    8.298103] audit: type=1130 audit(1795864042.702:45): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=avahi-daemon comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+ed Avahi mDNS/DNS-SD Stack.
+[    8.128382] polkitd[758]: Loading rules from directory /etc/polkit-1/rules.d
+[    8.130222] systemd[1]: Started RealtimeKit Scheduling Policy Service.
+[    8.131790] polkitd[758]: Loading rules from directory /run/polkit-1/rules.d
+[  OK  ] Started RealtimeKit Scheduling Policy Service.
+[    8.132432] polkitd[758]: [0[    8.310624] audit: type=1130 audit(1795864042.714:46): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=rtkit-daemon comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+;1;39mError opening rules directory: Error opening directory “/run/polkit-1/rules.d”: No such file or directory (g-file-error-quark, 4)
+[    8.142355] polkitd[758]: Loading rules from directory /usr/local/share/polkit-1/rules.d
+[  OK  ] Started Authorization Manager.
+[    8.145963] s[    8.321406] audit: type=1130 audit(1795864042.726:47): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=polkit comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+ystemd[1]: Started Authorization Manager.
+[    8.151292] polkitd[758]: Error opening rules directory: Error opening directory “/usr/local/share/polkit-1/rules.d”: No such file or directory (g-file-error-quark, 4)
+         Starting Modem Manager...
+[    8.156497] systemd[1]: Starting Modem Manager...
+[    8.157604] polkitd[758]: Loading rules from directory /usr/share/polkit-1/rules.d
+[    8.159297] dbus-daemon[754]: [system] Successfully activated service 'org.freedesktop.systemd1'
+[    8.160967] avahi-daemon[750]: Loading service file /services/sftp-ssh.service.
+[    8.162419] avahi-daemon[750]: Loading service file /services/ssh.service.
+[    8.163745] avahi-daemon[750]: Joining mDNS multicast group on interface lo.IPv6 with address ::1.
+[    8.165550] avahi-daemon[750]: New relevant interface lo.IPv6 for mDNS.
+[    8.166902] avahi-daemon[750]: Joining mDNS multicast group on interface lo.IPv4 with address 127.0.0.1.
+[    8.169567] avahi-daemon[750]: New relevant interface lo.IPv4 for mDNS.
+[    8.172183] avahi-daemon[750]: Network interface enumeration completed.
+[    8.174172] avahi-daemon[750]: Registering new address record for ::1 on lo.*.
+[    8.175955] avahi-daemon[750]: Registering new address record for 127.0.0.1 on lo.IPv4.
+[    8.177828] polkitd[758]: Finished loading, compiling and executing 3 rules
+[    8.179728] dbus-daemon[754]: [system] Successfully activated service 'org.freedesktop.PolicyKit1'
+[    8.181777] polkitd[758]: Acquired the name org.freedesktop.PolicyKit1 on the system bus
+[    8.184118] avahi-dnsconfd[752]: Successfully connected to Avahi daemon.
+[  OK  ] Started Daemon for power management.
+[    8.2[    8.411982] audit: type=1130 audit(1795864042.817:48): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=upower comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+34491] systemd[1]: Started Daemon for power management.
+[    8.287567] accounts-daemon[745]: started daemon version 23.13.9
+[    8.289264] systemd[1]: Started Accounts Service.
+[  OK  ] Started Accounts Service.
+[    8.468147] audit: type=1130 audit(1795864042.871:49): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=accounts-daemon comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[    8.349534] iwd[803]: Wireless daemon version 3.9
+[    8.408347] iwd[803]: Loaded configuration from /etc/iwd/main.conf
+[  OK  ] Started Wireless service.
+[    8.588267] audit: type=1130 audit(1795864042.993:50): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=iwd comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[    8.413792] systemd[1]: Started Wireless service.
+[    8.765202] cfg80211: Loading compiled-in X.509 certificates for regulatory database
+[    8.789756] Loaded X.509 cert 'sforshee: 00b28ddf47aef9cea7'
+[    8.791196] Loaded X.509 cert 'wens: 61c038651aabdcf94bd0ac7ff06c7248db18c600'
+[    8.716230] ModemManager[830]: <msg> ModemManager (version 1.24.2) starting in system bus...
+[    8.954374] avahi-daemon[750]: Server startup complete. Host name is symfonos.local. Local service cookie is 309234427.
+[    9.009839] NetworkManager[823]: <info>  [1795864043.5905] NetworkManager (version 1.54.0) is starting... (boot:52555e68-daee-49fc-aabd-4f07d22fc282)
+[    9.013104] NetworkManager[823]: <info>  [1795864043.5907] Read config: /etc/NetworkManager/NetworkManager.conf, /usr/lib/NetworkManager/conf.d/50-symfonos.conf
+[    9.016526] NetworkManager[823]: <info>  [1795864043.5975] manager[0x647709bc9eb0]: monitoring kernel firmware directory '/usr/lib/firmware'.
+[    9.019643] dbus-daemon[754]: [system] Activating via systemd: service name='org.freedesktop.hostname1' unit='dbus-org.freedesktop.hostname1.service' requested by ':1.13' (uid=0 pid=823 comm="/usr/bin/NetworkManager --no-daemon" label="system_u:system_r:NetworkManager_t:s0")
+         Starting Hostname Service...
+[    9.026336] systemd[1]: Starting Hostname Service...
+[  OK  ] Started Hostname Service.
+[    9.101657] systemd[1]: Start[    9.277195] audit: type=1130 audit(1795864043.682:51): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=systemd-hostnamed comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+ed Hostname Service.
+[    9.107124] dbus-daemon[754]: [system] Successfully activated service 'org.freedesktop.hostname1'
+[    9.112825] NetworkManager[823]: <info>  [1795864043.6939] hostname: hostname: using hostnamed
+[    9.114756] NetworkManager[823]: <info>  [1795864043.6939] hostname: static hostname changed from (none) to "symfonos"
+[    9.117438] NetworkManager[823]: <info>  [1795864043.6983] dns-mgr: init: dns=systemd-resolved rc-manager=symlink, plugin=systemd-resolved
+[    9.119930] NetworkManager[823]: <info>  [1795864043.7010] manager[0x647709bc9eb0]: rfkill: Wi-Fi hardware radio set enabled
+[    9.122150] NetworkManager[823]: <info>  [1795864043.7011] manager[0x647709bc9eb0]: rfkill: WWAN hardware radio set enabled
+[    9.149580] NetworkManager[823]: <info>  [1795864043.7307] Loaded device plugin: NMAtmManager (/usr/lib/NetworkManager/1.54.0/libnm-device-plugin-adsl.so)
+[    9.177588] NetworkManager[823]: <info>  [1795864043.7587] Loaded device plugin: NMBluezManager (/usr/lib/NetworkManager/1.54.0/libnm-device-plugin-bluetooth.so)
+[    9.180950] NetworkManager[823]: <info>  [1795864043.7590] Loaded device plugin: NMWifiFactory (/usr/lib/NetworkManager/1.54.0/libnm-device-plugin-wifi.so)
+[    9.184001] dbus-daemon[754]: [system] Activating via systemd: service name='org.freedesktop.nm_dispatcher' unit='dbus-org.freedesktop.nm-dispatcher.service' requested by ':1.13' (uid=0 pid=823 comm="/usr/bin/NetworkManager --no-daemon" label="system_u:system_r:NetworkManager_t:s0")
+[    9.189381] NetworkManager[823]: <info>  [1795864043.7593] Loaded device plugin: NMWwanFactory (/usr/lib/NetworkManager/1.54.0/libnm-device-plugin-wwan.so)
+[    9.192434] NetworkManager[823]: <info>  [1795864043.7595] manager: rfkill: Wi-Fi enabled by radio killswitch; enabled by state file
+[    9.195056] NetworkManager[823]: <info>  [1795864043.7595] manager: rfkill: WWAN enabled by radio killswitch; enabled by state file
+[    9.197634] NetworkManager[823]: <info>  [1795864043.7596] manager: Networking is enabled by state file
+[    9.199720] NetworkManager[823]: <info>  [1795864043.7596] settings: Loaded settings plugin: keyfile (internal)
+         Starting Network Manager Script Dispatcher Service...
+[    9.210039] systemd[1]: Starting Network Manager Script Dispatcher Service...
+[    9.223873] NetworkManager[823]: <info>  [1795864043.8050] dhcp: init: Using DHCP client 'internal'
+[    9.226058] NetworkManager[823]: <info>  [1795864043.8051] manager: (lo): new Loopback device (/org/freedesktop/NetworkManager/Devices/1)
+[    9.229443] NetworkManager[823]: <info>  [1795864043.8059] device (lo): state change: unmanaged -> unavailable (reason 'connection-assumed', managed-type: 'external')
+[    9.233378] NetworkManager[823]: <info>  [1795864043.8060] device (lo): state change: unavailable -> disconnected (reason 'connection-assumed', managed-type: 'external')
+[    9.236727] NetworkManager[823]: <info>  [1795864043.8067] device (lo): Activation: starting connection 'lo' (deb337ed-0e07-4e91-b217-52ae0eb261f4)
+[    9.239862] NetworkManager[823]: <info>  [1795864043.8072] manager: (enp0s1): new Ethernet device (/org/freedesktop/NetworkManager/Devices/2)
+[    9.242894] NetworkManager[823]: <info>  [1795864043.8087] settings: (enp0s1): created default wired connection 'Kabelgebundene Verbindung 1'
+[    9.245823] NetworkManager[823]: <info>  [1795864043.8088] device (enp0s1): state change: unmanaged -> unavailable (reason 'managed', managed-type: 'external')
+[    9.248672] udisksd[762]: [0;1;38:5:185mError probing device: Error sending ATA command IDENTIFY PACKET DEVICE to '/dev/sr0': Unexpected sense data returned:
+0000: f0 00 05 00  58 00 01 0a  00 00 00 00  21 04 00 00    ....X.......!...
+0010: 00 00 00 00  00 00 00 00  00 00 00 00  00 00 00 00    ................
+ (g-io-error-quark, 0)
+[  OK  ] Started Disk Manager.
+[    9.256177] u[    9.431571] audit: type=1130 audit(1795864043.836:52): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=udisks2 comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+disksd[762]: Acquired the name org.freedesktop.UDisks2 on the system message bus
+[    9.261733] systemd[1]: Started Disk Manager.
+[    9.302771] dbus-daemon[754]: [system] Successfully activated service 'org.freedesktop.nm_dispatcher'
+[  OK  ] Started Network Manager Script Dispatcher Service.
+[    9.303524] systemd[1]: Started Network Manager Script Dispatcher Service.
+[    9.483343] audit: type=1130 audit(1795864043.886:53): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=NetworkManager-dispatcher comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[    9.308279] NetworkManager[823]: <info>  [1795864043.8875] manager: (sit0): new IPTunnel device (/org/freedesktop/NetworkManager/Devices/3)
+[  OK  ] Started Network Manager.
+[    9.330058] NetworkManager[823]: <info>  [1795864043.9111] bus-manager: acquired D-Bus service "org.freedesktop.NetworkManager"
+[    9.333904] systemd[1]: Started Network Manager.
+[    9.335078] NetworkManager[823]: <info>  [1795864043.9117] device (lo): state change: disconnected -> prepare (reason 'none', managed-type: 'external')
+[    9.337911] N[    9.513019] audit: type=1130 audit(1795864043.917:54): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=NetworkManager comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+etworkManager[823]: <info>  [1795864043.9118] device (lo): state change: prepare -> config (reason 'none', managed-type: 'external')
+[    9.344224] NetworkManager[823]: <info>  [1795864043.9119] device (lo): state change: config -> ip-config (reason 'none', managed-type: 'external')
+[    9.347059] NetworkManager[823]: <info>  [1795864043.9121] device (lo): state change: ip-config -> ip-check (reason 'none', managed-type: 'external')
+[  OK  ] Reached target Network.
+[    9.349802] systemd[1]: Reached target Network.
+         Starting CUPS Scheduler...
+[    9.351795] systemd[1]: Starting CUPS Scheduler...
+[    9.353745] systemd[1]: Lokales Sprachmodell für den symfonOS-Assistenten (llama.cpp) was skipped because of an unmet condition check (ConditionPathExists=/var/lib/symfonos-assist/models/model.gguf).
+         Starting Permit User Sessions...
+[    9.357370] systemd[1]: Starting Permit User Sessions...
+[    9.359803] NetworkManager[823]: <info>  [1795864043.9409] device (lo): state change: ip-check -> secondaries (reason 'none', managed-type: 'external')
+[    9.362578] NetworkManager[823]: <info>  [1795864043.9410] device (lo): state change: secondaries -> activated (reason 'none', managed-type: 'external')
+[    9.365106] NetworkManager[823]: <info>  [1795864043.9414] device (lo): Activation: successful, device activated.
+[  OK  ] Started Modem Manager.
+[    9.367304] systemd[1]: Started Modem Manager.
+[    9.370181] NetworkManager[823]: <info>  [1795864043.9484] modem-manager: ModemManager not available
+[    9.548041] audit: type=1130 audit(1795864043.952:55): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=ModemManager comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[    9.397454] NetworkManager[823]: <info>  [1795864043.9785] modem-manager: ModemManager now available
+[  OK  ] Finished Permit User Sessions.
+[    9.595281] audit: type=1130 audit(1795864044.000:56): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=systemd-user-sessions comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[    9.418849] systemd[1]: Finished Permit User Sessions.
+[  OK  ] Started Simple Desktop Display Manager.
+[    9.426919] systemd[1]: Started Simple Desktop Display Manager.
+[    9.603567] audit: type=1130 audit(1795864044.007:57): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=sddm comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[    9.432399] systemd[1]: Started Serial Getty on ttyS0.
+[  OK  ] Started Serial Getty on ttyS0.
+[    9.610165] audit: type=1130 audit(1795864044.015:58): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=serial-getty@ttyS0 comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[  OK  ] Reached target Login Prompts.
+[    9.436086] systemd[1]: Reached target Login Prompts.
+[    9.763919] avahi-daemon[750]: Service "symfonos" (/services/ssh.service) successfully established.
+[    9.765878] avahi-daemon[750]: Service "symfonos" (/services/sftp-ssh.service) successfully established.
+[    9.956900] e1000e 0000:00:01.0 enp0s1: NIC Link is Up 1000 Mbps Full Duplex, Flow Control: Rx/Tx
+[    9.785159] NetworkManager[823]: <info>  [1795864044.3658] device (enp0s1): carrier: link connected
+[    9.787288] NetworkManager[823]: <info>  [1795864044.3661] device (enp0s1): state change: unavailable -> disconnected (reason 'carrier-changed', managed-type: 'full')
+[  OK  ] Started CUPS Scheduler.
+[    9.790379] systemd[1]: Started CUPS Scheduler.[    9.967501] audit: type=1130 audit(1795864044.372:59): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=cups comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+
+[  OK  ] Reached target Multi-User System.
+[    9.796355] NetworkManager[823]: <info>  [1795864044.3716] policy: auto-activating connection 'Kabelgebundene Verbindung 1' (600c5b64-ce64-3d0c-9ed3-93d65f6f8243)
+[    9.803436] NetworkManager[82[    9.978677] IPv4: martian source 255.255.255.255 from 10.0.2.2, on dev enp0s1
+3]: <info>  [179[    9.980541] ll header: 00000000: ff ff ff ff ff ff 52 55 0a 00 02 02 08 00
+5864044.3719] de[    9.982289] IPv4: martian source 255.255.255.255 from 10.0.2.2, on dev enp0s1
+vice (enp0s1): A[    9.983781] ll header: 00000000: ff ff ff ff ff ff 52 55 0a 00 02 02 08 00
+ctivation: starting connection 'Kabelgebundene Verbindung 1' (600c5b64-ce64-3d0c-9ed3-93d65f6f8243)
+[    9.812944] avahi-daemon[750]: Joining mDNS multicast group on interface enp0s1.IPv6 with address fe80::46b2:4e59:9a6a:c691.
+[  OK  ] Reached target Graphical Interface.
+[    9.817622] NetworkManager[823]: <info>  [1795864044.3720] device (enp0s1): state change: disconnected -> prepare (reason 'none', managed-type: 'full')
+[    9.821306] avahi-daemon[750]: New relevant interface enp0s1.IPv6 for mDNS.
+         Starting Record Runlevel Change in UTMP...
+[    9.824443] NetworkManager[823]: <info>  [1795864044.3722] manager: NetworkManager state is now CONNECTING
+[    9.826459] avahi-daemon[750]: Registering new address record for fe80::46b2:4e59:9a6a:c691 on enp0s1.*.
+[    9.828314] NetworkManager[823]: <info>  [1795864044.3723] device (enp0s1): state change: prepare -> config (reason 'none', managed-type: 'full')
+[    9.830779] systemd[1]: Reached target Multi-User System.
+[    9.831903] NetworkManager[823]: <info>  [1795864044.3756] device (enp0s1): state change: config -> ip-config (reason 'none', managed-type: 'full')
+[    9.835487] NetworkManager[823]: <info>  [1795864044.3799] dhcp4 (enp0s1): activation: beginning transaction (timeout in 45 seconds)
+[    9.838388] NetworkManager[823]: <info>  [1795864044.3916] dhcp4 (enp0s1): state changed new lease, address=10.0.2.15, acd pending
+[    9.840852] systemd[1]: Reached target Graphical Interface.[   10.016945] audit: type=1129 audit(1795864044.421:60): pid=915 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:initrc_t:s0 msg='old-level=N new-level=5 comm="systemd-update-utmp" exe="/usr/lib/systemd/systemd-update-utmp" hostname=? addr=? terminal=? res=success'
+
+[  OK  ] Finished Record Runlevel Change in UTMP.
+[    9.848119] systemd[1]: Starting Record Runlevel Change in UTMP...
+[    9.849496] systemd[1]: systemd-update-utmp-runlevel.service: Deactivated successfully.
+[    9.851156] s[   10.026272] audit: type=1130 audit(1795864044.431:61): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=systemd-update-utmp-runlevel comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+ystemd[1]: Finis[   10.030898] audit: type=1131 audit(1795864044.431:62): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=systemd-update-utmp-runlevel comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+hed Record Runlevel Change in UTMP.
+[    9.861250] systemd[1]: Startup finished in 1.123s (kernel) + 1.956s (initrd) + 6.771s (userspace) = 9.851s.
+[!p]104[?7h[6n[32766;32766H[6n[    9.944183] NetworkManager[823]: <info>  [1795864044.5252] dhcp4 (enp0s1): state changed new lease, address=10.0.2.15
+[    9.946774] NetworkManager[823]: <info>  [1795864044.5259] policy: set 'Kabelgebundene Verbindung 1' (enp0s1) as default for IPv4 routing and DNS
+[    9.950956] avahi-daemon[750]: Joining mDNS multicast group on interface enp0s1.IPv4 with address 10.0.2.15.
+[    9.953966] systemd-resolved[648]: enp0s1: Bus client set default route setting: yes
+[    9.955786] avahi-daemon[750]: New relevant interface enp0s1.IPv4 for mDNS.
+[    9.957241] systemd-resolved[648]: enp0s1: Bus client set DNS server list to: 10.0.2.3
+[    9.958815] avahi-daemon[750]: Registering new address record for 10.0.2.15 on enp0s1.IPv4.
+[    9.960447] NetworkManager[823]: <info>  [1795864044.5332] device (enp0s1): state change: ip-config -> ip-check (reason 'none', managed-type: 'full')
+[    9.962930] NetworkManager[823]: <info>  [1795864044.5343] device (enp0s1): state change: ip-check -> secondaries (reason 'none', managed-type: 'full')
+[    9.965481] NetworkManager[823]: <info>  [1795864044.5344] device (enp0s1): state change: secondaries -> activated (reason 'none', managed-type: 'full')
+[    9.967957] NetworkManager[823]: <info>  [1795864044.5345] manager: NetworkManager state is now CONNECTED_SITE
+[    9.969857] NetworkManager[823]: <info>  [1795864044.5347] device (enp0s1): Activation: successful, device activated.
+[    9.971878] NetworkManager[823]: <info>  [1795864044.5349] manager: NetworkManager state is now CONNECTED_GLOBAL
+[    9.973839] NetworkManager[823]: <info>  [1795864044.5350] manager: startup complete
+[!p]104[?7h[6n[32766;32766H[6n[   10.436561] audit: type=1100 audit(1795864044.841:63): pid=918 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0 msg='op=PAM:authentication grantors=pam_permit acct="live" exe="/usr/libexec/sddm-helper" hostname=? addr=? terminal=? res=success'
+[   10.453852] audit: type=1101 audit(1795864044.858:64): pid=918 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0 msg='op=PAM:accounting grantors=pam_faillock,pam_unix acct="live" exe="/usr/libexec/sddm-helper" hostname=? addr=? terminal=? res=success'
+[   10.458504] audit: type=1103 audit(1795864044.859:65): pid=918 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0 msg='op=PAM:setcred grantors=pam_permit acct="live" exe="/usr/libexec/sddm-helper" hostname=? addr=? terminal=? res=success'
+[   10.462997] audit: type=1006 audit(1795864044.859:66): pid=918 uid=0 subj=system_u:system_r:xdm_t:s0 old-auid=4294967295 auid=1000 tty=(none) old-ses=4294967295 ses=1 res=1
+[   10.465645] audit: type=1300 audit(1795864044.859:66): arch=c000003e syscall=1 success=yes exit=4 a0=c a1=7ffe371c1b70 a2=4 a3=0 items=0 ppid=913 pid=918 auid=1000 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=(none) ses=1 comm="sddm-helper" exe="/usr/libexec/sddm-helper" subj=system_u:system_r:xdm_t:s0 key=(null)
+[   10.470300] audit: type=1327 audit(1795864044.859:66): proctitle=2F7573722F6C6962657865632F7364646D2D68656C706572002D2D736F636B6574002F746D702F7364646D2D617574682D64613361376537332D613666352D343135352D613564662D316661386233613535326266002D2D69640031002D2D7374617274002F7573722F6C69622F706C61736D612D646275732D72756E2D7365
+[   10.308050] systemd[1]: Created slice User Slice of UID 1000.
+[   10.309799] systemd[1]: Starting User Runtime Directory /run/user/1000...
+[   10.315172] systemd-logind[760]: New session 1 of user live.
+[   10.353124] s[   10.528254] audit: type=1130 audit(1795864044.933:67): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=user-runtime-dir@1000 comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+ystemd[1]: Finished User Runtime Directory /run/user/1000.
+[   10.362442] systemd[1]: Starting User Manager for UID 1000...
+[   10.570607] audit: type=1101 audit(1795864044.975:68): pid=922 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:accounting grantors=pam_faillock,pam_unix acct="live" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+[   10.575313] audit: type=1103 audit(1795864044.975:69): pid=922 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:setcred grantors=? acct="live" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=failed'
+[   10.580046] audit: type=2300 audit(1795864044.980:70): pid=922 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=pam_selinux default-context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 selected-context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+[   10.580050] audit: type=1006 audit(1795864044.980:71): pid=922 uid=0 subj=system_u:system_r:init_t:s0 old-auid=4294967295 auid=1000 tty=(none) old-ses=4294967295 ses=2 res=1
+[   10.580052] audit: type=1300 audit(1795864044.980:71): arch=c000003e syscall=1 success=yes exit=4 a0=7 a1=7fff7ab5d5e0 a2=4 a3=0 items=0 ppid=1 pid=922 auid=1000 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=(none) ses=2 comm="(systemd)" exe="/usr/lib/systemd/systemd-executor" subj=system_u:system_r:init_t:s0 key=(null)
+[   10.404589] s[   10.580055] audit: type=1327 audit(1795864044.980:71): proctitle="(systemd)"
+ystemd-logind[760]: New session 2 of user live.
+[   10.581162] audit: type=1105 audit(1795864044.986:72): pid=922 uid=0 auid=1000 ses=2 subj=system_u:system_r:init_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_selinux,pam_loginuid,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="live" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+[   10.421612] (systemd)[922]: pam_unix(systemd-user:session): session opened for user live(uid=1000) by live(uid=0)
+[   10.593660] systemd[922]: Queued start job for default target Main User Target.
+[   10.617949] systemd[922]: Created slice User Application Slice.
+[   10.618695] systemd[922]: Created slice User Core Session Slice.
+[   10.618990] systemd[922]: Started Hell/Dunkel-Wechsel prüfen.
+[   10.619609] systemd[922]: Started Update-Hinweis prüfen.
+[   10.620450] systemd[922]: Started Daily Cleanup of User's Temporary Directories.
+[   10.620670] systemd[922]: Reached target Paths.
+[   10.620922] systemd[922]: Reached target Timers.
+[   10.621435] systemd[922]: Starting D-Bus User Message Bus Socket...
+[   10.628891] systemd[922]: Listening on PipeWire PulseAudio.
+[   10.629532] systemd[922]: Listening on PipeWire Multimedia System Sockets.
+[   10.630073] systemd[922]: Starting Create User Files and Directories...
+[   10.633853] systemd[922]: Listening on D-Bus User Message Bus Socket.
+[   10.634539] systemd[922]: Reached target Sockets.
+[   10.639313] systemd[922]: Finished Create User Files and Directories.
+[   10.640825] systemd[922]: Reached target Basic System.[   10.817252] audit: type=1130 audit(1795864045.220:73): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=user@1000 comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+
+[   10.646649] systemd[1]: Started User Manager for UID 1000.
+[   10.647606] systemd[922]: Starting D-Bus User Message Bus...
+[   10.650351] systemd[1]: Started Session 1 of User live.
+[   10.651411] systemd[922]: Started PipeWire Multimedia Service.
+[   10.655701] sddm-helper[918]: pam_unix(sddm-autologin:session): session opened for user live(uid=1000) by live(uid=0)
+[   10.834283] audit: type=2300 audit(1795864045.239:74): pid=918 uid=0 auid=1000 ses=1 subj=system_u:system_r:xdm_t:s0 msg='op=pam_selinux default-context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 selected-context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 exe="/usr/libexec/sddm-helper" hostname=symfonos addr=? terminal=/dev/tty1 res=success'
+[   10.665446] sddm-helper[918]:[   10.841010] audit: type=1105 audit(1795864045.239:75): pid=918 uid=0 auid=1000 ses=1 subj=system_u:system_r:xdm_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_loginuid,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_selinux acct="live" exe="/usr/libexec/sddm-helper" hostname=symfonos addr=? terminal=/dev/tty1 res=success'
+ Starting Wayland user session: "/usr/share/sddm/scripts/wayland-session" "/usr/lib/plasma-dbus-run-session-if-needed /usr/bin/startplasma-wayland"
+[   11.072706] dbus-daemon[936]: [session uid=1000 pid=936 pidfd=5] SELinux support is enabled
+[   11.074861] systemd[922]: Started D-Bus User Message Bus.
+[   11.079244] systemd[922]: Started Bluetooth mpris proxy.
+[   11.082862] systemd[922]: Started Multimedia Service Session Manager.
+[   11.085466] systemd[922]: Started PipeWire filter chain daemon.
+[   11.089181] systemd[922]: Started PipeWire PulseAudio.
+[   11.090620] systemd[922]: Reached target Main User Target.
+[   11.093259] systemd[922]: Startup finished in 678ms.
+
+symfonOS (Rolling)
+Kernel 6.16.1-symfonos on an x86_64 (ttyS0)
+
+symfonos login: [   11.846042] rtkit-daemon[759]: Successfully made thread 937 of process 937 owned by '1000' high priority at nice level -11.
+[   11.849676] rtkit-daemon[759]: Successfully made thread 950 of process 937 owned by '1000' RT at priority 20.
+[   11.854049] rtkit-daemon[759]: Successfully made thread 946 of process 946 owned by '1000' high priority at nice level -11.
+[   11.857077] rtkit-daemon[759]: Successfully made thread 949 of process 946 owned by '1000' RT at priority 20.
+[   11.860206] rtkit-daemon[759]: Successfully made thread 944 of process 944 owned by '1000' high priority at nice level -11.
+[   11.871888] rtkit-daemon[759]: Successfully made thread 961 of process 944 owned by '1000' RT at priority 20.
+[   11.889199] NetworkManager[823]: <info>  [1795864046.4698] policy: set 'Kabelgebundene Verbindung 1' (enp0s1) as default for IPv6 routing and DNS
+[   11.893453] avahi-daemon[750]: Leaving mDNS multicast group on interface enp0s1.IPv6 with address fe80::46b2:4e59:9a6a:c691.
+[   11.894518] avahi-daemon[750]: Joining mDNS multicast group on interface enp0s1.IPv6 with address fec0::4223:9ac9:cd7f:d462.
+[   11.898316] avahi-daemon[750]: Registering new address record for fec0::4223:9ac9:cd7f:d462 on enp0s1.*.
+[   11.899343] avahi-daemon[750]: Withdrawing address record for fe80::46b2:4e59:9a6a:c691 on enp0s1.
+[   13.383998] ModemManager[830]: <msg> [base-manager] couldn't check support for device '/sys/devices/pci0000:00/0000:00:01.0': not supported by any plugin
+[   13.430723] wireplumber[944]: [0;1;38:5:185mspa.bluez5: BlueZ system service is not available
+[   13.723525] wireplumber[944]: wp-device: SPA handle 'api.libcamera.enum.manager' could not be loaded; is it installed?
+[   13.724318] wireplumber[944]: s-monitors-libcamera: PipeWire's libcamera SPA plugin is missing or broken. Some camera types may not be supported.
+[   13.781636] avahi-daemon[750]: Registering new address record for fec0::452b:ed98:6a2c:4c19 on enp0s1.*.
+[   15.337950] dbus-daemon[754]: [system] Activating via systemd: service name='org.freedesktop.locale1' unit='dbus-org.freedesktop.locale1.service' requested by ':1.29' (uid=1000 pid=938 comm="/usr/bin/startplasma-wayland" label="unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023")
+[   15.356504] systemd[1]: Starting Locale Service...
+[   15.424383] systemd[1]: Started Locale Service.
+[   15.425464] dbus-daemon[754]: [system] Successfully activated service 'org.freedesktop.locale1'
+[   15.602306] audit: type=1130 audit(1795864050.004:76): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=systemd-localed comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   15.605819] audit: type=1400 audit(1795864050.006:77): avc:  denied  { read } for  pid=970 comm="systemd-localed" name="xkb" dev="overlay" ino=82270 scontext=system_u:system_r:systemd_locale_t:s0 tcontext=system_u:object_r:xkb_var_lib_t:s0 tclass=lnk_file permissive=0
+[   15.605823] audit: type=1300 audit(1795864050.006:77): arch=c000003e syscall=262 success=no exit=-13 a0=ffffff9c a1=7a14074b5788 a2=7fff63693cd0 a3=0 items=0 ppid=1 pid=970 auid=4294967295 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=(none) ses=4294967295 comm="systemd-localed" exe="/usr/lib/systemd/systemd-localed" subj=system_u:system_r:systemd_locale_t:s0 key=(null)
+[   15.605826] audit: type=1327 audit(1795864050.006:77): proctitle="/usr/lib/systemd/systemd-localed"
+[   15.428282] systemd-localed[970]: xkbcommon: ERROR: failed to add default include path /usr/share/X11/xkb
+[   16.614274] systemd[922]: Reload requested from client PID 938 ('startplasma-way')...
+[   16.615086] systemd[922]: Reloading...
+[   16.673928] systemd[922]: Reloading finished in 59 ms.
+[   16.693112] dbus-daemon[936]: [session uid=1000 pid=936 pidfd=5] Activating service name='org.kde.KSplash' requested by ':1.10' (uid=1000 pid=938 comm="/usr/bin/startplasma-wayland" label="unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023")
+[   16.733921] systemd[922]: Created slice User Background Tasks Slice.
+[   16.735427] systemd[922]: Starting KDE Global Shortcuts Server...
+[   16.737456] systemd[922]: Starting KDE Window Manager...
+[   16.738452] systemd[922]: Starting Rewrite dynamic launcher portal entries...
+[   16.739901] systemd[922]: Starting Baloo File Indexer Daemon...
+[   16.833065] systemd[922]: Finished Rewrite dynamic launcher portal entries.
+[   16.833800] systemd[922]: Reached target Session services which should run early before the graphical session is brought up.
+[   16.977972] systemd[922]: Started KDE Window Manager.
+[   16.999068] systemd[922]: Starting KDE Config Module Initialization...
+[   17.000922] systemd[922]: Starting Splash screen shown during boot...
+[   17.229917] systemd[922]: Started KDE Global Shortcuts Server.
+[   17.510135] systemd[922]: Started Baloo File Indexer Daemon.
+[   17.637200] dbus-daemon[936]: [session uid=1000 pid=936 pidfd=5] Activating via systemd: service name='org.freedesktop.portal.Desktop' unit='xdg-desktop-portal.service' requested by ':1.14' (uid=1000 pid=994 comm="/usr/bin/kcminit_startup" label="unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023")
+[   17.687263] systemd[922]: Starting Portal service...
+[   17.820679] dbus-daemon[936]: [session uid=1000 pid=936 pidfd=5] Activating via systemd: service name='org.freedesktop.impl.portal.PermissionStore' unit='xdg-permission-store.service' requested by ':1.16' (uid=1000 pid=997 comm="/usr/lib/xdg-desktop-portal" label="unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023")
+[   17.848376] systemd[922]: Starting sandboxed app permission store...
+[   17.914364] dbus-daemon[936]: [session uid=1000 pid=936 pidfd=5] Successfully activated service 'org.freedesktop.impl.portal.PermissionStore'
+[   17.915436] systemd[922]: Started sandboxed app permission store.
+[   17.918567] dbus-daemon[936]: [session uid=1000 pid=936 pidfd=5] Activating via systemd: service name='org.freedesktop.portal.Documents' unit='xdg-document-portal.service' requested by ':1.16' (uid=1000 pid=997 comm="/usr/lib/xdg-desktop-portal" label="unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023")
+[   17.940152] systemd[922]: Starting flatpak document portal service...
+[   18.015533] dbus-daemon[936]: [session uid=1000 pid=936 pidfd=5] Successfully activated service 'org.freedesktop.portal.Documents'
+[   18.018246] systemd[922]: Started flatpak document portal service.
+[   18.043344] dbus-daemon[936]: [session uid=1000 pid=936 pidfd=5] Activating via systemd: service name='org.freedesktop.impl.portal.desktop.kde' unit='plasma-xdg-desktop-portal-kde.service' requested by ':1.16' (uid=1000 pid=997 comm="/usr/lib/xdg-desktop-portal" label="unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023")
+[   18.691235] kwin_wayland[989]: No backend specified, automatically choosing drm
+[   19.060649] kwin_wayland[989]: [0;1;38:5:185mkwin_core: Failed to open drm node: ""
+[   19.061471] kwin_wayland[989]: [0;1;38:5:185mkwin_scene_opengl: couldn't find dev node for drm device
+[   19.315591] systemd[1]: NetworkManager-dispatcher.service: De[   19.491072] audit: type=1131 audit(1795864053.895:78): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=NetworkManager-dispatcher comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+activated successfully.
+[   20.996483] ksplashqml[992]: libEGL warning: egl: failed to create dri2 screen
+[   20.999975] ksplashqml[992]: libEGL warning: egl: failed to create dri2 screen
+[   21.048545] dbus-daemon[936]: [session uid=1000 pid=936 pidfd=5] Successfully activated service 'org.kde.KSplash'
+[   21.235729] kwin_wayland_wrapper[1039]: Refusing to try glamor on llvmpipe
+[   21.237997] kwin_wayland_wrapper[1039]: XWAYLAND: Disabling GLAMOR support
+[   21.239988] kwin_wayland_wrapper[1039]: EGL setup failed, disabling glamor
+[   21.240606] kwin_wayland_wrapper[1039]: Failed to initialize glamor, falling back to sw
+[   21.489830] kwin_wayland_wrapper[1062]: The XKEYBOARD keymap compiler (xkbcomp) reports:
+[   21.492068] kwin_wayland_wrapper[1062]: > Warning:          Could not resolve keysym XF86RefreshRateToggle
+[   21.492793] kwin_wayland_wrapper[1062]: > Warning:          Could not resolve keysym XF86Accessibility
+[   21.493463] kwin_wayland_wrapper[1062]: > Warning:          Could not resolve keysym XF86DoNotDisturb
+[   21.493725] kwin_wayland_wrapper[1062]: Errors from xkbcomp are not fatal to the X server
+[   21.545119] kwin_wayland_wrapper[1066]: The XKEYBOARD keymap compiler (xkbcomp) reports:
+[   21.547124] kwin_wayland_wrapper[1066]: > Warning:          Unsupported maximum keycode 708, clipping.
+[   21.549279] kwin_wayland_wrapper[1066]: >                   X11 cannot support keycodes above 255.
+[   21.551321] kwin_wayland_wrapper[1066]: > Warning:          Virtual modifier Hyper multiply defined
+[   21.553877] kwin_wayland_wrapper[1066]: >                   Using 0, ignoring 0
+[   21.555863] kwin_wayland_wrapper[1066]: > Warning:          Virtual modifier ScrollLock multiply defined
+[   21.558093] kwin_wayland_wrapper[1066]: >                   Using 0, ignoring 0
+[   21.560471] kwin_wayland_wrapper[1066]: > Warning:          Could not resolve keysym XF86RefreshRateToggle
+[   21.564557] kwin_wayland_wrapper[1066]: > Warning:          Could not resolve keysym XF86Accessibility
+[   21.566788] kwin_wayland_wrapper[1066]: > Warning:          Could not resolve keysym XF86DoNotDisturb
+[   21.568941] kwin_wayland_wrapper[1066]: Errors from xkbcomp are not fatal to the X server
+[   23.661371] systemd[922]: Started KDE Config Module Initialization.
+[   23.664242] systemd[922]: Starting KDE Session Management Server...
+[   23.666033] systemd[922]: Started Unlock kwallet from pam credentials.
+[   23.667537] systemd[922]: Starting KDE Daemon 6...
+[   24.012140] kded6[1081]: libEGL warning: egl: failed to create dri2 screen
+[   24.026054] kded6[1081]: libEGL warning: egl: failed to create dri2 screen
+[   24.254941] systemd[922]: Started KDE Daemon 6.
+[   24.257061] systemd[922]: Starting KDE Configuration Module Initialization (Phase 1)...
+[   24.297672] systemd[922]: Started KDE Session Management Server.
+[   24.300287] systemd[922]: Starting KDE Plasma Workspace...
+[   24.450310] systemd[922]: Finished KDE Configuration Module Initialization (Phase 1).
+[   24.487698] systemd[922]: plasma-kcminit.service: Consumed 1.427s CPU time, 39.8M memory peak.
+[   24.682064] plasmashell[1107]: libEGL warning: egl: failed to create dri2 screen
+[   24.689066] plasmashell[1107]: libEGL warning: egl: failed to create dri2 screen
+[   24.767213] dbus-daemon[936]: [session uid=1000 pid=936 pidfd=5] Activating via systemd: service name='org.kde.ActivityManager' unit='plasma-kactivitymanagerd.service' requested by ':1.24' (uid=1000 pid=1107 comm="/usr/bin/plasmashell --no-respawn" label="unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023")
+[   24.806359] systemd[922]: Starting KActivityManager Activity manager Service...
+[   24.989631] systemd[922]: Started KDE Plasma Workspace.
+[   24.990488] systemd[922]: Reached target KDE Plasma Workspace Core.
+[   24.995662] systemd[922]: Started Proxies GTK DBus menus to a Plasma readable format.
+[   25.001629] kded6[1081]: org.kde.colorcorrectlocationupdater: Geolocator stopped
+[   25.005816] systemd[922]: Started KAccess.
+[   25.008202] systemd[922]: Starting KSplash "ready" Stage...
+[   25.014281] systemd[922]: Starting KDE PolicyKit Authentication Agent...
+[   25.016080] systemd[922]: Starting Powerdevil...
+[   25.018246] systemd[922]: Starting Xdg Desktop Portal For KDE...
+[   25.024456] systemd[922]: Started Handle legacy xembed system tray icons.
+[   25.084346] kded6[1081]: org.kde.kameleon: found no RGB LED devices
+[   25.201235] systemd[922]: Finished KSplash "ready" Stage.
+[   25.285366] dbus-daemon[936]: [session uid=1000 pid=936 pidfd=5] Successfully activated service 'org.kde.ActivityManager'
+[   25.287112] systemd[922]: Started KActivityManager Activity manager Service.
+[   25.483047] xdg-desktop-portal-kde[1130]: libEGL warning: egl: failed to create dri2 screen
+[   25.532698] xdg-desktop-portal-kde[1130]: libEGL warning: egl: failed to create dri2 screen
+[   25.707423] dbus-daemon[936]: [session uid=1000 pid=936 pidfd=5] Successfully activated service 'org.freedesktop.impl.portal.desktop.kde'
+[   25.708547] systemd[922]: Started Xdg Desktop Portal For KDE.
+[   25.751761] dbus-daemon[936]: [session uid=1000 pid=936 pidfd=5] Successfully activated service 'org.freedesktop.portal.Desktop'
+[   25.754879] systemd[922]: Started Portal service.
+[   25.839777] polkit-kde-authentication-agent-1[1128]: libEGL warning: egl: failed to create dri2 screen
+[   25.845272] polkit-kde-authentication-agent-1[1128]: libEGL warning: egl: failed to create dri2 screen
+[   25.879155] kaccess[1174]: Keine Schemata installiert
+[   26.050284] systemd[922]: Started KDE PolicyKit Authentication Agent.
+[   26.059639] polkitd[758]: Registered Authentication Agent for unix-session:1 (system bus name :1.39 [/usr/lib/polkit-kde-authentication-agent-1], object path /org/kde/PolicyKit1/AuthenticationAgent, locale de_DE.UTF-8)
+[   26.306635] dbus-daemon[754]: [system] Activating service name='org.kde.powerdevil.discretegpuhelper' requested by ':1.36' (uid=1000 pid=1129 comm="/usr/lib/org_kde_powerdevil" label="unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023") (using servicehelper)
+[   26.348640] org.kde.powerdevil.discretegpuhelper[1200]: [0;1;38:5:185mDetected locale "C" with character encoding "ANSI_X3.4-1968", which is not UTF-8.
+Qt depends on a UTF-8 locale, and has switched to "C.UTF-8" instead.
+If this causes problems, reconfigure your locale. See the locale(1) manual
+for more information.
+[   26.420058] dbus-daemon[754]: [system] Successfully activated service 'org.kde.powerdevil.discretegpuhelper'
+[   26.422567] dbus-daemon[754]: [system] Activating service name='org.kde.powerdevil.chargethresholdhelper' requested by ':1.36' (uid=1000 pid=1129 comm="/usr/lib/org_kde_powerdevil" label="unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023") (using servicehelper)
+[   26.456840] org.kde.powerdevil.chargethresholdhelper[1206]: [0;1;38:5:185mDetected locale "C" with character encoding "ANSI_X3.4-1968", which is not UTF-8.
+Qt depends on a UTF-8 locale, and has switched to "C.UTF-8" instead.
+If this causes problems, reconfigure your locale. See the locale(1) manual
+for more information.
+[   26.503108] dbus-daemon[754]: [system] Successfully activated service 'org.kde.powerdevil.chargethresholdhelper'
+[   26.557612] dbus-daemon[754]: [system] Activating service name='org.kde.powerdevil.backlighthelper' requested by ':1.36' (uid=1000 pid=1129 comm="/usr/lib/org_kde_powerdevil" label="unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023") (using servicehelper)
+[   26.600289] backlighthelper[1214]: [0;1;38:5:185morg.kde.powerdevil: no kernel backlight interface found
+[   26.601360] org.kde.powerdevil.backlighthelper[1214]: [0;1;38:5:185mDetected locale "C" with character encoding "ANSI_X3.4-1968", which is not UTF-8.
+Qt depends on a UTF-8 locale, and has switched to "C.UTF-8" instead.
+If this causes problems, reconfigure your locale. See the locale(1) manual
+for more information.
+[   26.657072] dbus-daemon[754]: [system] Successfully activated service 'org.kde.powerdevil.backlighthelper'
+[   26.680271] org_kde_powerdevil[1129]: [0;1;38:5:185morg.kde.powerdevil: org.kde.powerdevil.chargethresholdhelper.getthreshold failed "Charge thresholds are not supported by the kernel for this hardware"
+[   26.681066] org_kde_powerdevil[1129]: [0;1;38:5:185morg.kde.powerdevil: org.kde.powerdevil.backlighthelper.brightness failed
+[   27.092313] systemd[922]: Started Powerdevil.
+[   27.093553] systemd[922]: Reached target KDE Plasma Workspace.
+[   27.095108] systemd[922]: Reached target Current graphical user session.
+[   27.096645] systemd[922]: Reached target plasma-workspace-wayland.target.
+[   27.099178] systemd[922]: Starting Discover...
+[   27.102357] systemd[922]: Starting Plasma Session Restore...
+[   27.106162] systemd[922]: Starting symfonOS Programmstart-Test...
+[   27.107805] systemd[922]: Starting User folders update...
+[   27.110442] systemd[922]: Starting KDE Session Restoration...
+[   27.140744] org_kde_powerdevil[1129]: [0;1;38:5:185morg.kde.powerdevil: org.kde.powerdevil.chargethresholdhelper.getthreshold failed "Charge thresholds are not supported by the kernel for this hardware"
+[   27.149809] systemd[922]: Finished KDE Session Restoration.
+[   27.244203] systemd[922]: Started Discover.
+[   27.262397] systemd[922]: Started Plasma Session Restore.
+[   27.319689] systemd[922]: Started symfonOS Programmstart-Test.
+[   27.320682] systemd[922]: Started User folders update.
+[   27.322200] systemd[922]: Reached target Startup of XDG autostart applications.
+[   27.617973] plasma-fallback-session-restore[1242]: libEGL warning: egl: failed to create dri2 screen
+[   27.619996] DiscoverNotifier[1239]: libEGL warning: egl: failed to create dri2 screen
+[   27.622349] plasma-fallback-session-restore[1242]: libEGL warning: egl: failed to create dri2 screen
+[   27.624047] DiscoverNotifier[1239]: libEGL warning: egl: failed to create dri2 screen
+[   27.683334] NetworkManager[823]: <info>  [1795864062.2639] agent-manager: agent[348c164a3d09ed00,:1.34/org.kde.plasma.networkmanagement/1000]: agent registered
+[   27.690765] kded6[1081]: [0;1;38:5:185mQDBusObjectPath: invalid path "/modules/oom-notifier"
+[   27.692073] kded6[1081]: [0;1;38:5:185mkf.dbusaddons: The kded module name "oom-notifier" is invalid!
+[   27.739386] kded6[1081]: [0;1;38:5:185mQDBusObjectPath: invalid path "/modules/plasma-session-shortcuts"
+[   27.740433] kded6[1081]: [0;1;38:5:185mkf.dbusaddons: The kded module name "plasma-session-shortcuts" is invalid!
+[   27.783351] kded6[1081]: [0;1;38:5:185morg.kde.plasma.printmanager.kded: Unable to register service to systemBus: "com.redhat.NewPrinterNotification"
+[   28.261521] plasmashell[1107]: kf.plasma.quick: Applet preload policy set to 1
+[   31.088316] plasmashell[1107]: [0;1;38:5:185morg.kde.plasma.kicker: Entry is not valid "org.kde.kontact.desktop" 0x576b4ee24ee0
+[   31.659929] plasma6.0-remove-old-shortcuts[1322]: [0;1;38:5:185m"next activity"
+[   31.667361] plasma6.0-remove-old-shortcuts[1322]: [0;1;38:5:185m"previous activity"
+[   32.435989] dbus-daemon[754]: [system] Activating via systemd: service name='org.bluez' unit='dbus-org.bluez.service' requested by ':1.34' (uid=1000 pid=1081 comm="/usr/bin/kded6" label="unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023")
+[   32.439496] dbus-daemon[936]: [session uid=1000 pid=936 pidfd=5] Activating via systemd: service name='org.bluez.obex' unit='dbus-org.bluez.obex.service' requested by ':1.21' (uid=1000 pid=1081 comm="/usr/bin/kded6" label="unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023")
+[   32.457933] kded6[1081]: [0;1;38:5:185morg.kde.pulseaudio: No object for name "alsa_output.pci-0000_00_05.0.analog-stereo.monitor"
+[   32.476887] systemd[1]: Bluetooth service was skipped because of an unmet condition check (ConditionPathIsDirectory=/sys/class/bluetooth).
+[   32.490327] systemd[922]: Starting Bluetooth OBEX service...
+[   32.589857] obexd[1347]: OBEX daemon 5.83
+[   32.591662] dbus-daemon[936]: [session uid=1000 pid=936 pidfd=5] Successfully activated service 'org.bluez.obex'
+[   32.594078] systemd[922]: Started Bluetooth OBEX service.
+[   34.072965] plasmashell[1107]: [0;1;38:5:185mkde.plasmashell: Activity added twice "aaf30308-20e6-4732-abdd-929effc92055"
+[   35.336325] plasmashell[1107]: [0;1;38:5:185morg.kde.plasma.kicker: Entry is not valid "org.kde.kontact.desktop" 0x576b4ff7cbc0
+[   35.337725] plasmashell[1107]: [0;1;38:5:185morg.kde.plasma.kicker: Entry is not valid "org.kde.kontact.desktop" 0x576b4ff7cbc0
+[   35.913124] systemd[922]: Finished Splash screen shown during boot.
+[   35.913908] systemd[922]: plasma-ksplash.service: Consumed 10.386s CPU time, 137M memory peak.
+[   36.033243] plasmashell[1107]: [0;1;38:5:185morg.kde.pulseaudio: No object for name "alsa_output.pci-0000_00_05.0.analog-stereo.monitor"
+[   39.146604] systemd[1]: systemd-hostnamed.service: Deactivated successfully.
+[   39.323440] audit: type=1131 audit(1795864073.726:79): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=systemd-hostnamed comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   45.637691] audit: type=1131 audit(1795864080.042:80): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=systemd-localed comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   45.462620] systemd[1]: systemd-localed.service: Deactivated successfully.
+[   48.006307] dbus-daemon[754]: [system] Activating via systemd: service name='org.freedesktop.Flatpak.SystemHelper' unit='flatpak-system-helper.service' requested by ':1.54' (uid=1000 pid=1239 comm="/usr/lib/DiscoverNotifier --check-delay 20" label="unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023")
+[   48.024258] systemd[1]: Starting flatpak system helper...
+[   48.088362] dbus-daemon[754]: [system] Successfully activated service 'org.freedesktop.Flatpak.SystemHelper'
+[   48.090893] systemd[1]: Started flatpak system helper.
+[   48.267410] audit: type=1130 audit(1795864082.671:81): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=flatpak-system-helper comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+[   49.047206] systemd[922]: Starting Hell/Dunkel nach Uhrzeit (Design-Center: Automatisch)...
+[   49.556522] systemd[922]: Finished Hell/Dunkel nach Uhrzeit (Design-Center: Automatisch).
+[   57.022282] kded6[1081]: [0;1;38:5:185mkf.bluezqt: PendingCall Error: "Did not receive a reply. Possible causes include: the remote application did not send a reply, the message bus security policy blocked the reply, the reply timeout expired, or the network connection was broken."
+[   57.443891] dbus-daemon[754]: [system] Failed to activate service 'org.bluez': timed out (service_start_timeout=25000ms)
