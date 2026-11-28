@@ -2,7 +2,7 @@
 # GENERATED von tools/desktop-recipes.py – Änderungen dort vornehmen
 [package]
 name = "nspr"
-version = "4.37-1"
+version = "4.37-2"
 summary = "Netscape Portable Runtime (NSS)"
 license = "MPL-2.0"
 url = "https://archive.mozilla.org/pub/nspr/releases/v4.37/src/"
@@ -17,6 +17,10 @@ build = '''
 cd "$S/nspr"
 sed -i '/^RELEASE/s|^|#|' pr/src/misc/Makefile.in
 sed -i 's|$(LIBRARY) ||' config/rules.mk
+# Bauzeit (date bzw. config/now mit time()) steht sonst in libnspr4/libplc4/libplds4: SOURCE_DATE_EPOCH nehmen
+sde=${SOURCE_DATE_EPOCH:-0}
+sed -i -e "s|^SH_DATE = .*|SH_DATE = $(date -u -d "@$sde" '+%Y-%m-%d %T')|" -e "s|^SH_NOW = .*|SH_NOW = ${sde}000000|" \
+  pr/src/Makefile.in lib/ds/Makefile.in lib/libc/src/Makefile.in
 ./configure --prefix=/usr --with-mozilla --with-pthreads --enable-64bit
 make
 '''
